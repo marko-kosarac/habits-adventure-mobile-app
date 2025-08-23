@@ -1,4 +1,119 @@
 package com.example.mobilnaaplikacija.model;
 
+import java.util.List;
+
 public class User {
+    private String id;
+    private String email;
+    private String password;
+    private String username;
+    private int avatarId; // indeks od 0-4 za izbor avatara
+
+    private boolean isActivated;
+    private long activationDeadline; // timestamp do kada važi aktivacioni link (24h)
+
+    // Profil info
+    private int level;
+    private String title;
+    private int powerPoints;
+    private int experiencePoints;
+    private int coins;
+
+    private List<String> badges; // lista naziva bedževa
+    private List<String> equipment; // lista opreme
+
+    private String qrCode; // može biti putanja do slike ili generisani kod
+
+    public User() {
+        super();
+    }
+    // Konstruktor za registraciju
+    public User(String id,String email, String password, String username, int avatarId) {
+        this.id = id;
+        this.email = email;
+        this.password = password;
+        this.username = username;
+        this.avatarId = avatarId;
+
+        this.isActivated = false;
+        this.activationDeadline = System.currentTimeMillis() + 24 * 60 * 60 * 1000; // 24h
+
+        // Default vrednosti profila
+        this.level = 1;
+        this.title = "Početnik";
+        this.powerPoints = 0;
+        this.experiencePoints = 0;
+        this.coins = 0;
+    }
+
+    // GETTERI I SETTERI
+    public String getId() {
+        return id;
+    }
+    public String getEmail() {
+        return email;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public int getAvatarId() {
+        return avatarId;
+    }
+
+    public boolean isActivated() {
+        return isActivated;
+    }
+
+    public void activateAccount() {
+        if (System.currentTimeMillis() <= activationDeadline) {
+            this.isActivated = true;
+        }
+    }
+
+    public int getLevel() {
+        return level;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public int getPowerPoints() {
+        return powerPoints;
+    }
+
+    public int getExperiencePoints() {
+        return experiencePoints;
+    }
+
+    public int getCoins() {
+        return coins;
+    }
+
+    public List<String> getBadges() {
+        return badges;
+    }
+
+    public List<String> getEquipment() {
+        return equipment;
+    }
+
+    public String getQrCode() {
+        return qrCode;
+    }
+
+    // Metod za promenu lozinke
+    public boolean changePassword(String oldPass, String newPass) {
+        if (this.password.equals(oldPass)) {
+            this.password = newPass;
+            return true;
+        }
+        return false;
+    }
 }
