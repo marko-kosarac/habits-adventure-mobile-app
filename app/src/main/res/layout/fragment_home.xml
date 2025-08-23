@@ -25,7 +25,7 @@
         android:id="@+id/editTextPassword"
         android:layout_width="300dp"
         android:layout_height="wrap_content"
-        android:hint="Password"
+        android:hint="Lozinka"
         android:inputType="textPassword"
         android:drawableStart="@android:drawable/ic_lock_lock"
         android:drawableTint="#555555"
@@ -48,9 +48,10 @@
         android:id="@+id/textRegisterRedirect"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Don't have an account? Register here"
-        android:textColor="#555555"
+        android:text="Nemate nalog? Registrujte se"
+        android:textColor="@android:color/holo_blue_dark"
         android:textSize="14sp"
-        android:layout_marginTop="8dp" />
+        android:layout_marginTop="8dp"
+        android:autoLink="none"/>
 
 </LinearLayout>

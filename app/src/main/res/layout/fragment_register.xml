@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="24dp"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="center">
+
+        <EditText
+            android:id="@+id/editTextUsername"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Korisničko ime"
+            android:padding="12dp"
+            android:layout_marginBottom="12dp"/>
+
+        <EditText
+            android:id="@+id/editTextEmail"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Email"
+            android:inputType="textEmailAddress"
+            android:padding="12dp"
+            android:layout_marginBottom="12dp"/>
+
+        <EditText
+            android:id="@+id/editTextPassword"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Lozinka"
+            android:inputType="textPassword"
+            android:padding="12dp"
+            android:layout_marginBottom="12dp"/>
+
+        <EditText
+            android:id="@+id/editTextConfirmPassword"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Potvrdi lozinku"
+            android:inputType="textPassword"
+            android:padding="12dp"
+            android:layout_marginBottom="20dp"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Izaberite avatar"
+            android:textSize="16sp"
+            android:layout_marginTop="16dp"/>
+
+        <GridLayout
+            android:id="@+id/avatarGrid"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:columnCount="5"
+            android:rowCount="1"
+            android:layout_marginTop="8dp">
+
+            <ImageView
+                android:id="@+id/avatar1"
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:src="@drawable/avatar1"
+                android:padding="4dp"
+                android:clickable="true"
+                android:focusable="true"/>
+
+            <ImageView
+                android:id="@+id/avatar2"
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:src="@drawable/avatar2"
+                android:padding="4dp"
+                android:clickable="true"
+                android:focusable="true"/>
+
+            <ImageView
+                android:id="@+id/avatar3"
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:src="@drawable/avatar3"
+                android:padding="4dp"
+                android:clickable="true"
+                android:focusable="true"/>
+
+            <ImageView
+                android:id="@+id/avatar4"
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:src="@drawable/avatar4"
+                android:padding="4dp"
+                android:clickable="true"
+                android:focusable="true"/>
+
+            <ImageView
+                android:id="@+id/avatar5"
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:src="@drawable/avatar5"
+                android:padding="4dp"
+                android:clickable="true"
+                android:focusable="true"/>
+        </GridLayout>
+
+        <Button
+            android:id="@+id/buttonRegister"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Registruj se"
+            android:layout_marginBottom="16dp"
+            android:backgroundTint="#2196F3" />
+
+        <TextView
+            android:id="@+id/textLoginRedirect"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Već imaš nalog? Prijavi se"
+            android:textColor="@android:color/holo_blue_dark"
+            android:textSize="14sp"
+            android:layout_marginTop="8dp"/>
+    </LinearLayout>
+
+</ScrollView>
