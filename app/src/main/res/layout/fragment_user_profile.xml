@@ -1,0 +1,102 @@
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="24dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="center_horizontal"
+        android:paddingTop="50dp">  <!-- Ovde smo dodali paddingTop -->
+
+        <!-- Avatar -->
+        <ImageView
+            android:id="@+id/imageAvatar"
+            android:layout_width="120dp"
+            android:layout_height="120dp"
+            android:src="@drawable/avatar5"
+            android:contentDescription="Avatar"
+            android:layout_marginBottom="16dp"/>
+
+        <!-- Username -->
+        <TextView
+            android:id="@+id/textUsername"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Marko Kosarac"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="8dp"/>
+
+        <!-- Level i titula -->
+        <TextView
+            android:id="@+id/textLevelTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Level 1 - Početnik"
+            android:textSize="16sp"
+            android:layout_marginBottom="16dp"/>
+
+        <!-- Statistika (XP, PP, Coins) -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="16dp">
+
+            <TextView
+                android:id="@+id/textXP"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="XP: 250"
+                android:layout_marginEnd="16dp"/>
+
+            <TextView
+                android:id="@+id/textPP"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="PP: 3"
+                android:layout_marginEnd="16dp"/>
+
+            <TextView
+                android:id="@+id/textCoins"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Novčići: 100"/>
+        </LinearLayout>
+
+        <!-- Bedževi -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Bedževi:"
+            android:textStyle="bold"
+            android:layout_marginBottom="8dp"/>
+
+        <LinearLayout
+            android:id="@+id/badgesContainer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="16dp">
+            <!-- Ovde ide lista ImageView za bedževe -->
+        </LinearLayout>
+
+        <!-- QR kod -->
+        <ImageView
+            android:id="@+id/qrCode"
+            android:layout_width="150dp"
+            android:layout_height="150dp"
+            android:layout_marginBottom="16dp"/>
+
+        <!-- Dugme za promenu lozinke -->
+        <Button
+            android:id="@+id/buttonChangePassword"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:backgroundTint="#2196F3"
+            android:text="Promeni lozinku"/>
+
+    </LinearLayout>
+</ScrollView>
