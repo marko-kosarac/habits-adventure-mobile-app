@@ -7,6 +7,34 @@
     android:gravity="center"
     android:background="@android:color/white">
 
+    <!-- Logo aplikacije -->
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:layout_marginBottom="40dp">
+
+        <!-- Ikonica -->
+        <ImageView
+            android:id="@+id/logoIcon"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:src="@drawable/ic_adventure"/>
+        <!-- Naslov -->
+        <TextView
+            android:id="@+id/textLogo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Habits Adventure"
+            android:textSize="28sp"
+            android:textStyle="bold"
+            android:textColor="#2196F3"
+            android:layout_gravity="center_vertical"
+            android:layout_marginStart="12dp"/>
+    </LinearLayout>
+
+    <!-- Polje za email -->
     <EditText
         android:id="@+id/editTextEmail"
         android:layout_width="300dp"
@@ -21,6 +49,7 @@
         android:layout_marginBottom="12dp"
         android:background="@drawable/edittext_bg" />
 
+    <!-- Polje za lozinku -->
     <EditText
         android:id="@+id/editTextPassword"
         android:layout_width="300dp"
@@ -35,6 +64,7 @@
         android:layout_marginBottom="20dp"
         android:background="@drawable/edittext_bg" />
 
+    <!-- Dugme za login -->
     <Button
         android:id="@+id/buttonLogin"
         android:layout_width="300dp"
@@ -42,16 +72,17 @@
         android:text="Login"
         android:layout_marginBottom="16dp"
         android:textColor="@android:color/white"
-        android:backgroundTint="#2196F3" />
+        android:backgroundTint="#2196F3"
+        android:fontFamily="sans-serif-medium" />
 
+    <!-- Redirect ka registraciji -->
     <TextView
         android:id="@+id/textRegisterRedirect"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Nemate nalog? Registrujte se"
-        android:textColor="@android:color/holo_blue_dark"
+        android:textColor="#2196F3"
         android:textSize="14sp"
         android:layout_marginTop="8dp"
         android:autoLink="none"/>
-
 </LinearLayout>
