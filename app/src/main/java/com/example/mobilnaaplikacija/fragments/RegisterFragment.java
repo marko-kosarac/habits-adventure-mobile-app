@@ -26,8 +26,8 @@ public class RegisterFragment extends Fragment {
         TextView textLoginRedirect = view.findViewById(R.id.textLoginRedirect);
         textLoginRedirect.setOnClickListener(v -> {
             // Navigacija nazad na login (HomeFragment)
-            NavHostFragment.findNavController(RegisterFragment.this)
-                    .navigate(R.id.action_registerFragment_to_nav_home);
+//            NavHostFragment.findNavController(RegisterFragment.this)
+//                    .navigate(R.id.action_registerFragment_to_nav_home);
         });
 
         return view;

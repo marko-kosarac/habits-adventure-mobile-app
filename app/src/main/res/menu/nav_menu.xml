@@ -1,4 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <item
+        android:id="@+id/nav_profile"
+        android:title="Profil"
+        android:icon="@drawable/ic_person" />
+
+    <item
+        android:id="@+id/nav_stats"
+        android:title="Statistika"
+        android:icon="@drawable/ic_bar_chart" />
+
+    <item
+        android:id="@+id/nav_logout"
+        android:title="Odjava"
+        android:icon="@drawable/ic_logout" />
+
 </menu>

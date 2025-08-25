@@ -37,7 +37,7 @@ public class HomePageFragment extends Fragment {
         Button buttonProfile = view.findViewById(R.id.buttonProfile);
         buttonProfile.setOnClickListener(v -> {
             NavController navController = Navigation.findNavController(view);
-            navController.navigate(R.id.action_homePageFragment_to_userProfileFragment);
+//            navController.navigate(R.id.action_homePageFragment_to_userProfileFragment);
         });
     }
 }

@@ -1,4 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android">
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:showIn="navigation_view">
 
+    <group android:checkableBehavior="single">
+        <!-- Početna stranica -->
+        <item
+            android:id="@+id/nav_home"
+            android:icon="@drawable/ic_home"
+            android:title="Početna" />
+
+        <!-- Profil korisnika -->
+        <item
+            android:id="@+id/nav_profile"
+            android:icon="@drawable/ic_person"
+            android:title="Profil" />
+
+        <!-- Statistika korisnika -->
+        <item
+            android:id="@+id/nav_stats"
+            android:icon="@drawable/ic_bar_chart"
+            android:title="Statistika" />
+
+        <!-- Logout opcija -->
+        <item
+            android:id="@+id/nav_logout"
+            android:icon="@drawable/ic_logout"
+            android:title="Odjava" />
+    </group>
 </menu>

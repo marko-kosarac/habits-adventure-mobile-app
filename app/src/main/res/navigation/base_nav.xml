@@ -2,43 +2,20 @@
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/base_nav"
-    app:startDestination="@id/nav_home">
+    android:id="@+id/mobile_navigation"
+    app:startDestination="@id/homeFragment">
 
+    <!-- Home fragment (login ekran) -->
     <fragment
-        android:id="@+id/nav_home"
+        android:id="@+id/homeFragment"
         android:name="com.example.mobilnaaplikacija.fragments.HomeFragment"
-        android:label="fragment_home"
-        tools:layout="@layout/fragment_home" >
-        <action
-            android:id="@+id/action_nav_home_to_homePageFragment"
-            app:destination="@id/homePageFragment" />
-        <action
-            android:id="@+id/action_nav_home_to_registerFragment"
-            app:destination="@id/registerFragment" />
-    </fragment>
+        android:label="Home"
+        tools:layout="@layout/fragment_home"/>
 
+    <!-- Main fragment sa Drawer-om -->
     <fragment
-        android:id="@+id/homePageFragment"
+        android:id="@+id/mainFragment"
         android:name="com.example.mobilnaaplikacija.fragments.HomePageFragment"
-        android:label="fragment_home_page"
-        tools:layout="@layout/fragment_home_page" >
-        <action
-            android:id="@+id/action_homePageFragment_to_userProfileFragment"
-            app:destination="@id/userProfileFragment" />
-    </fragment>
-    <fragment
-        android:id="@+id/registerFragment"
-        android:name="com.example.mobilnaaplikacija.fragments.RegisterFragment"
-        android:label="fragment_register"
-        tools:layout="@layout/fragment_register" >
-        <action
-            android:id="@+id/action_registerFragment_to_nav_home"
-            app:destination="@id/nav_home" />
-    </fragment>
-    <fragment
-        android:id="@+id/userProfileFragment"
-        android:name="com.example.mobilnaaplikacija.fragments.UserProfileFragment"
-        android:label="fragment_user_profile"
-        tools:layout="@layout/fragment_user_profile" />
+        android:label="Main Page"
+        tools:layout="@layout/fragment_home_page" />
 </navigation>

@@ -1,49 +1,53 @@
 package com.example.mobilnaaplikacija.fragments;
 
 import android.os.Bundle;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
-import androidx.navigation.NavController;
-import androidx.navigation.Navigation;
-import androidx.navigation.fragment.NavHostFragment;
-
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.TextView;
 
+import androidx.annotation.NonNull;
+import androidx.fragment.app.Fragment;
+import androidx.navigation.NavController;
+import androidx.navigation.Navigation;
+import androidx.navigation.NavOptions;
+
+import com.example.mobilnaaplikacija.MainActivity;
 import com.example.mobilnaaplikacija.R;
+import com.example.mobilnaaplikacija.databinding.FragmentHomeBinding;
 
 public class HomeFragment extends Fragment {
 
-    public HomeFragment() {
-        // Required empty public constructor
-    }
-
-    @Nullable
-    @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
-                             @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_home, container, false);
-    }
+    private FragmentHomeBinding binding;
+    private Button loginButton;
 
     @Override
-    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        binding = FragmentHomeBinding.inflate(inflater, container, false);
 
-        Button buttonLogin = view.findViewById(R.id.buttonLogin);
-        buttonLogin.setOnClickListener(v -> {
-            NavController navController = Navigation.findNavController(view);
-            navController.navigate(R.id.action_nav_home_to_homePageFragment);
+        loginButton = binding.buttonLogin; // dugme iz XML-a
+
+        loginButton.setOnClickListener(v -> {
+            // Dobavljamo referencu na MainActivity
+            MainActivity activity = (MainActivity) getActivity();
+            if (activity != null) {
+                // Promeni meni drawera sa logged_out na main_drawer
+                activity.setMainDrawer();
+            }
+
+            // Navigacija na MainFragment unutar istog MainActivity
+            NavController navController = Navigation.findNavController(v);
+            navController.navigate(R.id.mainFragment, null, new NavOptions.Builder()
+                    .setPopUpTo(R.id.homeFragment, true) // uklanja HomeFragment iz back stack-a
+                    .build());
         });
 
-        TextView textRegisterRedirect = view.findViewById(R.id.textRegisterRedirect);
-        textRegisterRedirect.setOnClickListener(v -> {
-            NavHostFragment.findNavController(HomeFragment.this)
-                    .navigate(R.id.action_nav_home_to_registerFragment);
-        });
+        return binding.getRoot();
     }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        binding = null;
     }
+}
