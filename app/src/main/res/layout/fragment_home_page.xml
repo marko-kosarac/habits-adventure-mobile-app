@@ -3,13 +3,9 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <Button
-        android:id="@+id/buttonProfile"
-        android:layout_width="300dp"
-        android:layout_height="100dp"
-        android:text="Profil"
-        android:textColor="@android:color/white"
-        android:backgroundTint="#2196F3"
-        android:layout_gravity="center"/>
+<TextView
+    android:layout_width="400px"
+    android:layout_height="100px"
+    android:text="Početna stranica"></TextView>
 
 </FrameLayout>

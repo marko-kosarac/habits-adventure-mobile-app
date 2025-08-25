@@ -46,7 +46,9 @@ public class MainActivity extends AppCompatActivity {
         mAppBarConfiguration = new AppBarConfiguration.Builder(
                 R.id.homeFragment,
                 R.id.mainFragment,   // dodaj mainFragment kao top-level
-                R.id.nav_profile
+                R.id.nav_profile,
+                R.id.profile_page,
+                R.id.nav_register
         ).setOpenableLayout(drawer).build();
 
         // Poveži Toolbar i Drawer sa NavController-om
@@ -58,6 +60,23 @@ public class MainActivity extends AppCompatActivity {
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.addDrawerListener(toggle);
         toggle.syncState();
+
+        navigationView.setNavigationItemSelectedListener(item -> {
+            int id = item.getItemId();
+
+            if (id == R.id.nav_home) {
+                navController.navigate(R.id.mainFragment);
+            } else if (id == R.id.nav_profile) {
+                navController.navigate(R.id.profile_page);
+            } else if (id == R.id.nav_logout) {
+                navigationView.getMenu().clear();
+                navigationView.inflateMenu(R.menu.logged_out_drawer);
+                navController.navigate(R.id.homeFragment);
+            }
+
+            drawer.closeDrawers();
+            return true;
+        });
     }
 
     public void onLoginSuccess() {

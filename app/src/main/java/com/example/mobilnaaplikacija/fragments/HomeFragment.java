@@ -5,6 +5,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
@@ -40,6 +41,13 @@ public class HomeFragment extends Fragment {
             navController.navigate(R.id.mainFragment, null, new NavOptions.Builder()
                     .setPopUpTo(R.id.homeFragment, true) // uklanja HomeFragment iz back stack-a
                     .build());
+        });
+
+        TextView registerLink = binding.textRegisterRedirect;
+
+        registerLink.setOnClickListener(v -> {
+            NavController navController = Navigation.findNavController(v);
+            navController.navigate(R.id.action_homeFragment_to_registerFragment);
         });
 
         return binding.getRoot();
