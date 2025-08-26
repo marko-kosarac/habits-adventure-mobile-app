@@ -1,6 +1,7 @@
 package com.example.mobilnaaplikacija;
 
 import android.os.Bundle;
+import android.view.Menu;
 
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.ActionBarDrawerToggle;
@@ -15,6 +16,9 @@ import androidx.navigation.ui.NavigationUI;
 import com.example.mobilnaaplikacija.databinding.ActivityMainBinding;
 import com.google.android.material.navigation.NavigationView;
 
+import java.util.HashSet;
+import java.util.Set;
+
 public class MainActivity extends AppCompatActivity {
 
     private ActivityMainBinding binding;
@@ -22,6 +26,7 @@ public class MainActivity extends AppCompatActivity {
     private NavController navController;
     private ActionBar actionBar;
     private AppBarConfiguration mAppBarConfiguration;
+    private Set<Integer> topLevelDestinations = new HashSet<>();
 
     private ActionBarDrawerToggle actionBarDrawerToggle;
     @Override
@@ -37,6 +42,7 @@ public class MainActivity extends AppCompatActivity {
         DrawerLayout drawer = binding.drawerLayout;
         NavigationView navigationView = binding.navView;
 
+        topLevelDestinations.add(R.id.action_settings);
         navController = Navigation.findNavController(this, R.id.nav_host_fragment_content_main);
 
         // Početni menu
@@ -95,6 +101,16 @@ public class MainActivity extends AppCompatActivity {
                         .setPopUpTo(R.id.homeFragment, true)
                         .build()
         );
+    }
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // menu.clear();
+        // koristimo ako je nasa arhitekrura takva da imamo jednu aktivnost
+        // i vise fragmentaa gde svaki od njih ima svoj menu unutar toolbar-a
+
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.main_menu, menu);
+        return true;
     }
 
 
