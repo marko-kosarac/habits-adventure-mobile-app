@@ -2,14 +2,15 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:fillViewport="true"
     android:padding="16dp">
 
     <LinearLayout
         android:orientation="vertical"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:gravity="center_horizontal"
-        android:spacing="16dp">
+        android:paddingBottom="16dp">
 
         <!-- Broj dana aktivnog korišćenja -->
         <TextView
@@ -21,7 +22,7 @@
             android:textStyle="bold"
             android:padding="8dp" />
 
-        <!-- Donut chart za urađene/neurađene/otkazane -->
+        <!-- Donut chart -->
         <com.github.mikephil.charting.charts.PieChart
             android:id="@+id/donutChart"
             android:layout_width="match_parent"
@@ -68,6 +69,11 @@
             android:textSize="18sp"
             android:textStyle="bold"
             android:padding="8dp" />
+
+        <!-- Spacer da se dno ne lepi -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="32dp" />
 
     </LinearLayout>
 </ScrollView>
