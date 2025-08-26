@@ -48,7 +48,8 @@ public class MainActivity extends AppCompatActivity {
                 R.id.mainFragment,   // dodaj mainFragment kao top-level
                 R.id.nav_profile,
                 R.id.profile_page,
-                R.id.nav_register
+                R.id.nav_register,
+                R.id.statistics_page
         ).setOpenableLayout(drawer).build();
 
         // Poveži Toolbar i Drawer sa NavController-om
@@ -68,7 +69,10 @@ public class MainActivity extends AppCompatActivity {
                 navController.navigate(R.id.mainFragment);
             } else if (id == R.id.nav_profile) {
                 navController.navigate(R.id.profile_page);
-            } else if (id == R.id.nav_logout) {
+            }
+            else if (id == R.id.nav_statistics){
+                navController.navigate((R.id.statistics_page));
+            }else if (id == R.id.nav_logout) {
                 navigationView.getMenu().clear();
                 navigationView.inflateMenu(R.menu.logged_out_drawer);
                 navController.navigate(R.id.homeFragment);

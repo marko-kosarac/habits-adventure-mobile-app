@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp">
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_horizontal"
+        android:spacing="16dp">
+
+        <!-- Broj dana aktivnog korišćenja -->
+        <TextView
+            android:id="@+id/tvActiveDays"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Aktivnih dana: 34"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:padding="8dp" />
+
+        <!-- Donut chart za urađene/neurađene/otkazane -->
+        <com.github.mikephil.charting.charts.PieChart
+            android:id="@+id/donutChart"
+            android:layout_width="match_parent"
+            android:layout_height="250dp"
+            android:layout_marginTop="16dp" />
+
+        <!-- Najduži niz uspešnih zadataka -->
+        <TextView
+            android:id="@+id/tvLongestStreak"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Najduži niz: 12 dana"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:padding="8dp" />
+
+        <!-- Bar chart po kategorijama -->
+        <com.github.mikephil.charting.charts.BarChart
+            android:id="@+id/barChart"
+            android:layout_width="match_parent"
+            android:layout_height="250dp"
+            android:layout_marginTop="16dp" />
+
+        <!-- Line chart prosečna težina zadataka -->
+        <com.github.mikephil.charting.charts.LineChart
+            android:id="@+id/lineChartDifficulty"
+            android:layout_width="match_parent"
+            android:layout_height="250dp"
+            android:layout_marginTop="16dp" />
+
+        <!-- Line chart XP poslednjih 7 dana -->
+        <com.github.mikephil.charting.charts.LineChart
+            android:id="@+id/lineChartXP"
+            android:layout_width="match_parent"
+            android:layout_height="250dp"
+            android:layout_marginTop="16dp" />
+
+        <!-- Specijalne misije -->
+        <TextView
+            android:id="@+id/tvMissions"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Specijalne misije: 3 započete, 2 završene"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:padding="8dp" />
+
+    </LinearLayout>
+</ScrollView>

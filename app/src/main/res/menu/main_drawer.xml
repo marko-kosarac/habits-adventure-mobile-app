@@ -18,11 +18,13 @@
 
         <!-- Statistika korisnika -->
         <item
-            android:id="@+id/nav_stats"
+            android:id="@+id/nav_statistics"
             android:icon="@drawable/ic_bar_chart"
             android:title="Statistika" />
+    </group>
 
-        <!-- Logout opcija -->
+    <!-- Odjava na dnu -->
+    <group android:id="@+id/nav_bottom_group">
         <item
             android:id="@+id/nav_logout"
             android:icon="@drawable/ic_logout"
