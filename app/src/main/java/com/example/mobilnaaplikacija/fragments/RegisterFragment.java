@@ -6,21 +6,22 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.GridLayout;
 import android.widget.ImageView;
+import android.widget.EditText;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import com.example.mobilnaaplikacija.R;
 import com.example.mobilnaaplikacija.services.UserService;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseUser;
-import com.example.mobilnaaplikacija.R;
+import com.example.mobilnaaplikacija.model.User;
 
 public class RegisterFragment extends Fragment {
 
@@ -93,21 +94,19 @@ public class RegisterFragment extends Fragment {
             return;
         }
 
-        userService.registerUser(email, password, username, selectedAvatar, new OnCompleteListener<AuthResult>() {
-            @Override
-            public void onComplete(@NonNull Task<AuthResult> task) {
-                if (task.isSuccessful()) {
-                    FirebaseUser firebaseUser = task.getResult().getUser();
-                    if (firebaseUser != null) {
-                        userService.saveUserData(firebaseUser.getUid(), email, username, selectedAvatar);
-                        userService.sendVerificationEmail(firebaseUser);
+        // Kreiramo objekat User
+        User user = new User();
+        user.setUsername(username);
+        user.setEmail(email);
+        user.setAvatarId(selectedAvatar);
 
-                        Toast.makeText(getActivity(), "Registracija uspešna. Proverite email za verifikaciju.", Toast.LENGTH_LONG).show();
-                        userService.logout();
-                    }
-                } else {
-                    Toast.makeText(getActivity(), "Greška: " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
-                }
+        // Pozivamo UserService za registraciju
+        userService.register(user, password, success -> {
+            if (success) {
+                Toast.makeText(getActivity(), "Registracija uspešna. Proverite email za verifikaciju.", Toast.LENGTH_LONG).show();
+                userService.logout(); // izloguj dok korisnik ne verifikuje email
+            } else {
+                Toast.makeText(getActivity(), "Greška pri registraciji.", Toast.LENGTH_SHORT).show();
             }
         });
     }

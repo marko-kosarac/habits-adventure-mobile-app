@@ -116,4 +116,64 @@ public class User {
         }
         return false;
     }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public void setAvatarId(int avatarId) {
+        this.avatarId = avatarId;
+    }
+
+    public void setActivated(boolean activated) {
+        isActivated = activated;
+    }
+
+    public void setActivationDeadline(long activationDeadline) {
+        this.activationDeadline = activationDeadline;
+    }
+
+    public void setLevel(int level) {
+        this.level = level;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public void setPowerPoints(int powerPoints) {
+        this.powerPoints = powerPoints;
+    }
+
+    public void setExperiencePoints(int experiencePoints) {
+        this.experiencePoints = experiencePoints;
+    }
+
+    public void setCoins(int coins) {
+        this.coins = coins;
+    }
+
+    public void setBadges(List<String> badges) {
+        this.badges = badges;
+    }
+
+    public void setEquipment(List<String> equipment) {
+        this.equipment = equipment;
+    }
+
+    public void setQrCode(String qrCode) {
+        this.qrCode = qrCode;
+    }
 }
