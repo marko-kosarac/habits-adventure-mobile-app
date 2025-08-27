@@ -16,6 +16,7 @@ import androidx.navigation.ui.NavigationUI;
 
 import com.example.mobilnaaplikacija.databinding.ActivityMainBinding;
 import com.google.android.material.navigation.NavigationView;
+import com.google.firebase.analytics.FirebaseAnalytics;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -28,6 +29,7 @@ public class MainActivity extends AppCompatActivity {
     private ActionBar actionBar;
     private AppBarConfiguration mAppBarConfiguration;
     private Set<Integer> topLevelDestinations = new HashSet<>();
+    private FirebaseAnalytics mFirebaseAnalytics;
 
     private ActionBarDrawerToggle actionBarDrawerToggle;
     @Override

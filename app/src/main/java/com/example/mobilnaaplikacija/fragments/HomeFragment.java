@@ -1,11 +1,15 @@
 package com.example.mobilnaaplikacija.fragments;
 
 import android.os.Bundle;
+import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
@@ -16,35 +20,70 @@ import androidx.navigation.NavOptions;
 import com.example.mobilnaaplikacija.MainActivity;
 import com.example.mobilnaaplikacija.R;
 import com.example.mobilnaaplikacija.databinding.FragmentHomeBinding;
+import com.example.mobilnaaplikacija.services.UserService;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
 public class HomeFragment extends Fragment {
 
     private FragmentHomeBinding binding;
     private Button loginButton;
+    private EditText emailInput, passwordInput;
+    private FirebaseAuth mAuth;
+    private UserService userService;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         binding = FragmentHomeBinding.inflate(inflater, container, false);
 
-        loginButton = binding.buttonLogin; // dugme iz XML-a
+        // Inicijalizacija
+        loginButton = binding.buttonLogin;
+        emailInput = binding.editTextEmail;     // obavezno mora postojati u XML (EditText)
+        passwordInput = binding.editTextPassword; // isto u XML
+        mAuth = FirebaseAuth.getInstance();
+        userService = new UserService();
 
+        // LOGIN dugme
         loginButton.setOnClickListener(v -> {
-            // Dobavljamo referencu na MainActivity
-            MainActivity activity = (MainActivity) getActivity();
-            if (activity != null) {
-                // Promeni meni drawera sa logged_out na main_drawer
-                activity.setMainDrawer();
+            String email = emailInput.getText().toString().trim();
+            String password = passwordInput.getText().toString().trim();
+
+            if (TextUtils.isEmpty(email)) {
+                Toast.makeText(getActivity(), "Email je obavezan", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            if (TextUtils.isEmpty(password)) {
+                Toast.makeText(getActivity(), "Lozinka je obavezna", Toast.LENGTH_SHORT).show();
+                return;
             }
 
-            // Navigacija na MainFragment unutar istog MainActivity
-            NavController navController = Navigation.findNavController(v);
-            navController.navigate(R.id.mainFragment, null, new NavOptions.Builder()
-                    .setPopUpTo(R.id.homeFragment, true) // uklanja HomeFragment iz back stack-a
-                    .build());
+            // Firebase login
+            userService.login(email, password, success -> {
+                if (success) {
+                    FirebaseUser fbUser = mAuth.getCurrentUser();
+                    if (fbUser != null) {
+                        Toast.makeText(getActivity(), "Uspešno logovanje", Toast.LENGTH_SHORT).show();
+
+                        // Promeni meni drawera sa logged_out na main_drawer
+                        MainActivity activity = (MainActivity) getActivity();
+                        if (activity != null) {
+                            activity.setMainDrawer();
+                        }
+
+                        // Navigacija na MainFragment
+                        NavController navController = Navigation.findNavController(v);
+                        navController.navigate(R.id.mainFragment, null, new NavOptions.Builder()
+                                .setPopUpTo(R.id.homeFragment, true)
+                                .build());
+                    }
+                } else {
+                    Toast.makeText(getActivity(), "Neuspešno logovanje", Toast.LENGTH_SHORT).show();
+                }
+            });
         });
 
+        // LINK ka registraciji
         TextView registerLink = binding.textRegisterRedirect;
-
         registerLink.setOnClickListener(v -> {
             NavController navController = Navigation.findNavController(v);
             navController.navigate(R.id.action_homeFragment_to_registerFragment);
