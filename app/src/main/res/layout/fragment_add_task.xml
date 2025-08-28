@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_height="wrap_content"
+    android:layout_width="match_parent">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <!-- Task name -->
+        <EditText
+            android:id="@+id/etTaskName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Naziv zadatka"
+            android:layout_marginBottom="16dp"/>
+
+        <!-- Task description -->
+        <EditText
+            android:id="@+id/etTaskDescription"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Opis (opciono)"
+            android:layout_marginBottom="16dp"/>
+
+        <!-- Task category -->
+        <Spinner
+            android:id="@+id/spinnerCategory"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:spinnerMode="dropdown" />
+
+        <!-- Task frequency -->
+        <RadioGroup
+            android:id="@+id/rgFrequency"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:layout_marginBottom="16dp">
+
+            <RadioButton
+                android:id="@+id/rbOneTime"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="60dp"
+                android:text="Jednokratan" />
+
+            <RadioButton
+                android:id="@+id/rbRepeat"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Ponavljanje" />
+
+        </RadioGroup>
+
+        <!-- Recurring task -->
+        <LinearLayout
+            android:id="@+id/layoutRecurringOptions"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <!-- Task interval -->
+            <EditText
+                android:id="@+id/etReccuringNumber"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                android:inputType="number"
+                android:hint="Broj ponavljanja"/>
+
+            <!-- Task unit -->
+            <Spinner
+                android:id="@+id/spinnerReccuringUnit"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                android:spinnerMode="dropdown"/>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_horizontal"
+                android:layout_marginBottom="16dp">
+
+                <EditText
+                    android:id="@+id/etStartDate"
+                    android:layout_width="150dp"
+                    android:layout_height="wrap_content"
+                    android:inputType="date"
+                    android:hint="Datum početka"
+                    android:layout_marginRight="30dp"/>
+
+                <EditText
+                    android:id="@+id/etEndDate"
+                    android:layout_width="150dp"
+                    android:layout_height="wrap_content"
+                    android:inputType="date"
+                    android:hint="Datum završetka"/>
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <!-- Task difficulty -->
+        <Spinner
+            android:id="@+id/spinnerDifficulty"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:spinnerMode="dropdown"/>
+
+        <!-- Task importance -->
+        <Spinner
+            android:id="@+id/spinnerImportance"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:spinnerMode="dropdown"/>
+
+        <!-- Add task button -->
+        <Button
+            android:id="@+id/btnAddTask"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="Dodaj zadatak"/>
+    </LinearLayout>
+
+</ScrollView>
