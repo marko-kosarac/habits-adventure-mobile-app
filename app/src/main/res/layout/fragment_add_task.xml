@@ -26,13 +26,32 @@
             android:hint="Opis (opciono)"
             android:layout_marginBottom="16dp"/>
 
-        <!-- Task category -->
-        <Spinner
-            android:id="@+id/spinnerCategory"
+
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:orientation="horizontal"
             android:layout_marginBottom="16dp"
-            android:spinnerMode="dropdown" />
+            android:gravity="">
+
+            <!-- Task category -->
+            <Spinner
+                android:id="@+id/spinnerCategory"
+                android:layout_width="wrap_content"
+                android:layout_height="40dp"
+                android:spinnerMode="dropdown"
+                android:layout_marginRight="20dp"/>
+
+            <!-- Add category -->
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="30dp"
+                android:layout_gravity="end"
+                android:text="Dodaj kategoriju"
+                android:backgroundTint="#2196F3"/>
+
+        </LinearLayout>
 
         <!-- Task frequency -->
         <RadioGroup
@@ -45,66 +64,94 @@
 
             <RadioButton
                 android:id="@+id/rbOneTime"
-                android:layout_width="wrap_content"
+                android:layout_width="150dp"
                 android:layout_height="wrap_content"
-                android:layout_marginRight="60dp"
-                android:text="Jednokratan" />
+                android:layout_marginRight="30dp"
+                android:text="Ne ponavlja se"
+                android:checked="true"/>
 
             <RadioButton
                 android:id="@+id/rbRepeat"
-                android:layout_width="wrap_content"
+                android:layout_width="150dp"
                 android:layout_height="wrap_content"
-                android:text="Ponavljanje" />
+                android:text="Ponavlja se" />
 
         </RadioGroup>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_horizontal"
+            android:layout_marginBottom="16dp">
+
+            <!-- Task start date -->
+            <EditText
+                android:id="@+id/etStartDate"
+                android:layout_width="150dp"
+                android:layout_height="wrap_content"
+                android:inputType="date"
+                android:hint="Počinje"
+                android:layout_marginRight="30dp"/>
+
+            <!-- Task end date -->
+            <EditText
+                android:id="@+id/etEndDate"
+                android:layout_width="150dp"
+                android:layout_height="wrap_content"
+                android:inputType="date"
+                android:hint="Završava"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_horizontal"
+            android:layout_marginBottom="16dp">
+
+            <!-- Task time -->
+            <EditText
+                android:id="@+id/etTime"
+                android:layout_width="150dp"
+                android:layout_height="wrap_content"
+                android:inputType="time"
+                android:hint="Satnica"
+                android:layout_marginRight="30dp"/>
+
+            <RadioButton
+                android:id="@+id/rbWholeDay"
+                android:layout_width="150dp"
+                android:layout_height="wrap_content"
+                android:hint="Cjelodnevno"/>
+
+        </LinearLayout>
 
         <!-- Recurring task -->
         <LinearLayout
             android:id="@+id/layoutRecurringOptions"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:orientation="horizontal"
+            android:layout_marginBottom="16dp"
+            android:gravity="center_horizontal">
 
             <!-- Task interval -->
             <EditText
                 android:id="@+id/etReccuringNumber"
-                android:layout_width="match_parent"
+                android:layout_width="150dp"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
                 android:inputType="number"
+                android:layout_marginRight="30dp"
                 android:hint="Broj ponavljanja"/>
 
             <!-- Task unit -->
             <Spinner
                 android:id="@+id/spinnerReccuringUnit"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
+                android:layout_width="150dp"
+                android:layout_height="40dp"
                 android:spinnerMode="dropdown"/>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_horizontal"
-                android:layout_marginBottom="16dp">
-
-                <EditText
-                    android:id="@+id/etStartDate"
-                    android:layout_width="150dp"
-                    android:layout_height="wrap_content"
-                    android:inputType="date"
-                    android:hint="Datum početka"
-                    android:layout_marginRight="30dp"/>
-
-                <EditText
-                    android:id="@+id/etEndDate"
-                    android:layout_width="150dp"
-                    android:layout_height="wrap_content"
-                    android:inputType="date"
-                    android:hint="Datum završetka"/>
-
-            </LinearLayout>
 
         </LinearLayout>
 
@@ -112,7 +159,7 @@
         <Spinner
             android:id="@+id/spinnerDifficulty"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="40dp"
             android:layout_marginBottom="16dp"
             android:spinnerMode="dropdown"/>
 
@@ -120,7 +167,7 @@
         <Spinner
             android:id="@+id/spinnerImportance"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="40dp"
             android:layout_marginBottom="16dp"
             android:spinnerMode="dropdown"/>
 
@@ -130,7 +177,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:text="Dodaj zadatak"/>
+            android:text="Dodaj zadatak"
+            android:backgroundTint="#2196F3"/>
     </LinearLayout>
 
 </ScrollView>
