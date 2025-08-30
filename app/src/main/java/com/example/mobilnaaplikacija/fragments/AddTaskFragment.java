@@ -87,10 +87,9 @@ public class AddTaskFragment extends Fragment {
             if(isChecked) {
                 binding.etTime.setEnabled(false);
                 binding.etTime.setText("");
+                // If whole-day, start & end equal
                 if(!binding.etStartDate.getText().toString().isEmpty()){
                     binding.etEndDate.setText(binding.etStartDate.getText().toString());
-                } else if(!binding.etEndDate.getText().toString().isEmpty()){
-                    binding.etStartDate.setText(binding.etEndDate.getText().toString());
                 }
             } else {
                 binding.etTime.setEnabled(true);
