@@ -2,7 +2,6 @@ package com.example.mobilnaaplikacija.fragments;
 
 import android.os.Bundle;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -36,14 +35,12 @@ public class HomeFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         binding = FragmentHomeBinding.inflate(inflater, container, false);
 
-        // Inicijalizacija
         loginButton = binding.buttonLogin;
-        emailInput = binding.editTextEmail;     // obavezno mora postojati u XML (EditText)
-        passwordInput = binding.editTextPassword; // isto u XML
+        emailInput = binding.editTextEmail;
+        passwordInput = binding.editTextPassword;
         mAuth = FirebaseAuth.getInstance();
         userService = new UserService();
 
-        // LOGIN dugme
         loginButton.setOnClickListener(v -> {
             String email = emailInput.getText().toString().trim();
             String password = passwordInput.getText().toString().trim();
@@ -57,14 +54,13 @@ public class HomeFragment extends Fragment {
                 return;
             }
 
-            // Firebase login
-            userService.login(email, password, success -> {
+            userService.login(email, password, (success, message) -> {
+                Toast.makeText(getActivity(), message, Toast.LENGTH_SHORT).show();
+
                 if (success) {
                     FirebaseUser fbUser = mAuth.getCurrentUser();
                     if (fbUser != null) {
-                        Toast.makeText(getActivity(), "Uspešno logovanje", Toast.LENGTH_SHORT).show();
-
-                        // Promeni meni drawera sa logged_out na main_drawer
+                        // Promeni meni drawera na logged_in verziju
                         MainActivity activity = (MainActivity) getActivity();
                         if (activity != null) {
                             activity.setMainDrawer();
@@ -76,13 +72,10 @@ public class HomeFragment extends Fragment {
                                 .setPopUpTo(R.id.homeFragment, true)
                                 .build());
                     }
-                } else {
-                    Toast.makeText(getActivity(), "Neuspešno logovanje", Toast.LENGTH_SHORT).show();
                 }
             });
         });
 
-        // LINK ka registraciji
         TextView registerLink = binding.textRegisterRedirect;
         registerLink.setOnClickListener(v -> {
             NavController navController = Navigation.findNavController(v);
