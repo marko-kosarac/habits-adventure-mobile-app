@@ -1,32 +1,57 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="24dp">
+    android:padding="16dp"
+    android:fillViewport="true"
+    android:background="@android:color/white">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:gravity="center_horizontal"
-        android:paddingTop="50dp">  <!-- Ovde smo dodali paddingTop -->
+        android:orientation="vertical">
 
-        <!-- Avatar -->
-        <ImageView
-            android:id="@+id/imageAvatar"
-            android:layout_width="120dp"
-            android:layout_height="120dp"
-            android:src="@drawable/avatar5"
-            android:contentDescription="Avatar"
-            android:layout_marginBottom="16dp"/>
+        <!-- Zaglavlje: Avatar i dugme za promenu lozinke -->
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="24dp">
+
+            <!-- Avatar -->
+            <de.hdodenhof.circleimageview.CircleImageView
+                android:id="@+id/imageAvatar"
+                android:layout_width="120dp"
+                android:layout_height="120dp"
+                android:layout_centerHorizontal="true"
+                android:layout_marginTop="16dp"
+                android:contentDescription="Avatar"
+                android:elevation="4dp"/>
+
+            <!-- Dugme za promenu lozinke -->
+            <Button
+                android:id="@+id/buttonChangePassword"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Promeni lozinku"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentEnd="true"
+                android:layout_marginTop="8dp"
+                android:layout_marginEnd="8dp"
+                android:backgroundTint="@color/colorPrimary"
+                android:textColor="@android:color/white"
+                android:padding="8dp"
+                android:textSize="12sp"/>
+
+        </RelativeLayout>
 
         <!-- Username -->
         <TextView
             android:id="@+id/textUsername"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Marko Kosarac"
-            android:textSize="20sp"
+            android:textSize="24sp"
             android:textStyle="bold"
+            android:layout_gravity="center_horizontal"
+            android:textColor="@android:color/black"
             android:layout_marginBottom="8dp"/>
 
         <!-- Level i titula -->
@@ -34,69 +59,112 @@
             android:id="@+id/textLevelTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Level 1 - Početnik"
             android:textSize="16sp"
+            android:layout_gravity="center_horizontal"
+            android:textColor="@android:color/darker_gray"
             android:layout_marginBottom="16dp"/>
 
-        <!-- Statistika (XP, PP, Coins) -->
+        <!-- Statistika: XP, PP, Coins -->
         <LinearLayout
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:layout_marginBottom="16dp">
+            android:gravity="center"
+            android:layout_marginBottom="16dp"
+            android:weightSum="3">
 
             <TextView
                 android:id="@+id/textXP"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:text="XP: 250"
-                android:layout_marginEnd="16dp"/>
+                android:layout_weight="1"
+                android:textColor="@android:color/black"
+                android:textSize="14sp"
+                android:gravity="center"/>
 
             <TextView
                 android:id="@+id/textPP"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:text="PP: 3"
-                android:layout_marginEnd="16dp"/>
+                android:layout_weight="1"
+                android:textColor="@android:color/black"
+                android:textSize="14sp"
+                android:gravity="center"/>
 
             <TextView
                 android:id="@+id/textCoins"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:text="Novčići: 100"/>
+                android:layout_weight="1"
+                android:textColor="@android:color/black"
+                android:textSize="14sp"
+                android:gravity="center"/>
         </LinearLayout>
 
         <!-- Bedževi -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Bedževi:"
+            android:text="Bedževi"
             android:textStyle="bold"
+            android:textColor="@android:color/black"
             android:layout_marginBottom="8dp"/>
 
-        <LinearLayout
-            android:id="@+id/badgesContainer"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_marginBottom="16dp">
-            <!-- Ovde ide lista ImageView za bedževe -->
-        </LinearLayout>
-
-        <!-- QR kod -->
-        <ImageView
-            android:id="@+id/qrCode"
-            android:layout_width="150dp"
-            android:layout_height="150dp"
-            android:layout_marginBottom="16dp"/>
-
-        <!-- Dugme za promenu lozinke -->
-        <Button
-            android:id="@+id/buttonChangePassword"
+        <HorizontalScrollView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:backgroundTint="#2196F3"
-            android:text="Promeni lozinku"/>
+            android:layout_marginBottom="16dp"
+            android:fillViewport="true">
+
+            <LinearLayout
+                android:id="@+id/badgesContainer"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:paddingStart="4dp"
+                android:paddingEnd="4dp"/>
+        </HorizontalScrollView>
+
+        <!-- Oprema -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Oprema"
+            android:textStyle="bold"
+            android:textColor="@android:color/black"
+            android:layout_marginBottom="8dp"/>
+
+        <HorizontalScrollView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:fillViewport="true">
+
+            <LinearLayout
+                android:id="@+id/equipmentContainer"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:paddingStart="4dp"
+                android:paddingEnd="4dp"/>
+        </HorizontalScrollView>
+
+        <!-- QR kod -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Moj QR kod"
+            android:textStyle="bold"
+            android:textColor="@android:color/black"
+            android:layout_marginBottom="8dp"/>
+
+        <ImageView
+            android:id="@+id/qrCode"
+            android:layout_width="200dp"
+            android:layout_height="200dp"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginBottom="24dp"
+            android:elevation="4dp"/>
 
     </LinearLayout>
 </ScrollView>

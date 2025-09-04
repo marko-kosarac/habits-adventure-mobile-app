@@ -64,6 +64,8 @@ public class UserProfileFragment extends Fragment {
 
         loadUserData();
 
+        buttonChangePassword.setOnClickListener(v -> showChangePasswordDialog());
+
         return view;
     }
 
@@ -122,6 +124,70 @@ public class UserProfileFragment extends Fragment {
             qrCode.setImageBitmap(bitmap);
         } catch (Exception e) {
             e.printStackTrace();
+        }
+    }
+
+    private void showChangePasswordDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+        builder.setTitle("Promena lozinke");
+
+        LinearLayout layout = new LinearLayout(getContext());
+        layout.setOrientation(LinearLayout.VERTICAL);
+        layout.setPadding(50, 40, 50, 10);
+
+        EditText oldPassword = new EditText(getContext());
+        oldPassword.setHint("Stara lozinka");
+        oldPassword.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
+        layout.addView(oldPassword);
+
+        EditText newPassword1 = new EditText(getContext());
+        newPassword1.setHint("Nova lozinka");
+        newPassword1.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
+        layout.addView(newPassword1);
+
+        EditText newPassword2 = new EditText(getContext());
+        newPassword2.setHint("Potvrdi novu lozinku");
+        newPassword2.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
+        layout.addView(newPassword2);
+
+        builder.setView(layout);
+
+        builder.setPositiveButton("Promeni", (dialog, which) -> {
+            String oldPass = oldPassword.getText().toString().trim();
+            String newPass1 = newPassword1.getText().toString().trim();
+            String newPass2 = newPassword2.getText().toString().trim();
+
+            if (!newPass1.equals(newPass2)) {
+                Toast.makeText(getContext(), "Nove lozinke se ne poklapaju.", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            if (newPass1.length() < 6) {
+                Toast.makeText(getContext(), "Lozinka mora imati najmanje 6 karaktera.", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            changePassword(oldPass, newPass1);
+        });
+
+        builder.setNegativeButton("Otkaži", (dialog, which) -> dialog.dismiss());
+
+        builder.show();
+    }
+
+    private void changePassword(String oldPassword, String newPassword) {
+        FirebaseUser user = auth.getCurrentUser();
+
+        if (user != null && user.getEmail() != null) {
+            AuthCredential credential = EmailAuthProvider.getCredential(user.getEmail(), oldPassword);
+
+            user.reauthenticate(credential)
+                    .addOnSuccessListener(aVoid -> user.updatePassword(newPassword)
+                            .addOnSuccessListener(aVoid1 ->
+                                    Toast.makeText(getContext(), "Lozinka uspešno promenjena.", Toast.LENGTH_SHORT).show())
+                            .addOnFailureListener(e ->
+                                    Toast.makeText(getContext(), "Greška: " + e.getMessage(), Toast.LENGTH_SHORT).show()))
+                    .addOnFailureListener(e ->
+                            Toast.makeText(getContext(), "Pogrešna stara lozinka.", Toast.LENGTH_SHORT).show());
         }
     }
 

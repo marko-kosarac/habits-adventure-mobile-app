@@ -1,8 +1,10 @@
 package com.example.mobilnaaplikacija;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.View;
+import android.widget.TextView;
 
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.ActionBarDrawerToggle;
@@ -17,9 +19,14 @@ import androidx.navigation.ui.NavigationUI;
 import com.example.mobilnaaplikacija.databinding.ActivityMainBinding;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.analytics.FirebaseAnalytics;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.HashSet;
 import java.util.Set;
+
+import de.hdodenhof.circleimageview.CircleImageView;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -93,19 +100,56 @@ public class MainActivity extends AppCompatActivity {
         hideSystemUI();
     }
 
-    public void onLoginSuccess() {
-        // Zamena menu-a sa main drawer
-        binding.navView.getMenu().clear();
-        binding.navView.inflateMenu(R.menu.main_drawer);
+    public void updateDrawerHeader() {
+        NavigationView navigationView = binding.navView;
+        View headerView = navigationView.getHeaderView(0); // prvi header
+        CircleImageView avatarView = headerView.findViewById(R.id.nav_header_avatar);
+        TextView nameView = headerView.findViewById(R.id.nav_header_name);
 
-        // Navigacija na HomePageFragment
-        navController.navigate(R.id.mainFragment,
-                null,
-                new androidx.navigation.NavOptions.Builder()
-                        .setPopUpTo(R.id.homeFragment, true)
-                        .build()
-        );
+        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+        if (currentUser != null) {
+            String uid = currentUser.getUid();
+
+            FirebaseFirestore db = FirebaseFirestore.getInstance();
+            db.collection("users").document(uid).get()
+                    .addOnSuccessListener(documentSnapshot -> {
+                        if (documentSnapshot.exists()) {
+                            String username = documentSnapshot.getString("username");
+                            Long avatarId = documentSnapshot.getLong("avatarId");
+
+                            nameView.setText(username != null ? username : "Korisnik");
+
+                            int avatarResId = R.drawable.avatar1; // default
+                            if (avatarId != null) {
+                                switch (avatarId.intValue()) {
+                                    case 0: avatarResId = R.drawable.avatar1; break;
+                                    case 1: avatarResId = R.drawable.avatar2; break;
+                                    case 2: avatarResId = R.drawable.avatar3; break;
+                                    case 3: avatarResId = R.drawable.avatar4; break;
+                                    case 4: avatarResId = R.drawable.avatar5; break;
+                                }
+                            }
+                            avatarView.setImageResource(avatarResId);
+                        }
+                    })
+                    .addOnFailureListener(e -> Log.e("DrawerHeader", "Greška pri učitavanju headera", e));
+        }
     }
+
+
+//    public void onLoginSuccess() {
+//        // Zamena menu-a sa main drawer
+//        binding.navView.getMenu().clear();
+//        binding.navView.inflateMenu(R.menu.main_drawer);
+//
+//        // Navigacija na HomePageFragment
+//        navController.navigate(R.id.mainFragment,
+//                null,
+//                new androidx.navigation.NavOptions.Builder()
+//                        .setPopUpTo(R.id.homeFragment, true)
+//                        .build()
+//        );
+//    }
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // menu.clear();

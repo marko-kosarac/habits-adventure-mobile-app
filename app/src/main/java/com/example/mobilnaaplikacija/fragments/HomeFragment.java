@@ -64,6 +64,7 @@ public class HomeFragment extends Fragment {
                         MainActivity activity = (MainActivity) getActivity();
                         if (activity != null) {
                             activity.setMainDrawer();
+                            activity.updateDrawerHeader();
                         }
 
                         // Navigacija na MainFragment
