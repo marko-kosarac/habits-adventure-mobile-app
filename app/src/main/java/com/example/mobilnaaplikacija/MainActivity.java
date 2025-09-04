@@ -83,6 +83,8 @@ public class MainActivity extends AppCompatActivity {
         drawer.addDrawerListener(toggle);
         toggle.syncState();
 
+        toggle.getDrawerArrowDrawable().setColor(Color.WHITE);
+
         navigationView.setNavigationItemSelectedListener(item -> {
             int id = item.getItemId();
 
