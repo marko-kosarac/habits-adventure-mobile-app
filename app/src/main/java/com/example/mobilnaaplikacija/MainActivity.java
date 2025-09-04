@@ -35,12 +35,9 @@ public class MainActivity extends AppCompatActivity {
     private ActivityMainBinding binding;
     private AppBarConfiguration appBarConfiguration;
     private NavController navController;
-    private ActionBar actionBar;
     private AppBarConfiguration mAppBarConfiguration;
     private Set<Integer> topLevelDestinations = new HashSet<>();
-    private FirebaseAnalytics mFirebaseAnalytics;
 
-    private ActionBarDrawerToggle actionBarDrawerToggle;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -66,7 +63,7 @@ public class MainActivity extends AppCompatActivity {
         // Top-level destinacije (hamburger se prikazuje za ove)
         mAppBarConfiguration = new AppBarConfiguration.Builder(
                 R.id.homeFragment,
-                R.id.mainFragment,   // dodaj mainFragment kao top-level
+                R.id.mainFragment,
                 R.id.nav_profile,
                 R.id.profile_page,
                 R.id.nav_register,
@@ -82,8 +79,6 @@ public class MainActivity extends AppCompatActivity {
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.addDrawerListener(toggle);
         toggle.syncState();
-
-        toggle.getDrawerArrowDrawable().setColor(Color.WHITE);
 
         navigationView.setNavigationItemSelectedListener(item -> {
             int id = item.getItemId();
@@ -165,11 +160,6 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // menu.clear();
-        // koristimo ako je nasa arhitekrura takva da imamo jednu aktivnost
-        // i vise fragmentaa gde svaki od njih ima svoj menu unutar toolbar-a
-
-        // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.main_menu, menu);
         return true;
     }
@@ -185,7 +175,6 @@ public class MainActivity extends AppCompatActivity {
         NavigationView navView = findViewById(R.id.nav_view);
         navView.getMenu().clear();
         navView.inflateMenu(R.menu.main_drawer);
-
     }
 
     private void hideSystemUI() {
