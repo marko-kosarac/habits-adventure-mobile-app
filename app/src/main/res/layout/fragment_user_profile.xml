@@ -23,6 +23,7 @@
                 android:layout_height="120dp"
                 android:layout_centerHorizontal="true"
                 android:layout_marginTop="16dp"
+                android:src="@drawable/avatar5"
                 android:contentDescription="Avatar"
                 android:elevation="4dp"/>
 
@@ -40,10 +41,9 @@
                 android:textColor="@android:color/white"
                 android:padding="8dp"
                 android:textSize="12sp"/>
-
         </RelativeLayout>
 
-        <!-- Username -->
+        <!-- Ime i prezime -->
         <TextView
             android:id="@+id/textUsername"
             android:layout_width="wrap_content"
@@ -54,15 +54,63 @@
             android:textColor="@android:color/black"
             android:layout_marginBottom="8dp"/>
 
-        <!-- Level i titula -->
-        <TextView
-            android:id="@+id/textLevelTitle"
-            android:layout_width="wrap_content"
+        <!-- Level i XP progres bar -->
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textSize="16sp"
-            android:layout_gravity="center_horizontal"
-            android:textColor="@android:color/darker_gray"
-            android:layout_marginBottom="16dp"/>
+            android:orientation="vertical"
+            android:layout_marginBottom="24dp">
+
+            <!-- Titula -->
+            <TextView
+                android:id="@+id/textLevelTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Novajlija"
+                android:textSize="16sp"
+                android:layout_gravity="center_horizontal"
+                android:textColor="@android:color/darker_gray"
+                android:layout_marginBottom="8dp"/>
+
+            <!-- XP Progress bar -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+
+                <!-- Trenutni level -->
+                <TextView
+                    android:id="@+id/textCurrentLevel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="1"
+                    android:textStyle="bold"
+                    android:textColor="@android:color/black"
+                    android:layout_marginEnd="8dp"/>
+
+                <!-- Progress bar -->
+                <ProgressBar
+                    android:id="@+id/levelProgressBar"
+                    style="?android:attr/progressBarStyleHorizontal"
+                    android:layout_width="0dp"
+                    android:layout_height="20dp"
+                    android:layout_weight="1"
+                    android:progress="40"
+                    android:max="100"
+                    android:progressDrawable="@drawable/progress_level_drawable"/>
+
+                <!-- Sledeći level -->
+                <TextView
+                    android:id="@+id/textNextLevel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="2"
+                    android:textStyle="bold"
+                    android:textColor="@android:color/black"
+                    android:layout_marginStart="8dp"/>
+            </LinearLayout>
+        </LinearLayout>
 
         <!-- Statistika: XP, PP, Coins -->
         <LinearLayout
@@ -80,7 +128,8 @@
                 android:layout_weight="1"
                 android:textColor="@android:color/black"
                 android:textSize="14sp"
-                android:gravity="center"/>
+                android:gravity="center"
+                android:text="XP: 0"/>
 
             <TextView
                 android:id="@+id/textPP"
@@ -89,7 +138,8 @@
                 android:layout_weight="1"
                 android:textColor="@android:color/black"
                 android:textSize="14sp"
-                android:gravity="center"/>
+                android:gravity="center"
+                android:text="PP: 0"/>
 
             <TextView
                 android:id="@+id/textCoins"
@@ -98,7 +148,8 @@
                 android:layout_weight="1"
                 android:textColor="@android:color/black"
                 android:textSize="14sp"
-                android:gravity="center"/>
+                android:gravity="center"
+                android:text="Coins: 0"/>
         </LinearLayout>
 
         <!-- Bedževi -->
@@ -165,6 +216,5 @@
             android:layout_gravity="center_horizontal"
             android:layout_marginBottom="24dp"
             android:elevation="4dp"/>
-
     </LinearLayout>
 </ScrollView>

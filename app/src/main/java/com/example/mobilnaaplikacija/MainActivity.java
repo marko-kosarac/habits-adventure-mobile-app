@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.appcompat.app.ActionBar;
@@ -52,6 +53,8 @@ public class MainActivity extends AppCompatActivity {
         DrawerLayout drawer = binding.drawerLayout;
         NavigationView navigationView = binding.navView;
 
+        updateDrawerHeader();
+
         topLevelDestinations.add(R.id.action_settings);
         navController = Navigation.findNavController(this, R.id.nav_host_fragment_content_main);
 
@@ -89,8 +92,16 @@ public class MainActivity extends AppCompatActivity {
             else if (id == R.id.nav_statistics){
                 navController.navigate((R.id.statistics_page));
             }else if (id == R.id.nav_logout) {
+                FirebaseAuth.getInstance().signOut(); // stvarni logout
+
                 navigationView.getMenu().clear();
                 navigationView.inflateMenu(R.menu.logged_out_drawer);
+                View header_blanc = navigationView.getHeaderView(0);
+                TextView name_blanc = header_blanc.findViewById(R.id.nav_header_name);
+                ImageView avatar_blanc = header_blanc.findViewById(R.id.nav_header_avatar);
+                name_blanc.setVisibility(View.GONE);
+                avatar_blanc.setImageResource(R.drawable.blank_picture);
+
                 navController.navigate(R.id.homeFragment);
             }
 
@@ -100,9 +111,15 @@ public class MainActivity extends AppCompatActivity {
         hideSystemUI();
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        updateDrawerHeader();
+    }
+
     public void updateDrawerHeader() {
         NavigationView navigationView = binding.navView;
-        View headerView = navigationView.getHeaderView(0); // prvi header
+        View headerView = navigationView.getHeaderView(0);
         CircleImageView avatarView = headerView.findViewById(R.id.nav_header_avatar);
         TextView nameView = headerView.findViewById(R.id.nav_header_name);
 
@@ -117,6 +134,7 @@ public class MainActivity extends AppCompatActivity {
                             String username = documentSnapshot.getString("username");
                             Long avatarId = documentSnapshot.getLong("avatarId");
 
+                            nameView.setVisibility(View.VISIBLE);
                             nameView.setText(username != null ? username : "Korisnik");
 
                             int avatarResId = R.drawable.avatar1; // default
@@ -133,23 +151,14 @@ public class MainActivity extends AppCompatActivity {
                         }
                     })
                     .addOnFailureListener(e -> Log.e("DrawerHeader", "Greška pri učitavanju headera", e));
+        } else {
+            // --- default za izlogovanog korisnika ---
+            nameView.setVisibility(View.GONE);
+            avatarView.setImageResource(R.drawable.blank_picture);
         }
     }
 
 
-//    public void onLoginSuccess() {
-//        // Zamena menu-a sa main drawer
-//        binding.navView.getMenu().clear();
-//        binding.navView.inflateMenu(R.menu.main_drawer);
-//
-//        // Navigacija na HomePageFragment
-//        navController.navigate(R.id.mainFragment,
-//                null,
-//                new androidx.navigation.NavOptions.Builder()
-//                        .setPopUpTo(R.id.homeFragment, true)
-//                        .build()
-//        );
-//    }
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // menu.clear();
