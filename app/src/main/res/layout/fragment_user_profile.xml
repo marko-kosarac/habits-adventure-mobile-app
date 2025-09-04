@@ -22,7 +22,6 @@
                 android:layout_height="120dp"
                 android:layout_centerHorizontal="true"
                 android:layout_marginTop="16dp"
-                android:src="@drawable/avatar5"
                 android:contentDescription="Avatar"/>
 
             <Button
@@ -142,7 +141,6 @@
                     android:id="@+id/textPP"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="50"
                     android:textStyle="bold"
                     android:textColor="@android:color/black"
                     android:layout_marginTop="4dp"/>
@@ -168,7 +166,6 @@
                     android:id="@+id/textCoins"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="120"
                     android:textStyle="bold"
                     android:textColor="@android:color/black"
                     android:layout_marginTop="4dp"/>

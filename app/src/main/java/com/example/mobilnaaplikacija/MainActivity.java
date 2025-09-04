@@ -1,5 +1,6 @@
 package com.example.mobilnaaplikacija;
 
+import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -49,6 +50,7 @@ public class MainActivity extends AppCompatActivity {
 
         Toolbar toolbar = binding.appBarMain.toolbar;
         setSupportActionBar(toolbar);
+        toolbar.setTitleTextColor(Color.WHITE);
 
         DrawerLayout drawer = binding.drawerLayout;
         NavigationView navigationView = binding.navView;

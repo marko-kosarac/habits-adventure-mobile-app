@@ -11,4 +11,5 @@
     <color name="colorPrimary">#1976D2</color>   <!-- tamnija plava -->
     <color name="colorPrimaryDark">#1565C0</color> <!-- još tamnija plava -->
     <color name="colorAccent">#64B5F6</color>   <!-- svetlija plava za akcente -->
+
 </resources>
