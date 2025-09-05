@@ -8,6 +8,7 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
 import android.text.InputType;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,6 +16,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -34,6 +36,8 @@ public class UserProfileFragment extends Fragment {
 
     private ImageView imageAvatar, qrCode;
     private TextView textUsername, textLevelTitle, textXP, textPP, textCoins;
+    private TextView textCurrentLevel, textNextLevel;
+    private ProgressBar levelProgressBar;
     private LinearLayout badgesContainer;
     private Button buttonChangePassword;
 
@@ -58,6 +62,10 @@ public class UserProfileFragment extends Fragment {
         textCoins = view.findViewById(R.id.textCoins);
         badgesContainer = view.findViewById(R.id.badgesContainer);
         buttonChangePassword = view.findViewById(R.id.buttonChangePassword);
+
+        textCurrentLevel = view.findViewById(R.id.textCurrentLevel);
+        textNextLevel = view.findViewById(R.id.textNextLevel);
+        levelProgressBar = view.findViewById(R.id.levelProgressBar);
 
         auth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
@@ -87,8 +95,8 @@ public class UserProfileFragment extends Fragment {
 
     private void bindUserData(@NonNull DocumentSnapshot document, String userId) {
         String username = document.getString("username");
-        long xp = document.getLong("xp") != null ? document.getLong("xp") : 0;
-        long pp = document.getLong("pp") != null ? document.getLong("pp") : 0;
+        long xp = document.getLong("experiencePoints") != null ? document.getLong("experiencePoints") : 0;
+        long pp = document.getLong("powerPoints") != null ? document.getLong("powerPoints") : 0;
         long coins = document.getLong("coins") != null ? document.getLong("coins") : 0;
         long level = document.getLong("level") != null ? document.getLong("level") : 1;
         String title = document.getString("title");
@@ -110,9 +118,61 @@ public class UserProfileFragment extends Fragment {
                 case 4: imageAvatar.setImageResource(R.drawable.avatar5); break;
             }
         }
-
+        updateLevelUI(xp, userId);
         generateQRCode(userId, username, email);
     }
+
+    private void updateLevelUI(long currentXP, String userId) {
+        int level = 1;
+        long xpForNextLevel = 200;
+        long prevXpForNext = 0;
+
+        while (currentXP >= xpForNextLevel) {
+            level++;
+            prevXpForNext = xpForNextLevel;
+            long next = xpForNextLevel * 2 + xpForNextLevel / 2;
+            xpForNextLevel = ((next + 99) / 100) * 100;
+        }
+
+        textCurrentLevel.setText(String.valueOf(level));
+        textNextLevel.setText(String.valueOf(level + 1));
+
+        // Dodela titula za prvih 3 nivoa
+        String title;
+        switch (level) {
+            case 1:
+                title = "Početnik";
+                break;
+            case 2:
+                title = "Učenik";
+                break;
+            case 3:
+                title = "Iskusni";
+                break;
+            default:
+                title = "Veteran";
+                break;
+        }
+
+        textLevelTitle.setText("Level " + level + " - " + title);
+
+        int progress = (int) ((currentXP * 100) / xpForNextLevel);
+        levelProgressBar.setMax(100);
+        levelProgressBar.setProgress(progress);
+
+        textXP.setText("XP: " + currentXP + " / " + xpForNextLevel);
+
+        db.collection("users").document(userId)
+                .update("level", level, "title", title)
+                .addOnSuccessListener(aVoid -> {
+                    // opcionalno: log ili toast
+                    Log.d("UserProfile", "Level i titula uspešno ažurirani");
+                })
+                .addOnFailureListener(e -> {
+                    Log.e("UserProfile", "Greška pri ažuriranju levela", e);
+                });
+    }
+
 
     private void generateQRCode(String userId, String username, String email) {
         MultiFormatWriter writer = new MultiFormatWriter();
