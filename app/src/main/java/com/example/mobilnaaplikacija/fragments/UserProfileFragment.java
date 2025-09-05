@@ -153,25 +153,30 @@ public class UserProfileFragment extends Fragment {
                 title = "Veteran";
                 break;
         }
-
         textLevelTitle.setText("Level " + level + " - " + title);
 
         int progress = (int) ((currentXP * 100) / xpForNextLevel);
         levelProgressBar.setMax(100);
         levelProgressBar.setProgress(progress);
-
         textXP.setText("XP: " + currentXP + " / " + xpForNextLevel);
 
+        // Izračunavanje PP-a
+        long pp = 0;
+        if (level > 1) {
+            pp = 40; // nakon prvog nivoa
+            for (int i = 2; i < level; i++) {
+                pp = pp + (pp * 3 / 4);
+            }
+        }
+        textPP.setText("PP: " + pp);
+
+        // Ažuriranje baze
         db.collection("users").document(userId)
-                .update("level", level, "title", title)
-                .addOnSuccessListener(aVoid -> {
-                    // opcionalno: log ili toast
-                    Log.d("UserProfile", "Level i titula uspešno ažurirani");
-                })
-                .addOnFailureListener(e -> {
-                    Log.e("UserProfile", "Greška pri ažuriranju levela", e);
-                });
+                .update("level", level, "title", title, "powerPoints", pp)
+                .addOnSuccessListener(aVoid -> Log.d("UserProfile", "Level, titula i PP ažurirani"))
+                .addOnFailureListener(e -> Log.e("UserProfile", "Greška pri ažuriranju levela i PP-a", e));
     }
+
 
 
     private void generateQRCode(String userId, String username, String email) {
