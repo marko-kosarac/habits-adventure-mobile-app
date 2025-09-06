@@ -1,11 +1,12 @@
 package com.example.mobilnaaplikacija.adapters;
 
 import android.content.Context;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.LinearLayout;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -17,54 +18,60 @@ import com.example.mobilnaaplikacija.model.Equipment;
 
 import java.util.ArrayList;
 
-public class EquipmentListAdapter extends RecyclerView.Adapter<EquipmentListAdapter.EquipmentViewHolder> {
+public class EquipmentListAdapter extends RecyclerView.Adapter<EquipmentListAdapter.ShopViewHolder> {
 
-    private ArrayList<Equipment> equipmentList;
+    private ArrayList<Equipment> shopItems;
     private Context context;
 
-    public EquipmentListAdapter(Context context, ArrayList<Equipment> equipmentList) {
+    public EquipmentListAdapter(Context context, ArrayList<Equipment> shopItems) {
         this.context = context;
-        this.equipmentList = equipmentList;
+        this.shopItems = shopItems;
     }
 
     @NonNull
     @Override
-    public EquipmentViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    public ShopViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(context).inflate(R.layout.item_equipment, parent, false);
-        return new EquipmentViewHolder(view);
+        return new ShopViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull EquipmentViewHolder holder, int position) {
-        Equipment equipment = equipmentList.get(position);
+    public void onBindViewHolder(@NonNull ShopViewHolder holder, int position) {
+        Equipment item = shopItems.get(position);
 
-        holder.textName.setText(equipment.getName());
-        holder.textType.setText("Tip: " + equipment.getType());
-        holder.textBonus.setText("Bonus: " + equipment.getBonus());
-        holder.textDescription.setText(equipment.getDescription());
+        holder.textName.setText(item.getName());
+        holder.textDescription.setText(item.getDescription());
+        holder.textPrice.setText("Cena: " + item.getBonus()); // Ako cena bude int, promeni tip u Equipment
 
-        holder.buttonActivate.setOnClickListener(v -> {
-            // ovde dodaj logiku za aktivaciju opreme
-            Toast.makeText(context, equipment.getName() + " aktivirana!", Toast.LENGTH_SHORT).show();
+        holder.buttonBuy.setOnClickListener(v -> {
+            String quantityText = holder.editQuantity.getText().toString();
+            if (TextUtils.isEmpty(quantityText)) {
+                Toast.makeText(context, "Unesite količinu", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            int quantity = Integer.parseInt(quantityText);
+            // Ovde ide logika za kupovinu
+            Toast.makeText(context, "Kupljeno " + quantity + "x " + item.getName(), Toast.LENGTH_SHORT).show();
         });
     }
 
     @Override
     public int getItemCount() {
-        return equipmentList.size();
+        return shopItems.size();
     }
 
-    public static class EquipmentViewHolder extends RecyclerView.ViewHolder {
-        TextView textName, textType, textBonus, textDescription;
-        Button buttonActivate;
+    public static class ShopViewHolder extends RecyclerView.ViewHolder {
+        TextView textName, textDescription, textPrice;
+        EditText editQuantity;
+        Button buttonBuy;
 
-        public EquipmentViewHolder(@NonNull View itemView) {
+        public ShopViewHolder(@NonNull View itemView) {
             super(itemView);
-            textName = itemView.findViewById(R.id.eq_name);
-            textType = itemView.findViewById(R.id.eq_type);
-            textBonus = itemView.findViewById(R.id.eq_bonus);
-            textDescription = itemView.findViewById(R.id.eq_description);
-            buttonActivate = itemView.findViewById(R.id.btn_activate);
+            textName = itemView.findViewById(R.id.shop_item_name);
+            textDescription = itemView.findViewById(R.id.shop_item_description);
+            textPrice = itemView.findViewById(R.id.shop_item_price);
+            editQuantity = itemView.findViewById(R.id.shop_item_quantity);
+            buttonBuy = itemView.findViewById(R.id.shop_item_buy);
         }
     }
 }

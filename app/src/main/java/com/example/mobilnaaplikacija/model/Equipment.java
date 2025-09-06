@@ -1,17 +1,23 @@
 package com.example.mobilnaaplikacija.model;
 
 public class Equipment {
+
+    public enum Type {
+        NAPITAK,
+        ODECA,
+        ORUZJE
+    }
+
     private long id;
     private String name;
     private String description;
-    private String type;    // Napitak / Odeća / Oružje
+    private Type type;      // enum umesto stringa
     private String bonus;   // "+20% PP", "+10% Snage", itd.
     private int duration;   // trajanje u borbama (0 = jednokratni, >0 = trajno)
 
-    public Equipment() {
-    }
+    public Equipment() {}
 
-    public Equipment(long id, String name, String description, String type, String bonus, int duration) {
+    public Equipment(long id, String name, String description, Type type, String bonus, int duration) {
         this.id = id;
         this.name = name;
         this.description = description;
@@ -30,8 +36,8 @@ public class Equipment {
     public String getDescription() { return description; }
     public void setDescription(String description) { this.description = description; }
 
-    public String getType() { return type; }
-    public void setType(String type) { this.type = type; }
+    public Type getType() { return type; }
+    public void setType(Type type) { this.type = type; }
 
     public String getBonus() { return bonus; }
     public void setBonus(String bonus) { this.bonus = bonus; }
