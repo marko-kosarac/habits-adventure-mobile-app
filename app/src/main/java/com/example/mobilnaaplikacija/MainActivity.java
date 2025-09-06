@@ -1,5 +1,6 @@
 package com.example.mobilnaaplikacija;
 
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
@@ -67,7 +68,8 @@ public class MainActivity extends AppCompatActivity {
                 R.id.nav_profile,
                 R.id.profile_page,
                 R.id.nav_register,
-                R.id.statistics_page
+                R.id.statistics_page,
+                R.id.shopFragment
         ).setOpenableLayout(drawer).build();
 
         // Poveži Toolbar i Drawer sa NavController-om
@@ -90,7 +92,12 @@ public class MainActivity extends AppCompatActivity {
             }
             else if (id == R.id.nav_statistics){
                 navController.navigate((R.id.statistics_page));
-            }else if (id == R.id.nav_logout) {
+            }
+            else if( id == R.id.nav_shop){
+                navController.navigate((R.id.shopFragment));
+
+            }else if (id == R.id.nav_logout)
+            {
                 FirebaseAuth.getInstance().signOut(); // stvarni logout
 
                 navigationView.getMenu().clear();

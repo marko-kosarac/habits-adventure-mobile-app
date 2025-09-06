@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/equipment_card_item"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="8dp"
+    app:cardCornerRadius="12dp"
+    app:cardElevation="4dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <!-- Naziv opreme -->
+        <TextView
+            android:id="@+id/eq_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Naziv Opreme"
+            android:textSize="18sp"
+            android:textStyle="bold"/>
+
+        <!-- Tip opreme -->
+        <TextView
+            android:id="@+id/eq_type"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Tip: Napitak"
+            android:textSize="14sp"
+            android:layout_marginTop="4dp"/>
+
+        <!-- Opis opreme -->
+        <TextView
+            android:id="@+id/eq_description"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Opis opreme"
+            android:textSize="14sp"
+            android:layout_marginTop="2dp"/>
+
+        <!-- Bonus opreme -->
+        <TextView
+            android:id="@+id/eq_bonus"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Bonus: +20% PP"
+            android:textSize="14sp"
+            android:layout_marginTop="2dp"/>
+
+        <!-- Trajanje opreme (ako postoji) -->
+        <TextView
+            android:id="@+id/eq_duration"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Trajanje: 2 borbe"
+            android:textSize="14sp"
+            android:layout_marginTop="2dp"/>
+
+        <!-- Dugme za aktivaciju/deaktivaciju -->
+        <Button
+            android:id="@+id/btn_activate"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Aktiviraj"
+            android:layout_marginTop="8dp"/>
+    </LinearLayout>
+
+</androidx.cardview.widget.CardView>
