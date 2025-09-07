@@ -1,6 +1,8 @@
 package com.example.mobilnaaplikacija.adapters;
 
 import android.content.Context;
+import android.text.InputFilter;
+import android.text.InputType;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -21,6 +23,9 @@ import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class EquipmentListAdapter extends RecyclerView.Adapter<EquipmentListAdapter.ShopViewHolder> {
 
@@ -55,53 +60,76 @@ public class EquipmentListAdapter extends RecyclerView.Adapter<EquipmentListAdap
             }
 
             int quantity = Integer.parseInt(quantityText);
-            int totalPrice = item.getPrice() * quantity;
+            if (quantity <= 0) {
+                Toast.makeText(context, "Morate da unesete količinu veću od 0", Toast.LENGTH_SHORT).show();
+                return;
+            }
 
+            int totalPrice = item.getPrice() * quantity;
             String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
             DocumentReference userRef = FirebaseFirestore.getInstance().collection("users").document(userId);
 
             userRef.get().addOnSuccessListener(documentSnapshot -> {
-                if (documentSnapshot.exists()) {
-                    Long coins = documentSnapshot.getLong("coins");
-                    if (coins == null) coins = 0L;
+                if (!documentSnapshot.exists()) return;
 
-                    if (coins < totalPrice) {
-                        Toast.makeText(context, "Nemate dovoljno novca!", Toast.LENGTH_SHORT).show();
-                        return;
-                    }
+                Long coins = documentSnapshot.getLong("coins");
+                if (coins == null) coins = 0L;
 
-                    if(quantity <= 0){
-                        Toast.makeText(context, "Morate da unesete količinu veću od 0", Toast.LENGTH_SHORT).show();
-                        return;
-                    }
-
-
-                    // Oduzimanje novca
-                    userRef.update("coins", coins - totalPrice);
-
-                    // Dodavanje kupljene opreme sa quantity
-                    Equipment purchasedItem = new Equipment(
-                            item.getId(),
-                            item.getName(),
-                            item.getDescription(),
-                            item.getType(),
-                            item.getBonus(),
-                            item.getDuration(),
-                            item.getPrice()
-                    );
-                    purchasedItem.setQuantity(quantity);
-
-                    userRef.update("equipment", FieldValue.arrayUnion(purchasedItem))
-                            .addOnSuccessListener(aVoid ->
-                                    Toast.makeText(context, "Kupljeno " + quantity + "x " + item.getName(), Toast.LENGTH_SHORT).show())
-                            .addOnFailureListener(e ->
-                                    Toast.makeText(context, "Greška prilikom kupovine: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+                if (coins < totalPrice) {
+                    Toast.makeText(context, "Nemate dovoljno novca!", Toast.LENGTH_SHORT).show();
+                    return;
                 }
+
+                // Oduzimanje novca
+                userRef.update("coins", coins - totalPrice);
+
+                List<Map<String, Object>> equipmentData = (List<Map<String, Object>>) documentSnapshot.get("equipment");
+                if (equipmentData == null) equipmentData = new ArrayList<>();
+                boolean exists = false;
+
+                for (Map<String, Object> e : equipmentData) {
+                    long id = ((Number) e.get("id")).longValue();
+                    boolean active = e.get("active") != null && (Boolean) e.get("active");
+
+                    if (id == item.getId() && !active) {
+                        int oldQty = ((Number) e.get("quantity")).intValue();
+                        e.put("quantity", oldQty + quantity); // poveća quantity
+                        exists = true;
+                        break;
+                    }
+                }
+
+                if (!exists) {
+                    Map<String, Object> newItem = new HashMap<>();
+                    newItem.put("id", item.getId());
+                    newItem.put("name", item.getName());
+                    newItem.put("description", item.getDescription());
+                    newItem.put("type", item.getType().name());
+                    newItem.put("bonus", item.getBonus());
+                    newItem.put("duration", item.getDuration());
+                    newItem.put("price", item.getPrice());
+                    newItem.put("quantity", quantity);
+                    newItem.put("active", false);
+
+                    equipmentData.add(newItem);
+                }
+
+                userRef.update("equipment", equipmentData)
+                        .addOnSuccessListener(aVoid -> {
+                            Toast.makeText(context, "Kupljeno " + quantity + "x " + item.getName(), Toast.LENGTH_SHORT).show();
+                            holder.editQuantity.setText(""); // resetuje unos
+                        })
+                        .addOnFailureListener(e -> {
+                            Toast.makeText(context, "Greška prilikom kupovine: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                        });
+
             }).addOnFailureListener(e -> {
                 Toast.makeText(context, "Greška pri učitavanju korisnika: " + e.getMessage(), Toast.LENGTH_SHORT).show();
             });
         });
     }
+
+
 
     @Override
     public int getItemCount() {
@@ -120,6 +148,20 @@ public class EquipmentListAdapter extends RecyclerView.Adapter<EquipmentListAdap
             textPrice = itemView.findViewById(R.id.shop_item_price);
             editQuantity = itemView.findViewById(R.id.shop_item_quantity);
             buttonBuy = itemView.findViewById(R.id.shop_item_buy);
+            editQuantity.setInputType(InputType.TYPE_CLASS_NUMBER);
+
+            editQuantity.setFilters(new InputFilter[]{
+                    (source, start, end, dest, dstart, dend) -> {
+                        // Proverava da li je svaki karakter cifra
+                        for (int i = start; i < end; i++) {
+                            if (!Character.isDigit(source.charAt(i))) {
+                                return "";
+                            }
+                        }
+                        return null;
+                    }
+            });
         }
+
     }
 }

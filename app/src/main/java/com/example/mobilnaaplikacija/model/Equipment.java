@@ -2,6 +2,8 @@ package com.example.mobilnaaplikacija.model;
 
 public class Equipment {
 
+
+
     public enum Type {
         NAPITAK,
         ODECA,
@@ -19,6 +21,17 @@ public class Equipment {
     private boolean isActivated;
 
     public Equipment() {}
+    public Equipment(Equipment other) {
+        this.id = other.id;
+        this.name = other.name;
+        this.description = other.description;
+        this.bonus = other.bonus;
+        this.duration = other.duration;
+        this.price = other.price;
+        this.quantity = other.quantity;
+        this.isActivated = other.isActivated;
+        this.type = other.type;
+    }
 
     public Equipment(long id, String name, String description, Type type, String bonus, int duration, int price) {
         this.id = id;

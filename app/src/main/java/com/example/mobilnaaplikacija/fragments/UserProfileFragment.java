@@ -35,10 +35,13 @@ import com.google.zxing.MultiFormatWriter;
 import com.google.zxing.common.BitMatrix;
 import com.journeyapps.barcodescanner.BarcodeEncoder;
 
+import org.w3c.dom.Text;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class UserProfileFragment extends Fragment {
 
@@ -139,14 +142,18 @@ public class UserProfileFragment extends Fragment {
         activeEquipmentContainer.removeAllViews();
         inactiveEquipmentContainer.removeAllViews();
 
+        if (userEquipmentList == null || userEquipmentList.isEmpty()) return;
+
         for (Equipment eq : userEquipmentList) {
             View card = LayoutInflater.from(getContext()).inflate(R.layout.card_user_equipment, null);
             TextView name = card.findViewById(R.id.textEquipmentName);
             TextView desc = card.findViewById(R.id.textEquipmentDescription);
+            TextView quantity = card.findViewById(R.id.textEquipmentQuantity);
             Button activateButton = card.findViewById(R.id.buttonActivateEquipment);
 
             name.setText(eq.getName());
             desc.setText(eq.getDescription());
+            quantity.setText("Količina: " + eq.getQuantity());
 
             if (eq.isActive()) {
                 activateButton.setText("Aktivirana");
@@ -164,29 +171,95 @@ public class UserProfileFragment extends Fragment {
         }
     }
 
+
     private void activateEquipment(Equipment eq, View cardView) {
         String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
-        DocumentReference userRef = FirebaseFirestore.getInstance().collection("users").document(userId);
+        DocumentReference userRef = db.collection("users").document(userId);
 
-        Map<String, Object> updates = new HashMap<>();
-        updates.put("equipment." + eq.getId() + ".active", true);
+        // Smanji quantity u objektu
+        eq.setQuantity(eq.getQuantity() - 1);
 
-        userRef.update(updates).addOnSuccessListener(aVoid -> {
-            eq.setActive(true);
-            eq.setQuantity(eq.getQuantity()-1);
+        // Proveri da li ista oprema već postoji u aktivnim
+        Equipment activeEq = null;
+        for (Equipment e : userEquipmentList) {
+            if (e.isActive() && e.getId() == eq.getId()) {
+                activeEq = e;
+                break;
+            }
+        }
 
-            // Premesti iz inactive u active listu
-            inactiveEquipmentContainer.removeView(cardView);
-            Button activateButton = cardView.findViewById(R.id.buttonActivateEquipment);
-            activateButton.setText("Aktivirana");
-            activateButton.setEnabled(false);
-            activeEquipmentContainer.addView(cardView);
+        if (activeEq != null) {
+            // Ako postoji, samo povećaj quantity
+            activeEq.setQuantity(activeEq.getQuantity() + 1);
+        } else {
+            // Ako ne postoji, kreiraj novu aktivnu instancu
+            activeEq = new Equipment();
+            activeEq.setId(eq.getId());
+            activeEq.setName(eq.getName());
+            activeEq.setDescription(eq.getDescription());
+            activeEq.setBonus(eq.getBonus());
+            activeEq.setDuration(eq.getDuration());
+            activeEq.setPrice(eq.getPrice());
+            activeEq.setQuantity(1);
+            activeEq.setType(eq.getType());
+            activeEq.setActive(true);
+            userEquipmentList.add(activeEq);
+        }
 
-            Toast.makeText(getContext(), eq.getName() + " je aktivirana!", Toast.LENGTH_SHORT).show();
-        }).addOnFailureListener(e -> {
-            Toast.makeText(getContext(), "Greška prilikom aktivacije: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+        // Ažuriraj Firestore
+        Equipment finalActiveEq = activeEq;
+        userRef.get().addOnSuccessListener(doc -> {
+            List<Map<String, Object>> equipmentData = (List<Map<String, Object>>) doc.get("equipment");
+            if (equipmentData == null) equipmentData = new ArrayList<>();
+            List<Map<String, Object>> updatedList = new ArrayList<>();
+
+            // Update quantity u inventaru i dodaj aktivne
+            for (Map<String, Object> e : equipmentData) {
+                long id = ((Number) e.get("id")).longValue();
+                int qty = ((Number) e.get("quantity")).intValue();
+
+                if (id == eq.getId()) {
+                    qty = qty - 1; // smanji quantity u inventaru
+                }
+
+                if (qty > 0) {
+                    e.put("quantity", qty);
+                    updatedList.add(e);
+                }
+            }
+
+            // Dodaj ili ažuriraj aktivnu opremu
+            boolean found = false;
+            for (Map<String, Object> e : updatedList) {
+                if (((Number) e.get("id")).longValue() == finalActiveEq.getId() && (Boolean) e.get("active")) {
+                    e.put("quantity", finalActiveEq.getQuantity());
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) {
+                Map<String, Object> activeMap = new HashMap<>();
+                activeMap.put("id", finalActiveEq.getId());
+                activeMap.put("name", finalActiveEq.getName());
+                activeMap.put("description", finalActiveEq.getDescription());
+                activeMap.put("bonus", finalActiveEq.getBonus());
+                activeMap.put("duration", finalActiveEq.getDuration());
+                activeMap.put("price", finalActiveEq.getPrice());
+                activeMap.put("quantity", finalActiveEq.getQuantity());
+                activeMap.put("type", finalActiveEq.getType().name());
+                activeMap.put("active", true);
+                updatedList.add(activeMap);
+            }
+
+            userRef.update("equipment", updatedList).addOnSuccessListener(aVoid -> {
+                loadUserEquipment(); // osveži prikaz
+                Toast.makeText(getContext(), eq.getName() + " je aktivirana!", Toast.LENGTH_SHORT).show();
+            });
         });
     }
+
+
+
 
     private void bindUserData(@NonNull DocumentSnapshot document, String userId) {
         String username = document.getString("username");
