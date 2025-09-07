@@ -15,6 +15,10 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.mobilnaaplikacija.R;
 import com.example.mobilnaaplikacija.model.Equipment;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FieldValue;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
 
@@ -41,7 +45,7 @@ public class EquipmentListAdapter extends RecyclerView.Adapter<EquipmentListAdap
 
         holder.textName.setText(item.getName());
         holder.textDescription.setText(item.getDescription());
-        holder.textPrice.setText("Cena: " + item.getPrice() + " gold");
+        holder.textPrice.setText("Cena: " + item.getPrice());
 
         holder.buttonBuy.setOnClickListener(v -> {
             String quantityText = holder.editQuantity.getText().toString();
@@ -49,11 +53,53 @@ public class EquipmentListAdapter extends RecyclerView.Adapter<EquipmentListAdap
                 Toast.makeText(context, "Unesite količinu", Toast.LENGTH_SHORT).show();
                 return;
             }
+
             int quantity = Integer.parseInt(quantityText);
-            Toast.makeText(context,
-                    "Kupljeno " + quantity + "x " + item.getName() +
-                            " za " + (quantity * item.getPrice()) + " gold",
-                    Toast.LENGTH_SHORT).show();
+            int totalPrice = item.getPrice() * quantity;
+
+            String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+            DocumentReference userRef = FirebaseFirestore.getInstance().collection("users").document(userId);
+
+            userRef.get().addOnSuccessListener(documentSnapshot -> {
+                if (documentSnapshot.exists()) {
+                    Long coins = documentSnapshot.getLong("coins");
+                    if (coins == null) coins = 0L;
+
+                    if (coins < totalPrice) {
+                        Toast.makeText(context, "Nemate dovoljno novca!", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+
+                    if(quantity <= 0){
+                        Toast.makeText(context, "Morate da unesete količinu veću od 0", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+
+
+                    // Oduzimanje novca
+                    userRef.update("coins", coins - totalPrice);
+
+                    // Dodavanje kupljene opreme sa quantity
+                    Equipment purchasedItem = new Equipment(
+                            item.getId(),
+                            item.getName(),
+                            item.getDescription(),
+                            item.getType(),
+                            item.getBonus(),
+                            item.getDuration(),
+                            item.getPrice()
+                    );
+                    purchasedItem.setQuantity(quantity);
+
+                    userRef.update("equipment", FieldValue.arrayUnion(purchasedItem))
+                            .addOnSuccessListener(aVoid ->
+                                    Toast.makeText(context, "Kupljeno " + quantity + "x " + item.getName(), Toast.LENGTH_SHORT).show())
+                            .addOnFailureListener(e ->
+                                    Toast.makeText(context, "Greška prilikom kupovine: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+                }
+            }).addOnFailureListener(e -> {
+                Toast.makeText(context, "Greška pri učitavanju korisnika: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+            });
         });
     }
 

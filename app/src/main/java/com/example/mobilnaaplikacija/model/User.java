@@ -1,6 +1,7 @@
 package com.example.mobilnaaplikacija.model;
 
 import java.util.List;
+import com.example.mobilnaaplikacija.model.Equipment;
 
 public class User {
     private String id;
@@ -20,7 +21,7 @@ public class User {
     private int coins;
 
     private List<String> badges; // lista naziva bedževa
-    private List<String> equipment; // lista opreme
+    private List<Equipment> equipment;
 
     private String qrCode; // može biti putanja do slike ili generisani kod
 
@@ -100,7 +101,7 @@ public class User {
         return badges;
     }
 
-    public List<String> getEquipment() {
+    public List<Equipment> getEquipment() {
         return equipment;
     }
 
@@ -169,7 +170,7 @@ public class User {
         this.badges = badges;
     }
 
-    public void setEquipment(List<String> equipment) {
+    public void setEquipment(List<Equipment> equipment) {
         this.equipment = equipment;
     }
 

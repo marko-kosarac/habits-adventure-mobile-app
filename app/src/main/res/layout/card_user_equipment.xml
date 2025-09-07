@@ -1,0 +1,51 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="200dp"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="12dp"
+    android:layout_marginEnd="8dp"
+    android:background="@drawable/card_background"
+    android:elevation="4dp">
+
+    <TextView
+        android:id="@+id/textEquipmentName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Ime opreme"
+        android:textStyle="bold"
+        android:textColor="@android:color/black"
+        android:textSize="16sp"/>
+
+    <TextView
+        android:id="@+id/textEquipmentBonus"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="+20% PP"
+        android:textColor="@android:color/darker_gray"
+        android:layout_marginTop="4dp"/>
+
+    <TextView
+        android:id="@+id/textEquipmentDescription"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Opis opreme"
+        android:textSize="14sp"
+        android:layout_marginTop="4dp"/>
+    <TextView
+        android:id="@+id/textEquipmentQuantity"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Količina: 3"
+        android:textColor="@android:color/black"
+        android:layout_marginTop="4dp"/>
+
+    <Button
+        android:id="@+id/buttonActivateEquipment"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Aktiviraj"
+        android:layout_marginTop="8dp"
+        android:backgroundTint="@color/colorPrimary"
+        android:textColor="@android:color/white"
+        android:textSize="14sp"/>
+</LinearLayout>

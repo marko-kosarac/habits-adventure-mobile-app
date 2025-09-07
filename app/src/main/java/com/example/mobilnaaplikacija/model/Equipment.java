@@ -14,7 +14,9 @@ public class Equipment {
     private Type type;      // enum umesto stringa
     private String bonus;   // "+20% PP", "+10% Snage", itd.
     private int duration;   // trajanje u borbama (0 = jednokratni, >0 = trajno)
+    private int quantity;
     private int price;
+    private boolean isActivated;
 
     public Equipment() {}
 
@@ -47,5 +49,15 @@ public class Equipment {
     public int getDuration() { return duration; }
     public void setDuration(int duration) { this.duration = duration; }
     public int getPrice(){return price;}
+    public int getQuantity() { return quantity; }
+    public void setQuantity(int quantity) { this.quantity = quantity; }
     public void setPrice(int price){this.price = price;}
+
+    public boolean isActive() {
+        return isActivated;
+    }
+
+    public void setActive(boolean active) {
+        isActivated = active;
+    }
 }

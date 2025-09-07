@@ -21,16 +21,24 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.mobilnaaplikacija.R;
+import com.example.mobilnaaplikacija.model.Equipment;
 import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.EmailAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.MultiFormatWriter;
 import com.google.zxing.common.BitMatrix;
 import com.journeyapps.barcodescanner.BarcodeEncoder;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class UserProfileFragment extends Fragment {
 
@@ -38,9 +46,10 @@ public class UserProfileFragment extends Fragment {
     private TextView textUsername, textLevelTitle, textXP, textPP, textCoins;
     private TextView textCurrentLevel, textNextLevel;
     private ProgressBar levelProgressBar;
-    private LinearLayout badgesContainer;
+    private LinearLayout badgesContainer,activeContainer, inactiveContainer;
+    private LinearLayout activeEquipmentContainer, inactiveEquipmentContainer;
     private Button buttonChangePassword;
-
+    private List<Equipment> userEquipmentList;
     private FirebaseAuth auth;
     private FirebaseFirestore db;
 
@@ -66,11 +75,14 @@ public class UserProfileFragment extends Fragment {
         textCurrentLevel = view.findViewById(R.id.textCurrentLevel);
         textNextLevel = view.findViewById(R.id.textNextLevel);
         levelProgressBar = view.findViewById(R.id.levelProgressBar);
+        activeEquipmentContainer = view.findViewById(R.id.activeEquipmentContainer);
+        inactiveEquipmentContainer = view.findViewById(R.id.inactiveEquipmentContainer);
 
         auth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
 
         loadUserData();
+        loadUserEquipment();
 
         buttonChangePassword.setOnClickListener(v -> showChangePasswordDialog());
 
@@ -91,6 +103,89 @@ public class UserProfileFragment extends Fragment {
                 })
                 .addOnFailureListener(e ->
                         Toast.makeText(getContext(), "Greška pri učitavanju profila.", Toast.LENGTH_SHORT).show());
+    }
+
+    private void loadUserEquipment() {
+        String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        db.collection("users").document(userId).get()
+                .addOnSuccessListener(document -> {
+                    if (document.exists()) {
+                        List<Map<String, Object>> equipmentData = (List<Map<String, Object>>) document.get("equipment");
+                        userEquipmentList = new ArrayList<>();
+                        for (Map<String, Object> data : equipmentData) {
+                            Equipment eq = mapToEquipment(data);
+                            userEquipmentList.add(eq);
+                        }
+                        displayEquipment();
+                    }
+                });
+    }
+
+    private Equipment mapToEquipment(Map<String, Object> data) {
+        Equipment eq = new Equipment();
+        eq.setId(((Number) data.get("id")).longValue());
+        eq.setName((String) data.get("name"));
+        eq.setDescription((String) data.get("description"));
+        eq.setBonus((String) data.get("bonus"));
+        eq.setDuration(((Number) data.get("duration")).intValue());
+        eq.setPrice(((Number) data.get("price")).intValue());
+        eq.setQuantity(((Number) data.get("quantity")).intValue());
+        eq.setActive((Boolean) data.get("active"));
+        eq.setType(Equipment.Type.valueOf((String) data.get("type")));
+        return eq;
+    }
+
+    private void displayEquipment() {
+        activeEquipmentContainer.removeAllViews();
+        inactiveEquipmentContainer.removeAllViews();
+
+        for (Equipment eq : userEquipmentList) {
+            View card = LayoutInflater.from(getContext()).inflate(R.layout.card_user_equipment, null);
+            TextView name = card.findViewById(R.id.textEquipmentName);
+            TextView desc = card.findViewById(R.id.textEquipmentDescription);
+            Button activateButton = card.findViewById(R.id.buttonActivateEquipment);
+
+            name.setText(eq.getName());
+            desc.setText(eq.getDescription());
+
+            if (eq.isActive()) {
+                activateButton.setText("Aktivirana");
+                activateButton.setEnabled(false);
+                activeEquipmentContainer.addView(card);
+            } else {
+                activateButton.setText("Aktiviraj");
+                activateButton.setEnabled(true);
+                inactiveEquipmentContainer.addView(card);
+
+                activateButton.setOnClickListener(v -> {
+                    activateEquipment(eq, card);
+                });
+            }
+        }
+    }
+
+    private void activateEquipment(Equipment eq, View cardView) {
+        String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        DocumentReference userRef = FirebaseFirestore.getInstance().collection("users").document(userId);
+
+        Map<String, Object> updates = new HashMap<>();
+        updates.put("equipment." + eq.getId() + ".active", true);
+
+        userRef.update(updates).addOnSuccessListener(aVoid -> {
+            eq.setActive(true);
+            eq.setQuantity(eq.getQuantity()-1);
+
+            // Premesti iz inactive u active listu
+            inactiveEquipmentContainer.removeView(cardView);
+            Button activateButton = cardView.findViewById(R.id.buttonActivateEquipment);
+            activateButton.setText("Aktivirana");
+            activateButton.setEnabled(false);
+            activeEquipmentContainer.addView(cardView);
+
+            Toast.makeText(getContext(), eq.getName() + " je aktivirana!", Toast.LENGTH_SHORT).show();
+        }).addOnFailureListener(e -> {
+            Toast.makeText(getContext(), "Greška prilikom aktivacije: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+        });
     }
 
     private void bindUserData(@NonNull DocumentSnapshot document, String userId) {
