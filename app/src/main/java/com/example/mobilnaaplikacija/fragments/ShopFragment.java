@@ -19,6 +19,7 @@ import com.example.mobilnaaplikacija.database.SQLiteHelper;
 import com.example.mobilnaaplikacija.model.Equipment;
 
 import java.util.ArrayList;
+import java.util.Locale;
 
 public class ShopFragment extends Fragment {
 
@@ -78,7 +79,8 @@ public class ShopFragment extends Fragment {
                 SQLiteHelper.COLUMN_DESCRIPTION,
                 SQLiteHelper.COLUMN_TYPE,
                 SQLiteHelper.COLUMN_BONUS,
-                SQLiteHelper.COLUMN_DURATION
+                SQLiteHelper.COLUMN_DURATION,
+                SQLiteHelper.COLUMN_PRICE
         };
 
         try (android.database.Cursor cursor = db.query(
@@ -93,9 +95,10 @@ public class ShopFragment extends Fragment {
                 String typeStr = cursor.getString(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_TYPE));
                 String bonus = cursor.getString(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_BONUS));
                 int duration = cursor.getInt(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_DURATION));
+                int price = cursor.getInt(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_PRICE));
 
                 Equipment.Type type = Equipment.Type.valueOf(typeStr);
-                equipmentList.add(new Equipment(id, name, description, type, bonus, duration));
+                equipmentList.add(new Equipment(id, name, description, type, bonus, duration, price));
             }
         }
 

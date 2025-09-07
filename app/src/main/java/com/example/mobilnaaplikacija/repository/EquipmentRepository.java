@@ -76,8 +76,9 @@ public class EquipmentRepository {
                 Equipment.Type type = Equipment.Type.valueOf(typeStr);
                 String bonus = cursor.getString(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_BONUS));
                 int duration = cursor.getInt(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_DURATION));
+                int price = cursor.getInt(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_PRICE));
 
-                Equipment equipment = new Equipment(id, name, description, type, bonus, duration);
+                Equipment equipment = new Equipment(id, name, description, type, bonus, duration, price);
                 equipmentList.add(equipment);
             } while (cursor.moveToNext());
             cursor.close();
@@ -101,10 +102,11 @@ public class EquipmentRepository {
             Equipment.Type type = Equipment.Type.valueOf(typeStr);
             String bonus = cursor.getString(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_BONUS));
             int duration = cursor.getInt(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_DURATION));
+            int price = cursor.getInt(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_PRICE));
 
             cursor.close();
             db.close();
-            return new Equipment(id, name, description, type, bonus, duration);
+            return new Equipment(id, name, description, type, bonus, duration, price);
         }
 
         if (cursor != null) cursor.close();

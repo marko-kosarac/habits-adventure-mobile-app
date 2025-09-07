@@ -41,7 +41,7 @@ public class EquipmentListAdapter extends RecyclerView.Adapter<EquipmentListAdap
 
         holder.textName.setText(item.getName());
         holder.textDescription.setText(item.getDescription());
-        holder.textPrice.setText("Cena: " + item.getBonus()); // Ako cena bude int, promeni tip u Equipment
+        holder.textPrice.setText("Cena: " + item.getPrice() + " gold");
 
         holder.buttonBuy.setOnClickListener(v -> {
             String quantityText = holder.editQuantity.getText().toString();
@@ -50,8 +50,10 @@ public class EquipmentListAdapter extends RecyclerView.Adapter<EquipmentListAdap
                 return;
             }
             int quantity = Integer.parseInt(quantityText);
-            // Ovde ide logika za kupovinu
-            Toast.makeText(context, "Kupljeno " + quantity + "x " + item.getName(), Toast.LENGTH_SHORT).show();
+            Toast.makeText(context,
+                    "Kupljeno " + quantity + "x " + item.getName() +
+                            " za " + (quantity * item.getPrice()) + " gold",
+                    Toast.LENGTH_SHORT).show();
         });
     }
 
