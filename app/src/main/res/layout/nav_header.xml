@@ -10,14 +10,12 @@
     <de.hdodenhof.circleimageview.CircleImageView
         android:id="@+id/nav_header_avatar"
         android:layout_width="80dp"
-        android:layout_height="80dp"
-        android:src="@drawable/avatar4" />
+        android:layout_height="80dp" />
 
     <TextView
         android:id="@+id/nav_header_name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Ime Prezime"
         android:textColor="@android:color/white"
         android:textSize="18sp"
         android:textStyle="bold"

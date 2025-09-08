@@ -1,8 +1,13 @@
 package com.example.mobilnaaplikacija;
 
+import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.View;
+import android.widget.ImageView;
+import android.widget.TextView;
 
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.ActionBarDrawerToggle;
@@ -16,20 +21,24 @@ import androidx.navigation.ui.NavigationUI;
 
 import com.example.mobilnaaplikacija.databinding.ActivityMainBinding;
 import com.google.android.material.navigation.NavigationView;
+import com.google.firebase.analytics.FirebaseAnalytics;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.HashSet;
 import java.util.Set;
+
+import de.hdodenhof.circleimageview.CircleImageView;
 
 public class MainActivity extends AppCompatActivity {
 
     private ActivityMainBinding binding;
     private AppBarConfiguration appBarConfiguration;
     private NavController navController;
-    private ActionBar actionBar;
     private AppBarConfiguration mAppBarConfiguration;
     private Set<Integer> topLevelDestinations = new HashSet<>();
 
-    private ActionBarDrawerToggle actionBarDrawerToggle;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -39,9 +48,12 @@ public class MainActivity extends AppCompatActivity {
 
         Toolbar toolbar = binding.appBarMain.toolbar;
         setSupportActionBar(toolbar);
+        toolbar.setTitleTextColor(Color.WHITE);
 
         DrawerLayout drawer = binding.drawerLayout;
         NavigationView navigationView = binding.navView;
+
+        updateDrawerHeader();
 
         topLevelDestinations.add(R.id.action_settings);
         navController = Navigation.findNavController(this, R.id.nav_host_fragment_content_main);
@@ -52,11 +64,12 @@ public class MainActivity extends AppCompatActivity {
         // Top-level destinacije (hamburger se prikazuje za ove)
         mAppBarConfiguration = new AppBarConfiguration.Builder(
                 R.id.homeFragment,
-                R.id.mainFragment,   // dodaj mainFragment kao top-level
+                R.id.mainFragment,
                 R.id.nav_profile,
                 R.id.profile_page,
                 R.id.nav_register,
-                R.id.statistics_page
+                R.id.statistics_page,
+                R.id.shopFragment
         ).setOpenableLayout(drawer).build();
 
         // Poveži Toolbar i Drawer sa NavController-om
@@ -79,9 +92,22 @@ public class MainActivity extends AppCompatActivity {
             }
             else if (id == R.id.nav_statistics){
                 navController.navigate((R.id.statistics_page));
-            }else if (id == R.id.nav_logout) {
+            }
+            else if( id == R.id.nav_shop){
+                navController.navigate((R.id.shopFragment));
+
+            }else if (id == R.id.nav_logout)
+            {
+                FirebaseAuth.getInstance().signOut(); // stvarni logout
+
                 navigationView.getMenu().clear();
                 navigationView.inflateMenu(R.menu.logged_out_drawer);
+                View header_blanc = navigationView.getHeaderView(0);
+                TextView name_blanc = header_blanc.findViewById(R.id.nav_header_name);
+                ImageView avatar_blanc = header_blanc.findViewById(R.id.nav_header_avatar);
+                name_blanc.setVisibility(View.GONE);
+                avatar_blanc.setImageResource(R.drawable.blank_picture);
+
                 navController.navigate(R.id.homeFragment);
             }
 
@@ -91,26 +117,56 @@ public class MainActivity extends AppCompatActivity {
         hideSystemUI();
     }
 
-    public void onLoginSuccess() {
-        // Zamena menu-a sa main drawer
-        binding.navView.getMenu().clear();
-        binding.navView.inflateMenu(R.menu.main_drawer);
-
-        // Navigacija na HomePageFragment
-        navController.navigate(R.id.mainFragment,
-                null,
-                new androidx.navigation.NavOptions.Builder()
-                        .setPopUpTo(R.id.homeFragment, true)
-                        .build()
-        );
+    @Override
+    protected void onResume() {
+        super.onResume();
+        updateDrawerHeader();
     }
+
+    public void updateDrawerHeader() {
+        NavigationView navigationView = binding.navView;
+        View headerView = navigationView.getHeaderView(0);
+        CircleImageView avatarView = headerView.findViewById(R.id.nav_header_avatar);
+        TextView nameView = headerView.findViewById(R.id.nav_header_name);
+
+        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+        if (currentUser != null) {
+            String uid = currentUser.getUid();
+
+            FirebaseFirestore db = FirebaseFirestore.getInstance();
+            db.collection("users").document(uid).get()
+                    .addOnSuccessListener(documentSnapshot -> {
+                        if (documentSnapshot.exists()) {
+                            String username = documentSnapshot.getString("username");
+                            Long avatarId = documentSnapshot.getLong("avatarId");
+
+                            nameView.setVisibility(View.VISIBLE);
+                            nameView.setText(username != null ? username : "Korisnik");
+
+                            int avatarResId = R.drawable.avatar1; // default
+                            if (avatarId != null) {
+                                switch (avatarId.intValue()) {
+                                    case 0: avatarResId = R.drawable.avatar1; break;
+                                    case 1: avatarResId = R.drawable.avatar2; break;
+                                    case 2: avatarResId = R.drawable.avatar3; break;
+                                    case 3: avatarResId = R.drawable.avatar4; break;
+                                    case 4: avatarResId = R.drawable.avatar5; break;
+                                }
+                            }
+                            avatarView.setImageResource(avatarResId);
+                        }
+                    })
+                    .addOnFailureListener(e -> Log.e("DrawerHeader", "Greška pri učitavanju headera", e));
+        } else {
+            // --- default za izlogovanog korisnika ---
+            nameView.setVisibility(View.GONE);
+            avatarView.setImageResource(R.drawable.blank_picture);
+        }
+    }
+
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // menu.clear();
-        // koristimo ako je nasa arhitekrura takva da imamo jednu aktivnost
-        // i vise fragmentaa gde svaki od njih ima svoj menu unutar toolbar-a
-
-        // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.main_menu, menu);
         return true;
     }
@@ -126,7 +182,6 @@ public class MainActivity extends AppCompatActivity {
         NavigationView navView = findViewById(R.id.nav_view);
         navView.getMenu().clear();
         navView.inflateMenu(R.menu.main_drawer);
-
     }
 
     private void hideSystemUI() {

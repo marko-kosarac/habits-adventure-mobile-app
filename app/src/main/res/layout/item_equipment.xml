@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/shop_item_card"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="8dp"
+    app:cardCornerRadius="12dp"
+    app:cardElevation="4dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <!-- Naziv opreme -->
+        <TextView
+            android:id="@+id/shop_item_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Naziv Opreme"
+            android:textSize="18sp"
+            android:textStyle="bold"/>
+
+        <!-- Opis opreme -->
+        <TextView
+            android:id="@+id/shop_item_description"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Opis opreme"
+            android:textSize="14sp"
+            android:layout_marginTop="4dp"/>
+
+        <!-- Cena opreme -->
+        <TextView
+            android:id="@+id/shop_item_price"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Cena: 100 novčića"
+            android:textSize="14sp"
+            android:layout_marginTop="4dp"/>
+
+        <!-- LinearLayout za količinu i dugme -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="8dp"
+            android:gravity="center_vertical">
+
+            <!-- Polje za količinu -->
+            <EditText
+                android:id="@+id/shop_item_quantity"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:hint="Količina"
+                android:inputType="numberDecimal"
+                android:padding="4dp" />
+
+            <!-- Dugme za kupovinu -->
+            <Button
+                android:id="@+id/shop_item_buy"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Kupi"
+                android:layout_marginStart="16dp"/>
+        </LinearLayout>
+
+    </LinearLayout>
+
+</androidx.cardview.widget.CardView>

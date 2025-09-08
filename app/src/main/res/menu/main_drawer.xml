@@ -3,31 +3,38 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:showIn="navigation_view">
 
+    <!-- SHOP sekcija -->
+    <group android:id="@+id/nav_shop_group">
+        <item
+            android:id="@+id/nav_shop"
+            android:icon="@drawable/ic_shop"
+            android:title="Prodavnica" />
+    </group>
+
+    <!-- Glavni meni -->
     <group android:checkableBehavior="single">
-        <!-- Početna stranica -->
         <item
             android:id="@+id/nav_home"
             android:icon="@drawable/ic_home"
             android:title="Početna" />
 
-        <!-- Profil korisnika -->
         <item
             android:id="@+id/nav_profile"
             android:icon="@drawable/ic_person"
             android:title="Profil" />
 
-        <!-- Statistika korisnika -->
         <item
             android:id="@+id/nav_statistics"
             android:icon="@drawable/ic_bar_chart"
             android:title="Statistika" />
     </group>
 
-    <!-- Odjava na dnu -->
+    <!-- Odjava -->
     <group android:id="@+id/nav_bottom_group">
         <item
             android:id="@+id/nav_logout"
             android:icon="@drawable/ic_logout"
             android:title="Odjava" />
     </group>
+
 </menu>
