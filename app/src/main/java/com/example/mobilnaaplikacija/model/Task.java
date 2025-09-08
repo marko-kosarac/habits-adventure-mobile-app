@@ -1,6 +1,11 @@
 package com.example.mobilnaaplikacija.model;
 
-public class Task {
+import android.os.Parcel;
+import android.os.Parcelable;
+
+import androidx.annotation.NonNull;
+
+public class Task implements Parcelable {
     public Long Id;
     public String Name;
     public String Description;
@@ -9,12 +14,14 @@ public class Task {
     public String StartDate;
     public String EndDate;
     public String Time;
-    public Boolean isWholeDay;
+    public Boolean IsWholeDay;
     public Integer Interval;
     public String Unit;
     public String Difficulty;
     public String Importance;
     public String Status;
+
+    public Task() {}
 
     public Task(String name, String description, String category, String frequency, String startDate, String endDate, String time, Boolean isWholeDay, Integer interval, String unit, String difficulty, String importance, String status) {
         Name = name;
@@ -24,7 +31,7 @@ public class Task {
         StartDate = startDate;
         EndDate = endDate;
         Time = time;
-        this.isWholeDay = isWholeDay;
+        IsWholeDay = isWholeDay;
         Interval = interval;
         Unit = unit;
         Difficulty = difficulty;
@@ -41,12 +48,29 @@ public class Task {
         StartDate = startDate;
         EndDate = endDate;
         Time = time;
-        this.isWholeDay = isWholeDay;
+        IsWholeDay = isWholeDay;
         Interval = interval;
         Unit = unit;
         Difficulty = difficulty;
         Importance = importance;
         Status = status;
+    }
+
+    protected Task(Parcel in) {
+        Id = in.readLong();
+        Name = in.readString();
+        Description = in.readString();
+        Category = in.readString();
+        Frequency = in.readString();
+        StartDate = in.readString();
+        EndDate = in.readString();
+        Time = in.readString();
+        IsWholeDay = in.readBoolean();
+        Interval = in.readInt();
+        Unit = in.readString();
+        Difficulty = in.readString();
+        Importance = in.readString();
+        Status = in.readString();
     }
 
     public Long getId() {
@@ -114,11 +138,11 @@ public class Task {
     }
 
     public Boolean getWholeDay() {
-        return isWholeDay;
+        return IsWholeDay;
     }
 
     public void setWholeDay(Boolean wholeDay) {
-        isWholeDay = wholeDay;
+        IsWholeDay = wholeDay;
     }
 
     public Integer getInterval() {
@@ -152,4 +176,48 @@ public class Task {
     public void setImportance(String importance) {
         Importance = importance;
     }
+
+    public String getStatus() {
+        return Status;
+    }
+
+    public void setStatus(String status) {
+        Status = status;
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(@NonNull Parcel parcel, int i) {
+        parcel.writeLong(Id);
+        parcel.writeString(Name);
+        parcel.writeString(Description);
+        parcel.writeString(Category);
+        parcel.writeString(Frequency);
+        parcel.writeString(StartDate);
+        parcel.writeString(EndDate);
+        parcel.writeString(Time);
+        parcel.writeBoolean(IsWholeDay);
+        parcel.writeInt(Interval);
+        parcel.writeString(Unit);
+        parcel.writeString(Difficulty);
+        parcel.writeString(Importance);
+        parcel.writeString(Status);
+    }
+
+
+    public static final Creator<Task> CREATOR = new Creator<Task>() {
+        @Override
+        public Task createFromParcel(Parcel in) {
+            return new Task(in);
+        }
+
+        @Override
+        public Task[] newArray(int size) {
+            return new Task[size];
+        }
+    };
 }
