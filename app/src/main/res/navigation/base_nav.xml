@@ -24,7 +24,13 @@
         android:id="@+id/mainFragment"
         android:name="com.example.mobilnaaplikacija.fragments.HomePageFragment"
         android:label="Početna"
-        tools:layout="@layout/fragment_home_page" />
+        tools:layout="@layout/fragment_home_page">
+
+        <action
+            android:id="@+id/action_homePageFragment_to_addTaskFragment"
+            app:destination="@id/addTaskFragment" />
+    </fragment>
+
     <fragment
         android:id="@+id/profile_page"
         android:name="com.example.mobilnaaplikacija.fragments.UserProfileFragment"
@@ -44,4 +50,10 @@
         android:name="com.example.mobilnaaplikacija.fragments.StatisticsFragment"
         android:label="Statistika"
         tools:layout="@layout/fragment_statistics" />
+
+    <fragment
+        android:id="@+id/addTaskFragment"
+        android:name="com.example.mobilnaaplikacija.fragments.AddTaskFragment"
+        android:label="Dodaj zadatak"
+        tools:layout="@layout/fragment_add_task" />
 </navigation>

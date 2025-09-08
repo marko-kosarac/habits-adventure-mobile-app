@@ -32,15 +32,15 @@
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:layout_marginBottom="16dp"
-            android:gravity="">
+            android:gravity="center">
 
             <!-- Task category -->
             <Spinner
                 android:id="@+id/spinnerCategory"
-                android:layout_width="wrap_content"
-                android:layout_height="40dp"
+                android:layout_width="150dp"
+                android:layout_height="match_parent"
                 android:spinnerMode="dropdown"
-                android:layout_marginRight="20dp"/>
+                android:layout_marginRight="0dp"/>
 
             <!-- Add category -->
             <Button
@@ -177,6 +177,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
+            android:layout_marginTop="16dp"
+
             android:text="Dodaj zadatak"
             android:backgroundTint="#2196F3"/>
     </LinearLayout>

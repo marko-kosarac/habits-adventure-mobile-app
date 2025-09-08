@@ -19,10 +19,12 @@ import android.widget.Toast;
 
 import com.example.mobilnaaplikacija.R;
 import com.example.mobilnaaplikacija.databinding.FragmentAddTaskBinding;
+import com.example.mobilnaaplikacija.model.Task;
 import com.google.android.material.textfield.TextInputEditText;
 
 import java.sql.Time;
 import java.util.Calendar;
+import java.util.UUID;
 
 public class AddTaskFragment extends Fragment {
 
@@ -143,19 +145,29 @@ public class AddTaskFragment extends Fragment {
 
     private void setupAddTaskButton(){
         binding.btnAddTask.setOnClickListener(view -> {
-            String taskName = binding.etTaskName.getText().toString().trim();
+            String name = binding.etTaskName.getText().toString().trim();
+            String description = binding.etTaskDescription.getText().toString().trim();
             String category = binding.spinnerCategory.getSelectedItem().toString();
+            Boolean isRepeating = binding.rbRepeat.isChecked();
+            Boolean isOneTime = binding.rbOneTime.isChecked();
+            String frequency = "";
+            if(isRepeating){
+                frequency = "PONAVLJAJUCI";
+            } else if(isOneTime){
+                frequency = "JEDNOKRATAN";
+            }
             String startDate = binding.etStartDate.getText().toString().trim();
             String endDate = binding.etEndDate.getText().toString().trim();
             String time = binding.etTime.getText().toString().trim();
             Boolean isWholeDay = binding.rbWholeDay.isChecked();
-            Boolean isRepeating = binding.rbRepeat.isChecked();
-            Boolean isOneTime = binding.rbOneTime.isChecked();
+            Integer interval = null;
+            String unit = "";
             String difficulty = binding.spinnerDifficulty.getSelectedItem().toString();
             String importance = binding.spinnerImportance.getSelectedItem().toString();
+            String status = "AKTIVAN";
 
             //Validation
-            if(taskName.isEmpty()) {
+            if(name.isEmpty()) {
                 Toast.makeText(requireContext(), "Unesite naziv zadatka!", Toast.LENGTH_SHORT).show();
                 return;
             }
@@ -180,7 +192,8 @@ public class AddTaskFragment extends Fragment {
                 return;
             }
 
-            if (isRepeating == false && isOneTime == false) {
+            if ((isRepeating == false && isOneTime == false)
+                    || (isRepeating == null && isOneTime == null)) {
                 Toast.makeText(requireContext(), "Izaberite jednokratan ili ponavljajući zadatak!", Toast.LENGTH_SHORT).show();
                 return;
             }
@@ -195,22 +208,30 @@ public class AddTaskFragment extends Fragment {
                 return;
             }
 
-            if(RECURRING_TASK){
-                String unit = binding.spinnerReccuringUnit.getSelectedItem().toString();
-                String interval = binding.etReccuringNumber.getText().toString();
+            if(frequency.equals("PONAVLJAJUCI")){
+                unit = binding.spinnerReccuringUnit.getSelectedItem().toString();
+                interval = Integer.valueOf(binding.etReccuringNumber.getText().toString());
 
                 if(unit.isEmpty()) {
                     Toast.makeText(requireContext(), "Unesite jedinicu zadatka!", Toast.LENGTH_SHORT).show();
                     return;
                 }
 
-                if(interval.isEmpty()) {
+                if((interval.toString()).isEmpty()) {
                     Toast.makeText(requireContext(), "Unesite broj ponavljanja zadatka!", Toast.LENGTH_SHORT).show();
                     return;
                 }
             }
 
+            Task task = new Task(0L, name, description, category, frequency, startDate, endDate, time, isWholeDay, interval, unit, difficulty, importance, status);
+            Bundle bundle = new Bundle();
+            bundle.putParcelable("task", task);
+
+            getParentFragmentManager().setFragmentResult("taskAdded", bundle);
+
             Toast.makeText(requireContext(), "Zadatak dodan!", Toast.LENGTH_SHORT).show();
+
+            getParentFragmentManager().popBackStack();
         });
     }
 
