@@ -43,8 +43,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="bottom|center"
             android:layout_marginBottom="16dp"
-            android:backgroundTint="#2196F3"
-            android:shadowColor="@color/black"
+            android:backgroundTint="@color/button"
             android:text="Dodaj zadatak"/>
 
     </LinearLayout>
