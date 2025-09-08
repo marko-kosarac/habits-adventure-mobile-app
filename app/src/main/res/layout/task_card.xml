@@ -5,19 +5,19 @@
     android:layout_width="match_parent"
     android:layout_height="145dp"
     android:layout_marginVertical="10dp"
-    android:padding="10dp"
+    android:padding="16dp"
     android:visibility="visible"
     app:cardBackgroundColor="#FDFDFD"
     app:cardCornerRadius="12dp"
     app:cardElevation="4dp">
 
     <LinearLayout
-        android:layout_width="match_parent"
+        android:layout_width="401dp"
         android:layout_height="match_parent"
         android:orientation="horizontal">
 
         <LinearLayout
-            android:layout_width="310dp"
+            android:layout_width="280dp"
             android:layout_height="match_parent"
             android:layout_marginLeft="16dp"
             android:orientation="vertical">
@@ -25,7 +25,7 @@
             <TextView
                 android:id="@+id/tvTaskName"
                 android:layout_width="match_parent"
-                android:layout_height="30dp"
+                android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
                 android:text="Naziv zadatka"
                 android:textSize="20sp"
@@ -35,32 +35,32 @@
                 android:id="@+id/tvTaskCategory"
                 android:layout_width="match_parent"
                 android:layout_height="30dp"
-                android:layout_marginVertical="8dp"
+                android:layout_marginTop="14dp"
                 android:text="Kategorija"
                 android:textColor="#2196F3"
                 android:textSize="14sp"
                 android:textStyle="italic" />
 
         </LinearLayout>
+
         <LinearLayout
-            android:layout_width="match_parent"
+            android:layout_width="95dp"
             android:layout_height="match_parent"
-            android:orientation="vertical"
             android:layout_marginRight="16dp"
-            >
+            android:gravity="right|fill_vertical"
+            android:orientation="vertical">
+
             <CheckBox
                 android:id="@+id/cbIsTaskDone"
                 android:layout_width="50dp"
                 android:layout_height="50dp"
-                android:layout_gravity="top|right"
                 android:layout_marginTop="10dp"
                 android:clickable="false" />
 
             <ImageButton
                 android:layout_width="50dp"
                 android:layout_height="50dp"
-                android:layout_marginTop="15dp"
-                android:layout_marginLeft="18dp"
+                android:layout_marginTop="20dp"
                 android:background="@drawable/round_border_background"
                 app:srcCompat="@drawable/ic_edit" />
         </LinearLayout>
