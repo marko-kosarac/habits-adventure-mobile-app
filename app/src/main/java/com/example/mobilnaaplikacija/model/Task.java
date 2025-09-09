@@ -7,223 +7,146 @@ import android.provider.ContactsContract;
 import androidx.annotation.NonNull;
 
 public class Task implements Parcelable {
-    public Long Id;
-    public String Name;
-    public String Description;
-    public String Category;
-    public FrequencyType Frequency;
-    public String StartDate;
-    public String EndDate;
-    public String Time;
-    public Boolean IsWholeDay;
-    public Integer Interval;
-    public UnitType Unit;
-    public DifficultyType Difficulty;
-    public ImportanceType Importance;
-    public StatusType Status;
+    public Long id;
+    public String name;
+    public String description;
+    public String category;
+    public FrequencyType frequency;
+    public String startDate;
+    public String endDate;
+    public String time;
+    public Boolean isWholeDay;
+    public Integer interval;
+    public UnitType unit;
+    public DifficultyType difficulty;
+    public ImportanceType importance;
+    public StatusType status;
 
     public Task() {}
 
     public Task(String name, String description, String category, FrequencyType frequency, String startDate, String endDate, String time, Boolean isWholeDay, Integer interval, UnitType unit, DifficultyType difficulty, ImportanceType importance, StatusType status) {
-        Name = name;
-        Description = description;
-        Category = category;
-        Frequency = frequency;
-        StartDate = startDate;
-        EndDate = endDate;
-        Time = time;
-        IsWholeDay = isWholeDay;
-        Interval = interval;
-        Unit = unit;
-        Difficulty = difficulty;
-        Importance = importance;
-        Status = status;
+        this.name = name;
+        this.description = description;
+        this.category = category;
+        this.frequency = frequency;
+        this.startDate = startDate;
+        this.endDate = endDate;
+        this.time = time;
+        this.isWholeDay = isWholeDay;
+        this.interval = interval;
+        this.unit = unit;
+        this.difficulty = difficulty;
+        this.importance = importance;
+        this.status = status;
     }
 
     public Task(Long id, String name, String description, String category, FrequencyType frequency, String startDate, String endDate, String time, Boolean isWholeDay, Integer interval, UnitType unit, DifficultyType difficulty, ImportanceType importance, StatusType status) {
-        Id = id;
-        Name = name;
-        Description = description;
-        Category = category;
-        Frequency = frequency;
-        StartDate = startDate;
-        EndDate = endDate;
-        Time = time;
-        IsWholeDay = isWholeDay;
-        Interval = interval;
-        Unit = unit;
-        Difficulty = difficulty;
-        Importance = importance;
-        Status = status;
+        this.id = id;
+        this.name = name;
+        this.description = description;
+        this.category = category;
+        this.frequency = frequency;
+        this.startDate = startDate;
+        this.endDate = endDate;
+        this.time = time;
+        this.isWholeDay = isWholeDay;
+        this.interval = interval;
+        this.unit = unit;
+        this.difficulty = difficulty;
+        this.importance = importance;
+        this.status = status;
     }
 
     protected Task(Parcel in) {
-        Id = in.readLong();
-        Name = in.readString();
-        Description = in.readString();
-        Category = in.readString();
+        id = in.readLong();
+        name = in.readString();
+        description = in.readString();
+        category = in.readString();
         String freqName = in.readString();
-        Frequency = freqName != null ? FrequencyType.valueOf(freqName) : null;
-        StartDate = in.readString();
-        EndDate = in.readString();
-        Time = in.readString();
-        IsWholeDay = in.readBoolean();
-        Interval = in.readInt();
+        frequency = freqName != null ? FrequencyType.valueOf(freqName) : null;
+        startDate = in.readString();
+        endDate = in.readString();
+        time = in.readString();
+        isWholeDay = in.readBoolean();
+        interval = in.readInt();
         String unitName = in.readString();
-        Unit = unitName != null ? UnitType.valueOf(unitName) : null;
+        unit = unitName != null ? UnitType.valueOf(unitName) : null;
         String diffName = in.readString();
-        Difficulty = diffName != null ? DifficultyType.valueOf(diffName) : null;
+        difficulty = diffName != null ? DifficultyType.valueOf(diffName) : null;
         String impName = in.readString();
-        Importance = impName != null ? ImportanceType.valueOf(impName) : null;
+        importance = impName != null ? ImportanceType.valueOf(impName) : null;
         String statusName = in.readString();
-        Status = statusName != null ? StatusType.valueOf(statusName) : null;
+        status = statusName != null ? StatusType.valueOf(statusName) : null;
     }
 
-    public Long getId() {
-        return Id;
-    }
+    // Getters and setters (with lowercase fields)
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
 
-    public void setId(Long id) {
-        Id = id;
-    }
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
 
-    public String getName() {
-        return Name;
-    }
+    public String getDescription() { return description; }
+    public void setDescription(String description) { this.description = description; }
 
-    public void setName(String name) {
-        Name = name;
-    }
+    public String getCategory() { return category; }
+    public void setCategory(String category) { this.category = category; }
 
-    public String getDescription() {
-        return Description;
-    }
+    public FrequencyType getFrequency() { return frequency; }
+    public void setFrequency(FrequencyType frequency) { this.frequency = frequency; }
 
-    public void setDescription(String description) {
-        Description = description;
-    }
+    public String getStartDate() { return startDate; }
+    public void setStartDate(String startDate) { this.startDate = startDate; }
 
-    public String getCategory() {
-        return Category;
-    }
+    public String getEndDate() { return endDate; }
+    public void setEndDate(String endDate) { this.endDate = endDate; }
 
-    public void setCategory(String category) {
-        Category = category;
-    }
+    public String getTime() { return time; }
+    public void setTime(String time) { this.time = time; }
 
-    public FrequencyType getFrequency() {
-        return Frequency;
-    }
+    public Boolean getWholeDay() { return isWholeDay; }
+    public void setWholeDay(Boolean wholeDay) { isWholeDay = wholeDay; }
 
-    public void setFrequency(FrequencyType frequency) {
-        Frequency = frequency;
-    }
+    public Integer getInterval() { return interval; }
+    public void setInterval(Integer interval) { this.interval = interval; }
 
-    public String getStartDate() {
-        return StartDate;
-    }
+    public UnitType getUnit() { return unit; }
+    public void setUnit(UnitType unit) { this.unit = unit; }
 
-    public void setStartDate(String startDate) {
-        StartDate = startDate;
-    }
+    public DifficultyType getDifficulty() { return difficulty; }
+    public void setDifficulty(DifficultyType difficulty) { this.difficulty = difficulty; }
 
-    public String getEndDate() {
-        return EndDate;
-    }
+    public ImportanceType getImportance() { return importance; }
+    public void setImportance(ImportanceType importance) { this.importance = importance; }
 
-    public void setEndDate(String endDate) {
-        EndDate = endDate;
-    }
-
-    public String getTime() {
-        return Time;
-    }
-
-    public void setTime(String time) {
-        Time = time;
-    }
-
-    public Boolean getWholeDay() {
-        return IsWholeDay;
-    }
-
-    public void setWholeDay(Boolean wholeDay) {
-        IsWholeDay = wholeDay;
-    }
-
-    public Integer getInterval() {
-        return Interval;
-    }
-
-    public void setInterval(Integer interval) {
-        Interval = interval;
-    }
-
-    public UnitType getUnit() {
-        return Unit;
-    }
-
-    public void setUnit(UnitType unit) {
-        Unit = unit;
-    }
-
-    public DifficultyType getDifficulty() {
-        return Difficulty;
-    }
-
-    public void setDifficulty(DifficultyType difficulty) {
-        Difficulty = difficulty;
-    }
-
-    public ImportanceType getImportance() {
-        return Importance;
-    }
-
-    public void setImportance(ImportanceType importance) {
-        Importance = importance;
-    }
-
-    public StatusType getStatus() {
-        return Status;
-    }
-
-    public void setStatus(StatusType status) {
-        Status = status;
-    }
+    public StatusType getStatus() { return status; }
+    public void setStatus(StatusType status) { this.status = status; }
 
     @Override
-    public int describeContents() {
-        return 0;
-    }
+    public int describeContents() { return 0; }
 
     @Override
     public void writeToParcel(@NonNull Parcel parcel, int i) {
-        parcel.writeLong(Id != null ? Id : -1);
-        parcel.writeString(Name);
-        parcel.writeString(Description);
-        parcel.writeString(Category);
-        parcel.writeString(Frequency != null ? Frequency.name() : null);
-        parcel.writeString(StartDate);
-        parcel.writeString(EndDate);
-        parcel.writeString(Time);
-        parcel.writeBoolean(IsWholeDay);
-        parcel.writeInt(Interval != null ? Interval : 0);
-        parcel.writeString(Unit != null ? Unit.name() : null);
-        parcel.writeString(Difficulty != null ? Difficulty.name() : null);
-        parcel.writeString(Importance != null ? Importance.name() : null);
-        parcel.writeString(Status != null ? Status.name() : null);
+        parcel.writeLong(id != null ? id : -1);
+        parcel.writeString(name);
+        parcel.writeString(description);
+        parcel.writeString(category);
+        parcel.writeString(frequency != null ? frequency.name() : null);
+        parcel.writeString(startDate);
+        parcel.writeString(endDate);
+        parcel.writeString(time);
+        parcel.writeBoolean(isWholeDay != null ? isWholeDay : false);
+        parcel.writeInt(interval != null ? interval : 0);
+        parcel.writeString(unit != null ? unit.name() : null);
+        parcel.writeString(difficulty != null ? difficulty.name() : null);
+        parcel.writeString(importance != null ? importance.name() : null);
+        parcel.writeString(status != null ? status.name() : null);
     }
-
 
     public static final Creator<Task> CREATOR = new Creator<Task>() {
         @Override
-        public Task createFromParcel(Parcel in) {
-            return new Task(in);
-        }
-
+        public Task createFromParcel(Parcel in) { return new Task(in); }
         @Override
-        public Task[] newArray(int size) {
-            return new Task[size];
-        }
+        public Task[] newArray(int size) { return new Task[size]; }
     };
 }
