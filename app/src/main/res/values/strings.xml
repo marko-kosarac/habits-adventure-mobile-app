@@ -31,6 +31,20 @@
     <string name="next">Next</string>
     <string name="previous">Previous</string>
 
+    <string name="my_tasks">Moji zadaci</string>
+    <string name="add_task">Dodaj zadatak</string>
+    <string name="task_name">Naziv zadatka</string>
+    <string name="task_category">Kategorija</string>
+    <string name="task_description">Opis (opciono)</string>
+    <string name="add_category">Dodaj kategoriju</string>
+    <string name="task_not_repeatable">Ne ponavlja se</string>
+    <string name="task_repeatable">Ponavlja se</string>
+    <string name="task_start">Počinje</string>
+    <string name="task_end">Završava</string>
+    <string name="task_time">Satnica</string>
+    <string name="task_whole_day">Cjelodnevno</string>
+    <string name="task_recurring_number">Broj ponavljanja</string>
+
     <string name="lorem_ipsum">
         Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam in scelerisque sem. Mauris
         volutpat, dolor id interdum ullamcorper, risus dolor egestas lectus, sit amet mattis purus

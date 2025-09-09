@@ -16,7 +16,7 @@
             android:id="@+id/etTaskName"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Naziv zadatka"
+            android:hint="@string/task_name"
             android:layout_marginBottom="16dp"
             android:layout_marginHorizontal="4dp"/>
 
@@ -25,7 +25,7 @@
             android:id="@+id/etTaskDescription"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Opis (opciono)"
+            android:hint="@string/task_description"
             android:layout_marginBottom="16dp"
             android:layout_marginHorizontal="4dp"/>
 
@@ -51,8 +51,8 @@
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="30dp"
                 android:layout_gravity="end"
-                android:text="Dodaj kategoriju"
-                android:backgroundTint="@color/button"/>
+                android:text="@string/add_category"
+                android:backgroundTint="@color/blueAccent"/>
 
         </LinearLayout>
 
@@ -70,13 +70,13 @@
                 android:layout_width="150dp"
                 android:layout_height="wrap_content"
                 android:layout_marginRight="30dp"
-                android:text="Ne ponavlja se"/>
+                android:text="@string/task_not_repeatable"/>
 
             <RadioButton
                 android:id="@+id/rbRepeat"
                 android:layout_width="150dp"
                 android:layout_height="wrap_content"
-                android:text="Ponavlja se" />
+                android:text="@string/task_repeatable" />
 
         </RadioGroup>
 
@@ -93,7 +93,7 @@
                 android:layout_width="150dp"
                 android:layout_height="wrap_content"
                 android:inputType="date"
-                android:hint="Počinje"
+                android:hint="@string/task_start"
                 android:layout_marginRight="30dp"/>
 
             <!-- Task end date -->
@@ -102,7 +102,7 @@
                 android:layout_width="150dp"
                 android:layout_height="wrap_content"
                 android:inputType="date"
-                android:hint="Završava"/>
+                android:hint="@string/task_end"/>
 
         </LinearLayout>
 
@@ -119,14 +119,14 @@
                 android:layout_width="150dp"
                 android:layout_height="wrap_content"
                 android:inputType="time"
-                android:hint="Satnica"
+                android:hint="@string/task_time"
                 android:layout_marginRight="30dp"/>
 
             <RadioButton
                 android:id="@+id/rbWholeDay"
                 android:layout_width="150dp"
                 android:layout_height="wrap_content"
-                android:hint="Cjelodnevno"/>
+                android:hint="@string/task_whole_day"/>
 
         </LinearLayout>
 
@@ -146,11 +146,11 @@
                 android:layout_height="wrap_content"
                 android:inputType="number"
                 android:layout_marginRight="30dp"
-                android:hint="Broj ponavljanja"/>
+                android:hint="@string/task_recurring_number"/>
 
             <!-- Task unit -->
             <Spinner
-                android:id="@+id/spinnerReccuringUnit"
+                android:id="@+id/spinnerRecurringUnit"
                 android:layout_width="150dp"
                 android:layout_height="40dp"
                 android:spinnerMode="dropdown"/>
@@ -182,8 +182,8 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:layout_marginTop="16dp"
-            android:backgroundTint="@color/button"
-            android:text="Dodaj zadatak" />
+            android:backgroundTint="@color/blueAccent"
+            android:text="@string/add_task" />
     </LinearLayout>
 
 </ScrollView>

@@ -26,7 +26,7 @@
                 android:id="@+id/tvTaskName"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Naziv zadatka"
+                android:text="@string/task_name"
                 android:textSize="20sp"
                 android:textStyle="bold"
                 android:textColor="@color/black"/>
@@ -36,8 +36,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="30dp"
                 android:layout_marginTop="5dp"
-                android:text="Kategorija"
-                android:textColor="#2196F3"
+                android:text="@string/task_category"
+                android:textColor="@color/blueAccent"
                 android:textSize="12sp"
                 android:textStyle="italic" />
 

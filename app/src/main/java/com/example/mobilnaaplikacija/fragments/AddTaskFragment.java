@@ -59,7 +59,7 @@ public class AddTaskFragment extends Fragment {
         String[] unitTypes = {"Dan", "Sedmica", "Mjesec", "Godina"};
         ArrayAdapter<String> unitAdapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_spinner_dropdown_item, unitTypes);
         unitAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        binding.spinnerReccuringUnit.setAdapter(unitAdapter);
+        binding.spinnerRecurringUnit.setAdapter(unitAdapter);
 
         String[] difficultyTypes = {"Veoma lak", "Lak", "Težak", "Ekstremno težak"};
         ArrayAdapter<String> difficultyAdapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_spinner_dropdown_item, difficultyTypes);
@@ -141,7 +141,7 @@ public class AddTaskFragment extends Fragment {
             } else if (checkedId == R.id.rbOneTime){
                 binding.layoutRecurringOptions.setVisibility(View.GONE);
                 binding.etReccuringNumber.setText("");
-                binding.spinnerReccuringUnit.setSelection(0);
+                binding.spinnerRecurringUnit.setSelection(0);
             }
         });
     }
@@ -216,7 +216,7 @@ public class AddTaskFragment extends Fragment {
             }
 
             if(frequency.equals(FrequencyType.PONAVLJAJUCI)){
-                String unitStr = binding.spinnerReccuringUnit.getSelectedItem().toString().toUpperCase(Locale.ROOT);
+                String unitStr = binding.spinnerRecurringUnit.getSelectedItem().toString().toUpperCase(Locale.ROOT);
                 unit = UnitType.valueOf(unitStr);
                 interval = Integer.valueOf(binding.etReccuringNumber.getText().toString());
 

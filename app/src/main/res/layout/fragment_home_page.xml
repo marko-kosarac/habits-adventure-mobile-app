@@ -14,10 +14,10 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:text="Moji zadaci"
+            android:text="@string/my_tasks"
             android:textSize="30dp"
             android:textStyle="bold"
-            android:textColor="@color/yellow"/>
+            android:textColor="@color/yellowAccent"/>
 
     </FrameLayout>
 
@@ -44,8 +44,8 @@
             android:layout_height="wrap_content"
             android:layout_gravity="bottom|center"
             android:layout_marginBottom="16dp"
-            android:backgroundTint="@color/button"
-            android:text="Dodaj zadatak"/>
+            android:backgroundTint="@color/blueAccent"
+            android:text="@string/add_task"/>
 
     </LinearLayout>
 
