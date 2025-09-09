@@ -114,15 +114,21 @@ public class UserProfileFragment extends Fragment {
                 .addOnSuccessListener(document -> {
                     if (document.exists()) {
                         List<Map<String, Object>> equipmentData = (List<Map<String, Object>>) document.get("equipment");
+
                         userEquipmentList = new ArrayList<>();
-                        for (Map<String, Object> data : equipmentData) {
-                            Equipment eq = mapToEquipment(data);
-                            userEquipmentList.add(eq);
+
+                        if (equipmentData != null) {  // ✅ zaštita od null-a
+                            for (Map<String, Object> data : equipmentData) {
+                                Equipment eq = mapToEquipment(data);
+                                userEquipmentList.add(eq);
+                            }
                         }
+
                         displayEquipment();
                     }
                 });
     }
+
 
     private Equipment mapToEquipment(Map<String, Object> data) {
         Equipment eq = new Equipment();
