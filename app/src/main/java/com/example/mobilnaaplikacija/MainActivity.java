@@ -58,8 +58,13 @@ public class MainActivity extends AppCompatActivity {
         topLevelDestinations.add(R.id.action_settings);
         navController = Navigation.findNavController(this, R.id.nav_host_fragment_content_main);
 
-        // Početni menu
-        navigationView.inflateMenu(R.menu.logged_out_drawer);
+        if (FirebaseAuth.getInstance().getCurrentUser() == null) {
+            navigationView.inflateMenu(R.menu.logged_out_drawer);
+            navController.navigate(R.id.homeFragment);
+        } else {
+            navigationView.inflateMenu(R.menu.main_drawer);
+            navController.navigate(R.id.mainFragment);
+        }
 
         // Top-level destinacije (hamburger se prikazuje za ove)
         mAppBarConfiguration = new AppBarConfiguration.Builder(
@@ -100,15 +105,17 @@ public class MainActivity extends AppCompatActivity {
             {
                 FirebaseAuth.getInstance().signOut(); // stvarni logout
 
-                navigationView.getMenu().clear();
-                navigationView.inflateMenu(R.menu.logged_out_drawer);
+//                navigationView.getMenu().clear();
+//                navigationView.inflateMenu(R.menu.logged_out_drawer);
                 View header_blanc = navigationView.getHeaderView(0);
                 TextView name_blanc = header_blanc.findViewById(R.id.nav_header_name);
                 ImageView avatar_blanc = header_blanc.findViewById(R.id.nav_header_avatar);
                 name_blanc.setVisibility(View.GONE);
                 avatar_blanc.setImageResource(R.drawable.blank_picture);
+                restartApp();
+                return true;
 
-                navController.navigate(R.id.homeFragment);
+//                navController.navigate(R.id.homeFragment);
             }
 
             drawer.closeDrawers();
@@ -121,6 +128,13 @@ public class MainActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         updateDrawerHeader();
+    }
+
+    private void restartApp() {
+        Intent intent = new Intent(this, MainActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(intent);
+        finish();
     }
 
     public void updateDrawerHeader() {
