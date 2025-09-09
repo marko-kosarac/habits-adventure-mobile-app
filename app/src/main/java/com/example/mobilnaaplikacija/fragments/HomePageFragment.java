@@ -70,9 +70,9 @@ public class HomePageFragment extends Fragment {
 
     private void prepareTaskList(ArrayList<Task> tasks){
         tasks.clear();
-        tasks.add(new Task(1L, "Anin rođendan", "Kućna žurka", "Zabava", FrequencyType.JEDNOKRATAN, "26/09/2025", "26/09/2025", "20:00", false, 1, UnitType.DAN, DifficultyType.LAK, ImportanceType.VAŽAN, StatusType.AKTIVAN));
-        tasks.add(new Task(2L, "Stomatolog", "Popravka zuba", "Zdravlje", FrequencyType.JEDNOKRATAN, "01/10/2025", "01/10/2025", "13:00", false, 1, UnitType.DAN, DifficultyType.TEŽAK, ImportanceType.VAŽAN, StatusType.AKTIVAN));
-        tasks.add(new Task(3L, "Poslovni sastanak", "Weekly", "Posao", FrequencyType.PONAVLJAJUCI, "26/09/2025", "26/09/2026", "15:00", false, 1, UnitType.SEDMICA, DifficultyType.TEŽAK, ImportanceType.EKSTREMNO_VAŽAN, StatusType.AKTIVAN));
+        tasks.add(new Task(0L, "Anin rođendan", "Kućna žurka", 0L, FrequencyType.JEDNOKRATAN, "26/09/2025", "26/09/2025", "20:00", false, 1, UnitType.DAN, DifficultyType.LAK, ImportanceType.VAŽAN, StatusType.AKTIVAN));
+        tasks.add(new Task(1L, "Stomatolog", "Popravka zuba", 0L, FrequencyType.JEDNOKRATAN, "01/10/2025", "01/10/2025", "13:00", false, 1, UnitType.DAN, DifficultyType.TEŽAK, ImportanceType.VAŽAN, StatusType.AKTIVAN));
+        tasks.add(new Task(2L, "Poslovni sastanak", "Weekly", 0L, FrequencyType.PONAVLJAJUCI, "26/09/2025", "26/09/2026", "15:00", false, 1, UnitType.SEDMICA, DifficultyType.TEŽAK, ImportanceType.EKSTREMNO_VAŽAN, StatusType.AKTIVAN));
     }
 
 }

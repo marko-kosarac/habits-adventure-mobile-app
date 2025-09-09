@@ -35,7 +35,7 @@ public class TaskRepository {
         values.put(SQLiteHelper.COLUMN_TIME, task.getTime());
         values.put(SQLiteHelper.COLUMN_IS_WHOLE_DAY, task.getWholeDay() ? 1 : 0);
         values.put(SQLiteHelper.COLUMN_INTERVAL, task.getInterval());
-        values.put(SQLiteHelper.COLUMN_UNIT, task.getUnit().name());
+        values.put(SQLiteHelper.COLUMN_UNIT, task.getUnit() != null ? task.getUnit().name() : null);
         values.put(SQLiteHelper.COLUMN_DIFFICULTY, task.getDifficulty().name());
         values.put(SQLiteHelper.COLUMN_IMPORTANCE, task.getImportance().name());
         values.put(SQLiteHelper.COLUMN_STATUS, task.getStatus().name());

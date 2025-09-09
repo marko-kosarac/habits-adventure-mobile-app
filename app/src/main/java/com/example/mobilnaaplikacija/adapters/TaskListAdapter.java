@@ -37,14 +37,6 @@ public class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapter.TaskVi
     @Override
     public void onBindViewHolder(@NonNull TaskViewHolder holder, int position) {
         Task task = tasks.get(position);
-        holder.taskName.setText(task.getName());
-        holder.taskCategory.setText(task.getCategory());
-        holder.taskIsDone.setChecked((task.getStatus().toString().toUpperCase(Locale.ROOT)).equals(StatusType.URAĐEN) ? true : false );
-
-        holder.taskCard.setOnClickListener(v -> {
-            Log.i("TaskListAdapter", "Clicked: " + task.getName());
-            Toast.makeText(holder.taskCard.getContext(), "Clicked: " + task.getName() + ", id: " + task.getId().toString(), Toast.LENGTH_SHORT).show();
-        });
     }
 
     @Override

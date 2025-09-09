@@ -7,6 +7,7 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.navigation.Navigation;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -18,19 +19,15 @@ import android.widget.Toast;
 
 import com.example.mobilnaaplikacija.R;
 import com.example.mobilnaaplikacija.databinding.FragmentAddTaskBinding;
-import com.example.mobilnaaplikacija.model.DifficultyType;
-import com.example.mobilnaaplikacija.model.FrequencyType;
-import com.example.mobilnaaplikacija.model.ImportanceType;
-import com.example.mobilnaaplikacija.model.StatusType;
 import com.example.mobilnaaplikacija.model.Task;
-import com.example.mobilnaaplikacija.model.UnitType;
+import com.example.mobilnaaplikacija.services.TaskService;
 
 import java.util.Calendar;
-import java.util.Locale;
 
 public class AddTaskFragment extends Fragment {
 
     private FragmentAddTaskBinding binding;
+    private TaskService taskService;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -46,7 +43,7 @@ public class AddTaskFragment extends Fragment {
         setupSpinners();
         setupDateTimePickers();
         setupFrequency();
-        setupAddTaskButton();
+        setupSaveTaskButton();
     }
 
     private void setupSpinners(){
@@ -146,101 +143,46 @@ public class AddTaskFragment extends Fragment {
         });
     }
 
-    private void setupAddTaskButton(){
-        binding.btnAddTask.setOnClickListener(view -> {
-            String name = binding.etTaskName.getText().toString().trim();
-            String description = binding.etTaskDescription.getText().toString().trim();
-            String category = binding.spinnerCategory.getSelectedItem().toString();
-            Boolean isRepeating = binding.rbRepeat.isChecked();
-            Boolean isOneTime = binding.rbOneTime.isChecked();
-            FrequencyType frequency = null;
-            if(isRepeating){
-                frequency = FrequencyType.PONAVLJAJUCI;
-            } else if(isOneTime){
-                frequency = FrequencyType.JEDNOKRATAN;
+    private void setupSaveTaskButton() {
+        binding.btnSaveTask.setOnClickListener(view -> {
+            taskService = new TaskService(requireContext());
+
+            Task task = taskService.validateAndCreateTask(
+                    binding.etTaskName.getText().toString(),
+                    binding.etTaskDescription.getText().toString(),
+                    binding.spinnerCategory.getSelectedItem().toString(),
+                    binding.rbRepeat.isChecked(),
+                    binding.rbOneTime.isChecked(),
+                    binding.etStartDate.getText().toString().trim(),
+                    binding.etEndDate.getText().toString().trim(),
+                    binding.etTime.getText().toString().trim(),
+                    binding.rbWholeDay.isChecked(),
+                    binding.spinnerDifficulty.getSelectedItem().toString(),
+                    binding.spinnerImportance.getSelectedItem().toString(),
+                    binding.spinnerRecurringUnit.getSelectedItem().toString(),
+                    binding.etReccuringNumber.getText().toString()
+            );
+
+            if (task == null) return;
+
+            long userId = 1L; // TODO: fetch from logged-in user
+            long id = taskService.saveTask(task, userId);
+
+            if (id != -1) {
+                task.setId(id);
+                sendTaskBackToHomePage(task);
+                Toast.makeText(requireContext(), "Zadatak dodan!", Toast.LENGTH_SHORT).show();
+                Navigation.findNavController(view).popBackStack();
+            } else {
+                Toast.makeText(requireContext(), "Greška pri dodavanju zadatka!", Toast.LENGTH_SHORT).show();
             }
-            String startDate = binding.etStartDate.getText().toString().trim();
-            String endDate = binding.etEndDate.getText().toString().trim();
-            String time = binding.etTime.getText().toString().trim();
-            Boolean isWholeDay = binding.rbWholeDay.isChecked();
-            Integer interval = null;
-            UnitType unit = null;
-            DifficultyType difficulty = null;
-            String difficultyStr = binding.spinnerDifficulty.getSelectedItem().toString().toUpperCase(Locale.ROOT);
-            difficulty = DifficultyType.valueOf(difficultyStr);
-            ImportanceType importance = null;
-            String importanceStr = binding.spinnerImportance.getSelectedItem().toString().toUpperCase(Locale.ROOT);
-            importance = ImportanceType.valueOf(importanceStr);
-            StatusType status = StatusType.AKTIVAN;
-
-            //Validation
-            if(name.isEmpty()) {
-                Toast.makeText(requireContext(), "Unesite naziv zadatka!", Toast.LENGTH_SHORT).show();
-                return;
-            }
-
-            if(category.isEmpty()) {
-                Toast.makeText(requireContext(), "Izaberite kategoriju zadatka!", Toast.LENGTH_SHORT).show();
-                return;
-            }
-
-            if (startDate.isEmpty()) {
-                Toast.makeText(requireContext(), "Izaberite datum početka!", Toast.LENGTH_SHORT).show();
-                return;
-            }
-
-            if (endDate.isEmpty()) {
-                Toast.makeText(requireContext(), "Izaberite datum završetka!", Toast.LENGTH_SHORT).show();
-                return;
-            }
-
-            if (time.isEmpty() && isWholeDay == false) {
-                Toast.makeText(requireContext(), "Unesite vrijeme zadatka!", Toast.LENGTH_SHORT).show();
-                return;
-            }
-
-            if ((isRepeating == false && isOneTime == false)
-                    || (isRepeating == null && isOneTime == null)) {
-                Toast.makeText(requireContext(), "Izaberite jednokratan ili ponavljajući zadatak!", Toast.LENGTH_SHORT).show();
-                return;
-            }
-
-            if(difficultyStr.isEmpty()) {
-                Toast.makeText(requireContext(), "Izaberite težinu zadatka!", Toast.LENGTH_SHORT).show();
-                return;
-            }
-
-            if(importanceStr.isEmpty()) {
-                Toast.makeText(requireContext(), "Izaberite bitnost zadatka!", Toast.LENGTH_SHORT).show();
-                return;
-            }
-
-            if(frequency.equals(FrequencyType.PONAVLJAJUCI)){
-                String unitStr = binding.spinnerRecurringUnit.getSelectedItem().toString().toUpperCase(Locale.ROOT);
-                unit = UnitType.valueOf(unitStr);
-                interval = Integer.valueOf(binding.etReccuringNumber.getText().toString());
-
-                if(unitStr.isEmpty()) {
-                    Toast.makeText(requireContext(), "Unesite jedinicu zadatka!", Toast.LENGTH_SHORT).show();
-                    return;
-                }
-
-                if((interval.toString()).isEmpty()) {
-                    Toast.makeText(requireContext(), "Unesite broj ponavljanja zadatka!", Toast.LENGTH_SHORT).show();
-                    return;
-                }
-            }
-
-            Task task = new Task(0L, name, description, category, frequency, startDate, endDate, time, isWholeDay, interval, unit, difficulty, importance, status);
-            Bundle bundle = new Bundle();
-            bundle.putParcelable("task", task);
-
-            getParentFragmentManager().setFragmentResult("taskAdded", bundle);
-
-            Toast.makeText(requireContext(), "Zadatak dodan!", Toast.LENGTH_SHORT).show();
-
-            getParentFragmentManager().popBackStack();
         });
+    }
+
+    private void sendTaskBackToHomePage(Task task) {
+        Bundle bundle = new Bundle();
+        bundle.putParcelable("task", task);
+        getParentFragmentManager().setFragmentResult("taskAdded", bundle);
     }
 
     @Override
