@@ -2,15 +2,15 @@ package com.example.mobilnaaplikacija.model;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.provider.ContactsContract;
 
 import androidx.annotation.NonNull;
 
 public class Task implements Parcelable {
     public Long id;
+    public Long userId;
     public String name;
     public String description;
-    public String category;
+    public Long categoryId;
     public FrequencyType frequency;
     public String startDate;
     public String endDate;
@@ -24,10 +24,11 @@ public class Task implements Parcelable {
 
     public Task() {}
 
-    public Task(String name, String description, String category, FrequencyType frequency, String startDate, String endDate, String time, Boolean isWholeDay, Integer interval, UnitType unit, DifficultyType difficulty, ImportanceType importance, StatusType status) {
+    public Task(Long userId, String name, String description, Long categoryId, FrequencyType frequency, String startDate, String endDate, String time, Boolean isWholeDay, Integer interval, UnitType unit, DifficultyType difficulty, ImportanceType importance, StatusType status) {
+        this.userId = userId;
         this.name = name;
         this.description = description;
-        this.category = category;
+        this.categoryId = categoryId;
         this.frequency = frequency;
         this.startDate = startDate;
         this.endDate = endDate;
@@ -40,11 +41,12 @@ public class Task implements Parcelable {
         this.status = status;
     }
 
-    public Task(Long id, String name, String description, String category, FrequencyType frequency, String startDate, String endDate, String time, Boolean isWholeDay, Integer interval, UnitType unit, DifficultyType difficulty, ImportanceType importance, StatusType status) {
+    public Task(Long id, Long userId, String name, String description, Long categoryId, FrequencyType frequency, String startDate, String endDate, String time, Boolean isWholeDay, Integer interval, UnitType unit, DifficultyType difficulty, ImportanceType importance, StatusType status) {
         this.id = id;
+        this.userId = userId;
         this.name = name;
         this.description = description;
-        this.category = category;
+        this.categoryId = categoryId;
         this.frequency = frequency;
         this.startDate = startDate;
         this.endDate = endDate;
@@ -59,9 +61,10 @@ public class Task implements Parcelable {
 
     protected Task(Parcel in) {
         id = in.readLong();
+        userId = in.readLong();
         name = in.readString();
         description = in.readString();
-        category = in.readString();
+        categoryId = in.readLong();
         String freqName = in.readString();
         frequency = freqName != null ? FrequencyType.valueOf(freqName) : null;
         startDate = in.readString();
@@ -79,9 +82,11 @@ public class Task implements Parcelable {
         status = statusName != null ? StatusType.valueOf(statusName) : null;
     }
 
-    // Getters and setters (with lowercase fields)
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
+
+    public Long getUserId() { return userId; }
+    public void setUserId(Long userId) { this.userId = userId; }
 
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }
@@ -89,8 +94,8 @@ public class Task implements Parcelable {
     public String getDescription() { return description; }
     public void setDescription(String description) { this.description = description; }
 
-    public String getCategory() { return category; }
-    public void setCategory(String category) { this.category = category; }
+    public Long getCategoryId() {return categoryId;}
+    public void setCategoryId(Long categoryId) {this.categoryId = categoryId;}
 
     public FrequencyType getFrequency() { return frequency; }
     public void setFrequency(FrequencyType frequency) { this.frequency = frequency; }
@@ -128,9 +133,10 @@ public class Task implements Parcelable {
     @Override
     public void writeToParcel(@NonNull Parcel parcel, int i) {
         parcel.writeLong(id != null ? id : -1);
+        parcel.writeLong(userId != null ? userId : -1);
         parcel.writeString(name);
         parcel.writeString(description);
-        parcel.writeString(category);
+        parcel.writeLong(categoryId != null ? categoryId : -1);
         parcel.writeString(frequency != null ? frequency.name() : null);
         parcel.writeString(startDate);
         parcel.writeString(endDate);

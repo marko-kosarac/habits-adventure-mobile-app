@@ -23,7 +23,7 @@ public class SQLiteHelper extends SQLiteOpenHelper {
     public static final String COLUMN_USER_ID = "user_id";
     public static final String COLUMN_TASK_NAME = "task_name";
     public static final String COLUMN_TASK_DESCRIPTION = "task_description";
-    public static final String COLUMN_CATEGORY = "category";
+    public static final String COLUMN_CATEGORY_ID = "category_id";
     public static final String COLUMN_FREQUENCY = "frequency";
     public static final String COLUMN_START_DATE = "start_date";
     public static final String COLUMN_END_DATE = "end_date";
@@ -54,7 +54,7 @@ public class SQLiteHelper extends SQLiteOpenHelper {
                     COLUMN_USER_ID + " TEXT, " +
                     COLUMN_TASK_NAME + " TEXT, " +
                     COLUMN_TASK_DESCRIPTION + " TEXT, " +
-                    COLUMN_CATEGORY + " TEXT, " +
+                    COLUMN_CATEGORY_ID + " TEXT, " +
                     COLUMN_FREQUENCY + " TEXT, " +
                     COLUMN_START_DATE + " TEXT, " +
                     COLUMN_END_DATE + " TEXT, " +
@@ -73,14 +73,14 @@ public class SQLiteHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        Log.i("EQ_DB", "Creating Equipment and Tasks table");
+        Log.i("DB", "Creating Equipment and Tasks table");
         db.execSQL(DB_CREATE);
         db.execSQL(DB_CREATE_TASKS);
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        Log.i("EQ_DB", "Upgrading tables from " + oldVersion + " to " + newVersion);
+        Log.i("DB", "Upgrading tables from " + oldVersion + " to " + newVersion);
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_EQUIPMENT);
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_TASKS);
         onCreate(db);
