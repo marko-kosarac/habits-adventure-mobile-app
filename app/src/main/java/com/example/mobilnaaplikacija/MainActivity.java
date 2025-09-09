@@ -63,7 +63,10 @@ public class MainActivity extends AppCompatActivity {
             navController.navigate(R.id.homeFragment);
         } else {
             navigationView.inflateMenu(R.menu.main_drawer);
-            navController.navigate(R.id.mainFragment);
+            if (savedInstanceState == null) {
+                // vodi korisnika samo ako se aktivnost prvi put kreira
+                navController.navigate(R.id.mainFragment);
+            }
         }
 
         // Top-level destinacije (hamburger se prikazuje za ove)
