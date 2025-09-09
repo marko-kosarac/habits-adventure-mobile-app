@@ -138,8 +138,10 @@ public class AddTaskFragment extends Fragment {
         binding.rgFrequency.setOnCheckedChangeListener((radioGroup, checkedId) -> {
             if(checkedId == R.id.rbRepeat) {
                 binding.layoutRecurringOptions.setVisibility(View.VISIBLE);
-            } else {
+            } else if (checkedId == R.id.rbOneTime){
                 binding.layoutRecurringOptions.setVisibility(View.GONE);
+                binding.etReccuringNumber.setText("");
+                binding.spinnerReccuringUnit.setSelection(0);
             }
         });
     }
