@@ -342,7 +342,7 @@ public class UserProfileFragment extends Fragment {
                 pp = pp + (pp * 3 / 4);
             }
         }
-        textPP.setText("PP: " + pp);
+        textPP.setText("Snaga: " + pp);
 
         // Ažuriranje baze
         db.collection("users").document(userId)
