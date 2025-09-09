@@ -13,23 +13,24 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.DatePicker;
-import android.widget.SpinnerAdapter;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
 import com.example.mobilnaaplikacija.R;
 import com.example.mobilnaaplikacija.databinding.FragmentAddTaskBinding;
+import com.example.mobilnaaplikacija.model.DifficultyType;
+import com.example.mobilnaaplikacija.model.FrequencyType;
+import com.example.mobilnaaplikacija.model.ImportanceType;
+import com.example.mobilnaaplikacija.model.StatusType;
 import com.example.mobilnaaplikacija.model.Task;
-import com.google.android.material.textfield.TextInputEditText;
+import com.example.mobilnaaplikacija.model.UnitType;
 
-import java.sql.Time;
 import java.util.Calendar;
-import java.util.UUID;
+import java.util.Locale;
 
 public class AddTaskFragment extends Fragment {
 
     private FragmentAddTaskBinding binding;
-    private boolean RECURRING_TASK = false;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -87,14 +88,11 @@ public class AddTaskFragment extends Fragment {
 
         binding.rbWholeDay.setOnCheckedChangeListener((buttonView, isChecked) -> {
             if(isChecked) {
-                binding.etTime.setEnabled(false);
                 binding.etTime.setText("");
                 // If whole-day, start & end equal
-                if(!binding.etStartDate.getText().toString().isEmpty()){
+                if (!binding.etStartDate.getText().toString().isEmpty()) {
                     binding.etEndDate.setText(binding.etStartDate.getText().toString());
                 }
-            } else {
-                binding.etTime.setEnabled(true);
             }
         });
     }
@@ -124,8 +122,10 @@ public class AddTaskFragment extends Fragment {
         Calendar calendar = Calendar.getInstance();
         TimePickerDialog timePickerDialog = new TimePickerDialog(
                 requireContext(),
-                (TimePicker view, int hourOfDay, int minute) ->
-                field.setText(String.format("%02d:%02d", hourOfDay, minute)),
+                (TimePicker view, int hourOfDay, int minute) -> {
+                    field.setText(String.format("%02d:%02d", hourOfDay, minute));
+                    binding.rbWholeDay.setChecked(false);
+                },
                 calendar.get(Calendar.HOUR_OF_DAY),
                 calendar.get(Calendar.MINUTE),
                 true);
@@ -133,10 +133,11 @@ public class AddTaskFragment extends Fragment {
     }
 
     private void setupFrequency(){
+        binding.layoutRecurringOptions.setVisibility(View.GONE);
+
         binding.rgFrequency.setOnCheckedChangeListener((radioGroup, checkedId) -> {
             if(checkedId == R.id.rbRepeat) {
                 binding.layoutRecurringOptions.setVisibility(View.VISIBLE);
-                RECURRING_TASK = true;
             } else {
                 binding.layoutRecurringOptions.setVisibility(View.GONE);
             }
@@ -150,21 +151,25 @@ public class AddTaskFragment extends Fragment {
             String category = binding.spinnerCategory.getSelectedItem().toString();
             Boolean isRepeating = binding.rbRepeat.isChecked();
             Boolean isOneTime = binding.rbOneTime.isChecked();
-            String frequency = "";
+            FrequencyType frequency = null;
             if(isRepeating){
-                frequency = "PONAVLJAJUCI";
+                frequency = FrequencyType.PONAVLJAJUCI;
             } else if(isOneTime){
-                frequency = "JEDNOKRATAN";
+                frequency = FrequencyType.JEDNOKRATAN;
             }
             String startDate = binding.etStartDate.getText().toString().trim();
             String endDate = binding.etEndDate.getText().toString().trim();
             String time = binding.etTime.getText().toString().trim();
             Boolean isWholeDay = binding.rbWholeDay.isChecked();
             Integer interval = null;
-            String unit = "";
-            String difficulty = binding.spinnerDifficulty.getSelectedItem().toString();
-            String importance = binding.spinnerImportance.getSelectedItem().toString();
-            String status = "AKTIVAN";
+            UnitType unit = null;
+            DifficultyType difficulty = null;
+            String difficultyStr = binding.spinnerDifficulty.getSelectedItem().toString().toUpperCase(Locale.ROOT);
+            difficulty = DifficultyType.valueOf(difficultyStr);
+            ImportanceType importance = null;
+            String importanceStr = binding.spinnerImportance.getSelectedItem().toString().toUpperCase(Locale.ROOT);
+            importance = ImportanceType.valueOf(importanceStr);
+            StatusType status = StatusType.AKTIVAN;
 
             //Validation
             if(name.isEmpty()) {
@@ -198,21 +203,22 @@ public class AddTaskFragment extends Fragment {
                 return;
             }
 
-            if(difficulty.isEmpty()) {
+            if(difficultyStr.isEmpty()) {
                 Toast.makeText(requireContext(), "Izaberite težinu zadatka!", Toast.LENGTH_SHORT).show();
                 return;
             }
 
-            if(importance.isEmpty()) {
+            if(importanceStr.isEmpty()) {
                 Toast.makeText(requireContext(), "Izaberite bitnost zadatka!", Toast.LENGTH_SHORT).show();
                 return;
             }
 
-            if(frequency.equals("PONAVLJAJUCI")){
-                unit = binding.spinnerReccuringUnit.getSelectedItem().toString();
+            if(frequency.equals(FrequencyType.PONAVLJAJUCI)){
+                String unitStr = binding.spinnerReccuringUnit.getSelectedItem().toString().toUpperCase(Locale.ROOT);
+                unit = UnitType.valueOf(unitStr);
                 interval = Integer.valueOf(binding.etReccuringNumber.getText().toString());
 
-                if(unit.isEmpty()) {
+                if(unitStr.isEmpty()) {
                     Toast.makeText(requireContext(), "Unesite jedinicu zadatka!", Toast.LENGTH_SHORT).show();
                     return;
                 }
