@@ -1,4 +1,4 @@
-package com.example.mobilnaaplikacija.fragments;
+package com.example.mobilnaaplikacija.fragments.registration;
 
 import android.os.Bundle;
 import android.text.TextUtils;

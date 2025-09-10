@@ -8,7 +8,7 @@
     <!-- Home fragment (login ekran) -->
     <fragment
         android:id="@+id/homeFragment"
-        android:name="com.example.mobilnaaplikacija.fragments.HomeFragment"
+        android:name="com.example.mobilnaaplikacija.fragments.login.HomeFragment"
         android:label="Login"
         tools:layout="@layout/fragment_home">
         <action
@@ -22,17 +22,17 @@
     <!-- Main fragment sa Drawer-om -->
     <fragment
         android:id="@+id/mainFragment"
-        android:name="com.example.mobilnaaplikacija.fragments.HomePageFragment"
+        android:name="com.example.mobilnaaplikacija.fragments.home.HomePageFragment"
         android:label="Početna"
         tools:layout="@layout/fragment_home_page" />
     <fragment
         android:id="@+id/profile_page"
-        android:name="com.example.mobilnaaplikacija.fragments.UserProfileFragment"
+        android:name="com.example.mobilnaaplikacija.fragments.user.UserProfileFragment"
         android:label="Profil"
         tools:layout="@layout/fragment_user_profile"/>
     <fragment
         android:id="@+id/nav_register"
-        android:name="com.example.mobilnaaplikacija.fragments.RegisterFragment"
+        android:name="com.example.mobilnaaplikacija.fragments.registration.RegisterFragment"
         android:label="Registracija"
         tools:layout="@layout/fragment_register">
         <action
@@ -41,7 +41,7 @@
     </fragment>
     <fragment
         android:id="@+id/statistics_page"
-        android:name="com.example.mobilnaaplikacija.fragments.StatisticsFragment"
+        android:name="com.example.mobilnaaplikacija.fragments.user.StatisticsFragment"
         android:label="Statistika"
         tools:layout="@layout/fragment_statistics" >
         <action
@@ -50,7 +50,7 @@
     </fragment>
     <fragment
         android:id="@+id/shopFragment"
-        android:name="com.example.mobilnaaplikacija.fragments.ShopFragment"
+        android:name="com.example.mobilnaaplikacija.fragments.shop.ShopFragment"
         android:label="Prodavnica"
         tools:layout="@layout/fragment_shop" />
 </navigation>

@@ -1,4 +1,4 @@
-package com.example.mobilnaaplikacija.fragments;
+package com.example.mobilnaaplikacija.fragments.login;
 
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -16,7 +16,7 @@ import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.NavOptions;
 
-import com.example.mobilnaaplikacija.MainActivity;
+import com.example.mobilnaaplikacija.activities.MainActivity;
 import com.example.mobilnaaplikacija.R;
 import com.example.mobilnaaplikacija.databinding.FragmentHomeBinding;
 import com.example.mobilnaaplikacija.services.UserService;

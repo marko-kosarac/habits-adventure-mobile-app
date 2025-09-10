@@ -26,7 +26,7 @@
             android:theme="@style/Theme.MobilnaAplikacija" />
         <!-- Splash screen kao početna aktivnost -->
         <activity
-            android:name=".SplashActivity"
+            android:name=".activities.SplashActivity"
             android:exported="true"
             android:theme="@style/Theme.MobilnaAplikacija">
             <intent-filter>
@@ -36,7 +36,7 @@
             </intent-filter>
         </activity> <!-- Main / Leanback aktivnost za TV -->
         <activity
-            android:name=".MainActivity"
+            android:name=".activities.MainActivity"
             android:exported="true"
             tools:ignore="MissingClass">
             <intent-filter>
