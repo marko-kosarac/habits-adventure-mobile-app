@@ -4,8 +4,8 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.viewpager2.adapter.FragmentStateAdapter;
 
-import com.example.mobilnaaplikacija.fragments.TabAllUsersFragment;
-import com.example.mobilnaaplikacija.fragments.TabFriendsFragment;
+import com.example.mobilnaaplikacija.fragments.friends.TabFriendsFragment;
+import com.example.mobilnaaplikacija.fragments.friends.TabAllUsersFragment;
 import com.example.mobilnaaplikacija.fragments.friends.FriendsFragment;
 
 public class ViewPagerAdapter extends FragmentStateAdapter {

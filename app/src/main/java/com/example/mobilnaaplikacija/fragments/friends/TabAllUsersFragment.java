@@ -1,4 +1,4 @@
-package com.example.mobilnaaplikacija.fragments;
+package com.example.mobilnaaplikacija.fragments.friends;
 
 import android.os.Bundle;
 import android.text.Editable;
@@ -30,6 +30,7 @@ public class TabAllUsersFragment extends Fragment {
     private RecyclerView recyclerView;
     private UserListAdapter adapter;
     private List<User> allUsersList = new ArrayList<>();
+    private List<User> friendsList = new ArrayList<>();
     private EditText searchInput;
 
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
@@ -44,10 +45,11 @@ public class TabAllUsersFragment extends Fragment {
         searchInput = view.findViewById(R.id.searchAllUsers);
 
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        adapter = new UserListAdapter(getContext(), allUsersList, (user, position) -> addFriend(user, position));
+        adapter = new UserListAdapter(getContext(), allUsersList, friendsList, (user, position) -> addFriend(user, position));
         recyclerView.setAdapter(adapter);
 
-        loadAllUsers();
+
+        loadFriendsAndUsers();
 
         searchInput.addTextChangedListener(new TextWatcher() {
             @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
@@ -61,7 +63,30 @@ public class TabAllUsersFragment extends Fragment {
         return view;
     }
 
-    private void loadAllUsers() {
+    private void loadFriendsAndUsers() {
+        friendsList.clear();
+
+        db.collection("users").document(currentUserId)
+                .get()
+                .addOnSuccessListener(doc -> {
+                    List<String> friendIds = (List<String>) doc.get("friends");
+                    if (friendIds != null) {
+                        for (String fid : friendIds) {
+                            User friend = new User();
+                            friend.setId(fid);
+                            friendsList.add(friend);
+                        }
+                    }
+
+                    loadAllUsersWithFriends();
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(getContext(), "Greška pri učitavanju prijatelja", Toast.LENGTH_SHORT).show();
+                    loadAllUsersWithFriends(); // i dalje učitaj sve korisnike
+                });
+    }
+
+    private void loadAllUsersWithFriends() {
         allUsersList.clear();
         db.collection("users").get().addOnCompleteListener(task -> {
             if (task.isSuccessful() && task.getResult() != null) {
@@ -77,7 +102,16 @@ public class TabAllUsersFragment extends Fragment {
                     user.setId(uid);
                     user.setUsername(username != null ? username : "Korisnik");
                     user.setAvatarId(avatarId);
-                    user.setFriend(false); // default, kasnije se može proveriti iz liste prijatelja
+
+                    // Provera da li je već prijatelj
+                    boolean isAlreadyFriend = false;
+                    for (User friend : friendsList) {
+                        if (friend.getId().equals(uid)) {
+                            isAlreadyFriend = true;
+                            break;
+                        }
+                    }
+                    user.setFriend(isAlreadyFriend);
 
                     allUsersList.add(user);
                 }
@@ -89,12 +123,28 @@ public class TabAllUsersFragment extends Fragment {
     }
 
     private void addFriend(User user, int position) {
-//        // TODO: implement Firebase logiku za dodavanje prijatelja
-//        user.setFriend(true);
-//        adapter.updateUser(position, user);
-//        Toast.makeText(getContext(), user.getUsername() + " je dodat kao prijatelj!", Toast.LENGTH_SHORT).show();
+        db.collection("users").document(currentUserId)
+                .update("friends", com.google.firebase.firestore.FieldValue.arrayUnion(user.getId()))
+                .addOnSuccessListener(aVoid -> {
+                    Toast.makeText(getContext(), user.getUsername() + " je dodat kao prijatelj!", Toast.LENGTH_SHORT).show();
 
+                    friendsList.add(user);
+
+                    TabFriendsFragment fragment = (TabFriendsFragment) getParentFragmentManager()
+                            .findFragmentByTag("f0"); // f0 je tag za prvi tab ViewPager2
+                    if (fragment != null) {
+                        fragment.addFriendToList(user);
+                    }
+
+                    user.setFriend(true); // ili adapter proverava friendsList
+                    adapter.updateUser(position, user);
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(getContext(), "Greška pri dodavanju prijatelja", Toast.LENGTH_SHORT).show();
+                });
     }
+
+
 
     private void filterUsers(String query) {
         List<User> filtered = new ArrayList<>();
