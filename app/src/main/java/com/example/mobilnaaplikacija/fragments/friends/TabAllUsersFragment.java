@@ -93,13 +93,14 @@ public class TabAllUsersFragment extends Fragment {
 //        user.setFriend(true);
 //        adapter.updateUser(position, user);
 //        Toast.makeText(getContext(), user.getUsername() + " je dodat kao prijatelj!", Toast.LENGTH_SHORT).show();
+
     }
 
     private void filterUsers(String query) {
-//        List<User> filtered = new ArrayList<>();
-//        for (User u : allUsersList) {
-//            if (u.getUsername().toLowerCase().contains(query.toLowerCase())) filtered.add(u);
-//        }
-//        adapter.setUsers(filtered);
+        List<User> filtered = new ArrayList<>();
+        for (User u : allUsersList) {
+            if (u.getUsername().toLowerCase().contains(query.toLowerCase())) filtered.add(u);
+        }
+         adapter.setUsers(filtered);
     }
 }

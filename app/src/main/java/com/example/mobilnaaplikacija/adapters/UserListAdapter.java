@@ -56,16 +56,23 @@ public class UserListAdapter extends RecyclerView.Adapter<UserListAdapter.UserVi
             default: holder.userAvatar.setImageResource(R.drawable.avatar1); break;
         }
 
-        // Dugme za dodavanje prijatelja
+        // Ako je korisnik prijatelj, dugme se sakrije i prikaže TextView sa "Prijatelji"
         if (user.isFriend()) {
-            holder.buttonAddFriend.setText("Prijatelji");
-            holder.buttonAddFriend.setEnabled(false);
+            holder.buttonAddFriend.setVisibility(View.GONE);
+            holder.textFriend.setVisibility(View.VISIBLE);
         } else {
-            holder.buttonAddFriend.setText("Dodaj");
-            holder.buttonAddFriend.setEnabled(true);
-            holder.buttonAddFriend.setOnClickListener(v -> listener.onAddFriend(user, position));
+            holder.buttonAddFriend.setVisibility(View.VISIBLE);
+            holder.textFriend.setVisibility(View.GONE);
+
+            holder.buttonAddFriend.setOnClickListener(v -> {
+                user.setFriend(true);
+                notifyItemChanged(position); // osveži da se Button sakrije i TextView prikaže
+                listener.onAddFriend(user, position);
+            });
         }
+
     }
+
 
     @Override
     public int getItemCount() {
@@ -76,12 +83,14 @@ public class UserListAdapter extends RecyclerView.Adapter<UserListAdapter.UserVi
         CircleImageView userAvatar;
         TextView userName;
         Button buttonAddFriend;
+        TextView textFriend;
 
         public UserViewHolder(@NonNull View itemView) {
             super(itemView);
             userAvatar = itemView.findViewById(R.id.userAvatar);
             userName = itemView.findViewById(R.id.userName);
             buttonAddFriend = itemView.findViewById(R.id.buttonAddFriend);
+            textFriend = itemView.findViewById(R.id.textFriend);
         }
     }
 

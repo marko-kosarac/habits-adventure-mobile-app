@@ -56,12 +56,7 @@ public class TabFriendsFragment extends Fragment {
     }
 
     private void loadFriends() {
-        // TODO: implement Firebase query da uzmeš listu prijatelja
-        // Za sada dummy data
-        friendsList.clear();
-        friendsList.add(new User("1", "Marko", true));
-        friendsList.add(new User("2", "Ana", true));
-        adapter.setUsers(friendsList);
+
     }
 
     private void filterFriends(String query) {

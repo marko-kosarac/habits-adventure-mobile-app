@@ -50,6 +50,6 @@
     <fragment
         android:id="@+id/friendsFragment"
         android:name="com.example.mobilnaaplikacija.fragments.friends.FriendsFragment"
-        android:label="fragment_friends"
+        android:label="Prijatelji"
         tools:layout="@layout/fragment_friends" />
 </navigation>

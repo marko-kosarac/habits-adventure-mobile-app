@@ -1,35 +1,51 @@
-<?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="horizontal"
-    android:padding="12dp"
-    android:gravity="center_vertical"
-    android:background="?attr/selectableItemBackground">
+    android:padding="8dp"
+    android:gravity="center_vertical">
 
     <de.hdodenhof.circleimageview.CircleImageView
         android:id="@+id/userAvatar"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
-        android:src="@drawable/avatar1" />
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:src="@drawable/avatar1"/>
 
     <TextView
         android:id="@+id/userName"
         android:layout_width="0dp"
-        android:layout_weight="1"
         android:layout_height="wrap_content"
-        android:text="Korisnik"
-        android:textSize="16sp"
-        android:paddingStart="12dp"
-        android:textColor="@android:color/black" />
+        android:layout_weight="1"
+        android:paddingStart="16dp"
+        android:text="Username"
+        android:textSize="16sp"/>
 
+    <!-- Dugme za dodavanje prijatelja -->
     <Button
         android:id="@+id/buttonAddFriend"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="36dp"
         android:text="Dodaj"
-        android:paddingHorizontal="12dp"
+        android:paddingStart="12dp"
+        android:paddingEnd="12dp"
+        android:textSize="14sp"
         android:backgroundTint="@color/purple_500"
-        android:textColor="@android:color/white" />
+        android:textColor="@android:color/white"
+        android:layout_marginStart="8dp"/>
 
+    <!-- Tekst koji se prikazuje kada je prijatelj -->
+    <TextView
+        android:id="@+id/textFriend"
+        android:layout_width="wrap_content"
+        android:layout_height="36dp"
+        android:layout_marginStart="8dp"
+        android:gravity="center"
+        android:background="@drawable/friend_label_bg"
+        android:text="Prijatelji"
+        android:textColor="@android:color/white"
+        android:paddingStart="12dp"
+        android:paddingEnd="12dp"
+        android:textSize="14sp"
+        android:visibility="gone"/>
 </LinearLayout>
