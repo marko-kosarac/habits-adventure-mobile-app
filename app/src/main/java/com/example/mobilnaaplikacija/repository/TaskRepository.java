@@ -58,8 +58,8 @@ public class TaskRepository {
                 Task task = new Task();
                 task.setId(cursor.getLong(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_TASK_ID)));
                 task.setUserId(cursor.getLong(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_USER_ID)));
-                task.setName(cursor.getString(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_NAME)));
-                task.setDescription(cursor.getString(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_DESCRIPTION)));
+                task.setName(cursor.getString(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_TASK_NAME)));
+                task.setDescription(cursor.getString(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_TASK_DESCRIPTION)));
                 task.setCategoryId(cursor.getLong(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_CATEGORY_ID)));
                 task.setFrequency(FrequencyType.valueOf(cursor.getString(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_FREQUENCY))));
                 task.setStartDate(cursor.getString(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_START_DATE)));

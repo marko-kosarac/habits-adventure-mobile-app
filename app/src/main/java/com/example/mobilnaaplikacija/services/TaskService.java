@@ -1,22 +1,26 @@
 package com.example.mobilnaaplikacija.services;
 
 import android.content.Context;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.widget.Toast;
 
 import com.example.mobilnaaplikacija.database.SQLiteHelper;
 import com.example.mobilnaaplikacija.repository.TaskRepository;
 import com.example.mobilnaaplikacija.model.*;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 
 public class TaskService {
 
     private final Context context;
-    private final TaskRepository repository;
+    private final TaskRepository taskRepository;
 
     public TaskService(Context context) {
         this.context = context;
-        this.repository = new TaskRepository(new SQLiteHelper(context));
+        this.taskRepository = new TaskRepository(new SQLiteHelper(context));
     }
 
     public Task validateAndCreateTask(
@@ -83,11 +87,17 @@ public class TaskService {
 
     public long saveTask(Task task, long userId) {
         task.setUserId(userId);
-        return repository.insertTask(task, String.valueOf(userId));
+        return taskRepository.insertTask(task, String.valueOf(userId));
     }
 
     private Task showError(String message) {
         Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
         return null;
     }
+
+    public List<Task> getTasksById(Long userId){
+        List<Task> tasks = taskRepository.getTasksById(userId);
+        return tasks;
+    }
+
 }

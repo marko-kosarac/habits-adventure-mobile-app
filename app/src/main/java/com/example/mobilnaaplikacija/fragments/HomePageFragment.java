@@ -22,6 +22,7 @@ import com.example.mobilnaaplikacija.model.ImportanceType;
 import com.example.mobilnaaplikacija.model.StatusType;
 import com.example.mobilnaaplikacija.model.Task;
 import com.example.mobilnaaplikacija.model.UnitType;
+import com.example.mobilnaaplikacija.services.TaskService;
 
 import java.util.ArrayList;
 
@@ -29,6 +30,8 @@ public class HomePageFragment extends Fragment {
 
     public static ArrayList<Task> tasks = new ArrayList<Task>();
     private FragmentHomePageBinding binding;
+    private TaskListAdapter adapter;
+    private TaskService taskService;
 
     @Nullable
     @Override
@@ -36,11 +39,12 @@ public class HomePageFragment extends Fragment {
         Log.i("MoblinaAplikacija", "onCreateView Home Page Fragment");
         binding = FragmentHomePageBinding.inflate(inflater, container, false);
 
-        prepareTaskList(tasks);
-
-        TaskListAdapter adapter = new TaskListAdapter(tasks);
+        adapter = new TaskListAdapter(tasks);
         binding.rvTasks.setLayoutManager(new LinearLayoutManager(requireContext()));
         binding.rvTasks.setAdapter(adapter);
+
+        taskService = new TaskService(requireContext());
+        loadTasksFromDb();
 
         getParentFragmentManager().setFragmentResultListener("taskAdded", this, (request, bundle) -> {
             Task newTask = bundle.getParcelable("task");
@@ -68,11 +72,10 @@ public class HomePageFragment extends Fragment {
         binding = null;
     }
 
-    private void prepareTaskList(ArrayList<Task> tasks){
+    private void loadTasksFromDb(){
         tasks.clear();
-        tasks.add(new Task(0L, "Anin rođendan", "Kućna žurka", 0L, FrequencyType.JEDNOKRATAN, "26/09/2025", "26/09/2025", "20:00", false, 1, UnitType.DAN, DifficultyType.LAK, ImportanceType.VAŽAN, StatusType.AKTIVAN));
-        tasks.add(new Task(1L, "Stomatolog", "Popravka zuba", 0L, FrequencyType.JEDNOKRATAN, "01/10/2025", "01/10/2025", "13:00", false, 1, UnitType.DAN, DifficultyType.TEŽAK, ImportanceType.VAŽAN, StatusType.AKTIVAN));
-        tasks.add(new Task(2L, "Poslovni sastanak", "Weekly", 0L, FrequencyType.PONAVLJAJUCI, "26/09/2025", "26/09/2026", "15:00", false, 1, UnitType.SEDMICA, DifficultyType.TEŽAK, ImportanceType.EKSTREMNO_VAŽAN, StatusType.AKTIVAN));
+        tasks.addAll(taskService.getTasksById(1L));
+        adapter.notifyDataSetChanged();
     }
 
 }
