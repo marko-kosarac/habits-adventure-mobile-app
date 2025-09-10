@@ -67,7 +67,14 @@ public class TaskRepository {
                 task.setTime(cursor.getString(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_TIME)));
                 task.setWholeDay(cursor.getInt(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_IS_WHOLE_DAY)) == 1);
                 task.setInterval(cursor.getInt(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_INTERVAL)));
-                task.setUnit(UnitType.valueOf(cursor.getString(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_UNIT))));
+                int unitIndex = cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_UNIT);
+                String unitStr = cursor.getString(unitIndex);
+
+                if (unitStr != null) {
+                    task.setUnit(UnitType.valueOf(unitStr));
+                } else {
+                    task.setUnit(null);
+                }
                 task.setDifficulty(DifficultyType.valueOf(cursor.getString(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_DIFFICULTY))));
                 task.setImportance(ImportanceType.valueOf(cursor.getString(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_IMPORTANCE))));
                 task.setStatus(StatusType.valueOf(cursor.getString(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_STATUS))));
