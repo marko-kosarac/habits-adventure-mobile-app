@@ -76,7 +76,8 @@ public class MainActivity extends AppCompatActivity {
                 R.id.profile_page,
                 R.id.nav_register,
                 R.id.statistics_page,
-                R.id.shopFragment
+                R.id.shopFragment,
+                R.id.friendsFragment
         ).setOpenableLayout(drawer).build();
 
         // Poveži Toolbar i Drawer sa NavController-om
@@ -103,6 +104,9 @@ public class MainActivity extends AppCompatActivity {
             else if( id == R.id.nav_shop){
                 navController.navigate((R.id.shopFragment));
 
+            }
+            else if(id == R.id.nav_friends){
+                navController.navigate((R.id.friendsFragment));
             }else if (id == R.id.nav_logout)
             {
                 FirebaseAuth.getInstance().signOut(); // stvarni logout

@@ -1,5 +1,6 @@
 package com.example.mobilnaaplikacija.model;
 
+import java.util.ArrayList;
 import java.util.List;
 import com.example.mobilnaaplikacija.model.Equipment;
 
@@ -8,6 +9,7 @@ public class User {
     private String email;
     private String password;
     private String username;
+    private boolean isFriend;
     private int avatarId; // indeks od 0-4 za izbor avatara
 
     private boolean isActivated;
@@ -22,6 +24,7 @@ public class User {
 
     private List<String> badges; // lista naziva bedževa
     private List<Equipment> equipment;
+    private List<User> friends;
 
     private String qrCode; // može biti putanja do slike ili generisani kod
 
@@ -29,6 +32,12 @@ public class User {
         super();
     }
     // Konstruktor za registraciju
+
+    public User(String id, String username, boolean isFriend) {
+        this.id = id;
+        this.username = username;
+        this.isFriend = isFriend;
+    }
     public User(String id,String email, String password, String username, int avatarId) {
         this.id = id;
         this.email = email;
@@ -45,6 +54,7 @@ public class User {
         this.powerPoints = 0;
         this.experiencePoints = 0;
         this.coins = 0;
+        this.friends = new ArrayList<>();
     }
 
     // GETTERI I SETTERI
@@ -176,5 +186,21 @@ public class User {
 
     public void setQrCode(String qrCode) {
         this.qrCode = qrCode;
+    }
+
+    public List<User> getFriends() {
+        return friends;
+    }
+
+    public void setFriends(List<User> friends) {
+        this.friends = friends;
+    }
+
+    public boolean isFriend() {
+        return isFriend;
+    }
+
+    public void setFriend(boolean friend) {
+        isFriend = friend;
     }
 }

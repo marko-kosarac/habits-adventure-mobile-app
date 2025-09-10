@@ -12,9 +12,6 @@
         android:label="Login"
         tools:layout="@layout/fragment_home">
         <action
-            android:id="@+id/action_homeFragment_to_profile_page"
-            app:destination="@id/profile_page" />
-        <action
             android:id="@+id/action_homeFragment_to_registerFragment"
             app:destination="@id/nav_register" />
     </fragment>
@@ -44,13 +41,15 @@
         android:name="com.example.mobilnaaplikacija.fragments.user.StatisticsFragment"
         android:label="Statistika"
         tools:layout="@layout/fragment_statistics" >
-        <action
-            android:id="@+id/action_statistics_page_to_shopFragment"
-            app:destination="@id/shopFragment" />
     </fragment>
     <fragment
         android:id="@+id/shopFragment"
         android:name="com.example.mobilnaaplikacija.fragments.shop.ShopFragment"
         android:label="Prodavnica"
         tools:layout="@layout/fragment_shop" />
+    <fragment
+        android:id="@+id/friendsFragment"
+        android:name="com.example.mobilnaaplikacija.fragments.friends.FriendsFragment"
+        android:label="fragment_friends"
+        tools:layout="@layout/fragment_friends" />
 </navigation>
