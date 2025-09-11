@@ -77,7 +77,9 @@ public class MainActivity extends AppCompatActivity {
                 R.id.nav_register,
                 R.id.statistics_page,
                 R.id.shopFragment,
-                R.id.friendsFragment
+                R.id.friendsFragment,
+                R.id.friendProfileFragment
+
         ).setOpenableLayout(drawer).build();
 
         // Poveži Toolbar i Drawer sa NavController-om
@@ -129,6 +131,8 @@ public class MainActivity extends AppCompatActivity {
         });
         hideSystemUI();
     }
+
+
 
     @Override
     protected void onResume() {

@@ -1,15 +1,21 @@
 package com.example.mobilnaaplikacija.adapters;
 
 import android.content.Context;
+import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.Fragment;
+import androidx.navigation.NavController;
+import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.mobilnaaplikacija.R;
+import com.example.mobilnaaplikacija.fragments.friends.FriendProfileFragment;
 import com.example.mobilnaaplikacija.model.User;
 
 import java.util.List;
@@ -48,6 +54,12 @@ public class FriendListAdapter extends RecyclerView.Adapter<FriendListAdapter.Fr
             case 4: holder.friendAvatar.setImageResource(R.drawable.avatar5); break;
             default: holder.friendAvatar.setImageResource(R.drawable.avatar1);
         }
+        holder.itemView.setOnClickListener(v -> {
+            NavController navController = Navigation.findNavController(v);
+            Bundle args = new Bundle();
+            args.putString("friendId", user.getId());
+            navController.navigate(R.id.action_friendsFragment_to_friendProfileFragment, args);
+        });
     }
 
     @Override

@@ -51,5 +51,13 @@
         android:id="@+id/friendsFragment"
         android:name="com.example.mobilnaaplikacija.fragments.friends.FriendsFragment"
         android:label="Prijatelji"
-        tools:layout="@layout/fragment_friends" />
+        tools:layout="@layout/fragment_friends" >
+        <action
+            android:id="@+id/action_friendsFragment_to_friendProfileFragment"
+            app:destination="@id/friendProfileFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/friendProfileFragment"
+        android:name="com.example.mobilnaaplikacija.fragments.friends.FriendProfileFragment"
+        android:label="Profil prijatelja" />
 </navigation>

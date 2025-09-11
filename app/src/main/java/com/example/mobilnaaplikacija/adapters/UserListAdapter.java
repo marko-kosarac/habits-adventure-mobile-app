@@ -1,6 +1,7 @@
 package com.example.mobilnaaplikacija.adapters;
 
 import android.content.Context;
+import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -8,6 +9,8 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.navigation.NavController;
+import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.mobilnaaplikacija.R;
@@ -74,6 +77,13 @@ public class UserListAdapter extends RecyclerView.Adapter<UserListAdapter.UserVi
             holder.textFriend.setVisibility(View.GONE);
             holder.buttonAddFriend.setOnClickListener(v -> listener.onAddFriend(user, position));
         }
+
+        holder.itemView.setOnClickListener(v -> {
+            NavController navController = Navigation.findNavController(v);
+            Bundle args = new Bundle();
+            args.putString("friendId", user.getId());
+            navController.navigate(R.id.action_friendsFragment_to_friendProfileFragment, args);
+        });
     }
 
     @Override
