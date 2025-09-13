@@ -29,13 +29,12 @@
         >
 
         <!-- Zadaci -->
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/rvTasks"
+        <androidx.fragment.app.FragmentContainerView
+            android:id="@+id/fragTaskList"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_marginBottom="16dp"
-            android:layout_weight="1"
-            android:scrollbars="vertical"/>
+            android:layout_weight="1"/>
 
         <!-- Dugme za dodavanje zadatka -->
         <Button
