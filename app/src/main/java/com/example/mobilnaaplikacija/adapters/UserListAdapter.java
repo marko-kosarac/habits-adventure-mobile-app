@@ -72,7 +72,11 @@ public class UserListAdapter extends RecyclerView.Adapter<UserListAdapter.UserVi
         if (isFriend) {
             holder.buttonAddFriend.setVisibility(View.GONE);
             holder.textFriend.setVisibility(View.VISIBLE); // prikazi "Prijatelji"
-        } else {
+        }else if (user.isRequestSent()) {
+            holder.buttonAddFriend.setText("Poslato");
+            holder.buttonAddFriend.setEnabled(false);
+        }
+            else {
             holder.buttonAddFriend.setVisibility(View.VISIBLE);
             holder.textFriend.setVisibility(View.GONE);
             holder.buttonAddFriend.setOnClickListener(v -> listener.onAddFriend(user, position));

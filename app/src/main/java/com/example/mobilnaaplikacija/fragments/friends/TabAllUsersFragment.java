@@ -98,7 +98,7 @@ public class TabAllUsersFragment extends Fragment {
             if (task.isSuccessful() && task.getResult() != null) {
                 for (QueryDocumentSnapshot doc : task.getResult()) {
                     String uid = doc.getId();
-                    if (uid.equals(currentUserId)) continue; // ne prikazuj samog sebe
+                    if (uid.equals(currentUserId)) continue;
 
                     String username = doc.getString("username");
                     Long avatarLong = doc.getLong("avatarId");
@@ -109,7 +109,6 @@ public class TabAllUsersFragment extends Fragment {
                     user.setUsername(username != null ? username : "Korisnik");
                     user.setAvatarId(avatarId);
 
-                    // Provera da li je već prijatelj
                     boolean isAlreadyFriend = false;
                     for (User friend : friendsList) {
                         if (friend.getId().equals(uid)) {
@@ -122,32 +121,33 @@ public class TabAllUsersFragment extends Fragment {
                     allUsersList.add(user);
                 }
                 adapter.setUsers(allUsersList);
+
+                // 🔹 dodatno obeleži kome je već poslat zahtev
+                markPendingRequests();
             } else {
                 Toast.makeText(getContext(), "Greška pri učitavanju korisnika", Toast.LENGTH_SHORT).show();
             }
         });
     }
 
-    private void addFriend(User user, int position) {
-        String currentUserId = FirebaseAuth.getInstance().getCurrentUser().getUid();
-
-        Map<String, Object> request = new HashMap<>();
-        request.put("fromUserId", currentUserId);
-        request.put("toUserId", user.getId());
-        request.put("status", "pending");
-        request.put("timestamp", FieldValue.serverTimestamp());
-
-        FirebaseFirestore.getInstance()
-                .collection("friend_requests")
-                .add(request)
-                .addOnSuccessListener(documentReference -> {
-                    Toast.makeText(getContext(), "Zahtev poslat!", Toast.LENGTH_SHORT).show();
-
-                    user.setFriendRequestSent(true); // update UI
-                    adapter.updateUser(position, user);
-                })
-                .addOnFailureListener(e -> {
-                    Toast.makeText(getContext(), "Greška pri slanju zahteva", Toast.LENGTH_SHORT).show();
+    private void markPendingRequests() {
+        db.collection("friend_requests")
+                .whereEqualTo("fromUserId", currentUserId)
+                .whereEqualTo("status", "pending")
+                .get()
+                .addOnSuccessListener(query -> {
+                    if (query != null && !query.isEmpty()) {
+                        for (QueryDocumentSnapshot doc : query) {
+                            String toUserId = doc.getString("toUserId");
+                            for (User u : allUsersList) {
+                                if (u.getId().equals(toUserId)) {
+                                    u.setRequestSent(true);
+                                    break;
+                                }
+                            }
+                        }
+                        adapter.setUsers(allUsersList); // osveži UI
+                    }
                 });
     }
 
@@ -167,7 +167,7 @@ public class TabAllUsersFragment extends Fragment {
                 .addOnSuccessListener(docRef -> {
                     Toast.makeText(getContext(), "Zahtev poslat korisniku " + user.getUsername(), Toast.LENGTH_SHORT).show();
 
-                    // Opcionalno: promeni dugme u "Zahtev poslat" ili ga onemogući
+                    // 🔹 odmah promeni status u UI
                     user.setRequestSent(true);
                     adapter.updateUser(allUsersList.indexOf(user), user);
                 })
@@ -175,18 +175,6 @@ public class TabAllUsersFragment extends Fragment {
                     Toast.makeText(getContext(), "Greška pri slanju zahteva", Toast.LENGTH_SHORT).show();
                 });
     }
-
-
-    private void sendNotificationToUser(String receiverId, String requestId) {
-        db.collection("users").document(receiverId).get().addOnSuccessListener(doc -> {
-            String token = doc.getString("fcmToken");
-            if (token != null) {
-                // Ovdje se poziva cloud function ili tvoj server koji koristi FCM HTTP API
-                // jer sa klijenta nije sigurno slati direktno na FCM endpoint
-            }
-        });
-    }
-
 
 
 
