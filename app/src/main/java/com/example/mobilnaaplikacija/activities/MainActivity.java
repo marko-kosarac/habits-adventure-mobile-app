@@ -8,6 +8,7 @@ import android.view.Menu;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
@@ -23,7 +24,10 @@ import com.example.mobilnaaplikacija.databinding.ActivityMainBinding;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentChange;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.ListenerRegistration;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -37,6 +41,9 @@ public class MainActivity extends AppCompatActivity {
     private NavController navController;
     private AppBarConfiguration mAppBarConfiguration;
     private Set<Integer> topLevelDestinations = new HashSet<>();
+    private static final String FRIEND_REQUEST_CHANNEL_ID = "friend_request_channel";
+    private ListenerRegistration friendRequestListener;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,6 +74,9 @@ public class MainActivity extends AppCompatActivity {
                 navController.navigate(R.id.mainFragment);
             }
         }
+        if (FirebaseAuth.getInstance().getCurrentUser() != null) {
+            listenForFriendRequests();
+        }
 
         // Top-level destinacije (hamburger se prikazuje za ove)
         mAppBarConfiguration = new AppBarConfiguration.Builder(
@@ -91,6 +101,8 @@ public class MainActivity extends AppCompatActivity {
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.addDrawerListener(toggle);
         toggle.syncState();
+
+        createNotificationChannel();
 
         navigationView.setNavigationItemSelectedListener(item -> {
             int id = item.getItemId();
@@ -138,6 +150,9 @@ public class MainActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         updateDrawerHeader();
+//        if (FirebaseAuth.getInstance().getCurrentUser() != null) {
+//            listenForFriendRequests();
+//        }
     }
 
     private void restartApp() {
@@ -218,4 +233,145 @@ public class MainActivity extends AppCompatActivity {
                         | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
                         | View.SYSTEM_UI_FLAG_FULLSCREEN);
     }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (friendRequestListener != null) {
+            friendRequestListener.remove();
+        }
+    }
+
+    private void createNotificationChannel() {
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            CharSequence name = "Friend Requests";
+            String description = "Obaveštenja o zahtevima za prijateljstvo";
+            int importance = android.app.NotificationManager.IMPORTANCE_HIGH;
+            android.app.NotificationChannel channel = new android.app.NotificationChannel(FRIEND_REQUEST_CHANNEL_ID, name, importance);
+            channel.setDescription(description);
+
+            android.app.NotificationManager notificationManager = getSystemService(android.app.NotificationManager.class);
+            if (notificationManager != null) {
+                notificationManager.createNotificationChannel(channel);
+            }
+        }
+    }
+
+    public void listenForFriendRequests() {
+        String currentUserId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+
+        if (friendRequestListener != null) {
+            friendRequestListener.remove(); // ukloni prethodni listener ako postoji
+        }
+
+        friendRequestListener = db.collection("friend_requests")
+                .whereEqualTo("toUserId", currentUserId)
+                .whereEqualTo("status", "pending")
+                .addSnapshotListener((value, error) -> {
+                    if (error != null) return;
+
+                    if (value != null && !value.isEmpty()) {
+                        for (DocumentChange dc : value.getDocumentChanges()) {
+                            if (dc.getType() == DocumentChange.Type.ADDED) {
+                                String requestId = dc.getDocument().getId();
+                                String fromUserId = dc.getDocument().getString("fromUserId");
+
+                                // Dohvati username pošiljaoca
+                                db.collection("users").document(fromUserId)
+                                        .get()
+                                        .addOnSuccessListener(doc -> {
+                                            String fromUsername = doc.getString("username");
+
+                                            // Prikaz dijaloga
+                                            showFriendRequestDialog(fromUserId, requestId);
+
+                                            // Prikaz lokalne notifikacije
+                                            showFriendRequestNotification(fromUsername, requestId);
+                                        });
+                            }
+                        }
+                    }
+                });
+    }
+
+
+
+    // Helper metoda za provere da li je app u foreground-u
+    private boolean isAppInForeground() {
+        android.app.ActivityManager.RunningAppProcessInfo appProcess = new android.app.ActivityManager.RunningAppProcessInfo();
+        android.app.ActivityManager.getMyMemoryState(appProcess);
+        return appProcess.importance == android.app.ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND;
+    }
+
+    // Dijalog za prihvatanje/odbijanje
+    private void showFriendRequestDialog(String fromUserId, String requestId) {
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+
+        db.collection("users").document(fromUserId)
+                .get()
+                .addOnSuccessListener(doc -> {
+                    String fromUsername = doc.getString("username");
+
+                    new androidx.appcompat.app.AlertDialog.Builder(this)
+                            .setTitle("Novi zahtev za prijateljstvo")
+                            .setMessage(fromUsername + " ti je poslao zahtev.")
+                            .setPositiveButton("Prihvati", (dialog, which) -> acceptFriendRequest(fromUserId, requestId))
+                            .setNegativeButton("Odbij", (dialog, which) -> declineFriendRequest(requestId))
+                            .setCancelable(false)
+                            .show();
+                });
+    }
+
+    // Prihvatanje zahteva
+    private void acceptFriendRequest(String fromUserId, String requestId) {
+        String currentUserId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+
+        db.collection("users").document(currentUserId)
+                .update("friends", FieldValue.arrayUnion(fromUserId));
+        db.collection("users").document(fromUserId)
+                .update("friends", FieldValue.arrayUnion(currentUserId));
+
+        db.collection("friend_requests").document(requestId)
+                .update("status", "accepted");
+
+        Toast.makeText(this, "Prihvatio si zahtev!", Toast.LENGTH_SHORT).show();
+    }
+
+    // Odbijanje zahteva
+    private void declineFriendRequest(String requestId) {
+        FirebaseFirestore.getInstance().collection("friend_requests")
+                .document(requestId)
+                .update("status", "declined");
+
+        Toast.makeText(this, "Odbio si zahtev.", Toast.LENGTH_SHORT).show();
+    }
+
+    // Lokalna notifikacija
+    private void showFriendRequestNotification(String fromUsername, String requestId) {
+        android.app.NotificationManager notificationManager =
+                (android.app.NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+
+        android.app.PendingIntent pendingIntent = android.app.PendingIntent.getActivity(
+                this, 0, new Intent(this, MainActivity.class),
+                android.app.PendingIntent.FLAG_UPDATE_CURRENT | android.app.PendingIntent.FLAG_IMMUTABLE
+        );
+
+        android.app.Notification.Builder builder = new android.app.Notification.Builder(this, FRIEND_REQUEST_CHANNEL_ID)
+                .setSmallIcon(R.drawable.ic_friend_request)
+                .setContentTitle("Novi zahtev za prijateljstvo")
+                .setContentText(fromUsername + " ti je poslao zahtev.")
+                .setContentIntent(pendingIntent)
+                .setAutoCancel(true)
+                .setPriority(android.app.Notification.PRIORITY_HIGH);
+
+        if (notificationManager != null) {
+            notificationManager.notify(requestId.hashCode(), builder.build());
+        }
+    }
+
+
+
+
 }

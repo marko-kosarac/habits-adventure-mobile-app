@@ -13,6 +13,8 @@ public class User {
     private int avatarId; // indeks od 0-4 za izbor avatara
 
     private boolean isActivated;
+    private boolean requestSent = false;
+
     private long activationDeadline; // timestamp do kada važi aktivacioni link (24h)
 
     // Profil info
@@ -21,6 +23,7 @@ public class User {
     private int powerPoints;
     private int experiencePoints;
     private int coins;
+    private boolean friendRequestSent = false;
 
     private List<String> badges; // lista naziva bedževa
     private List<Equipment> equipment;
@@ -203,4 +206,10 @@ public class User {
     public void setFriend(boolean friend) {
         isFriend = friend;
     }
+
+    public boolean isFriendRequestSent() { return friendRequestSent; }
+    public void setFriendRequestSent(boolean sent) { this.friendRequestSent = sent; }
+
+    public boolean isRequestSent() { return requestSent; }
+    public void setRequestSent(boolean sent) { this.requestSent = sent; }
 }

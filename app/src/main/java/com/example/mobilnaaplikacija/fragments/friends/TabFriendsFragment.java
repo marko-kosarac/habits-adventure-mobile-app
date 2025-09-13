@@ -17,10 +17,11 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.mobilnaaplikacija.R;
 import com.example.mobilnaaplikacija.adapters.FriendListAdapter;
-import com.example.mobilnaaplikacija.adapters.UserListAdapter;
 import com.example.mobilnaaplikacija.model.User;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.DocumentChange;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 import java.util.ArrayList;
@@ -36,6 +37,8 @@ public class TabFriendsFragment extends Fragment {
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
     private String currentUserId = FirebaseAuth.getInstance().getCurrentUser().getUid();
 
+    private ListenerRegistration friendRequestListener;
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -45,12 +48,11 @@ public class TabFriendsFragment extends Fragment {
         searchInput = view.findViewById(R.id.searchFriends);
 
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-
-        List<User> allUsersList = new ArrayList<>();
         adapter = new FriendListAdapter(getContext(), friendsList);
         recyclerView.setAdapter(adapter);
 
-        loadFriends();
+        loadFriends(); // učitaj sve postojeće prijatelje
+        listenForFriendAcceptances(); // osluškuj nove u real-time
 
         searchInput.addTextChangedListener(new TextWatcher() {
             @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
@@ -67,16 +69,14 @@ public class TabFriendsFragment extends Fragment {
     private void loadFriends() {
         friendsList.clear();
 
-        // Prvo učitaj listu ID-jeva prijatelja trenutnog korisnika
         db.collection("users").document(currentUserId).get()
                 .addOnSuccessListener(doc -> {
                     List<String> friendIds = (List<String>) doc.get("friends");
                     if (friendIds == null || friendIds.isEmpty()) {
-                        adapter.setFriends(friendsList); // nema prijatelja
+                        adapter.setFriends(friendsList);
                         return;
                     }
 
-                    // Sada učitaj podatke za svakog prijatelja
                     db.collection("users").get().addOnCompleteListener(task -> {
                         if (task.isSuccessful() && task.getResult() != null) {
                             for (QueryDocumentSnapshot document : task.getResult()) {
@@ -93,7 +93,10 @@ public class TabFriendsFragment extends Fragment {
                                 user.setAvatarId(avatarId);
                                 user.setFriend(true);
 
-                                friendsList.add(user);
+                                // ⚡ Dodaj samo ako već nije u listi
+                                if (friendsList.stream().noneMatch(u -> u.getId().equals(uid))) {
+                                    friendsList.add(user);
+                                }
                             }
                             adapter.setFriends(friendsList);
                         } else {
@@ -107,14 +110,58 @@ public class TabFriendsFragment extends Fragment {
     private void filterFriends(String query) {
         List<User> filtered = new ArrayList<>();
         for (User u : friendsList) {
-            if (u.getUsername().toLowerCase().contains(query.toLowerCase())) filtered.add(u);
+            if (u.getUsername().toLowerCase().contains(query.toLowerCase())) {
+                filtered.add(u);
+            }
         }
         adapter.setFriends(filtered);
     }
+
     public void addFriendToList(User user) {
-        if (!friendsList.contains(user)) {
+        if (friendsList.stream().noneMatch(u -> u.getId().equals(user.getId()))) {
             friendsList.add(user);
             adapter.setFriends(friendsList);
         }
+    }
+
+    private void listenForFriendAcceptances() {
+        friendRequestListener = db.collection("friend_requests")
+                .whereEqualTo("toUserId", currentUserId)
+                .whereEqualTo("status", "accepted")
+                .addSnapshotListener((value, error) -> {
+                    if (error != null || value == null) return;
+
+                    for (DocumentChange dc : value.getDocumentChanges()) {
+                        if (dc.getType() == DocumentChange.Type.ADDED) {
+                            String fromUserId = dc.getDocument().getString("fromUserId");
+
+                            // ⚡ Ako već postoji, preskoči
+                            if (friendsList.stream().anyMatch(u -> u.getId().equals(fromUserId))) {
+                                continue;
+                            }
+
+                            db.collection("users").document(fromUserId).get()
+                                    .addOnSuccessListener(doc -> {
+                                        String username = doc.getString("username");
+                                        Long avatarLong = doc.getLong("avatarId");
+                                        int avatarId = avatarLong != null ? avatarLong.intValue() : 0;
+
+                                        User newFriend = new User();
+                                        newFriend.setId(fromUserId);
+                                        newFriend.setUsername(username != null ? username : "Korisnik");
+                                        newFriend.setAvatarId(avatarId);
+                                        newFriend.setFriend(true);
+
+                                        addFriendToList(newFriend);
+                                    });
+                        }
+                    }
+                });
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        if (friendRequestListener != null) friendRequestListener.remove();
     }
 }

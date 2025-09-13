@@ -19,11 +19,14 @@ import com.example.mobilnaaplikacija.R;
 import com.example.mobilnaaplikacija.adapters.UserListAdapter;
 import com.example.mobilnaaplikacija.model.User;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class TabAllUsersFragment extends Fragment {
 
@@ -45,8 +48,11 @@ public class TabAllUsersFragment extends Fragment {
         searchInput = view.findViewById(R.id.searchAllUsers);
 
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        adapter = new UserListAdapter(getContext(), allUsersList, friendsList, (user, position) -> addFriend(user, position));
-        recyclerView.setAdapter(adapter);
+        adapter = new UserListAdapter(getContext(), allUsersList, friendsList, (user, position) -> {
+            if (!user.isFriend() && !user.isRequestSent()) {
+                sendFriendRequest(user);
+            }
+        });        recyclerView.setAdapter(adapter);
 
 
         loadFriendsAndUsers();
@@ -123,26 +129,64 @@ public class TabAllUsersFragment extends Fragment {
     }
 
     private void addFriend(User user, int position) {
-        db.collection("users").document(currentUserId)
-                .update("friends", com.google.firebase.firestore.FieldValue.arrayUnion(user.getId()))
-                .addOnSuccessListener(aVoid -> {
-                    Toast.makeText(getContext(), user.getUsername() + " je dodat kao prijatelj!", Toast.LENGTH_SHORT).show();
+        String currentUserId = FirebaseAuth.getInstance().getCurrentUser().getUid();
 
-                    friendsList.add(user);
+        Map<String, Object> request = new HashMap<>();
+        request.put("fromUserId", currentUserId);
+        request.put("toUserId", user.getId());
+        request.put("status", "pending");
+        request.put("timestamp", FieldValue.serverTimestamp());
 
-                    TabFriendsFragment fragment = (TabFriendsFragment) getParentFragmentManager()
-                            .findFragmentByTag("f0"); // f0 je tag za prvi tab ViewPager2
-                    if (fragment != null) {
-                        fragment.addFriendToList(user);
-                    }
+        FirebaseFirestore.getInstance()
+                .collection("friend_requests")
+                .add(request)
+                .addOnSuccessListener(documentReference -> {
+                    Toast.makeText(getContext(), "Zahtev poslat!", Toast.LENGTH_SHORT).show();
 
-                    user.setFriend(true); // ili adapter proverava friendsList
+                    user.setFriendRequestSent(true); // update UI
                     adapter.updateUser(position, user);
                 })
                 .addOnFailureListener(e -> {
-                    Toast.makeText(getContext(), "Greška pri dodavanju prijatelja", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getContext(), "Greška pri slanju zahteva", Toast.LENGTH_SHORT).show();
                 });
     }
+
+
+    private void sendFriendRequest(User user) {
+        String currentUserId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+
+        Map<String, Object> request = new HashMap<>();
+        request.put("fromUserId", currentUserId);
+        request.put("toUserId", user.getId());
+        request.put("status", "pending");
+        request.put("timestamp", com.google.firebase.firestore.FieldValue.serverTimestamp());
+
+        FirebaseFirestore.getInstance()
+                .collection("friend_requests")
+                .add(request)
+                .addOnSuccessListener(docRef -> {
+                    Toast.makeText(getContext(), "Zahtev poslat korisniku " + user.getUsername(), Toast.LENGTH_SHORT).show();
+
+                    // Opcionalno: promeni dugme u "Zahtev poslat" ili ga onemogući
+                    user.setRequestSent(true);
+                    adapter.updateUser(allUsersList.indexOf(user), user);
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(getContext(), "Greška pri slanju zahteva", Toast.LENGTH_SHORT).show();
+                });
+    }
+
+
+    private void sendNotificationToUser(String receiverId, String requestId) {
+        db.collection("users").document(receiverId).get().addOnSuccessListener(doc -> {
+            String token = doc.getString("fcmToken");
+            if (token != null) {
+                // Ovdje se poziva cloud function ili tvoj server koji koristi FCM HTTP API
+                // jer sa klijenta nije sigurno slati direktno na FCM endpoint
+            }
+        });
+    }
+
 
 
 
@@ -151,6 +195,6 @@ public class TabAllUsersFragment extends Fragment {
         for (User u : allUsersList) {
             if (u.getUsername().toLowerCase().contains(query.toLowerCase())) filtered.add(u);
         }
-         adapter.setUsers(filtered);
+        adapter.setUsers(filtered);
     }
 }
