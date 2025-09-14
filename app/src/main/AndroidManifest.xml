@@ -1,12 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
-
     <!-- INTERNET je već tu -->
-    <uses-permission android:name="android.permission.INTERNET" />
-    <!-- Za primanje push notifikacija (od Android 13 obavezno) -->
+    <uses-permission android:name="android.permission.INTERNET" /> <!-- Za primanje push notifikacija (od Android 13 obavezno) -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
-
 
     <uses-feature
         android:name="android.hardware.touchscreen"
@@ -24,35 +21,34 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.MobilnaAplikacija">
-
+        <activity
+            android:name=".activities.QrScanActivity"
+            android:exported="false"
+            android:theme="@style/Theme.MobilnaAplikacija" />
         <activity
             android:name=".ShopActivity"
             android:exported="false"
-            android:theme="@style/Theme.MobilnaAplikacija" />
-
-        <!-- Splash screen kao početna aktivnost -->
+            android:theme="@style/Theme.MobilnaAplikacija" /> <!-- Splash screen kao početna aktivnost -->
         <activity
             android:name=".activities.SplashActivity"
             android:exported="true"
             android:theme="@style/Theme.MobilnaAplikacija">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity>
-
-        <!-- Main / Leanback aktivnost za TV -->
+        </activity> <!-- Main / Leanback aktivnost za TV -->
         <activity
             android:name=".activities.MainActivity"
             android:exported="true"
             tools:ignore="MissingClass">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LEANBACK_LAUNCHER" />
             </intent-filter>
-        </activity>
-
-        <!-- Firebase Messaging Service -->
+        </activity> <!-- Firebase Messaging Service -->
         <service
             android:name=".services.notifications.MyFirebaseMessagingService"
             android:exported="false">
@@ -60,7 +56,6 @@
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>
         </service>
-
     </application>
 
 </manifest>

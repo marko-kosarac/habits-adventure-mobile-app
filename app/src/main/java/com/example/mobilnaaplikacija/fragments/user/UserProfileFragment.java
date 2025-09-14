@@ -260,9 +260,6 @@ public class UserProfileFragment extends Fragment {
         });
     }
 
-
-
-
     private void bindUserData(@NonNull DocumentSnapshot document, String userId) {
         String username = document.getString("username");
         long xp = document.getLong("experiencePoints") != null ? document.getLong("experiencePoints") : 0;
@@ -289,7 +286,7 @@ public class UserProfileFragment extends Fragment {
             }
         }
         updateLevelUI(xp, userId);
-        generateQRCode(userId, username, email);
+        generateQRCode(userId);
     }
 
     private void updateLevelUI(long currentXP, String userId) {
@@ -349,10 +346,10 @@ public class UserProfileFragment extends Fragment {
 
 
 
-    private void generateQRCode(String userId, String username, String email) {
+    private void generateQRCode(String userId) {
         MultiFormatWriter writer = new MultiFormatWriter();
         try {
-            String qrContent = "username:" + username + ", email:" + email;
+            String qrContent = "userId:" + userId;
             BitMatrix matrix = writer.encode(qrContent, BarcodeFormat.QR_CODE, 300, 300);
             BarcodeEncoder encoder = new BarcodeEncoder();
             Bitmap bitmap = encoder.createBitmap(matrix);
@@ -361,6 +358,7 @@ public class UserProfileFragment extends Fragment {
             e.printStackTrace();
         }
     }
+
 
     private void showChangePasswordDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(getContext());

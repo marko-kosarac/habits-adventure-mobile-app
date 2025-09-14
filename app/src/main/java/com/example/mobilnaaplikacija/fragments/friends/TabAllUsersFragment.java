@@ -1,5 +1,7 @@
 package com.example.mobilnaaplikacija.fragments.friends;
 
+import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -16,8 +18,10 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.mobilnaaplikacija.R;
+import com.example.mobilnaaplikacija.activities.QrScanActivity;
 import com.example.mobilnaaplikacija.adapters.UserListAdapter;
 import com.example.mobilnaaplikacija.model.User;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -35,15 +39,18 @@ public class TabAllUsersFragment extends Fragment {
     private List<User> allUsersList = new ArrayList<>();
     private List<User> friendsList = new ArrayList<>();
     private EditText searchInput;
+    private FloatingActionButton fabScanQr;
 
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
     private String currentUserId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+
+    private static final int QR_SCAN_REQUEST_CODE = 1001;
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_tab_all_users, container, false);
-
+        fabScanQr = view.findViewById(R.id.fabScanQr);
         recyclerView = view.findViewById(R.id.recyclerAllUsers);
         searchInput = view.findViewById(R.id.searchAllUsers);
 
@@ -66,7 +73,56 @@ public class TabAllUsersFragment extends Fragment {
             @Override public void afterTextChanged(Editable s) {}
         });
 
+        fabScanQr.setOnClickListener(v -> startQrScanner());
+
         return view;
+    }
+
+    private void startQrScanner() {
+        Intent intent = new Intent(getActivity(), QrScanActivity.class); // tvoja aktivnost za skener
+        startActivityForResult(intent, QR_SCAN_REQUEST_CODE);
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == QR_SCAN_REQUEST_CODE && resultCode == Activity.RESULT_OK && data != null) {
+            String scannedData = data.getStringExtra("scanned_data");
+            handleQrResult(scannedData);
+        }
+    }
+
+    private void handleQrResult(String scannedData) {
+        if (scannedData != null && scannedData.startsWith("userId:")) {
+            String scannedUserId = scannedData.substring(7);
+
+            if (scannedUserId.equals(currentUserId)) {
+                Toast.makeText(getContext(), "Ne možeš dodati sebe", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            // Dodaj u bazu prijatelja oba korisnika
+            db.collection("users").document(currentUserId)
+                    .update("friends", FieldValue.arrayUnion(scannedUserId));
+            db.collection("users").document(scannedUserId)
+                    .update("friends", FieldValue.arrayUnion(currentUserId));
+
+            // Dodaj u UI listu ako već nije
+            User newFriend = new User();
+            newFriend.setId(scannedUserId);
+            newFriend.setUsername("Korisnik"); // možeš kasnije dohvatiti pravo ime iz Firestore
+            newFriend.setFriend(true);
+
+            if (friendsList.stream().noneMatch(u -> u.getId().equals(newFriend.getId()))) {
+                friendsList.add(newFriend);
+            }
+
+            Toast.makeText(getContext(), "Korisnik dodat u prijatelje!", Toast.LENGTH_SHORT).show();
+            adapter.setUsers(allUsersList); // refresh adaptera
+        } else {
+            Toast.makeText(getContext(), "QR kod nije validan", Toast.LENGTH_SHORT).show();
+        }
     }
 
     private void loadFriendsAndUsers() {
