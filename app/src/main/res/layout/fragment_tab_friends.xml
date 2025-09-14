@@ -1,26 +1,42 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:padding="8dp">
+    android:layout_height="match_parent">
 
-    <!-- Search bar -->
-    <EditText
-        android:id="@+id/searchFriends"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="Pretraži prijatelje"
-        android:padding="10dp"
-        android:drawableStart="@android:drawable/ic_menu_search"
-        android:background="@drawable/search_bg"
-        android:inputType="text" />
-
-    <!-- Lista prijatelja -->
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recyclerFriends"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginTop="8dp" />
+        android:orientation="vertical"
+        android:padding="8dp">
 
-</LinearLayout>
+        <!-- Search bar -->
+        <EditText
+            android:id="@+id/searchFriends"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Pretraži prijatelje"
+            android:padding="10dp"
+            android:drawableStart="@android:drawable/ic_menu_search"
+            android:background="@drawable/search_bg"
+            android:inputType="text" />
+
+        <!-- Lista prijatelja -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recyclerFriends"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginTop="8dp" />
+
+    </LinearLayout>
+
+    <!-- Floating button za kreiranje saveza -->
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fabCreateAlliance"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="end|bottom"
+        android:layout_margin="16dp"
+        android:src="@drawable/ic_add_alliance"
+        android:contentDescription="Kreiraj savez" />
+
+</FrameLayout>

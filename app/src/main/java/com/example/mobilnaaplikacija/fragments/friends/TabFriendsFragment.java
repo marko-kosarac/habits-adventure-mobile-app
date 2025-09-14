@@ -1,11 +1,13 @@
 package com.example.mobilnaaplikacija.fragments.friends;
 
+import android.app.AlertDialog;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
@@ -16,8 +18,10 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.mobilnaaplikacija.R;
+import com.example.mobilnaaplikacija.adapters.AllianceFriendsAdapter;
 import com.example.mobilnaaplikacija.adapters.FriendListAdapter;
 import com.example.mobilnaaplikacija.model.User;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentChange;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -50,6 +54,9 @@ public class TabFriendsFragment extends Fragment {
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         adapter = new FriendListAdapter(getContext(), friendsList);
         recyclerView.setAdapter(adapter);
+
+        FloatingActionButton fabCreate = view.findViewById(R.id.fabCreateAlliance);
+        fabCreate.setOnClickListener(v -> showCreateAllianceDialog());
 
         loadFriends(); // učitaj sve postojeće prijatelje
         listenForFriendAcceptances(); // osluškuj nove u real-time
@@ -158,6 +165,39 @@ public class TabFriendsFragment extends Fragment {
                     }
                 });
     }
+
+    private void showCreateAllianceDialog() {
+        View dialogView = LayoutInflater.from(getContext()).inflate(R.layout.dialog_create_alliance, null);
+        EditText editAllianceName = dialogView.findViewById(R.id.editAllianceName);
+        RecyclerView recyclerView = dialogView.findViewById(R.id.recyclerAllianceFriends);
+        Button buttonCreate = dialogView.findViewById(R.id.buttonCreateAlliance);
+
+        AlertDialog dialog = new AlertDialog.Builder(getContext())
+                .setView(dialogView)
+                .create();
+
+        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+
+        // učitaj prijatelje iz friendsList
+        AllianceFriendsAdapter adapter = new AllianceFriendsAdapter(friendsList);
+        recyclerView.setAdapter(adapter);
+
+        buttonCreate.setOnClickListener(v -> {
+            String allianceName = editAllianceName.getText().toString().trim();
+            if (allianceName.isEmpty()) {
+                Toast.makeText(getContext(), "Unesite naziv saveza", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            List<User> selectedFriends = adapter.getSelectedFriends();
+            Toast.makeText(getContext(), "Savez kreiran sa " + selectedFriends.size() + " prijatelja", Toast.LENGTH_SHORT).show();
+
+            dialog.dismiss();
+        });
+
+        dialog.show();
+    }
+
 
     @Override
     public void onDestroyView() {
