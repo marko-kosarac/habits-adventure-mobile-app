@@ -4,6 +4,7 @@ import android.app.AlertDialog;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -194,50 +195,147 @@ public class TabFriendsFragment extends Fragment {
             }
 
             List<String> selectedFriendIds = adapter.getSelectedFriendIds();
-            createAlliance(allianceName, selectedFriendIds);
+            createAllianceAndSendInvites(allianceName, selectedFriendIds);
             dialog.dismiss();
         });
 
         dialog.show();
     }
 
-    private void createAlliance(String name, List<String> friendIds) {
-        String currentUserId = FirebaseAuth.getInstance().getCurrentUser().getUid();
-
-        Map<String, Object> allianceData = new HashMap<>();
-        allianceData.put("name", name);
-        allianceData.put("leaderId", currentUserId);
-        allianceData.put("members", new ArrayList<>(Arrays.asList(currentUserId))); // vođa je prvi član
-        allianceData.put("missionStarted", false);
-
+    private void createAllianceAndSendInvites(String allianceName, List<String> inviteUserIds) {
+        String creatorId = FirebaseAuth.getInstance().getCurrentUser().getUid();
         FirebaseFirestore db = FirebaseFirestore.getInstance();
 
-        // Kreiranje saveza
-        db.collection("alliances")
-                .add(allianceData)
-                .addOnSuccessListener(allianceRef -> {
-                    String allianceId = allianceRef.getId();
+        // Proveri da li korisnik već ima savez
+        db.collection("users").document(creatorId)
+                .get()
+                .addOnSuccessListener(userDoc -> {
+                    String currentAllianceId = userDoc.getString("currentAllianceId");
 
-                    // Kreiranje poziva prijateljima
-                    for (String fid : friendIds) {
-                        Map<String, Object> invite = new HashMap<>();
-                        invite.put("allianceId", allianceId);
-                        invite.put("fromUserId", currentUserId);
-                        invite.put("toUserId", fid);
-                        invite.put("status", "pending");
-                        invite.put("timestamp", FieldValue.serverTimestamp());
+                    if (currentAllianceId != null && !currentAllianceId.isEmpty()) {
+                        // Dohvati prethodni savez da proverimo da li je vođa
+                        db.collection("alliances").document(currentAllianceId)
+                                .get()
+                                .addOnSuccessListener(prevAllianceDoc -> {
+                                    if (prevAllianceDoc.exists()) {
+                                        String leaderId = prevAllianceDoc.getString("leaderId");
 
-                        db.collection("alliance_invites").add(invite);
+                                        if (creatorId.equals(leaderId)) {
+                                            // Ako je vođa, ne može kreirati novi savez
+                                            new AlertDialog.Builder(getContext())
+                                                    .setTitle("Ne možete kreirati novi savez")
+                                                    .setMessage("Prvo morate ukinuti prethodni savez pre nego što kreirate novi.")
+                                                    .setPositiveButton("OK", null)
+                                                    .show();
+                                        } else {
+                                            // Ako nije vođa, napušta prethodni savez sa potvrdom
+                                            showLeavePreviousAllianceDialog(currentAllianceId, allianceName, inviteUserIds);
+                                        }
+                                    } else {
+                                        // Prethodni savez ne postoji, može kreirati novi
+                                        actuallyCreateAlliance(allianceName, creatorId, inviteUserIds);
+                                    }
+                                });
+                    } else {
+                        // Nema prethodnog saveza, može kreirati novi
+                        actuallyCreateAlliance(allianceName, creatorId, inviteUserIds);
+                    }
+                });
+    }
 
-                        // 🔹 Kasnije ovde dodaj notifikaciju (FCM)
+    // Dijalog za potvrdu napuštanja prethodnog saveza
+    private void showLeavePreviousAllianceDialog(String previousAllianceId, String newAllianceName, List<String> inviteUserIds) {
+        new AlertDialog.Builder(getContext())
+                .setTitle("Napuštanje prethodnog saveza")
+                .setMessage("Automatski ćete napustiti prethodni savez da biste kreirali novi. Da li želite da nastavite?")
+                .setPositiveButton("Da", (dialog, which) -> leaveAlliance(previousAllianceId, () ->
+                        actuallyCreateAlliance(newAllianceName, FirebaseAuth.getInstance().getCurrentUser().getUid(), inviteUserIds)))
+                .setNegativeButton("Ne", null)
+                .show();
+    }
+
+    // Funkcija za kreiranje saveza i slanje poziva
+    private void actuallyCreateAlliance(String allianceName, String creatorId, List<String> inviteUserIds) {
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        String allianceId = db.collection("alliances").document().getId();
+
+        Map<String, Object> allianceData = new HashMap<>();
+        allianceData.put("name", allianceName);
+        allianceData.put("leaderId", creatorId);
+        allianceData.put("members", FieldValue.arrayUnion(creatorId));
+
+        db.collection("alliances").document(allianceId)
+                .set(allianceData)
+                .addOnSuccessListener(aVoid -> {
+                    // Ažuriraj kreatora
+                    db.collection("users").document(creatorId)
+                            .update("currentAllianceId", allianceId);
+
+                    // Kreiraj pozive za sve inviteUserIds sa proverom
+                    for (String userId : inviteUserIds) {
+                        db.collection("users").document(userId).get()
+                                .addOnSuccessListener(userDoc -> {
+                                    String userAllianceId = userDoc.getString("currentAllianceId");
+
+                                    if (userAllianceId != null && !userAllianceId.isEmpty()) {
+                                        // Dohvati savez korisnika
+                                        db.collection("alliances").document(userAllianceId)
+                                                .get().addOnSuccessListener(userAllianceDoc -> {
+                                                    String leaderId = userAllianceDoc.getString("leaderId");
+
+                                                    if (userId.equals(leaderId)) {
+                                                        // Korisnik je vođa drugog saveza → prikazi toast i ne šalji poziv
+                                                        String username = userDoc.getString("username");
+                                                        Toast.makeText(getContext(),
+                                                                (username != null ? username : "Korisnik") +
+                                                                        " je vođa drugog saveza i ne može biti pozvan.",
+                                                                Toast.LENGTH_SHORT).show();
+                                                    } else {
+                                                        // Može primiti poziv
+                                                        sendAllianceInvite(userId, allianceId, creatorId);
+                                                    }
+                                                });
+                                    } else {
+                                        // Korisnik nema savez → šalje se poziv
+                                        sendAllianceInvite(userId, allianceId, creatorId);
+                                    }
+                                });
                     }
 
                     Toast.makeText(getContext(), "Savez kreiran i pozivi poslati!", Toast.LENGTH_SHORT).show();
                 })
                 .addOnFailureListener(e -> {
-                    Toast.makeText(getContext(), "Greška pri kreiranju saveza", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getContext(), "Greška pri kreiranju saveza!", Toast.LENGTH_SHORT).show();
+                    Log.e("Alliance", "Neuspelo kreiranje saveza", e);
                 });
     }
+
+    private void sendAllianceInvite(String toUserId, String allianceId, String creatorId) {
+        Map<String, Object> inviteData = new HashMap<>();
+        inviteData.put("fromUserId", creatorId);
+        inviteData.put("toUserId", toUserId);
+        inviteData.put("allianceId", allianceId);
+        inviteData.put("status", "pending");
+
+        FirebaseFirestore.getInstance().collection("alliance_invites").add(inviteData);
+    }
+
+
+    private void leaveAlliance(String allianceId, Runnable onComplete) {
+        String currentUserId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+
+        db.collection("alliances").document(allianceId)
+                .update("members", FieldValue.arrayRemove(currentUserId))
+                .addOnSuccessListener(aVoid -> {
+                    db.collection("users").document(currentUserId)
+                            .update("currentAllianceId", null)
+                            .addOnSuccessListener(aVoid2 -> onComplete.run());
+                })
+                .addOnFailureListener(e -> Toast.makeText(getContext(), "Greška pri napuštanju prethodnog saveza.", Toast.LENGTH_SHORT).show());
+    }
+
+
 
 
 

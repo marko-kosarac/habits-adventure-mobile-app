@@ -63,7 +63,7 @@
         tools:layout="@layout/fragment_friend_profile"/>
     <fragment
         android:id="@+id/myAllianceFragment"
-        android:name="com.example.mobilnaaplikacija.MyAllianceFragment"
-        android:label="fragment_my_alliance"
+        android:name="com.example.mobilnaaplikacija.fragments.alliance.MyAllianceFragment"
+        android:label="Moj savez"
         tools:layout="@layout/fragment_my_alliance" />
 </navigation>

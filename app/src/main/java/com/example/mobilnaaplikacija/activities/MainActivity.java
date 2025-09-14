@@ -93,7 +93,8 @@ public class MainActivity extends AppCompatActivity {
                 R.id.statistics_page,
                 R.id.shopFragment,
                 R.id.friendsFragment,
-                R.id.friendProfileFragment
+                R.id.friendProfileFragment,
+                R.id.myAllianceFragment
 
         ).setOpenableLayout(drawer).build();
 
@@ -126,6 +127,9 @@ public class MainActivity extends AppCompatActivity {
             }
             else if(id == R.id.nav_friends){
                 navController.navigate((R.id.friendsFragment));
+            }
+            else if(id == R.id.nav_alliance){
+                navController.navigate((R.id.myAllianceFragment));
             }else if (id == R.id.nav_logout)
             {
                 FirebaseAuth.getInstance().signOut(); // stvarni logout
@@ -362,7 +366,7 @@ public class MainActivity extends AppCompatActivity {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
 
         // Dohvati ime saveza
-        db.collection("alliance").document(allianceId).get().addOnSuccessListener(doc -> {
+        db.collection("alliances").document(allianceId).get().addOnSuccessListener(doc -> {
             String allianceName = "savez";
             if (doc.exists() && doc.getString("name") != null) {
                 allianceName = doc.getString("name");
@@ -414,38 +418,87 @@ public class MainActivity extends AppCompatActivity {
         db.collection("users").document(currentUserId).get().addOnSuccessListener(userDoc -> {
             String currentAllianceId = userDoc.getString("currentAllianceId");
 
-            // Ako je korisnik već u nekom savezu, ukloni ga iz prethodnog
             if (currentAllianceId != null && !currentAllianceId.isEmpty()) {
-                db.collection("alliance").document(currentAllianceId)
-                        .update("members", FieldValue.arrayRemove(currentUserId))
+                // Proveri da li prethodni savez postoji
+                db.collection("alliances").document(currentAllianceId).get()
+                        .addOnSuccessListener(prevAllianceDoc -> {
+                            if (prevAllianceDoc.exists()) {
+                                // Ukloni korisnika iz prethodnog saveza
+                                db.collection("alliances").document(currentAllianceId)
+                                        .update("members", FieldValue.arrayRemove(currentUserId));
+                            } else {
+                                Log.w("Alliance", "Prethodni savez ne postoji, preskačem remove");
+                            }
+
+                            // Sada dodaj korisnika u novi savez
+                            addUserToAlliance(db, allianceId, currentUserId, inviteDocId);
+                        })
                         .addOnFailureListener(e -> {
-                            // Ako dokument ne postoji, samo ignoriraj
-                            Log.w("Alliance", "Ne postoji prethodni savez, preskačem remove");
+                            Log.e("Alliance", "Greška pri proveri prethodnog saveza", e);
+                            addUserToAlliance(db, allianceId, currentUserId, inviteDocId);
                         });
+            } else {
+                // Nema prethodnog saveza, direktno dodaj korisnika
+                addUserToAlliance(db, allianceId, currentUserId, inviteDocId);
             }
-
-            // Dodaj korisnika u novi savez (kreira dokument ako ne postoji)
-            Map<String, Object> data = new HashMap<>();
-            data.put("members", FieldValue.arrayUnion(currentUserId));
-
-            db.collection("alliance").document(allianceId)
-                    .set(data, SetOptions.merge())
-                    .addOnSuccessListener(aVoid -> {
-                        // Ažuriraj korisnika da pokaže trenutni savez
-                        db.collection("users").document(currentUserId)
-                                .update("currentAllianceId", allianceId);
-
-                        // Promeni status poziva u accepted
-                        db.collection("alliance_invites").document(inviteDocId)
-                                .update("status", "accepted");
-
-                        Toast.makeText(this, "Pridružio si se savezu!", Toast.LENGTH_SHORT).show();
-                    })
-                    .addOnFailureListener(e -> {
-                        Toast.makeText(this, "Greška pri pridruživanju savezu!", Toast.LENGTH_SHORT).show();
-                        Log.e("Alliance", "Neuspelo pridruživanje savezu", e);
-                    });
         });
+    }
+
+    // Pomoćna funkcija za dodavanje korisnika u savez i slanje notifikacije
+    private void addUserToAlliance(FirebaseFirestore db, String allianceId, String userId, String inviteDocId) {
+        // Dodaj korisnika u savez (kreira dokument ako ne postoji)
+        db.collection("alliances").document(allianceId)
+                .set(new HashMap<String, Object>() {{
+                    put("members", FieldValue.arrayUnion(userId));
+                }}, SetOptions.merge())
+                .addOnSuccessListener(aVoid -> {
+                    // Ažuriraj korisnika da pokaže trenutni savez
+                    db.collection("users").document(userId)
+                            .update("currentAllianceId", allianceId);
+
+                    // Promeni status poziva u accepted
+                    db.collection("alliance_invites").document(inviteDocId)
+                            .update("status", "accepted");
+
+                    // Dohvati kreatora saveza da pošaljemo notifikaciju
+                    db.collection("alliances").document(allianceId)
+                            .get().addOnSuccessListener(allianceDoc -> {
+                                if (allianceDoc.exists()) {
+                                    String leaderId = allianceDoc.getString("leaderId");
+                                    if (leaderId != null && !leaderId.equals(userId)) {
+                                        // Pošalji lokalnu notifikaciju ili update za kreatora saveza
+                                        sendAllianceAcceptedNotification(leaderId, userId);
+                                    }
+                                }
+                            });
+
+                    Toast.makeText(this, "Pridružio si se savezu!", Toast.LENGTH_SHORT).show();
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(this, "Greška pri pridruživanju savezu!", Toast.LENGTH_SHORT).show();
+                    Log.e("Alliance", "Neuspelo pridruživanje savezu", e);
+                });
+    }
+
+    // Primer funkcije za notifikaciju kreatoru saveza
+    private void sendAllianceAcceptedNotification(String leaderId, String newMemberId) {
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+
+        db.collection("users").document(newMemberId)
+                .get().addOnSuccessListener(newMemberDoc -> {
+                    String newMemberName = newMemberDoc.getString("username");
+
+                    // Ovde možeš dodati kod za Firestore "notifications" kolekciju ili push notifikaciju
+                    // npr:
+                    Map<String, Object> notification = new HashMap<>();
+                    notification.put("type", "alliance_accepted");
+                    notification.put("message", newMemberName + " je prihvatio poziv u tvoj savez!");
+                    notification.put("timestamp", FieldValue.serverTimestamp());
+
+                    db.collection("users").document(leaderId)
+                            .collection("notifications")
+                            .add(notification);
+                });
     }
 
 
