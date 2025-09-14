@@ -1,5 +1,6 @@
 package com.example.mobilnaaplikacija.activities;
 
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -28,8 +29,11 @@ import com.google.firebase.firestore.DocumentChange;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.ListenerRegistration;
+import com.google.firebase.firestore.SetOptions;
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import de.hdodenhof.circleimageview.CircleImageView;
@@ -42,7 +46,7 @@ public class MainActivity extends AppCompatActivity {
     private AppBarConfiguration mAppBarConfiguration;
     private Set<Integer> topLevelDestinations = new HashSet<>();
     private static final String FRIEND_REQUEST_CHANNEL_ID = "friend_request_channel";
-    private ListenerRegistration friendRequestListener;
+    private ListenerRegistration friendRequestListener, allianceInviteListener;
 
 
     @Override
@@ -76,6 +80,7 @@ public class MainActivity extends AppCompatActivity {
         }
         if (FirebaseAuth.getInstance().getCurrentUser() != null) {
             listenForFriendRequests();
+            listenForAllianceInvites();
         }
 
         // Top-level destinacije (hamburger se prikazuje za ove)
@@ -150,9 +155,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         updateDrawerHeader();
-//        if (FirebaseAuth.getInstance().getCurrentUser() != null) {
-//            listenForFriendRequests();
-//        }
     }
 
     private void restartApp() {
@@ -240,6 +242,9 @@ public class MainActivity extends AppCompatActivity {
         if (friendRequestListener != null) {
             friendRequestListener.remove();
         }
+        if (allianceInviteListener != null) {
+            allianceInviteListener.remove();
+        }
     }
 
     private void createNotificationChannel() {
@@ -294,6 +299,164 @@ public class MainActivity extends AppCompatActivity {
                     }
                 });
     }
+
+    public void listenForAllianceInvites() {
+        String currentUserId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+
+        allianceInviteListener = db.collection("alliance_invites")
+                .whereEqualTo("toUserId", currentUserId)
+                .whereEqualTo("status", "pending")
+                .addSnapshotListener((value, error) -> {
+                    if (error != null || value == null) return;
+
+                    for (DocumentChange dc : value.getDocumentChanges()) {
+                        if (dc.getType() == DocumentChange.Type.ADDED) {
+                            String fromUserId = dc.getDocument().getString("fromUserId");
+                            String allianceId = dc.getDocument().getString("allianceId");
+
+                            // Prikaži dijalog za poziv
+                            showAllianceInviteDialog(allianceId, fromUserId, dc.getDocument().getId());
+                        }
+                    }
+                });
+    }
+
+    private void showAllianceInviteDialog(String allianceId, String fromUserId, String inviteDocId) {
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+
+        // Dohvati username pošiljaoca i ime saveza
+        db.collection("users").document(fromUserId)
+                .get()
+                .addOnSuccessListener(userDoc -> {
+                    String fromUsername = userDoc.getString("username");
+                    if (fromUsername == null) fromUsername = "Korisnik";
+
+                    String finalFromUsername = fromUsername;
+                    db.collection("alliances").document(allianceId)
+                            .get()
+                            .addOnSuccessListener(allianceDoc -> {
+                                String allianceName = allianceDoc.getString("name");
+                                if (allianceName == null) allianceName = "savez";
+
+                                // Dijalog koji ne može da se zatvori dok korisnik ne odabere
+                                AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                                builder.setTitle("Poziv u savez");
+                                builder.setMessage("Korisnik " + finalFromUsername + " te pozvao u savez \"" + allianceName + "\".");
+                                builder.setCancelable(false);
+
+                                builder.setPositiveButton("Prihvati", (dialog, which) -> acceptAllianceInvite(allianceId, inviteDocId));
+                                builder.setNegativeButton("Odbij", (dialog, which) -> declineAllianceInvite(inviteDocId));
+
+                                builder.show();
+
+                                // Lokalna notifikacija sa imenom saveza
+                                showAllianceInviteNotification(finalFromUsername, allianceName, inviteDocId);
+                            });
+                });
+    }
+
+
+    private void showAllianceInviteNotification(String fromUsername, String allianceId, String inviteDocId) {
+        String ALLIANCE_INVITE_CHANNEL_ID = "alliance_invite_channel";
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+
+        // Dohvati ime saveza
+        db.collection("alliance").document(allianceId).get().addOnSuccessListener(doc -> {
+            String allianceName = "savez";
+            if (doc.exists() && doc.getString("name") != null) {
+                allianceName = doc.getString("name");
+            }
+
+            // Kreiraj kanal ako je potrebno
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                android.app.NotificationChannel channel = new android.app.NotificationChannel(
+                        ALLIANCE_INVITE_CHANNEL_ID,
+                        "Alliance Invites",
+                        android.app.NotificationManager.IMPORTANCE_HIGH
+                );
+                channel.setDescription("Obaveštenja o pozivima u saveze");
+                android.app.NotificationManager notificationManager = getSystemService(android.app.NotificationManager.class);
+                if (notificationManager != null) {
+                    notificationManager.createNotificationChannel(channel);
+                }
+            }
+
+            android.app.PendingIntent pendingIntent = android.app.PendingIntent.getActivity(
+                    this, 0, new Intent(this, MainActivity.class),
+                    android.app.PendingIntent.FLAG_UPDATE_CURRENT | android.app.PendingIntent.FLAG_IMMUTABLE
+            );
+
+            android.app.Notification.Builder builder = new android.app.Notification.Builder(this, ALLIANCE_INVITE_CHANNEL_ID)
+                    .setSmallIcon(R.drawable.ic_alliance_invite)
+                    .setContentTitle("Poziv u savez")
+                    .setContentText(fromUsername + " te je pozvao u savez \"" + allianceName + "\".")
+                    .setContentIntent(pendingIntent)
+                    .setAutoCancel(true)
+                    .setPriority(android.app.Notification.PRIORITY_HIGH);
+
+            android.app.NotificationManager notificationManager =
+                    (android.app.NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+
+            if (notificationManager != null) {
+                notificationManager.notify(inviteDocId.hashCode(), builder.build());
+            }
+        });
+    }
+
+
+
+    private void acceptAllianceInvite(String allianceId, String inviteDocId) {
+        String currentUserId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+
+        // Dohvati trenutnog korisnika
+        db.collection("users").document(currentUserId).get().addOnSuccessListener(userDoc -> {
+            String currentAllianceId = userDoc.getString("currentAllianceId");
+
+            // Ako je korisnik već u nekom savezu, ukloni ga iz prethodnog
+            if (currentAllianceId != null && !currentAllianceId.isEmpty()) {
+                db.collection("alliance").document(currentAllianceId)
+                        .update("members", FieldValue.arrayRemove(currentUserId))
+                        .addOnFailureListener(e -> {
+                            // Ako dokument ne postoji, samo ignoriraj
+                            Log.w("Alliance", "Ne postoji prethodni savez, preskačem remove");
+                        });
+            }
+
+            // Dodaj korisnika u novi savez (kreira dokument ako ne postoji)
+            Map<String, Object> data = new HashMap<>();
+            data.put("members", FieldValue.arrayUnion(currentUserId));
+
+            db.collection("alliance").document(allianceId)
+                    .set(data, SetOptions.merge())
+                    .addOnSuccessListener(aVoid -> {
+                        // Ažuriraj korisnika da pokaže trenutni savez
+                        db.collection("users").document(currentUserId)
+                                .update("currentAllianceId", allianceId);
+
+                        // Promeni status poziva u accepted
+                        db.collection("alliance_invites").document(inviteDocId)
+                                .update("status", "accepted");
+
+                        Toast.makeText(this, "Pridružio si se savezu!", Toast.LENGTH_SHORT).show();
+                    })
+                    .addOnFailureListener(e -> {
+                        Toast.makeText(this, "Greška pri pridruživanju savezu!", Toast.LENGTH_SHORT).show();
+                        Log.e("Alliance", "Neuspelo pridruživanje savezu", e);
+                    });
+        });
+    }
+
+
+    private void declineAllianceInvite(String inviteDocId) {
+        FirebaseFirestore.getInstance().collection("alliance_invites").document(inviteDocId)
+                .update("status", "declined");
+
+        Toast.makeText(this, "Odbio si poziv.", Toast.LENGTH_SHORT).show();
+    }
+
+
 
 
 

@@ -61,4 +61,9 @@
         android:name="com.example.mobilnaaplikacija.fragments.friends.FriendProfileFragment"
         android:label="Profil prijatelja"
         tools:layout="@layout/fragment_friend_profile"/>
+    <fragment
+        android:id="@+id/myAllianceFragment"
+        android:name="com.example.mobilnaaplikacija.MyAllianceFragment"
+        android:label="fragment_my_alliance"
+        tools:layout="@layout/fragment_my_alliance" />
 </navigation>

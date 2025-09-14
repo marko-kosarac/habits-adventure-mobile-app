@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp">
+
+    <!-- Naziv saveza -->
+    <TextView
+        android:id="@+id/textAllianceName"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Naziv saveza"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:paddingBottom="8dp" />
+
+    <!-- Vođa saveza -->
+    <TextView
+        android:id="@+id/textAllianceLeader"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Vođa: "
+        android:textSize="16sp"
+        android:paddingBottom="8dp" />
+
+    <!-- Lista članova -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Članovi:"
+        android:textStyle="bold"
+        android:paddingBottom="4dp" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerAllianceMembers"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
+
+</LinearLayout>

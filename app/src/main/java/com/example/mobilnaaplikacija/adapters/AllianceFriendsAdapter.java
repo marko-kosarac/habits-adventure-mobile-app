@@ -12,12 +12,15 @@ import com.example.mobilnaaplikacija.R;
 import com.example.mobilnaaplikacija.model.User;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class AllianceFriendsAdapter extends RecyclerView.Adapter<AllianceFriendsAdapter.ViewHolder> {
 
     private final List<User> friends;
     private final List<User> selectedFriends = new ArrayList<>();
+    private Map<String, Boolean> selectedMap = new HashMap<>();
 
     public AllianceFriendsAdapter(List<User> friends) {
         this.friends = friends;
@@ -38,16 +41,34 @@ public class AllianceFriendsAdapter extends RecyclerView.Adapter<AllianceFriends
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         User friend = friends.get(position);
-        holder.checkBox.setText(friend.getUsername());
-        holder.checkBox.setChecked(selectedFriends.contains(friend));
 
-        holder.checkBox.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            if (isChecked) {
+        holder.checkBox.setText(friend.getUsername());
+
+        // Postavi početno stanje checkbox-a
+        holder.checkBox.setOnCheckedChangeListener(null); // ukloni prethodni listener
+        boolean isChecked = selectedMap.getOrDefault(friend.getId(), false);
+        holder.checkBox.setChecked(isChecked);
+
+        // Dodaj novi listener
+        holder.checkBox.setOnCheckedChangeListener((buttonView, checked) -> {
+            selectedMap.put(friend.getId(), checked);
+            if (checked) {
                 if (!selectedFriends.contains(friend)) selectedFriends.add(friend);
             } else {
                 selectedFriends.remove(friend);
             }
         });
+    }
+
+
+    public List<String> getSelectedFriendIds() {
+        List<String> selectedIds = new ArrayList<>();
+        for (Map.Entry<String, Boolean> entry : selectedMap.entrySet()) {
+            if (entry.getValue()) {
+                selectedIds.add(entry.getKey());
+            }
+        }
+        return selectedIds;
     }
 
     @Override

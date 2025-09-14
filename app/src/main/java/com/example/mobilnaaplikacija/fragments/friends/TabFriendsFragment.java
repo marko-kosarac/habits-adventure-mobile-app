@@ -24,12 +24,16 @@ import com.example.mobilnaaplikacija.model.User;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentChange;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class TabFriendsFragment extends Fragment {
 
@@ -189,14 +193,52 @@ public class TabFriendsFragment extends Fragment {
                 return;
             }
 
-            List<User> selectedFriends = adapter.getSelectedFriends();
-            Toast.makeText(getContext(), "Savez kreiran sa " + selectedFriends.size() + " prijatelja", Toast.LENGTH_SHORT).show();
-
+            List<String> selectedFriendIds = adapter.getSelectedFriendIds();
+            createAlliance(allianceName, selectedFriendIds);
             dialog.dismiss();
         });
 
         dialog.show();
     }
+
+    private void createAlliance(String name, List<String> friendIds) {
+        String currentUserId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+
+        Map<String, Object> allianceData = new HashMap<>();
+        allianceData.put("name", name);
+        allianceData.put("leaderId", currentUserId);
+        allianceData.put("members", new ArrayList<>(Arrays.asList(currentUserId))); // vođa je prvi član
+        allianceData.put("missionStarted", false);
+
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+
+        // Kreiranje saveza
+        db.collection("alliances")
+                .add(allianceData)
+                .addOnSuccessListener(allianceRef -> {
+                    String allianceId = allianceRef.getId();
+
+                    // Kreiranje poziva prijateljima
+                    for (String fid : friendIds) {
+                        Map<String, Object> invite = new HashMap<>();
+                        invite.put("allianceId", allianceId);
+                        invite.put("fromUserId", currentUserId);
+                        invite.put("toUserId", fid);
+                        invite.put("status", "pending");
+                        invite.put("timestamp", FieldValue.serverTimestamp());
+
+                        db.collection("alliance_invites").add(invite);
+
+                        // 🔹 Kasnije ovde dodaj notifikaciju (FCM)
+                    }
+
+                    Toast.makeText(getContext(), "Savez kreiran i pozivi poslati!", Toast.LENGTH_SHORT).show();
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(getContext(), "Greška pri kreiranju saveza", Toast.LENGTH_SHORT).show();
+                });
+    }
+
 
 
     @Override
