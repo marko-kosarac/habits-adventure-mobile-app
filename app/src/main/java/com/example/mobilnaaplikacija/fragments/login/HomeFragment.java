@@ -92,6 +92,7 @@ public class HomeFragment extends Fragment {
                         if (activity != null) {
                             activity.listenForFriendRequests();
                             activity.listenForAllianceInvites();
+                            activity.listenForAllianceAcceptancesForLeader();
                             activity.setMainDrawer();
                             activity.updateDrawerHeader();
                         }
