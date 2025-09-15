@@ -186,9 +186,11 @@ public class AddTaskFragment extends DialogFragment {
             if(user != null){
                 userId = user.getUid();
             }
-            long id = taskService.saveTask(task, userId);
+            String id = taskService.saveTask(task, userId);
 
-            if (id != -1) {
+            //TODO set categoryId
+
+            if (id != "-1") {
                 task.setId(id);
                 sendTaskBackToHomePage(task);
                 Toast.makeText(requireContext(), "Zadatak dodan!", Toast.LENGTH_SHORT).show();

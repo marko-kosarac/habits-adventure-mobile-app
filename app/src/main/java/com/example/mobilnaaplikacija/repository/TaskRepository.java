@@ -22,7 +22,7 @@ public class TaskRepository {
         this.dbHelper = dbHelper;
     }
 
-    public long insertTask(Task task, String userId){
+    public String insertTask(Task task, String userId){
         SQLiteDatabase db = dbHelper.getWritableDatabase();
         ContentValues values = new ContentValues();
         values.put(SQLiteHelper.COLUMN_USER_ID, userId);
@@ -40,7 +40,7 @@ public class TaskRepository {
         values.put(SQLiteHelper.COLUMN_IMPORTANCE, task.getImportance().name());
         values.put(SQLiteHelper.COLUMN_STATUS, task.getStatus().name());
 
-        long id = db.insert(SQLiteHelper.TABLE_TASKS, null, values);
+        String id = String.valueOf(db.insert(SQLiteHelper.TABLE_TASKS, null, values));
         db.close();
         return id;
     }
@@ -56,11 +56,11 @@ public class TaskRepository {
         if (cursor.moveToFirst()) {
             do {
                 Task task = new Task();
-                task.setId(cursor.getLong(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_TASK_ID)));
+                task.setId(cursor.getString(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_TASK_ID)));
                 task.setUserId(cursor.getString(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_USER_ID)));
                 task.setName(cursor.getString(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_TASK_NAME)));
                 task.setDescription(cursor.getString(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_TASK_DESCRIPTION)));
-                task.setCategoryId(cursor.getLong(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_CATEGORY_ID)));
+                task.setCategoryId(cursor.getString(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_CATEGORY_ID)));
                 task.setFrequency(FrequencyType.valueOf(cursor.getString(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_FREQUENCY))));
                 task.setStartDate(cursor.getString(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_START_DATE)));
                 task.setEndDate(cursor.getString(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_END_DATE)));

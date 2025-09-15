@@ -1,23 +1,36 @@
 package com.example.mobilnaaplikacija.model;
 
 public class Category {
-    private String Name;
-    private Integer Color;
+    private String id;
+    private String name;
+    private Integer color;
 
-    public Category(Integer color, String name) {
-        Color = color;
-        Name = name;
+    public Category() {
+    }
+
+    public Category(String id, Integer color, String name) {
+        id = id;
+        color = color;
+        name = name;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        id = id;
     }
 
     public String getName() {
-        return Name;
+        return name;
     }
 
     public Integer getColor() {
-        return Color;
+        return color;
     }
 
     public void setColor(Integer color) {
-        Color = color;
+        color = color;
     }
 }

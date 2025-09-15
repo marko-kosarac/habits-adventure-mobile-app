@@ -67,11 +67,11 @@ public class TaskService {
         StatusType status = StatusType.AKTIVAN;
 
         return new Task(
-                0L,
-                "",
+                "-1",
+                "-1",
                 name,
                 description,
-                0L, //TODO categoryId if used
+                "-1",
                 frequency,
                 startDate,
                 endDate,
@@ -85,9 +85,9 @@ public class TaskService {
         );
     }
 
-    public long saveTask(Task task, String userId) {
+    public String saveTask(Task task, String userId) {
         task.setUserId(userId);
-        return taskRepository.insertTask(task, String.valueOf(userId));
+        return taskRepository.insertTask(task, userId);
     }
 
     private Task showError(String message) {
