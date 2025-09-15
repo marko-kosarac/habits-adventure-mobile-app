@@ -7,7 +7,7 @@ import androidx.annotation.NonNull;
 
 public class Task implements Parcelable {
     public Long id;
-    public Long userId;
+    public String userId;
     public String name;
     public String description;
     public Long categoryId;
@@ -24,7 +24,7 @@ public class Task implements Parcelable {
 
     public Task() {}
 
-    public Task(Long userId, String name, String description, Long categoryId, FrequencyType frequency, String startDate, String endDate, String time, Boolean isWholeDay, Integer interval, UnitType unit, DifficultyType difficulty, ImportanceType importance, StatusType status) {
+    public Task(String userId, String name, String description, Long categoryId, FrequencyType frequency, String startDate, String endDate, String time, Boolean isWholeDay, Integer interval, UnitType unit, DifficultyType difficulty, ImportanceType importance, StatusType status) {
         this.userId = userId;
         this.name = name;
         this.description = description;
@@ -41,7 +41,7 @@ public class Task implements Parcelable {
         this.status = status;
     }
 
-    public Task(Long id, Long userId, String name, String description, Long categoryId, FrequencyType frequency, String startDate, String endDate, String time, Boolean isWholeDay, Integer interval, UnitType unit, DifficultyType difficulty, ImportanceType importance, StatusType status) {
+    public Task(Long id, String userId, String name, String description, Long categoryId, FrequencyType frequency, String startDate, String endDate, String time, Boolean isWholeDay, Integer interval, UnitType unit, DifficultyType difficulty, ImportanceType importance, StatusType status) {
         this.id = id;
         this.userId = userId;
         this.name = name;
@@ -61,7 +61,7 @@ public class Task implements Parcelable {
 
     protected Task(Parcel in) {
         id = in.readLong();
-        userId = in.readLong();
+        userId = in.readString();
         name = in.readString();
         description = in.readString();
         categoryId = in.readLong();
@@ -85,8 +85,8 @@ public class Task implements Parcelable {
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
-    public Long getUserId() { return userId; }
-    public void setUserId(Long userId) { this.userId = userId; }
+    public String getUserId() { return userId; }
+    public void setUserId(String userId) { this.userId = userId; }
 
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }
@@ -133,7 +133,7 @@ public class Task implements Parcelable {
     @Override
     public void writeToParcel(@NonNull Parcel parcel, int i) {
         parcel.writeLong(id != null ? id : -1);
-        parcel.writeLong(userId != null ? userId : -1);
+        parcel.writeString(userId);
         parcel.writeString(name);
         parcel.writeString(description);
         parcel.writeLong(categoryId != null ? categoryId : -1);

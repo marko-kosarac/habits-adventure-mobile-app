@@ -7,7 +7,6 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
-import androidx.navigation.Navigation;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -21,13 +20,18 @@ import com.example.mobilnaaplikacija.R;
 import com.example.mobilnaaplikacija.databinding.FragmentAddTaskBinding;
 import com.example.mobilnaaplikacija.model.Task;
 import com.example.mobilnaaplikacija.services.TaskService;
+import com.example.mobilnaaplikacija.services.UserService;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.auth.User;
 
 import java.util.Calendar;
+import java.util.logging.Logger;
 
 public class AddTaskFragment extends DialogFragment {
 
     private FragmentAddTaskBinding binding;
     private TaskService taskService;
+    private UserService userService;
 
     @Override
     public void onStart() {
@@ -157,6 +161,7 @@ public class AddTaskFragment extends DialogFragment {
     private void setupSaveTaskButton() {
         binding.btnSaveTask.setOnClickListener(view -> {
             taskService = new TaskService(requireContext());
+            userService = new UserService();
 
             Task task = taskService.validateAndCreateTask(
                     binding.etTaskName.getText().toString(),
@@ -176,7 +181,11 @@ public class AddTaskFragment extends DialogFragment {
 
             if (task == null) return;
 
-            long userId = 1L; // TODO: fetch from logged-in user
+            String userId = "";
+            FirebaseUser user = userService.getCurrentUser();
+            if(user != null){
+                userId = user.getUid();
+            }
             long id = taskService.saveTask(task, userId);
 
             if (id != -1) {

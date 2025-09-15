@@ -17,6 +17,8 @@ import com.example.mobilnaaplikacija.adapters.TaskListAdapter;
 import com.example.mobilnaaplikacija.databinding.FragmentTaskListBinding;
 import com.example.mobilnaaplikacija.model.Task;
 import com.example.mobilnaaplikacija.services.TaskService;
+import com.example.mobilnaaplikacija.services.UserService;
+import com.google.firebase.auth.FirebaseUser;
 
 import java.util.ArrayList;
 
@@ -25,6 +27,7 @@ public class TaskListFragment extends Fragment implements RecyclerViewInterface 
     private ArrayList<Task> tasks;
     private FragmentTaskListBinding binding;
     private TaskService taskService;
+    private UserService userService;
 
     public TaskListFragment(){}
 
@@ -33,6 +36,7 @@ public class TaskListFragment extends Fragment implements RecyclerViewInterface 
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState){
         Log.i("MoblinaAplikacija", "onCreateView Task List Fragment");
         this.taskService = new TaskService(getContext());
+        this.userService = new UserService();
         this.tasks = new ArrayList<>();
         binding = FragmentTaskListBinding.inflate(inflater, container, false);
         return binding.getRoot();
@@ -52,8 +56,14 @@ public class TaskListFragment extends Fragment implements RecyclerViewInterface 
     }
 
     public void getTasks(){
+        String userId = "";
+        FirebaseUser user = userService.getCurrentUser();
+        if(user != null){
+            userId = user.getUid();
+        }
+
         tasks.clear();
-        tasks.addAll(taskService.getTasksById(1L)); // TODO : get user id
+        tasks.addAll(taskService.getTasksById(userId));
         adapter.notifyDataSetChanged();
     }
 

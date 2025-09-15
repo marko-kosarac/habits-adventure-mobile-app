@@ -68,7 +68,7 @@ public class TaskService {
 
         return new Task(
                 0L,
-                0L, //TODO userId
+                "",
                 name,
                 description,
                 0L, //TODO categoryId if used
@@ -85,7 +85,7 @@ public class TaskService {
         );
     }
 
-    public long saveTask(Task task, long userId) {
+    public long saveTask(Task task, String userId) {
         task.setUserId(userId);
         return taskRepository.insertTask(task, String.valueOf(userId));
     }
@@ -95,7 +95,7 @@ public class TaskService {
         return null;
     }
 
-    public List<Task> getTasksById(Long userId){
+    public List<Task> getTasksById(String userId){
         List<Task> tasks = taskRepository.getTasksById(userId);
         return tasks;
     }

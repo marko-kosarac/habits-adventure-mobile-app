@@ -45,7 +45,7 @@ public class TaskRepository {
         return id;
     }
 
-    public List<Task> getTasksById(Long userId){
+    public List<Task> getTasksById(String userId){
         List<Task> tasks = new ArrayList<>();
         SQLiteDatabase db = dbHelper.getReadableDatabase();
 
@@ -57,7 +57,7 @@ public class TaskRepository {
             do {
                 Task task = new Task();
                 task.setId(cursor.getLong(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_TASK_ID)));
-                task.setUserId(cursor.getLong(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_USER_ID)));
+                task.setUserId(cursor.getString(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_USER_ID)));
                 task.setName(cursor.getString(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_TASK_NAME)));
                 task.setDescription(cursor.getString(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_TASK_DESCRIPTION)));
                 task.setCategoryId(cursor.getLong(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_CATEGORY_ID)));
