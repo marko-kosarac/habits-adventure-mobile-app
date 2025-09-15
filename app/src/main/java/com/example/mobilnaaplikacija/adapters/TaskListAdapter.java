@@ -3,13 +3,11 @@ package com.example.mobilnaaplikacija.adapters;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.mobilnaaplikacija.R;
@@ -65,7 +63,7 @@ public class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapter.TasksV
             editButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    int position = getBindingAdapterPosition();
+                    int position = getAdapterPosition();
                     if (position != RecyclerView.NO_POSITION && recyclerViewInterface != null) {
                         recyclerViewInterface.onEditClick(position);
                     }
@@ -76,7 +74,7 @@ public class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapter.TasksV
                 @Override
                 public void onClick(View v) {
                     if(recyclerViewInterface != null){
-                        int pos = getBindingAdapterPosition();
+                        int pos = getAdapterPosition();
                         if(pos != RecyclerView.NO_POSITION){
                             recyclerViewInterface.onItemClick(pos);
                         }
