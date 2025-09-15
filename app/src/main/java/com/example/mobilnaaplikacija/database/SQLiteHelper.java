@@ -6,7 +6,6 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
 public class SQLiteHelper extends SQLiteOpenHelper {
-
     //Equipment table
     public static final String TABLE_EQUIPMENT = "EQUIPMENT";
     public static final String COLUMN_ID = "_id";
@@ -38,7 +37,7 @@ public class SQLiteHelper extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "appdata.db";
     private static final int DATABASE_VERSION = 5;
 
-    private static final String DB_CREATE = "CREATE TABLE " + TABLE_EQUIPMENT + " ("
+    private static final String DB_CREATE_EQUIPMENT = "CREATE TABLE " + TABLE_EQUIPMENT + " ("
             + COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
             + COLUMN_NAME + " TEXT, "
             + COLUMN_DESCRIPTION + " TEXT, "
@@ -74,7 +73,7 @@ public class SQLiteHelper extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase db) {
         Log.i("DB", "Creating Equipment and Tasks table");
-        db.execSQL(DB_CREATE);
+        db.execSQL(DB_CREATE_EQUIPMENT);
         db.execSQL(DB_CREATE_TASKS);
     }
 
