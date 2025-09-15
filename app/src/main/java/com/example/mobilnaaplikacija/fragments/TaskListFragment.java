@@ -28,18 +28,12 @@ public class TaskListFragment extends Fragment implements RecyclerViewInterface 
 
     public TaskListFragment(){}
 
-    @Override
-    public void onCreate(@Nullable Bundle savedInstanceState){
-        super.onCreate(savedInstanceState);
-        Log.i("MoblinaAplikacija", "onCreate Task List Fragment");
-        this.taskService = new TaskService(getContext());
-        tasks = new ArrayList<>();
-    }
-
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState){
         Log.i("MoblinaAplikacija", "onCreateView Task List Fragment");
+        this.taskService = new TaskService(getContext());
+        this.tasks = new ArrayList<>();
         binding = FragmentTaskListBinding.inflate(inflater, container, false);
         return binding.getRoot();
     }
@@ -47,10 +41,14 @@ public class TaskListFragment extends Fragment implements RecyclerViewInterface 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        getTasks();
         binding.rvTasks.setLayoutManager(new LinearLayoutManager(getActivity()));
         adapter = new TaskListAdapter(tasks, this);
         binding.rvTasks.setAdapter(adapter);
+        getTasks();
+
+        getParentFragmentManager().setFragmentResultListener("Task added", this, ((requestKey, result) -> {
+            getTasks();
+        }));
     }
 
     public void getTasks(){

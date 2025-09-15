@@ -6,7 +6,7 @@ import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
+import androidx.fragment.app.DialogFragment;
 import androidx.navigation.Navigation;
 
 import android.view.LayoutInflater;
@@ -24,7 +24,7 @@ import com.example.mobilnaaplikacija.services.TaskService;
 
 import java.util.Calendar;
 
-public class AddTaskFragment extends Fragment {
+public class AddTaskFragment extends DialogFragment {
 
     private FragmentAddTaskBinding binding;
     private TaskService taskService;
@@ -172,7 +172,7 @@ public class AddTaskFragment extends Fragment {
                 task.setId(id);
                 sendTaskBackToHomePage(task);
                 Toast.makeText(requireContext(), "Zadatak dodan!", Toast.LENGTH_SHORT).show();
-                Navigation.findNavController(view).popBackStack();
+                dismiss();
             } else {
                 Toast.makeText(requireContext(), "Greška pri dodavanju zadatka!", Toast.LENGTH_SHORT).show();
             }
@@ -182,7 +182,7 @@ public class AddTaskFragment extends Fragment {
     private void sendTaskBackToHomePage(Task task) {
         Bundle bundle = new Bundle();
         bundle.putParcelable("task", task);
-        getParentFragmentManager().setFragmentResult("taskAdded", bundle);
+        getParentFragmentManager().setFragmentResult("Task added", bundle);
     }
 
     @Override

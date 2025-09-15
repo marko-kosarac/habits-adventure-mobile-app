@@ -28,32 +28,13 @@ import java.util.ArrayList;
 
 public class HomePageFragment extends Fragment {
 
-    public static ArrayList<Task> tasks = new ArrayList<Task>();
     private FragmentHomePageBinding binding;
-    private TaskListAdapter adapter;
-    private TaskService taskService;
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState){
         Log.i("MoblinaAplikacija", "onCreateView Home Page Fragment");
         binding = FragmentHomePageBinding.inflate(inflater, container, false);
-
-        adapter = new TaskListAdapter(tasks);
-        binding.rvTasks.setLayoutManager(new LinearLayoutManager(requireContext()));
-        binding.rvTasks.setAdapter(adapter);
-
-        taskService = new TaskService(requireContext());
-        loadTasksFromDb();
-
-        getParentFragmentManager().setFragmentResultListener("taskAdded", this, (request, bundle) -> {
-            Task newTask = bundle.getParcelable("task");
-            if(newTask != null) {
-                tasks.add(newTask);
-                adapter.notifyItemInserted(tasks.size() - 1);
-            }
-        });
-
         return binding.getRoot();
     }
 
@@ -61,8 +42,12 @@ public class HomePageFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState){
         super.onViewCreated(view, savedInstanceState);
 
-        binding.btnAddTask.setOnClickListener(v -> {
-            Navigation.findNavController(v).navigate(R.id.action_homePageFragment_to_addTaskFragment);
+        binding.btnAddTask.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                new AddTaskFragment().show(
+                        getChildFragmentManager(), "New task");
+            }
         });
     }
 
@@ -71,11 +56,4 @@ public class HomePageFragment extends Fragment {
         super.onDestroyView();
         binding = null;
     }
-
-    private void loadTasksFromDb(){
-        tasks.clear();
-        tasks.addAll(taskService.getTasksById(1L));
-        adapter.notifyDataSetChanged();
-    }
-
 }
