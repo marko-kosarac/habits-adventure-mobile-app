@@ -14,8 +14,6 @@ public class Task implements Parcelable {
     public FrequencyType frequency;
     public String startDate;
     public String endDate;
-    public String time;
-    public Boolean isWholeDay;
     public Integer interval;
     public UnitType unit;
     public DifficultyType difficulty;
@@ -24,7 +22,7 @@ public class Task implements Parcelable {
 
     public Task() {}
 
-    public Task(String userId, String name, String description, String categoryId, FrequencyType frequency, String startDate, String endDate, String time, Boolean isWholeDay, Integer interval, UnitType unit, DifficultyType difficulty, ImportanceType importance, StatusType status) {
+    public Task(String userId, String name, String description, String categoryId, FrequencyType frequency, String startDate, String endDate, Integer interval, UnitType unit, DifficultyType difficulty, ImportanceType importance, StatusType status) {
         this.userId = userId;
         this.name = name;
         this.description = description;
@@ -32,8 +30,6 @@ public class Task implements Parcelable {
         this.frequency = frequency;
         this.startDate = startDate;
         this.endDate = endDate;
-        this.time = time;
-        this.isWholeDay = isWholeDay;
         this.interval = interval;
         this.unit = unit;
         this.difficulty = difficulty;
@@ -41,7 +37,7 @@ public class Task implements Parcelable {
         this.status = status;
     }
 
-    public Task(String id, String userId, String name, String description, String categoryId, FrequencyType frequency, String startDate, String endDate, String time, Boolean isWholeDay, Integer interval, UnitType unit, DifficultyType difficulty, ImportanceType importance, StatusType status) {
+    public Task(String id, String userId, String name, String description, String categoryId, FrequencyType frequency, String startDate, String endDate, Integer interval, UnitType unit, DifficultyType difficulty, ImportanceType importance, StatusType status) {
         this.id = id;
         this.userId = userId;
         this.name = name;
@@ -50,8 +46,6 @@ public class Task implements Parcelable {
         this.frequency = frequency;
         this.startDate = startDate;
         this.endDate = endDate;
-        this.time = time;
-        this.isWholeDay = isWholeDay;
         this.interval = interval;
         this.unit = unit;
         this.difficulty = difficulty;
@@ -69,8 +63,6 @@ public class Task implements Parcelable {
         frequency = freqName != null ? FrequencyType.valueOf(freqName) : null;
         startDate = in.readString();
         endDate = in.readString();
-        time = in.readString();
-        isWholeDay = in.readBoolean();
         interval = in.readInt();
         String unitName = in.readString();
         unit = unitName != null ? UnitType.valueOf(unitName) : null;
@@ -106,12 +98,6 @@ public class Task implements Parcelable {
     public String getEndDate() { return endDate; }
     public void setEndDate(String endDate) { this.endDate = endDate; }
 
-    public String getTime() { return time; }
-    public void setTime(String time) { this.time = time; }
-
-    public Boolean getWholeDay() { return isWholeDay; }
-    public void setWholeDay(Boolean wholeDay) { isWholeDay = wholeDay; }
-
     public Integer getInterval() { return interval; }
     public void setInterval(Integer interval) { this.interval = interval; }
 
@@ -140,8 +126,6 @@ public class Task implements Parcelable {
         parcel.writeString(frequency != null ? frequency.name() : null);
         parcel.writeString(startDate);
         parcel.writeString(endDate);
-        parcel.writeString(time);
-        parcel.writeBoolean(isWholeDay != null ? isWholeDay : false);
         parcel.writeInt(interval != null ? interval : 0);
         parcel.writeString(unit != null ? unit.name() : null);
         parcel.writeString(difficulty != null ? difficulty.name() : null);

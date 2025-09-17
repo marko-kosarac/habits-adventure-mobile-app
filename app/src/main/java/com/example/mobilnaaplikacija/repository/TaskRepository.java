@@ -33,8 +33,6 @@ public class TaskRepository {
         values.put(SQLiteHelper.COLUMN_FREQUENCY, task.getFrequency().name());
         values.put(SQLiteHelper.COLUMN_START_DATE, task.getStartDate());
         values.put(SQLiteHelper.COLUMN_END_DATE, task.getEndDate());
-        values.put(SQLiteHelper.COLUMN_TIME, task.getTime());
-        values.put(SQLiteHelper.COLUMN_IS_WHOLE_DAY, task.getWholeDay() ? 1 : 0);
         values.put(SQLiteHelper.COLUMN_INTERVAL, task.getInterval());
         values.put(SQLiteHelper.COLUMN_UNIT, task.getUnit() != null ? task.getUnit().name() : null);
         values.put(SQLiteHelper.COLUMN_DIFFICULTY, task.getDifficulty().name());
@@ -61,8 +59,6 @@ public class TaskRepository {
         values.put(SQLiteHelper.COLUMN_FREQUENCY, task.getFrequency().name());
         values.put(SQLiteHelper.COLUMN_START_DATE, task.getStartDate());
         values.put(SQLiteHelper.COLUMN_END_DATE, task.getEndDate());
-        values.put(SQLiteHelper.COLUMN_TIME, task.getTime());
-        values.put(SQLiteHelper.COLUMN_IS_WHOLE_DAY, task.getWholeDay() ? 1 : 0);
         values.put(SQLiteHelper.COLUMN_INTERVAL, task.getInterval());
         values.put(SQLiteHelper.COLUMN_UNIT, task.getUnit() != null ? task.getUnit().name() : null);
         values.put(SQLiteHelper.COLUMN_DIFFICULTY, task.getDifficulty().name());
@@ -96,8 +92,6 @@ public class TaskRepository {
                 task.setFrequency(FrequencyType.valueOf(cursor.getString(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_FREQUENCY))));
                 task.setStartDate(cursor.getString(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_START_DATE)));
                 task.setEndDate(cursor.getString(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_END_DATE)));
-                task.setTime(cursor.getString(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_TIME)));
-                task.setWholeDay(cursor.getInt(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_IS_WHOLE_DAY)) == 1);
                 task.setInterval(cursor.getInt(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_INTERVAL)));
                 int unitIndex = cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_UNIT);
                 String unitStr = cursor.getString(unitIndex);

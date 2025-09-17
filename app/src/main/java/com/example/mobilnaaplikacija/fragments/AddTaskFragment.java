@@ -75,14 +75,12 @@ public class AddTaskFragment extends DialogFragment {
             taskToUpdate = getArguments().getParcelable("Task to edit");
             binding.etTaskName.setText(taskToUpdate.getName());
             binding.etTaskDescription.setText(taskToUpdate.getDescription());
-            //binding.spinnerCategory.
+            //binding.spinnerCategory. TODO
             binding.btnSaveCategory.setText("Izmijeni kategoriju");
             binding.rbOneTime.setChecked(taskToUpdate.getFrequency() == FrequencyType.JEDNOKRATAN);
             binding.rbRepeat.setChecked(taskToUpdate.getFrequency() == FrequencyType.PONAVLJAJUCI);
             binding.etStartDate.setText(taskToUpdate.getStartDate());
             binding.etEndDate.setText(taskToUpdate.getEndDate());
-            binding.etTime.setText(taskToUpdate.getTime());
-            binding.rbWholeDay.setChecked(taskToUpdate.getWholeDay());
             binding.etReccuringNumber.setText(taskToUpdate.getInterval() == null ? "0" : String.valueOf(taskToUpdate.getInterval()));
             binding.spinnerRecurringUnit.setSelection(taskToUpdate.getUnit() == null ? -1 : UnitType.valueOf(taskToUpdate.getUnit().name()).ordinal());
             binding.spinnerDifficulty.setSelection((DifficultyType.valueOf(taskToUpdate.getDifficulty().name()).ordinal()));
@@ -100,8 +98,6 @@ public class AddTaskFragment extends DialogFragment {
             binding.rbRepeat.setChecked(taskToView.getFrequency() == FrequencyType.PONAVLJAJUCI);
             binding.etStartDate.setText(taskToView.getStartDate());
             binding.etEndDate.setText(taskToView.getEndDate());
-            binding.etTime.setText(taskToView.getTime());
-            binding.rbWholeDay.setChecked(taskToView.getWholeDay());
             binding.etReccuringNumber.setText(taskToView.getInterval() == null ? "0" : String.valueOf(taskToView.getInterval()));
             binding.spinnerRecurringUnit.setSelection(taskToView.getUnit() == null ? -1 : UnitType.valueOf(taskToView.getUnit().name()).ordinal());
             binding.spinnerDifficulty.setSelection((DifficultyType.valueOf(taskToView.getDifficulty().name()).ordinal()));
@@ -142,22 +138,8 @@ public class AddTaskFragment extends DialogFragment {
         binding.etEndDate.setFocusable(false);
         binding.etEndDate.setClickable(true);
 
-        binding.etTime.setFocusable(false);
-        binding.etTime.setClickable(true);
-
         binding.etStartDate.setOnClickListener(view -> showDatePicker(binding.etStartDate, true));
         binding.etEndDate.setOnClickListener(view -> showDatePicker(binding.etEndDate, false));
-        binding.etTime.setOnClickListener(view -> showTimePicker(binding.etTime));
-
-        binding.rbWholeDay.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            if(isChecked) {
-                binding.etTime.setText("");
-                // If whole-day, start & end equal
-                if (!binding.etStartDate.getText().toString().isEmpty()) {
-                    binding.etEndDate.setText(binding.etStartDate.getText().toString());
-                }
-            }
-        });
     }
 
     private void showDatePicker(android.widget.EditText field, boolean isStartDate){
@@ -167,14 +149,7 @@ public class AddTaskFragment extends DialogFragment {
             String date = dayOfMonth + "/" + (month + 1) + "/" + year;
             field.setText(date);
 
-            // If whole-day, start & end equal
-            if (binding.rbWholeDay.isChecked()) {
-                if (isStartDate) {
-                    binding.etEndDate.setText(date);
-                } else {
-                    binding.etStartDate.setText(date);
-                }
-            } else if (binding.rbOneTime.isChecked()) {
+            if (binding.rbOneTime.isChecked()) {
                 // If non repeating and start, then start and end equal
                 if (isStartDate) {
                     binding.etEndDate.setText(date);
@@ -239,20 +214,6 @@ public class AddTaskFragment extends DialogFragment {
         datePickerDialog.show();
     }
 
-    private void showTimePicker(android.widget.EditText field){
-        Calendar calendar = Calendar.getInstance();
-        TimePickerDialog timePickerDialog = new TimePickerDialog(
-                requireContext(),
-                (TimePicker view, int hourOfDay, int minute) -> {
-                    field.setText(String.format("%02d:%02d", hourOfDay, minute));
-                    binding.rbWholeDay.setChecked(false);
-                },
-                calendar.get(Calendar.HOUR_OF_DAY),
-                calendar.get(Calendar.MINUTE),
-                true);
-        timePickerDialog.show();
-    }
-
     private void setupFrequency(){
         if(binding.rbRepeat.isChecked()){
             binding.layoutRecurringOptions.setVisibility(View.VISIBLE);
@@ -297,8 +258,6 @@ public class AddTaskFragment extends DialogFragment {
             FrequencyType frequency = isRepeating ? FrequencyType.PONAVLJAJUCI : FrequencyType.JEDNOKRATAN;
             String startDate = binding.etStartDate.getText().toString().trim();
             String endDate = binding.etEndDate.getText().toString().trim();
-            String time = binding.etTime.getText().toString().trim();
-            boolean isWholeDay = binding.rbWholeDay.isChecked();
             String difficulty = binding.spinnerDifficulty.getSelectedItem().toString();
             String importance = binding.spinnerImportance.getSelectedItem().toString();
             String recurringUnit = binding.spinnerRecurringUnit.getSelectedItem() != null
@@ -310,7 +269,7 @@ public class AddTaskFragment extends DialogFragment {
 
             //Validacija
             String error = taskService.validate(name, category, isRepeating, isOneTime, startDate, endDate,
-                    time, isWholeDay, difficulty, importance, recurringUnit, recurringNumber);
+                    difficulty, importance, recurringUnit, recurringNumber);
             if(error != null){
                 showError(error);
                 return;
@@ -328,8 +287,6 @@ public class AddTaskFragment extends DialogFragment {
             task.setFrequency(frequency);
             task.setStartDate(startDate);
             task.setEndDate(endDate);
-            task.setTime(time);
-            task.setWholeDay(isWholeDay);
             task.setDifficulty((DifficultyType)binding.spinnerDifficulty.getSelectedItem());
             task.setImportance((ImportanceType)binding.spinnerImportance.getSelectedItem());
             if (isOneTime) {

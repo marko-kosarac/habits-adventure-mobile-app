@@ -24,7 +24,7 @@ public class TaskService {
         this.taskRepository = new TaskRepository(new SQLiteHelper(context));
     }
 
-    public String validate(String name, String category, boolean isRepeating, boolean isOneTime, String startDate, String endDate, String time, boolean isWholeDay, String difficultyStr, String importanceStr, String unitStr, String intervalStr) {
+    public String validate(String name, String category, boolean isRepeating, boolean isOneTime, String startDate, String endDate, String difficultyStr, String importanceStr, String unitStr, String intervalStr) {
         FrequencyType frequency = isRepeating ? FrequencyType.PONAVLJAJUCI :
                 (isOneTime ? FrequencyType.JEDNOKRATAN : null);
 
@@ -32,7 +32,6 @@ public class TaskService {
         if (category.isEmpty()) return "Izaberite kategoriju zadatka!";
         if (startDate.isEmpty()) return "Izaberite datum početka!";
         if (endDate.isEmpty()) return "Izaberite datum završetka!";
-        if (time.isEmpty() && !isWholeDay) return "Unesite vrijeme zadatka!";
         if (frequency == null) return "Izaberite jednokratan ili ponavljajući zadatak!";
         if (difficultyStr.isEmpty()) return "Izaberite težinu zadatka!";
         if (importanceStr.isEmpty()) return "Izaberite bitnost zadatka!";
