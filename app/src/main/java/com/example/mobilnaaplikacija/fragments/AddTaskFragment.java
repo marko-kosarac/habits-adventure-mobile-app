@@ -37,7 +37,7 @@ public class AddTaskFragment extends DialogFragment {
     private FragmentAddTaskBinding binding;
     private TaskService taskService;
     private UserService userService;
-    private boolean isEditing;
+    private boolean isEditing, areDatesValid;
     private Task taskToUpdate, taskToView;
 
     @Override
@@ -65,6 +65,7 @@ public class AddTaskFragment extends DialogFragment {
         userService = new UserService();
 
         isEditing = false;
+        areDatesValid = true;
         taskToUpdate = null;
         taskToView = null;
         setupSpinners();
@@ -162,30 +163,80 @@ public class AddTaskFragment extends DialogFragment {
     private void showDatePicker(android.widget.EditText field, boolean isStartDate){
         Calendar calendar = Calendar.getInstance();
         DatePickerDialog datePickerDialog = new DatePickerDialog(requireContext(),
-                (DatePicker view, int year, int month, int dayOfMonth) ->{
-                String date = dayOfMonth + "/" + (month + 1) + "/" + year;
-                field.setText(date);
-                    // If whole-day, start & end equal
-                    if (binding.rbWholeDay.isChecked()) {
-                        if (isStartDate) {
-                            binding.etEndDate.setText(date);
-                        } else {
-                            binding.etStartDate.setText(date);
-                        }
-                    } else if (binding.rbOneTime.isChecked()) {
-                        // If non repeating and start, then start and end equal
-                        if (isStartDate) {
-                            binding.etEndDate.setText(date);
-                            Toast.makeText(requireContext(), "Datum završetka je postavljen kao datum početka. Možeš promijeniti ovo.", Toast.LENGTH_LONG).show();
-                        } else if (!binding.etEndDate.getText().toString().isEmpty()) {
-                            binding.etStartDate.setText(date);
-                            Toast.makeText(requireContext(), "Datum početka je postavljen kao datum završetka. Možeš promijeniti ovo.", Toast.LENGTH_LONG).show();
-                        }
-                    }
-                },
-                calendar.get(Calendar.YEAR),
-                calendar.get(Calendar.MONTH),
-                calendar.get(Calendar.DAY_OF_MONTH));
+            (DatePicker view, int year, int month, int dayOfMonth) ->{
+            String date = dayOfMonth + "/" + (month + 1) + "/" + year;
+            field.setText(date);
+
+            // If whole-day, start & end equal
+            if (binding.rbWholeDay.isChecked()) {
+                if (isStartDate) {
+                    binding.etEndDate.setText(date);
+                } else {
+                    binding.etStartDate.setText(date);
+                }
+            } else if (binding.rbOneTime.isChecked()) {
+                // If non repeating and start, then start and end equal
+                if (isStartDate) {
+                    binding.etEndDate.setText(date);
+                    Toast.makeText(requireContext(), "Kraj je postavljen na isti datum.", Toast.LENGTH_LONG).show();
+                } else if (!binding.etEndDate.getText().toString().isEmpty()) {
+                    binding.etStartDate.setText(date);
+                    Toast.makeText(requireContext(), "Početak je postavljen na isti datum.", Toast.LENGTH_LONG).show();
+                }
+            }
+
+            //Start and end picked, but changed start
+            if (isStartDate && !binding.etEndDate.getText().toString().isEmpty()) {
+                try {
+                    String[] partsStart = binding.etStartDate.getText().toString().split("/");
+                    int dayStart = Integer.parseInt(partsStart[0]);
+                    int monthStart = Integer.parseInt(partsStart[1]) - 1;
+                    int yearStart = Integer.parseInt(partsStart[2]);
+                    Calendar calStart = Calendar.getInstance();
+                    calStart.set(yearStart, monthStart, dayStart);
+
+                    String[] partsEnd = binding.etEndDate.getText().toString().split("/");
+                    int dayEnd = Integer.parseInt(partsEnd[0]);
+                    int monthEnd = Integer.parseInt(partsEnd[1]) - 1;
+                    int yearEnd = Integer.parseInt(partsEnd[2]);
+                    Calendar calEnd = Calendar.getInstance();
+                    calEnd.set(yearEnd, monthEnd, dayEnd);
+
+                    if (calEnd.before(calStart)) {
+                        areDatesValid = false;
+                        showError("Datum završetka je prije početka!");
+                    } else
+                        areDatesValid = true;
+
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            }
+
+            },
+            calendar.get(Calendar.YEAR),
+            calendar.get(Calendar.MONTH),
+            calendar.get(Calendar.DAY_OF_MONTH));
+
+        long today = System.currentTimeMillis() - 1000;
+        datePickerDialog.getDatePicker().setMinDate(today);
+
+        //Prevent choosing older than start date
+        if (!isStartDate && !binding.etStartDate.getText().toString().isEmpty()) {
+           try {
+               String[] partsOfStart = binding.etStartDate.getText().toString().split("/");
+               int day = Integer.parseInt(partsOfStart[0]);
+               int month = Integer.parseInt(partsOfStart[1]) - 1;
+               int year = Integer.parseInt(partsOfStart[2]);
+
+               Calendar calendarStart = Calendar.getInstance();
+               calendarStart.set(year, month, day);
+               datePickerDialog.getDatePicker().setMinDate(calendarStart.getTimeInMillis());
+           } catch (Exception e) {
+               throw new RuntimeException(e);
+           }
+        }
+
         datePickerDialog.show();
     }
 
@@ -285,23 +336,24 @@ public class AddTaskFragment extends DialogFragment {
             task.setStatus(StatusType.AKTIVAN); //TODO set status
 
             //Čuvanje zadatka
-            if(isEditing){
-                task = taskService.update(task);
-                Toast.makeText(requireContext(), "Zadatak izmijenjen!", Toast.LENGTH_SHORT).show();
-
-            } else {
-                task = taskService.add(task);
-                Toast.makeText(requireContext(), "Zadatak dodan!", Toast.LENGTH_SHORT).show();
-            }
-            sendBackToTaskList(task);
-            dismiss();
+            if (areDatesValid) {
+                if(isEditing){
+                    task = taskService.update(task);
+                    Toast.makeText(requireContext(), "Zadatak izmijenjen!", Toast.LENGTH_SHORT).show();
+                } else {
+                    task = taskService.add(task);
+                    Toast.makeText(requireContext(), "Zadatak dodan!", Toast.LENGTH_SHORT).show();
+                }
+                sendBackToTaskList(task);
+                dismiss();
+            } else
+                showError("Datum završetka je prije početka!");
         });
     }
 
     private void sendBackToTaskList(Task task) {
         Bundle bundle = new Bundle();
         bundle.putParcelable("task", task);
-        Log.d("AddTaskFragment", "Sending Task managed: " + task.getName());
         getParentFragmentManager().setFragmentResult("Task managed", bundle);
     }
 
