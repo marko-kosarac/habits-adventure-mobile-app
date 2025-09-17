@@ -212,11 +212,10 @@ public class AddTaskFragment extends DialogFragment {
                     throw new RuntimeException(e);
                 }
             }
-
-            },
-            calendar.get(Calendar.YEAR),
-            calendar.get(Calendar.MONTH),
-            calendar.get(Calendar.DAY_OF_MONTH));
+        },
+        calendar.get(Calendar.YEAR),
+        calendar.get(Calendar.MONTH),
+        calendar.get(Calendar.DAY_OF_MONTH));
 
         long today = System.currentTimeMillis() - 1000;
         datePickerDialog.getDatePicker().setMinDate(today);
@@ -302,7 +301,7 @@ public class AddTaskFragment extends DialogFragment {
             String importance = binding.spinnerImportance.getSelectedItem().toString();
             String recurringUnit = binding.spinnerRecurringUnit.getSelectedItem() != null
                     ? binding.spinnerRecurringUnit.getSelectedItem().toString()
-                    : "";
+                    : null;
             String recurringNumber = binding.etReccuringNumber.getText() != null
                     ? binding.etReccuringNumber.getText().toString()
                     : "0";
@@ -331,8 +330,13 @@ public class AddTaskFragment extends DialogFragment {
             task.setWholeDay(isWholeDay);
             task.setDifficulty((DifficultyType)binding.spinnerDifficulty.getSelectedItem());
             task.setImportance((ImportanceType)binding.spinnerImportance.getSelectedItem());
-            task.setUnit((UnitType) binding.spinnerRecurringUnit.getSelectedItem());
-            task.setInterval(recurringNumber.trim().isEmpty() ? 0 : Integer.parseInt(recurringNumber));
+            if (isOneTime) {
+                task.setUnit(null);
+                task.setInterval(0);
+            } else {
+                task.setUnit((UnitType) binding.spinnerRecurringUnit.getSelectedItem());
+                task.setInterval(Integer.parseInt(recurringNumber));
+            }
             task.setStatus(StatusType.AKTIVAN); //TODO set status
 
             //Čuvanje zadatka
