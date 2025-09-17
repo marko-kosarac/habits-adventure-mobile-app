@@ -21,32 +21,13 @@
 
     </FrameLayout>
 
-    <LinearLayout
+    <!-- Zadaci -->
+    <androidx.fragment.app.FragmentContainerView
+        android:id="@+id/fragTaskList"
+        android:name="com.example.mobilnaaplikacija.fragments.TaskListFragment"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:paddingHorizontal="16dp"
-        >
-
-        <!-- Zadaci -->
-        <androidx.fragment.app.FragmentContainerView
-            android:id="@+id/fragTaskList"
-            android:name="com.example.mobilnaaplikacija.fragments.TaskListFragment"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_marginBottom="16dp"
-            android:layout_weight="1"/>
-
-        <!-- Dugme za dodavanje zadatka -->
-        <Button
-            android:id="@+id/btnAddTask"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="bottom|center"
-            android:layout_marginBottom="16dp"
-            android:backgroundTint="@color/blueAccent"
-            android:text="@string/add_task"/>
-
-    </LinearLayout>
+        android:layout_height="0dp"
+        android:layout_margin="16dp"
+        android:layout_weight="1"/>
 
 </LinearLayout>
