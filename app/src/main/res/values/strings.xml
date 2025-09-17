@@ -42,9 +42,18 @@
     <string name="task_repeatable">Ponavlja se</string>
     <string name="task_start">Počinje</string>
     <string name="task_end">Završava</string>
-    <string name="task_time">Satnica</string>
-    <string name="task_whole_day">Cjelodnevno</string>
     <string name="task_recurring_number">Broj ponavljanja</string>
+    <string name="detail_name">Naziv:</string>
+    <string name="detail_description">Opis:</string>
+    <string name="detail_category">Kategorija:</string>
+    <string name="detail_date_start">Od:</string>
+    <string name="detail_date_end">Do:</string>
+    <string name="detail_recurring">Ponavljanje zadatka:</string>
+    <string name="detail_recurring_number">Broj:</string>
+    <string name="detail_recurring_unit">Jedinica:</string>
+    <string name="detail_difficulty">Težina:</string>
+    <string name="detail_importance">Bitnost:</string>
+    <string name="detail_title">Detalji zadatka</string>
 
     <string name="lorem_ipsum">
         Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam in scelerisque sem. Mauris
