@@ -40,7 +40,7 @@ public class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapter.TasksV
         Task task = tasks.get(position);
         holder.name.setText(task.getName());
         holder.category.setText(task.getName()); // TODO : retrieve category by id
-        holder.isDone.setChecked((task.getStatus().toString().toUpperCase(Locale.ROOT)).equals(StatusType.URAĐEN));
+        holder.isDone.setChecked(task.getStatus() == StatusType.URAĐEN);
     }
 
     @Override

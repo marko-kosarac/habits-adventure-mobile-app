@@ -22,10 +22,11 @@ public class TaskRepository {
         this.dbHelper = dbHelper;
     }
 
-    public String insertTask(Task task, String userId){
+
+    public Task add(Task task){
         SQLiteDatabase db = dbHelper.getWritableDatabase();
         ContentValues values = new ContentValues();
-        values.put(SQLiteHelper.COLUMN_USER_ID, userId);
+        values.put(SQLiteHelper.COLUMN_USER_ID, task.getUserId());
         values.put(SQLiteHelper.COLUMN_TASK_NAME, task.getName());
         values.put(SQLiteHelper.COLUMN_TASK_DESCRIPTION, task.getDescription());
         values.put(SQLiteHelper.COLUMN_CATEGORY_ID, task.getCategoryId());
@@ -40,12 +41,43 @@ public class TaskRepository {
         values.put(SQLiteHelper.COLUMN_IMPORTANCE, task.getImportance().name());
         values.put(SQLiteHelper.COLUMN_STATUS, task.getStatus().name());
 
-        String id = String.valueOf(db.insert(SQLiteHelper.TABLE_TASKS, null, values));
+        long rowId = db.insert(SQLiteHelper.TABLE_TASKS, null, values);
         db.close();
-        return id;
+
+        if (rowId == -1)
+            return null;
+
+        task.setId(String.valueOf(rowId));
+        return task;
     }
 
-    public List<Task> getTasksById(String userId){
+    public Task update(Task task) {
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(SQLiteHelper.COLUMN_USER_ID, task.getUserId());
+        values.put(SQLiteHelper.COLUMN_TASK_NAME, task.getName());
+        values.put(SQLiteHelper.COLUMN_TASK_DESCRIPTION, task.getDescription());
+        values.put(SQLiteHelper.COLUMN_CATEGORY_ID, task.getCategoryId());
+        values.put(SQLiteHelper.COLUMN_FREQUENCY, task.getFrequency().name());
+        values.put(SQLiteHelper.COLUMN_START_DATE, task.getStartDate());
+        values.put(SQLiteHelper.COLUMN_END_DATE, task.getEndDate());
+        values.put(SQLiteHelper.COLUMN_TIME, task.getTime());
+        values.put(SQLiteHelper.COLUMN_IS_WHOLE_DAY, task.getWholeDay() ? 1 : 0);
+        values.put(SQLiteHelper.COLUMN_INTERVAL, task.getInterval());
+        values.put(SQLiteHelper.COLUMN_UNIT, task.getUnit() != null ? task.getUnit().name() : null);
+        values.put(SQLiteHelper.COLUMN_DIFFICULTY, task.getDifficulty().name());
+        values.put(SQLiteHelper.COLUMN_IMPORTANCE, task.getImportance().name());
+        values.put(SQLiteHelper.COLUMN_STATUS, task.getStatus().name());
+
+        db.update(SQLiteHelper.TABLE_TASKS, values,
+                SQLiteHelper.COLUMN_TASK_ID + " = ?",
+                new String[]{task.getId()});
+        db.close();
+
+        return task;
+    }
+
+    public List<Task> getTasksByUser(String userId){
         List<Task> tasks = new ArrayList<>();
         SQLiteDatabase db = dbHelper.getReadableDatabase();
 
@@ -87,7 +119,7 @@ public class TaskRepository {
         return tasks;
     }
 
-    public int deleteTask(long taskId){
+    public int delete(long taskId){
         SQLiteDatabase db = dbHelper.getWritableDatabase();
         int rows = db.delete(SQLiteHelper.TABLE_TASKS, SQLiteHelper.COLUMN_TASK_ID + " = ?", new String[]{String.valueOf(taskId)});
         db.close();

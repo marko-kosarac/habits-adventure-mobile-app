@@ -8,6 +8,7 @@ import android.widget.Toast;
 import com.example.mobilnaaplikacija.database.SQLiteHelper;
 import com.example.mobilnaaplikacija.repository.TaskRepository;
 import com.example.mobilnaaplikacija.model.*;
+import com.google.firebase.auth.FirebaseUser;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,81 +24,38 @@ public class TaskService {
         this.taskRepository = new TaskRepository(new SQLiteHelper(context));
     }
 
-    public Task validateAndCreateTask(
-            String name,
-            String description,
-            String category,
-            boolean isRepeating,
-            boolean isOneTime,
-            String startDate,
-            String endDate,
-            String time,
-            boolean isWholeDay,
-            String difficultyStr,
-            String importanceStr,
-            String unitStr,
-            String intervalStr
-    ) {
+    public String validate(String name, String category, boolean isRepeating, boolean isOneTime, String startDate, String endDate, String time, boolean isWholeDay, String difficultyStr, String importanceStr, String unitStr, String intervalStr) {
         FrequencyType frequency = isRepeating ? FrequencyType.PONAVLJAJUCI :
                 (isOneTime ? FrequencyType.JEDNOKRATAN : null);
 
-        // Validation
-        if (name.isEmpty()) return showError("Unesite naziv zadatka!");
-        if (category.isEmpty()) return showError("Izaberite kategoriju zadatka!");
-        if (startDate.isEmpty()) return showError("Izaberite datum početka!");
-        if (endDate.isEmpty()) return showError("Izaberite datum završetka!");
-        if (time.isEmpty() && !isWholeDay) return showError("Unesite vrijeme zadatka!");
-        if (frequency == null) return showError("Izaberite jednokratan ili ponavljajući zadatak!");
-        if (difficultyStr.isEmpty()) return showError("Izaberite težinu zadatka!");
-        if (importanceStr.isEmpty()) return showError("Izaberite bitnost zadatka!");
+        if (name.isEmpty()) return "Unesite naziv zadatka!";
+        if (category.isEmpty()) return "Izaberite kategoriju zadatka!";
+        if (startDate.isEmpty()) return "Izaberite datum početka!";
+        if (endDate.isEmpty()) return "Izaberite datum završetka!";
+        if (time.isEmpty() && !isWholeDay) return "Unesite vrijeme zadatka!";
+        if (frequency == null) return "Izaberite jednokratan ili ponavljajući zadatak!";
+        if (difficultyStr.isEmpty()) return "Izaberite težinu zadatka!";
+        if (importanceStr.isEmpty()) return "Izaberite bitnost zadatka!";
 
-        Integer interval = null;
-        UnitType unit = null;
 
         if (frequency == FrequencyType.PONAVLJAJUCI) {
-            if (unitStr.isEmpty()) return showError("Unesite jedinicu zadatka!");
-            unit = UnitType.valueOf(unitStr.toUpperCase(Locale.ROOT));
-
-            if (intervalStr.isEmpty()) return showError("Unesite broj ponavljanja zadatka!");
-            interval = Integer.valueOf(intervalStr);
+            if (unitStr.isEmpty()) return "Unesite jedinicu zadatka!";
+            if (intervalStr.isEmpty()) return "Unesite broj ponavljanja zadatka!";
         }
 
-        DifficultyType difficulty = DifficultyType.valueOf(difficultyStr.toUpperCase(Locale.ROOT).replace(" ", "_"));
-        ImportanceType importance = ImportanceType.valueOf(importanceStr.toUpperCase(Locale.ROOT).replace(" ", "_"));
-        StatusType status = StatusType.AKTIVAN;
-
-        return new Task(
-                "-1",
-                "-1",
-                name,
-                description,
-                "-1",
-                frequency,
-                startDate,
-                endDate,
-                time,
-                isWholeDay,
-                interval,
-                unit,
-                difficulty,
-                importance,
-                status
-        );
-    }
-
-    public String saveTask(Task task, String userId) {
-        task.setUserId(userId);
-        return taskRepository.insertTask(task, userId);
-    }
-
-    private Task showError(String message) {
-        Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
         return null;
     }
 
-    public List<Task> getTasksById(String userId){
-        List<Task> tasks = taskRepository.getTasksById(userId);
-        return tasks;
+    public Task add(Task task) {
+        return taskRepository.add(task);
     }
 
+
+    public Task update(Task task) {
+        return taskRepository.update(task);
+    }
+
+    public List<Task> getTasksByUser(String userId){
+        return taskRepository.getTasksByUser(userId);
+    }
 }
