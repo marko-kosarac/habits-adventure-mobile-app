@@ -34,6 +34,7 @@ import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentChange;
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -54,6 +55,7 @@ public class MainActivity extends AppCompatActivity {
     private NavController navController;
     private AppBarConfiguration mAppBarConfiguration;
     private Set<Integer> topLevelDestinations = new HashSet<>();
+    private final Set<String> processedNotifications = new HashSet<>();
     private static final String FRIEND_REQUEST_CHANNEL_ID = "friend_request_channel";
     private ListenerRegistration friendRequestListener, allianceInviteListener;
 
@@ -89,8 +91,7 @@ public class MainActivity extends AppCompatActivity {
         if (FirebaseAuth.getInstance().getCurrentUser() != null) {
             listenForFriendRequests();
             listenForAllianceInvites();
-            listenForAllianceAcceptancesForLeader();
-            showPendingAllianceAcceptancesForLeader();
+            listenForNotifications();
         }
 
         mAppBarConfiguration = new AppBarConfiguration.Builder(
@@ -239,6 +240,7 @@ public class MainActivity extends AppCompatActivity {
         if (allianceInviteListener != null) {
             allianceInviteListener.remove();
         }
+
     }
 
     private void createNotificationChannel() {
@@ -318,97 +320,72 @@ public class MainActivity extends AppCompatActivity {
                 });
     }
 
-    public void listenForAllianceAcceptancesForLeader() {
+    public void listenForNotifications() {
         String currentUserId = FirebaseAuth.getInstance().getCurrentUser().getUid();
         FirebaseFirestore db = FirebaseFirestore.getInstance();
 
-        db.collection("alliances")
-                .whereEqualTo("leaderId", currentUserId)
-                .addSnapshotListener((alliancesSnapshots, error) -> {
-                    if (error != null || alliancesSnapshots == null) return;
+        db.collection("notifications")
+                .whereEqualTo("toUserId", currentUserId)
+                .whereEqualTo("seen", false)
+                .addSnapshotListener((snapshots, e) -> {
+                    if (e != null || snapshots == null) return;
 
-                    for (DocumentChange allianceChange : alliancesSnapshots.getDocumentChanges()) {
-                        if (allianceChange.getType() == DocumentChange.Type.ADDED ||
-                                allianceChange.getType() == DocumentChange.Type.MODIFIED) {
+                    for (DocumentChange dc : snapshots.getDocumentChanges()) {
+                        if (dc.getType() == DocumentChange.Type.ADDED) {
+                            DocumentSnapshot doc = dc.getDocument();
+                            String docId = doc.getId();
 
-                            String allianceId = allianceChange.getDocument().getId();
+                            if (processedNotifications.contains(docId)) continue;
+                            processedNotifications.add(docId);
 
-                            db.collection("alliance_invites")
-                                    .whereEqualTo("allianceId", allianceId)
-                                    .whereEqualTo("status", "accepted")
-                                    .addSnapshotListener((snapshots, e) -> {
-                                        if (e != null || snapshots == null) return;
+                            String message = doc.getString("message");
 
-                                        for (DocumentChange dc : snapshots.getDocumentChanges()) {
-                                            DocumentSnapshot doc = dc.getDocument();
-                                            Boolean notificationSent = doc.getBoolean("notificationSent");
-                                            if (notificationSent != null && notificationSent) continue;
+                            if (message != null) {
+                                runOnUiThread(() -> {
+                                    if (!isFinishing() && !isDestroyed()) {
+                                        new AlertDialog.Builder(this)
+                                                .setTitle("Obaveštenje o savezu")
+                                                .setMessage(message)
+                                                .setPositiveButton("OK", (dialog, which) -> {
+                                                    doc.getReference().update("seen", true);
+                                                })
+                                                .show();
 
-                                            String acceptedUserId = doc.getString("toUserId");
-                                            if (acceptedUserId != null && !acceptedUserId.equals(currentUserId)) {
-                                                db.collection("users").document(acceptedUserId)
-                                                        .get().addOnSuccessListener(userDoc -> {
-                                                            String username = userDoc.getString("username");
-                                                            if (username == null) username = "Korisnik";
-
-                                                            String finalUsername = username;
-                                                            runOnUiThread(() -> new AlertDialog.Builder(MainActivity.this)
-                                                                    .setTitle("Novi član saveza")
-                                                                    .setMessage(finalUsername + " je prihvatio poziv u tvoj savez!")
-                                                                    .setPositiveButton("OK", null)
-                                                                    .setCancelable(true)
-                                                                    .show());
-
-                                                            db.collection("alliance_invites").document(doc.getId())
-                                                                    .update("notificationSent", true);
-                                                        });
-                                            }
-                                        }
-                                    });
+                                        showAllianceAcceptanceNotificationSafe(message);
+                                    }
+                                });
+                            }
                         }
                     }
                 });
     }
 
-    public void showPendingAllianceAcceptancesForLeader() {
-        String currentUserId = FirebaseAuth.getInstance().getCurrentUser().getUid();
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
+    private void showAllianceAcceptanceNotificationSafe(String message) {
+        String channelId = "alliance_channel";
+        String channelName = "Alliance Notifications";
 
-        db.collection("alliances")
-                .whereEqualTo("leaderId", currentUserId)
-                .get()
-                .addOnSuccessListener(querySnapshot -> {
-                    for (DocumentSnapshot allianceDoc : querySnapshot.getDocuments()) {
-                        String allianceId = allianceDoc.getId();
+        NotificationManager notificationManager =
+                (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 
-                        db.collection("alliance_invites")
-                                .whereEqualTo("allianceId", allianceId)
-                                .whereEqualTo("status", "accepted")
-                                .get()
-                                .addOnSuccessListener(acceptedSnapshots -> {
-                                    for (DocumentSnapshot acceptedDoc : acceptedSnapshots.getDocuments()) {
-                                        String acceptedUserId = acceptedDoc.getString("toUserId");
-                                        if (acceptedUserId != null && !acceptedUserId.equals(currentUserId)) {
-                                            db.collection("users").document(acceptedUserId)
-                                                    .get()
-                                                    .addOnSuccessListener(userDoc -> {
-                                                        String username = userDoc.getString("username");
-                                                        if (username == null) username = "Korisnik";
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            NotificationChannel channel = new NotificationChannel(
+                    channelId, channelName, NotificationManager.IMPORTANCE_HIGH
+            );
+            notificationManager.createNotificationChannel(channel);
+        }
 
-                                                        String finalUsername = username;
-                                                        runOnUiThread(() -> new AlertDialog.Builder(MainActivity.this)
-                                                                .setTitle("Novi član saveza")
-                                                                .setMessage(finalUsername + " je prihvatio poziv u tvoj savez!")
-                                                                .setPositiveButton("OK", null)
-                                                                .setCancelable(true)
-                                                                .show());
-                                                    });
-                                        }
-                                    }
-                                });
-                    }
-                });
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, channelId)
+                .setSmallIcon(R.drawable.ic_notifications)
+                .setContentTitle("Novi član u savezu")
+                .setContentText(message)
+                .setPriority(NotificationCompat.PRIORITY_HIGH)
+                .setAutoCancel(true);
+
+        if (notificationManager != null) {
+            notificationManager.notify((int) System.currentTimeMillis(), builder.build());
+        }
     }
+
 
     private void showAllianceInviteDialog(String allianceId, String fromUserId, String inviteDocId) {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
@@ -510,15 +487,66 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void addUserToAlliance(FirebaseFirestore db, String allianceId, String userId, String inviteDocId) {
-        db.collection("alliances").document(allianceId)
-                .update("members", FieldValue.arrayUnion(userId))
-                .addOnSuccessListener(aVoid -> db.collection("users").document(userId)
-                        .update("currentAllianceId", allianceId)
-                        .addOnSuccessListener(v -> db.collection("alliance_invites").document(inviteDocId)
-                                .update("status", "accepted", "notificationSent", false))
-                        .addOnFailureListener(e -> Log.e("MainActivity", "Greška pri update-u korisnika", e)))
-                .addOnFailureListener(e -> Log.e("MainActivity", "Greška pri dodavanju u savez", e));
+        DocumentReference allianceRef = db.collection("alliances").document(allianceId);
+        DocumentReference userRef = db.collection("users").document(userId);
+        DocumentReference inviteRef = db.collection("alliance_invites").document(inviteDocId);
+
+        allianceRef.update("members", FieldValue.arrayUnion(userId))
+                .addOnSuccessListener(aVoid -> {
+                    userRef.update("currentAllianceId", allianceId)
+                            .addOnSuccessListener(v -> {
+                                Map<String, Object> inviteUpdates = new HashMap<>();
+                                inviteUpdates.put("status", "accepted");
+                                inviteUpdates.put("notificationSent", false); // za eventualne dodatne listener-e
+                                inviteRef.update(inviteUpdates)
+                                        .addOnSuccessListener(done -> {
+                                            Log.d("Alliance", "Korisnik " + userId + " dodat u savez " + allianceId);
+
+                                            sendAllianceAcceptedNotification(allianceRef, userId, allianceId);
+                                            Toast.makeText(
+                                                    getApplicationContext(),
+                                                    "Uspešno ste pristupili savezu!",
+                                                    Toast.LENGTH_SHORT
+                                            ).show();
+                                        });
+                            })
+                            .addOnFailureListener(e -> Log.e("Alliance", "Greška pri update-u korisnika", e));
+                })
+                .addOnFailureListener(e -> Log.e("Alliance", "Greška pri dodavanju u savez", e));
     }
+
+
+
+
+    private void sendAllianceAcceptedNotification(DocumentReference allianceRef, String newMemberId, String allianceId) {
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+
+        allianceRef.get().addOnSuccessListener(allianceDoc -> {
+            if (!allianceDoc.exists()) return;
+            String leaderId = allianceDoc.getString("leaderId");
+            if (leaderId == null || leaderId.isEmpty()) return;
+
+            db.collection("users").document(newMemberId).get().addOnSuccessListener(newMemberDoc -> {
+                String newMemberName = newMemberDoc.getString("username");
+                if (newMemberName == null) newMemberName = "Korisnik";
+
+                // Kreiraj dokument notifikacije za lidera
+                Map<String, Object> notification = new HashMap<>();
+                notification.put("toUserId", leaderId);
+                notification.put("type", "alliance_invite_accepted");
+                notification.put("fromUserId", newMemberId);
+                notification.put("allianceId", allianceId);
+                notification.put("message", newMemberName + " je prihvatio poziv u savez!");
+                notification.put("timestamp", System.currentTimeMillis());
+                notification.put("seen", false);          // OBAVEZNO: lider još nije video
+                notification.put("notificationSent", false); // OBAVEZNO: nije poslato UI-u
+
+                db.collection("notifications").add(notification);
+            });
+        });
+    }
+
+
 
     private void declineAllianceInvite(String inviteDocId) {
         FirebaseFirestore.getInstance().collection("alliance_invites")

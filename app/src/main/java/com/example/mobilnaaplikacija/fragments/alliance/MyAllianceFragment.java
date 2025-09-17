@@ -26,7 +26,7 @@ import java.util.List;
 
 public class MyAllianceFragment extends Fragment {
 
-    private TextView textAllianceName, textAllianceLeader;
+    private TextView textAllianceName, textAllianceLeader, textMembersLabel;
     private Button btnDeleteAlliance, btnLeaveAlliance;
     private RecyclerView recyclerAllianceMembers;
     private AllianceMemberAdapter memberAdapter;
@@ -44,6 +44,7 @@ public class MyAllianceFragment extends Fragment {
         recyclerAllianceMembers = view.findViewById(R.id.recyclerAllianceMembers);
         btnDeleteAlliance = view.findViewById(R.id.btnDeleteAlliance);
         btnLeaveAlliance = view.findViewById(R.id.btnLeaveAlliance);
+        textMembersLabel = view.findViewById(R.id.textMembersLabel);
 
         recyclerAllianceMembers.setLayoutManager(new LinearLayoutManager(getContext()));
         memberAdapter = new AllianceMemberAdapter(memberList);
@@ -90,6 +91,8 @@ public class MyAllianceFragment extends Fragment {
                                             memberList.addAll(members);
                                             memberAdapter.notifyDataSetChanged();
                                         }
+                                        textMembersLabel.setVisibility(View.VISIBLE);
+                                        recyclerAllianceMembers.setVisibility(View.VISIBLE);
 
                                         // Prikaz dugmadi
                                         if (currentUserId.equals(leaderId)) {
@@ -116,6 +119,7 @@ public class MyAllianceFragment extends Fragment {
         recyclerAllianceMembers.setVisibility(View.GONE);
         btnDeleteAlliance.setVisibility(View.GONE);
         btnLeaveAlliance.setVisibility(View.GONE);
+        textMembersLabel.setVisibility(View.GONE);
         memberList.clear();
         memberAdapter.notifyDataSetChanged();
     }
@@ -132,7 +136,7 @@ public class MyAllianceFragment extends Fragment {
     private void showDeleteConfirmation() {
         new AlertDialog.Builder(getContext())
                 .setTitle("Obriši savez")
-                .setMessage("Da li ste sigurni da želite obrisati savez? Ova akcija se ne može poništiti.")
+                .setMessage("Da li ste sigurni da želite obrisati savez?")
                 .setPositiveButton("Da", (dialog, which) -> deleteAlliance())
                 .setNegativeButton("Ne", null)
                 .show();
