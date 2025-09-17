@@ -28,6 +28,7 @@ import com.example.mobilnaaplikacija.model.UnitType;
 import com.example.mobilnaaplikacija.services.TaskService;
 import com.example.mobilnaaplikacija.services.UserService;
 
+import java.time.Duration;
 import java.util.Calendar;
 import java.util.Locale;
 
@@ -168,6 +169,15 @@ public class AddTaskFragment extends DialogFragment {
                             binding.etEndDate.setText(date);
                         } else {
                             binding.etStartDate.setText(date);
+                        }
+                    } else if (binding.rbOneTime.isChecked()) {
+                        // If non repeating and start, then start and end equal
+                        if (isStartDate) {
+                            binding.etEndDate.setText(date);
+                            Toast.makeText(requireContext(), "Datum završetka je postavljen kao datum početka. Možeš promijeniti ovo.", Toast.LENGTH_LONG).show();
+                        } else if (!binding.etEndDate.getText().toString().isEmpty()) {
+                            binding.etStartDate.setText(date);
+                            Toast.makeText(requireContext(), "Datum početka je postavljen kao datum završetka. Možeš promijeniti ovo.", Toast.LENGTH_LONG).show();
                         }
                     }
                 },
