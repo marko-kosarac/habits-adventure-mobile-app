@@ -54,6 +54,7 @@
     <string name="detail_difficulty">Težina:</string>
     <string name="detail_importance">Bitnost:</string>
     <string name="detail_title">Detalji zadatka</string>
+    <string name="add_task_title">Kreiraj novi zadatak</string>
 
     <string name="lorem_ipsum">
         Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam in scelerisque sem. Mauris

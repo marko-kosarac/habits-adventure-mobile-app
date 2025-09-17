@@ -1,190 +1,207 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:layout_marginTop="16dp">
+    android:layout_height="match_parent">
 
-    <LinearLayout
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="80dp" />
+
+    <!-- Title -->
+    <TextView
+        android:id="@+id/tvAddTaskTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="30dp"
+        android:text="@string/add_task_title"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:textColor="@color/yellowAccent" />
+
+    <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="16dp">
-
-        <!-- Task name -->
-        <EditText
-            android:id="@+id/etTaskName"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="@string/task_name"
-            android:layout_marginBottom="16dp"
-            android:layout_marginHorizontal="4dp"/>
-
-        <!-- Task description -->
-        <EditText
-            android:id="@+id/etTaskDescription"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="@string/task_description"
-            android:layout_marginBottom="16dp"
-            android:layout_marginHorizontal="4dp"/>
-
+        android:layout_marginTop="80dp">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_marginBottom="16dp"
-            android:gravity="center">
+            android:orientation="vertical"
+            android:padding="16dp">
 
-            <!-- Task category -->
-            <Spinner
-                android:id="@+id/spinnerCategory"
-                android:layout_width="150dp"
+            <!-- Task name -->
+            <EditText
+                android:id="@+id/etTaskName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/task_name"
+                android:layout_marginBottom="16dp"
+                android:layout_marginHorizontal="4dp"/>
+
+            <!-- Task description -->
+            <EditText
+                android:id="@+id/etTaskDescription"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/task_description"
+                android:layout_marginBottom="16dp"
+                android:layout_marginHorizontal="4dp"/>
+
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="16dp"
+                android:gravity="center">
+
+                <!-- Task category -->
+                <Spinner
+                    android:id="@+id/spinnerCategory"
+                    android:layout_width="150dp"
+                    android:layout_height="match_parent"
+                    android:spinnerMode="dropdown"
+                    android:layout_marginRight="0dp"/>
+
+                <!-- Add category -->
+                <Button
+                    android:id="@+id/btnSaveCategory"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="30dp"
+                    android:layout_gravity="end"
+                    android:text="@string/add_category"
+                    android:backgroundTint="@color/blueAccent"/>
+
+            </LinearLayout>
+
+            <!-- Task frequency -->
+            <RadioGroup
+                android:id="@+id/rgFrequency"
+                android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:spinnerMode="dropdown"
-                android:layout_marginRight="0dp"/>
+                android:orientation="horizontal"
+                android:gravity="center"
+                android:layout_marginBottom="16dp">
 
-            <!-- Add category -->
-            <Button
-                android:layout_width="wrap_content"
+                <RadioButton
+                    android:id="@+id/rbOneTime"
+                    android:layout_width="150dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginRight="30dp"
+                    android:text="@string/task_not_repeatable"/>
+
+                <RadioButton
+                    android:id="@+id/rbRepeat"
+                    android:layout_width="150dp"
+                    android:layout_height="wrap_content"
+                    android:text="@string/task_repeatable" />
+
+            </RadioGroup>
+
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="30dp"
-                android:layout_gravity="end"
-                android:text="@string/add_category"
-                android:backgroundTint="@color/blueAccent"/>
+                android:orientation="horizontal"
+                android:gravity="center_horizontal"
+                android:layout_marginBottom="16dp">
 
-        </LinearLayout>
+                <!-- Task start date -->
+                <EditText
+                    android:id="@+id/etStartDate"
+                    android:layout_width="150dp"
+                    android:layout_height="wrap_content"
+                    android:inputType="date"
+                    android:hint="@string/task_start"
+                    android:layout_marginRight="30dp"/>
 
-        <!-- Task frequency -->
-        <RadioGroup
-            android:id="@+id/rgFrequency"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="horizontal"
-            android:gravity="center"
-            android:layout_marginBottom="16dp">
+                <!-- Task end date -->
+                <EditText
+                    android:id="@+id/etEndDate"
+                    android:layout_width="150dp"
+                    android:layout_height="wrap_content"
+                    android:inputType="date"
+                    android:hint="@string/task_end"/>
 
-            <RadioButton
-                android:id="@+id/rbOneTime"
-                android:layout_width="150dp"
+            </LinearLayout>
+
+            <!-- Recurring task -->
+            <LinearLayout
+                android:id="@+id/layoutRecurringOptions"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginRight="30dp"
-                android:text="@string/task_not_repeatable"/>
+                android:orientation="horizontal"
+                android:layout_marginBottom="16dp"
+                android:gravity="center_horizontal">
 
-            <RadioButton
-                android:id="@+id/rbRepeat"
-                android:layout_width="150dp"
-                android:layout_height="wrap_content"
-                android:text="@string/task_repeatable" />
+                <!-- Task interval -->
+                <EditText
+                    android:id="@+id/etReccuringNumber"
+                    android:layout_width="150dp"
+                    android:layout_height="wrap_content"
+                    android:inputType="number"
+                    android:layout_marginRight="30dp"
+                    android:hint="@string/task_recurring_number"/>
 
-        </RadioGroup>
+                <!-- Task unit -->
+                <Spinner
+                    android:id="@+id/spinnerRecurringUnit"
+                    android:layout_width="150dp"
+                    android:layout_height="40dp"
+                    android:spinnerMode="dropdown"/>
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_horizontal"
-            android:layout_marginBottom="16dp">
+            </LinearLayout>
 
-            <!-- Task start date -->
-            <EditText
-                android:id="@+id/etStartDate"
-                android:layout_width="150dp"
-                android:layout_height="wrap_content"
-                android:inputType="date"
-                android:hint="@string/task_start"
-                android:layout_marginRight="30dp"/>
-
-            <!-- Task end date -->
-            <EditText
-                android:id="@+id/etEndDate"
-                android:layout_width="150dp"
-                android:layout_height="wrap_content"
-                android:inputType="date"
-                android:hint="@string/task_end"/>
-
-        </LinearLayout>
-
-        <!-- Recurring task -->
-        <LinearLayout
-            android:id="@+id/layoutRecurringOptions"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_marginBottom="16dp"
-            android:gravity="center_horizontal">
-
-            <!-- Task interval -->
-            <EditText
-                android:id="@+id/etReccuringNumber"
-                android:layout_width="150dp"
-                android:layout_height="wrap_content"
-                android:inputType="number"
-                android:layout_marginRight="30dp"
-                android:hint="@string/task_recurring_number"/>
-
-            <!-- Task unit -->
+            <!-- Task difficulty -->
             <Spinner
-                android:id="@+id/spinnerRecurringUnit"
-                android:layout_width="150dp"
+                android:id="@+id/spinnerDifficulty"
+                android:layout_width="match_parent"
                 android:layout_height="40dp"
-                android:spinnerMode="dropdown"/>
+                android:layout_marginBottom="16dp"
+                android:spinnerMode="dropdown"
+                android:layout_marginHorizontal="4dp"/>
 
-        </LinearLayout>
+            <!-- Task importance -->
+            <Spinner
+                android:id="@+id/spinnerImportance"
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:layout_marginBottom="16dp"
+                android:spinnerMode="dropdown"
+                android:layout_marginHorizontal="4dp"/>
 
-        <!-- Task difficulty -->
-        <Spinner
-            android:id="@+id/spinnerDifficulty"
-            android:layout_width="match_parent"
-            android:layout_height="40dp"
-            android:layout_marginBottom="16dp"
-            android:spinnerMode="dropdown"
-            android:layout_marginHorizontal="4dp"/>
-
-        <!-- Task importance -->
-        <Spinner
-            android:id="@+id/spinnerImportance"
-            android:layout_width="match_parent"
-            android:layout_height="40dp"
-            android:layout_marginBottom="16dp"
-            android:spinnerMode="dropdown"
-            android:layout_marginHorizontal="4dp"/>
-
-        <Button
-            android:id="@+id/btnSaveTask"
-            android:layout_width="wrap_content"
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_horizontal"
-            android:layout_marginTop="16dp">
-
-            <!-- Remove task button -->
-            <Button
-                android:id="@+id/btnRemoveTask"
-                android:layout_width="wrap_content"
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:layout_marginHorizontal="10dp"
-                android:backgroundTint="@color/blueAccent"
-                android:text="@string/remove_task"
-                android:visibility="gone"/>
+                android:orientation="horizontal"
+                android:gravity="center_horizontal"
+                android:layout_marginTop="16dp">
 
-            <!-- Add task button -->
-            <Button
-                android:id="@+id/btnSaveTask"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:layout_marginHorizontal="10dp"
-                android:backgroundTint="@color/blueAccent"
-                android:text="@string/add_task" />
+                <!-- Remove task button -->
+                <Button
+                    android:id="@+id/btnRemoveTask"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginHorizontal="10dp"
+                    android:backgroundTint="@color/blueAccent"
+                    android:text="@string/remove_task"
+                    android:visibility="gone"/>
+
+                <!-- Add task button -->
+                <Button
+                    android:id="@+id/btnSaveTask"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginHorizontal="10dp"
+                    android:backgroundTint="@color/blueAccent"
+                    android:text="@string/add_task" />
 
 
-        </LinearLayout>
+            </LinearLayout>
 
     </LinearLayout>
-
-</ScrollView>
+    </ScrollView>
+</FrameLayout>
