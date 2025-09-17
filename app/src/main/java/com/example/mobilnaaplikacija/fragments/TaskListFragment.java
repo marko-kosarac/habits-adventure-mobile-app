@@ -79,7 +79,7 @@ public class TaskListFragment extends Fragment implements RecyclerViewInterface 
         Bundle args = new Bundle();
         Task selectedTask = tasks.get(position);
         args.putParcelable("Task to view", selectedTask);
-        AddTaskFragment fragment = new AddTaskFragment();
+        DetailTaskFragment fragment = new DetailTaskFragment();
         fragment.setArguments(args);
         fragment.show(getChildFragmentManager(), "View task");
     }

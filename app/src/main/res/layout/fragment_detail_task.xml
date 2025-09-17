@@ -1,0 +1,219 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingHorizontal="16dp">
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="80dp">
+    </View>
+
+    <TextView
+        android:id="@+id/tvTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:text="@string/detail_title"
+        android:layout_marginTop="30dp"
+        android:layout_marginHorizontal="4dp"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:textColor="@color/yellowAccent"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp"
+        android:layout_marginTop="80dp"
+        android:isScrollContainer="true">
+
+        <!-- Task name -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="32dp">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/detail_name"
+                android:layout_marginHorizontal="4dp"
+                android:textSize="18sp"/>
+            <TextView
+                android:id="@+id/tvTaskName"
+                android:layout_marginHorizontal="8dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="end"
+                android:textSize="18sp"/>
+        </LinearLayout>
+
+        <!-- Task description -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="32dp"            android:gravity="center">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/detail_description"
+                android:layout_marginHorizontal="4dp"
+                android:textSize="18sp"/>
+            <TextView
+                android:id="@+id/tvTaskDescription"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="8dp"
+                android:textSize="18sp"/>
+        </LinearLayout>
+
+        <!-- Task category -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="32dp"
+            android:gravity="center_vertical">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/detail_category"
+                android:layout_marginHorizontal="4dp"
+                android:textSize="18sp"/>
+            <TextView
+                android:id="@+id/tvTaskCategory"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="8dp"
+                android:textSize="18sp"/>
+        </LinearLayout>
+
+        <!-- Task date -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="32dp"
+            android:gravity="center_vertical">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/detail_date_start"
+                android:layout_marginHorizontal="4dp"
+                android:textSize="18sp"/>
+            <TextView
+                android:id="@+id/tvTaskStartDate"
+                android:layout_width="120dp"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="8dp"
+                android:textSize="18sp"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/detail_date_end"
+                android:layout_marginRight="4dp"
+                android:textSize="18sp"/>
+
+            <TextView
+                android:id="@+id/tvTaskEndDate"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginHorizontal="8dp"
+                android:textSize="18sp" />
+        </LinearLayout>
+
+        <!-- Task frequency -->
+        <LinearLayout
+            android:id="@+id/recurringFields"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginBottom="32dp">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="@string/detail_recurring"
+                android:layout_marginHorizontal="4dp"
+                android:layout_marginBottom="8dp"
+                android:textSize="18sp"/>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/detail_recurring_number"
+                    android:layout_marginHorizontal="4dp"
+                    android:textSize="18sp"/>
+                <TextView
+                    android:id="@+id/tvTaskRecurringNumber"
+                    android:layout_width="90dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="8dp"
+                    android:textSize="18sp"/>
+                <TextView
+                    android:text="@string/detail_recurring_unit"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="4dp"
+                    android:textSize="18sp"/>
+                <TextView
+                    android:id="@+id/tvTaskRecurringUnit"
+                    android:layout_width="110dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="8dp"
+                    android:textSize="18sp"/>
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <!-- Task difficulty -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="32dp"
+            android:gravity="center_vertical">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/detail_difficulty"
+                android:layout_marginHorizontal="4dp"
+                android:textSize="18sp"/>
+            <TextView
+                android:id="@+id/tvTaskDifficulty"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="8dp"
+                android:textSize="18sp"/>
+        </LinearLayout>
+
+        <!-- Task importance -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="32dp"
+            android:gravity="center_vertical">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/detail_importance"
+                android:layout_marginHorizontal="4dp"
+                android:textSize="18sp"/>
+            <TextView
+                android:id="@+id/tvTaskImportance"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="8dp"
+                android:textSize="18sp"/>
+        </LinearLayout>
+    </LinearLayout>
+</FrameLayout>
