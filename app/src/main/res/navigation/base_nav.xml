@@ -66,4 +66,9 @@
         android:name="com.example.mobilnaaplikacija.fragments.alliance.MyAllianceFragment"
         android:label="Moj savez"
         tools:layout="@layout/fragment_my_alliance" />
+    <fragment
+        android:id="@+id/allianceChatFragment"
+        android:name="com.example.mobilnaaplikacija.AllianceChatFragment"
+        android:label="fragment_alliance_chat"
+        tools:layout="@layout/fragment_alliance_chat" />
 </navigation>
