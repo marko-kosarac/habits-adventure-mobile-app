@@ -34,7 +34,6 @@ public class TaskListFragment extends Fragment implements RecyclerViewInterface 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState){
-        Log.i("MoblinaAplikacija", "onCreateView Task List Fragment");
         this.taskService = new TaskService(getContext());
         this.userService = new UserService();
         this.tasks = new ArrayList<>();
@@ -50,9 +49,17 @@ public class TaskListFragment extends Fragment implements RecyclerViewInterface 
         binding.rvTasks.setAdapter(adapter);
         getTasks();
 
-        getParentFragmentManager().setFragmentResultListener("Task added", this, ((requestKey, result) -> {
+        binding.btnAddTask.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                new AddTaskFragment().show(
+                        getChildFragmentManager(), "New task");
+            }
+        });
+
+        getChildFragmentManager().setFragmentResultListener("Task saved", getViewLifecycleOwner(), (requestKey, result) -> {
             getTasks();
-        }));
+        });
     }
 
     public void getTasks(){
@@ -63,17 +70,28 @@ public class TaskListFragment extends Fragment implements RecyclerViewInterface 
         }
 
         tasks.clear();
-        tasks.addAll(taskService.getTasksById(userId));
+        tasks.addAll(taskService.getTasksByUser(userId));
         adapter.notifyDataSetChanged();
     }
 
     @Override
-    public void onItemClick(int position) {}
+    public void onItemClick(int position) {
+        Bundle args = new Bundle();
+        Task selectedTask = tasks.get(position);
+        args.putParcelable("Task to view", selectedTask);
+        AddTaskFragment fragment = new AddTaskFragment();
+        fragment.setArguments(args);
+        fragment.show(getChildFragmentManager(), "View task");
+    }
 
     @Override
     public void onEditClick(int position) {
+        Bundle args = new Bundle();
         Task selectedTask = tasks.get(position);
-        new AddTaskFragment().show(getChildFragmentManager(), "Edit task");
+        args.putParcelable("Task to edit", selectedTask);
+        AddTaskFragment fragment = new AddTaskFragment();
+        fragment.setArguments(args);
+        fragment.show(getChildFragmentManager(), "Edit task");
     }
 
     @Override

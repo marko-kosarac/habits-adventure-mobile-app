@@ -5,12 +5,31 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rvTasks"
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        tools:listitem="@layout/card_task"/>
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <!-- Zadaci -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvTasks"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:layout_marginBottom="8dp"
+            tools:listitem="@layout/card_task"/>
+
+        <!-- Dugme za dodavanje zadatka -->
+        <Button
+            android:id="@+id/btnAddTask"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|center"
+            android:layout_marginBottom="32dp"
+            android:backgroundTint="@color/blueAccent"
+            android:text="@string/add_task"/>
+
+    </LinearLayout>
 
 </LinearLayout>
 
