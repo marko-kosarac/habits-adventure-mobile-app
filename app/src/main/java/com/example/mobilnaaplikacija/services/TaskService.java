@@ -58,4 +58,8 @@ public class TaskService {
     public List<Task> getTasksByUser(String userId){
         return taskRepository.getTasksByUser(userId);
     }
+
+    public Boolean deleteById(String id){
+        return taskRepository.delete(id) > 0;
+    }
 }

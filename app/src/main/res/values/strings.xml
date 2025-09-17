@@ -33,6 +33,7 @@
 
     <string name="my_tasks">Moji zadaci</string>
     <string name="add_task">Dodaj zadatak</string>
+    <string name="remove_task">Izbriši zadatak</string>
     <string name="task_name">Naziv zadatka</string>
     <string name="task_category">Kategorija</string>
     <string name="task_description">Opis (opciono)</string>

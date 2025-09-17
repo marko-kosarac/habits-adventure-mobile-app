@@ -57,7 +57,7 @@ public class TaskListFragment extends Fragment implements RecyclerViewInterface 
             }
         });
 
-        getChildFragmentManager().setFragmentResultListener("Task saved", getViewLifecycleOwner(), (requestKey, result) -> {
+        getChildFragmentManager().setFragmentResultListener("Task managed", getViewLifecycleOwner(), (requestKey, result) -> {
             getTasks();
         });
     }

@@ -119,9 +119,9 @@ public class TaskRepository {
         return tasks;
     }
 
-    public int delete(long taskId){
+    public int delete(String id){
         SQLiteDatabase db = dbHelper.getWritableDatabase();
-        int rows = db.delete(SQLiteHelper.TABLE_TASKS, SQLiteHelper.COLUMN_TASK_ID + " = ?", new String[]{String.valueOf(taskId)});
+        int rows = db.delete(SQLiteHelper.TABLE_TASKS, SQLiteHelper.COLUMN_TASK_ID + " = ?", new String[]{String.valueOf(id)});
         db.close();
         return rows;
     }

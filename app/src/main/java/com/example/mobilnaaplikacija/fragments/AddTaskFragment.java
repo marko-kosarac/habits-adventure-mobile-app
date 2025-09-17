@@ -87,6 +87,8 @@ public class AddTaskFragment extends DialogFragment {
             binding.spinnerDifficulty.setSelection((DifficultyType.valueOf(taskToUpdate.getDifficulty().name()).ordinal()));
             binding.spinnerImportance.setSelection((ImportanceType.valueOf(taskToUpdate.getImportance().name()).ordinal()));
             binding.btnSaveTask.setText("Izmijeni zadatak");
+            setupRemoveTaskButton();
+            binding.btnRemoveTask.setVisibility(View.VISIBLE);
         } else if(getArguments() != null && getArguments().containsKey("Task to view")){
             taskToView = getArguments().getParcelable("Task to view");
             binding.etTaskName.setText(taskToView.getName());
@@ -219,6 +221,17 @@ public class AddTaskFragment extends DialogFragment {
         });
     }
 
+    private void setupRemoveTaskButton(){
+        binding.btnRemoveTask.setOnClickListener(view -> {
+            boolean removed = taskService.deleteById(taskToUpdate.getId());
+            if (removed)
+                Toast.makeText(requireContext(), "Zadatak izbrisan!", Toast.LENGTH_SHORT).show();
+            else
+                Toast.makeText(requireContext(), "Greška u brisanju zadatka!", Toast.LENGTH_SHORT).show();
+            sendBackToTaskList(taskToUpdate);
+            dismiss();
+        });
+    }
     private void setupSaveTaskButton() {
         binding.btnSaveTask.setOnClickListener(view -> {
             Task task = new Task();
@@ -281,7 +294,6 @@ public class AddTaskFragment extends DialogFragment {
                 Toast.makeText(requireContext(), "Zadatak dodan!", Toast.LENGTH_SHORT).show();
             }
             sendBackToTaskList(task);
-            //Toast.makeText(requireContext(), "Greška pri čuvanju zadatka!", Toast.LENGTH_SHORT).show();
             dismiss();
         });
     }
@@ -289,8 +301,8 @@ public class AddTaskFragment extends DialogFragment {
     private void sendBackToTaskList(Task task) {
         Bundle bundle = new Bundle();
         bundle.putParcelable("task", task);
-        Log.d("AddTaskFragment", "Sending Task saved: " + task.getName());
-        getParentFragmentManager().setFragmentResult("Task saved", bundle);
+        Log.d("AddTaskFragment", "Sending Task managed: " + task.getName());
+        getParentFragmentManager().setFragmentResult("Task managed", bundle);
     }
 
     private void showError(String message){
