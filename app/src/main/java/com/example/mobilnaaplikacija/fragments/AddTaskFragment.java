@@ -267,6 +267,8 @@ public class AddTaskFragment extends DialogFragment {
                 binding.layoutRecurringOptions.setVisibility(View.GONE);
                 binding.etReccuringNumber.setText("");
                 binding.spinnerRecurringUnit.setSelection(0);
+                binding.etEndDate.setText(binding.etStartDate.getText());
+                Toast.makeText(requireContext(),"Datumi su isti.", Toast.LENGTH_SHORT).show();
             }
         });
     }
