@@ -215,5 +215,16 @@
                 android:layout_marginHorizontal="8dp"
                 android:textSize="18sp"/>
         </LinearLayout>
+
+        <!-- Edit task button -->
+        <Button
+            android:id="@+id/btnEditTask"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="16dp"
+            android:backgroundTint="@color/blueAccent"
+            android:text="@string/edit_task"/>
     </LinearLayout>
 </FrameLayout>

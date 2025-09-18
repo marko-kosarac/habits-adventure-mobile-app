@@ -53,6 +53,19 @@ public class DetailTaskFragment extends DialogFragment {
             binding.tvTaskDifficulty.setText(selectedTask.getDifficulty().getDisplayName());
             binding.tvTaskImportance.setText(selectedTask.getImportance().getDisplayName());
         }
+
+        binding.btnEditTask.setOnClickListener(v -> {
+            Bundle args = new Bundle();
+            args.putParcelable("Task to edit", selectedTask);
+            AddEditTaskFragment fragment = new AddEditTaskFragment();
+            fragment.setArguments(args);
+            fragment.show(getChildFragmentManager(), "Edit task");
+        });
+
+        getChildFragmentManager().setFragmentResultListener("Task managed", getViewLifecycleOwner(), (requestKey, result) -> {
+            getParentFragmentManager().setFragmentResult("Task managed", result);
+            dismiss();
+        });
     }
 
     @Override
