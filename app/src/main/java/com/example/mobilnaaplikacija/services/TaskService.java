@@ -5,6 +5,8 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.widget.Toast;
 
+import androidx.annotation.Nullable;
+
 import com.example.mobilnaaplikacija.database.SQLiteHelper;
 import com.example.mobilnaaplikacija.repository.TaskRepository;
 import com.example.mobilnaaplikacija.model.*;
@@ -60,5 +62,18 @@ public class TaskService {
 
     public Boolean deleteById(String id){
         return taskRepository.delete(id) > 0;
+    }
+
+    public ArrayList<Task> filterByFrequency(ArrayList<Task> tasks, @Nullable FrequencyType type) {
+        if (type == null)
+            return tasks;
+
+        ArrayList<Task> filteredTasks = new ArrayList<>();
+        for (Task t : tasks) {
+            if (t.getFrequency() == type) {
+                filteredTasks.add(t);
+            }
+        }
+        return filteredTasks;
     }
 }

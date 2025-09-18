@@ -57,6 +57,9 @@
     <string name="detail_importance">Bitnost:</string>
     <string name="detail_title">Detalji zadatka</string>
     <string name="add_task_title">Kreiraj novi zadatak</string>
+    <string name="chip_all">Svi</string>
+    <string name="chip_one_time">Jednokratni</string>
+    <string name="chip_repeat">Ponavljajući</string>
 
     <string name="lorem_ipsum">
         Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam in scelerisque sem. Mauris

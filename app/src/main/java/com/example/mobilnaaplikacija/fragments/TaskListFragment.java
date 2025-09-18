@@ -11,9 +11,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.example.mobilnaaplikacija.R;
 import com.example.mobilnaaplikacija.RecyclerViewInterface;
 import com.example.mobilnaaplikacija.adapters.TaskListAdapter;
 import com.example.mobilnaaplikacija.databinding.FragmentTaskListBinding;
+import com.example.mobilnaaplikacija.model.FrequencyType;
 import com.example.mobilnaaplikacija.model.Task;
 import com.example.mobilnaaplikacija.services.TaskService;
 import com.example.mobilnaaplikacija.services.UserService;
@@ -59,6 +61,19 @@ public class TaskListFragment extends Fragment implements RecyclerViewInterface 
         getChildFragmentManager().setFragmentResultListener("Task managed", getViewLifecycleOwner(), (requestKey, result) -> {
             getTasks();
         });
+
+        binding.cgFilters.setOnCheckedStateChangeListener((group, checkedIds) -> {
+            ArrayList<Task> filteredTasks = new ArrayList<>();
+
+            if (checkedIds.get(0) == R.id.chipAll) {
+               filteredTasks = taskService.filterByFrequency(tasks, null);
+           } else if (checkedIds.get(0) == R.id.chipOneTime) {
+                filteredTasks = taskService.filterByFrequency(tasks, FrequencyType.JEDNOKRATAN);
+            } else if (checkedIds.get(0) == R.id.chipRepeat) {
+                filteredTasks = taskService.filterByFrequency(tasks, FrequencyType.PONAVLJAJUCI);
+            }
+            adapter.setTasks(filteredTasks);
+        });
     }
 
     public void getTasks(){
@@ -70,7 +85,7 @@ public class TaskListFragment extends Fragment implements RecyclerViewInterface 
 
         tasks.clear();
         tasks.addAll(taskService.getTasksByUser(userId));
-        adapter.notifyDataSetChanged();
+        adapter.setTasks(tasks);
     }
 
     @Override
