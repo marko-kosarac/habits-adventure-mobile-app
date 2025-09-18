@@ -6,7 +6,7 @@
 
     <View
         android:layout_width="match_parent"
-        android:layout_height="80dp">
+        android:layout_height="90dp">
     </View>
 
     <TextView
@@ -15,7 +15,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
         android:text="@string/detail_title"
-        android:layout_marginTop="30dp"
+        android:layout_marginTop="40dp"
         android:layout_marginHorizontal="4dp"
         android:textSize="24sp"
         android:textStyle="bold"
@@ -26,7 +26,7 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:padding="16dp"
-        android:layout_marginTop="80dp"
+        android:layout_marginTop="90dp"
         android:isScrollContainer="true">
 
         <!-- Task name -->

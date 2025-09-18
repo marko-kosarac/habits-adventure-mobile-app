@@ -73,10 +73,10 @@ public class AddTaskFragment extends DialogFragment {
         if(getArguments() != null && getArguments().containsKey("Task to edit")){
             isEditing = true;
             taskToUpdate = getArguments().getParcelable("Task to edit");
+            binding.tvAddTaskTitle.setText("Izmijeni zadatak");
             binding.etTaskName.setText(taskToUpdate.getName());
             binding.etTaskDescription.setText(taskToUpdate.getDescription());
-            //binding.spinnerCategory. TODO
-            binding.btnSaveCategory.setText("Izmijeni kategoriju");
+            binding.categoryFields.setVisibility(View.GONE);
             binding.rbOneTime.setChecked(taskToUpdate.getFrequency() == FrequencyType.JEDNOKRATAN);
             binding.rbRepeat.setChecked(taskToUpdate.getFrequency() == FrequencyType.PONAVLJAJUCI);
             binding.etStartDate.setText(taskToUpdate.getStartDate());
@@ -85,26 +85,8 @@ public class AddTaskFragment extends DialogFragment {
             binding.spinnerRecurringUnit.setSelection(taskToUpdate.getUnit() == null ? -1 : UnitType.valueOf(taskToUpdate.getUnit().name()).ordinal());
             binding.spinnerDifficulty.setSelection((DifficultyType.valueOf(taskToUpdate.getDifficulty().name()).ordinal()));
             binding.spinnerImportance.setSelection((ImportanceType.valueOf(taskToUpdate.getImportance().name()).ordinal()));
-            binding.btnSaveTask.setText("Izmijeni zadatak");
             setupRemoveTaskButton();
             binding.btnRemoveTask.setVisibility(View.VISIBLE);
-        } else if(getArguments() != null && getArguments().containsKey("Task to view")){
-            taskToView = getArguments().getParcelable("Task to view");
-            binding.etTaskName.setText(taskToView.getName());
-            binding.etTaskDescription.setText(taskToView.getDescription());
-            //binding.spinnerCategory.
-            binding.btnSaveCategory.setVisibility(View.GONE);
-            binding.rbOneTime.setChecked(taskToView.getFrequency() == FrequencyType.JEDNOKRATAN);
-            binding.rbRepeat.setChecked(taskToView.getFrequency() == FrequencyType.PONAVLJAJUCI);
-            binding.etStartDate.setText(taskToView.getStartDate());
-            binding.etEndDate.setText(taskToView.getEndDate());
-            binding.etReccuringNumber.setText(taskToView.getInterval() == null ? "0" : String.valueOf(taskToView.getInterval()));
-            binding.spinnerRecurringUnit.setSelection(taskToView.getUnit() == null ? -1 : UnitType.valueOf(taskToView.getUnit().name()).ordinal());
-            binding.spinnerDifficulty.setSelection((DifficultyType.valueOf(taskToView.getDifficulty().name()).ordinal()));
-            binding.spinnerImportance.setSelection((ImportanceType.valueOf(taskToView.getImportance().name()).ordinal()));
-            binding.btnSaveTask.setVisibility(View.GONE);
-        } else {
-            binding.btnSaveTask.setText("Dodaj zadatak");
         }
 
         setupDateTimePickers();

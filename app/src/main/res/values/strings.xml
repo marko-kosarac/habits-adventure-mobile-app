@@ -32,12 +32,14 @@
     <string name="previous">Previous</string>
 
     <string name="my_tasks">Moji zadaci</string>
-    <string name="add_task">Dodaj zadatak</string>
-    <string name="remove_task">Izbriši zadatak</string>
+    <string name="add_task">Novi zadatak</string>
+    <string name="remove_task">Izbriši</string>
+    <string name="save_task">Sačuvaj</string>
+    <string name="edit_task">Izmijeni</string>
     <string name="task_name">Naziv zadatka</string>
     <string name="task_category">Kategorija</string>
     <string name="task_description">Opis (opciono)</string>
-    <string name="add_category">Dodaj kategoriju</string>
+    <string name="add_category">Nova kategorija</string>
     <string name="task_not_repeatable">Ne ponavlja se</string>
     <string name="task_repeatable">Ponavlja se</string>
     <string name="task_start">Počinje</string>

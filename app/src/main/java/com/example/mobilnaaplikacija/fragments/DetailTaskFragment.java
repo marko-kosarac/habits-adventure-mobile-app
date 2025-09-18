@@ -9,16 +9,13 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
 
-import com.example.mobilnaaplikacija.R;
 import com.example.mobilnaaplikacija.databinding.FragmentDetailTaskBinding;
 import com.example.mobilnaaplikacija.model.FrequencyType;
 import com.example.mobilnaaplikacija.model.Task;
-import com.example.mobilnaaplikacija.model.UnitType;
-import com.example.mobilnaaplikacija.services.TaskService;
 
 public class DetailTaskFragment extends DialogFragment {
     private FragmentDetailTaskBinding binding;
-    private Task taskToView;
+    private Task selectedTask;
 
     @Override
     public void onStart() {
@@ -41,20 +38,20 @@ public class DetailTaskFragment extends DialogFragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        taskToView = null;
+        selectedTask = null;
 
         if (getArguments() != null && getArguments().containsKey("Task to view")) {
-            taskToView = getArguments().getParcelable("Task to view");
-            binding.tvTaskName.setText(taskToView.getName());
-            binding.tvTaskDescription.setText(taskToView.getDescription());
-            binding.tvTaskCategory.setText(taskToView.getStartDate()); //TODO category
-            binding.tvTaskStartDate.setText(taskToView.getStartDate());
-            binding.tvTaskEndDate.setText(taskToView.getEndDate());
-            binding.recurringFields.setVisibility(taskToView.frequency == FrequencyType.PONAVLJAJUCI ? View.VISIBLE : View.GONE);
-            binding.tvTaskRecurringNumber.setText(String.valueOf(taskToView.getInterval()));
-            binding.tvTaskRecurringUnit.setText(taskToView.getUnit() == null ? "" : taskToView.getUnit().getDisplayName());
-            binding.tvTaskDifficulty.setText(taskToView.getDifficulty().getDisplayName());
-            binding.tvTaskImportance.setText(taskToView.getImportance().getDisplayName());
+            selectedTask = getArguments().getParcelable("Task to view");
+            binding.tvTaskName.setText(selectedTask.getName());
+            binding.tvTaskDescription.setText(selectedTask.getDescription());
+            binding.tvTaskCategory.setText(selectedTask.getStartDate()); //TODO category
+            binding.tvTaskStartDate.setText(selectedTask.getStartDate());
+            binding.tvTaskEndDate.setText(selectedTask.getEndDate());
+            binding.recurringFields.setVisibility(selectedTask.frequency == FrequencyType.PONAVLJAJUCI ? View.VISIBLE : View.GONE);
+            binding.tvTaskRecurringNumber.setText(String.valueOf(selectedTask.getInterval()));
+            binding.tvTaskRecurringUnit.setText(selectedTask.getUnit() == null ? "" : selectedTask.getUnit().getDisplayName());
+            binding.tvTaskDifficulty.setText(selectedTask.getDifficulty().getDisplayName());
+            binding.tvTaskImportance.setText(selectedTask.getImportance().getDisplayName());
         }
     }
 

@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:paddingHorizontal="16dp">
 
     <View
         android:layout_width="match_parent"
-        android:layout_height="80dp" />
+        android:layout_height="90dp" />
 
     <!-- Title -->
     <TextView
@@ -13,16 +14,16 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
-        android:layout_marginTop="30dp"
+        android:layout_marginTop="40dp"
         android:text="@string/add_task_title"
         android:textSize="24sp"
         android:textStyle="bold"
         android:textColor="@color/yellowAccent" />
 
-    <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    <ScrollView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="80dp">
+        android:layout_marginTop="90dp">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -48,32 +49,51 @@
                 android:layout_marginBottom="16dp"
                 android:layout_marginHorizontal="4dp"/>
 
-
             <LinearLayout
+                android:id="@+id/categoryFields"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:layout_marginBottom="16dp"
                 android:gravity="center">
-
                 <!-- Task category -->
                 <Spinner
                     android:id="@+id/spinnerCategory"
-                    android:layout_width="150dp"
+                    android:layout_width="145dp"
                     android:layout_height="match_parent"
                     android:spinnerMode="dropdown"
-                    android:layout_marginRight="0dp"/>
-
+                    android:layout_marginEnd="10dp"/>
                 <!-- Add category -->
                 <Button
                     android:id="@+id/btnSaveCategory"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginLeft="30dp"
                     android:layout_gravity="end"
                     android:text="@string/add_category"
                     android:backgroundTint="@color/blueAccent"/>
+            </LinearLayout>
 
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_horizontal"
+                android:layout_marginBottom="16dp">
+                <!-- Task start date -->
+                <EditText
+                    android:id="@+id/etStartDate"
+                    android:layout_width="140dp"
+                    android:layout_height="wrap_content"
+                    android:inputType="date"
+                    android:hint="@string/task_start"
+                    android:layout_marginEnd="20dp"/>
+                <!-- Task end date -->
+                <EditText
+                    android:id="@+id/etEndDate"
+                    android:layout_width="140dp"
+                    android:layout_height="wrap_content"
+                    android:inputType="date"
+                    android:hint="@string/task_end"/>
             </LinearLayout>
 
             <!-- Task frequency -->
@@ -84,47 +104,18 @@
                 android:orientation="horizontal"
                 android:gravity="center"
                 android:layout_marginBottom="16dp">
-
                 <RadioButton
                     android:id="@+id/rbOneTime"
-                    android:layout_width="150dp"
+                    android:layout_width="140dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginRight="30dp"
+                    android:layout_marginEnd="20dp"
                     android:text="@string/task_not_repeatable"/>
-
                 <RadioButton
                     android:id="@+id/rbRepeat"
                     android:layout_width="150dp"
                     android:layout_height="wrap_content"
                     android:text="@string/task_repeatable" />
-
             </RadioGroup>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_horizontal"
-                android:layout_marginBottom="16dp">
-
-                <!-- Task start date -->
-                <EditText
-                    android:id="@+id/etStartDate"
-                    android:layout_width="150dp"
-                    android:layout_height="wrap_content"
-                    android:inputType="date"
-                    android:hint="@string/task_start"
-                    android:layout_marginRight="30dp"/>
-
-                <!-- Task end date -->
-                <EditText
-                    android:id="@+id/etEndDate"
-                    android:layout_width="150dp"
-                    android:layout_height="wrap_content"
-                    android:inputType="date"
-                    android:hint="@string/task_end"/>
-
-            </LinearLayout>
 
             <!-- Recurring task -->
             <LinearLayout
@@ -134,23 +125,20 @@
                 android:orientation="horizontal"
                 android:layout_marginBottom="16dp"
                 android:gravity="center_horizontal">
-
                 <!-- Task interval -->
                 <EditText
                     android:id="@+id/etReccuringNumber"
-                    android:layout_width="150dp"
+                    android:layout_width="140dp"
                     android:layout_height="wrap_content"
                     android:inputType="number"
-                    android:layout_marginRight="30dp"
+                    android:layout_marginEnd="20dp"
                     android:hint="@string/task_recurring_number"/>
-
                 <!-- Task unit -->
                 <Spinner
                     android:id="@+id/spinnerRecurringUnit"
                     android:layout_width="150dp"
                     android:layout_height="40dp"
                     android:spinnerMode="dropdown"/>
-
             </LinearLayout>
 
             <!-- Task difficulty -->
@@ -176,30 +164,24 @@
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:gravity="center_horizontal"
-                android:layout_marginTop="16dp">
-
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="16dp">
                 <!-- Remove task button -->
                 <Button
                     android:id="@+id/btnRemoveTask"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:layout_marginHorizontal="10dp"
+                    android:layout_marginEnd="32dp"
                     android:backgroundTint="@color/blueAccent"
                     android:text="@string/remove_task"
                     android:visibility="gone"/>
-
                 <!-- Add task button -->
                 <Button
                     android:id="@+id/btnSaveTask"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:layout_marginHorizontal="10dp"
                     android:backgroundTint="@color/blueAccent"
-                    android:text="@string/add_task" />
-
-
+                    android:text="@string/save_task" />
             </LinearLayout>
 
     </LinearLayout>
