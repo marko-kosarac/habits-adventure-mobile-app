@@ -1,20 +1,17 @@
 package com.example.mobilnaaplikacija.fragments;
 
 import android.app.DatePickerDialog;
-import android.app.TimePickerDialog;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
 
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.DatePicker;
-import android.widget.TimePicker;
 import android.widget.Toast;
 
 import com.example.mobilnaaplikacija.R;
@@ -28,11 +25,9 @@ import com.example.mobilnaaplikacija.model.UnitType;
 import com.example.mobilnaaplikacija.services.TaskService;
 import com.example.mobilnaaplikacija.services.UserService;
 
-import java.time.Duration;
 import java.util.Calendar;
-import java.util.Locale;
 
-public class AddTaskFragment extends DialogFragment {
+public class AddEditTaskFragment extends DialogFragment {
 
     private FragmentAddTaskBinding binding;
     private TaskService taskService;

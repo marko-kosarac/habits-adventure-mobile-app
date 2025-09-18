@@ -7,7 +7,6 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -52,7 +51,7 @@ public class TaskListFragment extends Fragment implements RecyclerViewInterface 
         binding.btnAddTask.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                new AddTaskFragment().show(
+                new AddEditTaskFragment().show(
                         getChildFragmentManager(), "New task");
             }
         });
@@ -89,7 +88,7 @@ public class TaskListFragment extends Fragment implements RecyclerViewInterface 
         Bundle args = new Bundle();
         Task selectedTask = tasks.get(position);
         args.putParcelable("Task to edit", selectedTask);
-        AddTaskFragment fragment = new AddTaskFragment();
+        AddEditTaskFragment fragment = new AddEditTaskFragment();
         fragment.setArguments(args);
         fragment.show(getChildFragmentManager(), "Edit task");
     }

@@ -24,12 +24,7 @@
         android:id="@+id/mainFragment"
         android:name="com.example.mobilnaaplikacija.fragments.HomePageFragment"
         android:label="Početna"
-        tools:layout="@layout/fragment_home_page">
-
-        <action
-            android:id="@+id/action_homePageFragment_to_addTaskFragment"
-            app:destination="@id/addTaskFragment" />
-    </fragment>
+        tools:layout="@layout/fragment_home_page"/>
 
     <fragment
         android:id="@+id/profile_page"
