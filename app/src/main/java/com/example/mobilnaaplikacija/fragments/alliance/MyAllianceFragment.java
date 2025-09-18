@@ -12,11 +12,14 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.navigation.NavController;
+import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.mobilnaaplikacija.R;
 import com.example.mobilnaaplikacija.adapters.AllianceMemberAdapter;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -28,6 +31,7 @@ public class MyAllianceFragment extends Fragment {
 
     private TextView textAllianceName, textAllianceLeader, textMembersLabel;
     private Button btnDeleteAlliance, btnLeaveAlliance;
+    private FloatingActionButton btnChat;
     private RecyclerView recyclerAllianceMembers;
     private AllianceMemberAdapter memberAdapter;
     private List<String> memberList = new ArrayList<>();
@@ -45,6 +49,7 @@ public class MyAllianceFragment extends Fragment {
         btnDeleteAlliance = view.findViewById(R.id.btnDeleteAlliance);
         btnLeaveAlliance = view.findViewById(R.id.btnLeaveAlliance);
         textMembersLabel = view.findViewById(R.id.textMembersLabel);
+        btnChat = view.findViewById(R.id.fabOpenChat);
 
         recyclerAllianceMembers.setLayoutManager(new LinearLayoutManager(getContext()));
         memberAdapter = new AllianceMemberAdapter(memberList);
@@ -53,10 +58,29 @@ public class MyAllianceFragment extends Fragment {
         btnDeleteAlliance.setOnClickListener(v -> showDeleteConfirmation());
         btnLeaveAlliance.setOnClickListener(v -> showLeaveConfirmation());
 
+
+        btnChat.setOnClickListener(v -> {
+            db.collection("users").document(FirebaseAuth.getInstance().getCurrentUser().getUid())
+                    .get()
+                    .addOnSuccessListener(userDoc -> {
+                        String allianceId = userDoc.getString("currentAllianceId");
+                        if (allianceId != null && !allianceId.isEmpty()) {
+                            Bundle bundle = new Bundle();
+                            bundle.putString("allianceId", allianceId);
+
+                            NavController navController = Navigation.findNavController(requireView());
+                            navController.navigate(R.id.action_myAllianceFragment_to_allianceChatFragment, bundle);
+                        } else {
+                            Toast.makeText(getContext(), "Niste u savezu.", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+        });
+
         loadAllianceData();
 
         return view;
     }
+
 
     private void loadAllianceData() {
         String currentUserId = FirebaseAuth.getInstance().getCurrentUser().getUid();
@@ -93,6 +117,7 @@ public class MyAllianceFragment extends Fragment {
                                         }
                                         textMembersLabel.setVisibility(View.VISIBLE);
                                         recyclerAllianceMembers.setVisibility(View.VISIBLE);
+                                        btnChat.setVisibility(View.VISIBLE);
 
                                         // Prikaz dugmadi
                                         if (currentUserId.equals(leaderId)) {

@@ -104,7 +104,8 @@ public class MainActivity extends AppCompatActivity {
                 R.id.shopFragment,
                 R.id.friendsFragment,
                 R.id.friendProfileFragment,
-                R.id.myAllianceFragment
+                R.id.myAllianceFragment,
+                R.id.allianceChatFragment
         ).setOpenableLayout(drawer).build();
 
         NavigationUI.setupActionBarWithNavController(this, navController, mAppBarConfiguration);
@@ -147,7 +148,7 @@ public class MainActivity extends AppCompatActivity {
             drawer.closeDrawers();
             return true;
         });
-        hideSystemUI();
+//        hideSystemUI();
     }
 
     @Override

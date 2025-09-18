@@ -11,7 +11,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Marko"
-        android:textSize="12sp"
+        android:textSize="13sp"
         android:textColor="@android:color/darker_gray"/>
 
     <TextView
@@ -19,6 +19,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Ćao svima!"
+        android:textSize="17sp"
         android:background="@drawable/bg_message_left"
         android:padding="8dp"
         android:textColor="@android:color/black"/>
@@ -28,6 +29,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="12:30"
-        android:textSize="10sp"
+        android:textSize="12sp"
         android:textColor="@android:color/darker_gray"/>
 </LinearLayout>

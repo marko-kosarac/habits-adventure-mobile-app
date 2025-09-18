@@ -65,10 +65,14 @@
         android:id="@+id/myAllianceFragment"
         android:name="com.example.mobilnaaplikacija.fragments.alliance.MyAllianceFragment"
         android:label="Moj savez"
-        tools:layout="@layout/fragment_my_alliance" />
+        tools:layout="@layout/fragment_my_alliance" >
+        <action
+            android:id="@+id/action_myAllianceFragment_to_allianceChatFragment"
+            app:destination="@id/allianceChatFragment" />
+    </fragment>
     <fragment
         android:id="@+id/allianceChatFragment"
-        android:name="com.example.mobilnaaplikacija.AllianceChatFragment"
-        android:label="fragment_alliance_chat"
+        android:name="com.example.mobilnaaplikacija.fragments.alliance.AllianceChatFragment"
+        android:label="Savez Chat"
         tools:layout="@layout/fragment_alliance_chat" />
 </navigation>
