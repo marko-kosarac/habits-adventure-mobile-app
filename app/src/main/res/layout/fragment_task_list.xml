@@ -4,41 +4,48 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:padding="8dp"
     android:orientation="vertical">
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical">
+        <!-- Mod: lista/kalendar -->
+        <com.google.android.material.tabs.TabLayout
+            android:id="@+id/tabLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="4dp"
+            app:tabIndicatorColor="@color/tab_selection_color"/>
         <!-- Filteri -->
         <com.google.android.material.chip.ChipGroup
             android:id="@+id/cgFilters"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp"
+            android:layout_marginBottom="4dp"
             app:singleSelection="true"
             app:selectionRequired="true"
             app:singleLine="true"
-            android:layout_gravity="center_horizontal">
+            android:layout_gravity="">
             <com.google.android.material.chip.Chip
                 android:id="@+id/chipAll"
                 style="@style/Widget.MaterialComponents.Chip.Choice"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:checked="true"
-                android:text="@string/chip_all"/>
+                android:text="@string/chip_all"
+                android:textSize="12sp"/>
             <com.google.android.material.chip.Chip
                 android:id="@+id/chipOneTime"
                 style="@style/Widget.MaterialComponents.Chip.Choice"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/chip_one_time"/>
+                android:text="@string/chip_one_time"
+                android:textSize="12sp"/>
             <com.google.android.material.chip.Chip
                 android:id="@+id/chipRepeat"
                 style="@style/Widget.MaterialComponents.Chip.Choice"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/chip_repeat"/>
+                android:text="@string/chip_repeat"
+                android:textSize="12sp"/>
         </com.google.android.material.chip.ChipGroup>
         <!-- Zadaci -->
         <androidx.recyclerview.widget.RecyclerView
@@ -46,7 +53,7 @@
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
-            android:layout_marginBottom="8dp"
+            android:layout_marginBottom="16dp"
             tools:listitem="@layout/card_task"/>
         <!-- Dugme za dodavanje zadatka -->
         <Button
@@ -54,11 +61,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
-            android:layout_marginTop="16dp"
-            android:layout_marginBottom="32dp"
+            android:layout_marginBottom="16dp"
             android:backgroundTint="@color/blueAccent"
             android:text="@string/add_task"/>
-    </LinearLayout>
 
 </LinearLayout>
 

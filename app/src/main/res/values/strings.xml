@@ -60,6 +60,8 @@
     <string name="chip_all">Svi</string>
     <string name="chip_one_time">Jednokratni</string>
     <string name="chip_repeat">Ponavljajući</string>
+    <string name="list_view">Lista</string>
+    <string name="calendar_view">Kalendar</string>
 
     <string name="lorem_ipsum">
         Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam in scelerisque sem. Mauris

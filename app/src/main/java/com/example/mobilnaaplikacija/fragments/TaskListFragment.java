@@ -10,6 +10,8 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.example.mobilnaaplikacija.R;
 import com.example.mobilnaaplikacija.RecyclerViewInterface;
@@ -19,6 +21,7 @@ import com.example.mobilnaaplikacija.model.FrequencyType;
 import com.example.mobilnaaplikacija.model.Task;
 import com.example.mobilnaaplikacija.services.TaskService;
 import com.example.mobilnaaplikacija.services.UserService;
+import com.google.android.material.tabs.TabLayout;
 import com.google.firebase.auth.FirebaseUser;
 
 import java.util.ArrayList;
@@ -49,6 +52,28 @@ public class TaskListFragment extends Fragment implements RecyclerViewInterface 
         adapter = new TaskListAdapter(tasks, this);
         binding.rvTasks.setAdapter(adapter);
         getTasks();
+
+        TabLayout tabLayout = binding.tabLayout;
+
+        //Tab lista
+        TabLayout.Tab listTab = tabLayout.newTab();
+        View listView = LayoutInflater.from(getContext()).inflate(R.layout.tab, null);
+        ImageView tabListImage = listView.findViewById(R.id.ivTabIcon);
+        tabListImage.setImageResource(R.drawable.ic_list);
+        TextView tabListText = listView.findViewById(R.id.tvTabTitle);
+        tabListText.setText(R.string.list_view);
+        listTab.setCustomView(listView);
+        tabLayout.addTab(listTab);
+
+        //Tab kalendar
+        TabLayout.Tab calendarTab = tabLayout.newTab();
+        View calendarView = LayoutInflater.from(getContext()).inflate(R.layout.tab, null);
+        ImageView tabCalendarImage = calendarView.findViewById(R.id.ivTabIcon);
+        tabCalendarImage.setImageResource(R.drawable.ic_calendar);
+        TextView tabCalendarText = calendarView.findViewById(R.id.tvTabTitle);
+        tabCalendarText.setText(R.string.calendar_view);
+        calendarTab.setCustomView(calendarView);
+        tabLayout.addTab(calendarTab);
 
         binding.btnAddTask.setOnClickListener(new View.OnClickListener() {
             @Override
