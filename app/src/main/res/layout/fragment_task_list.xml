@@ -55,13 +55,24 @@
             android:layout_weight="1"
             android:layout_marginBottom="16dp"
             tools:listitem="@layout/card_task"/>
-        <!-- Dugme za dodavanje zadatka -->
+        <!-- Kalendar -->
+        <com.applandeo.materialcalendarview.CalendarView
+            android:id="@+id/calendarView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="140dp"
+            app:headerColor="@color/selected_background"
+            app:selectionColor="@color/yellowAccent"
+            app:todayLabelColor="@color/blueAccent"
+            android:visibility="gone"/>
+
+    <!-- Dugme za dodavanje zadatka -->
         <Button
             android:id="@+id/btnAddTask"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginBottom="16dp"
+            android:layout_gravity="center_horizontal|bottom"
+            android:layout_marginBottom="8dp"
             android:backgroundTint="@color/blueAccent"
             android:text="@string/add_task"/>
 

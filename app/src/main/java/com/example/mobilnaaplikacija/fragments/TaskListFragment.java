@@ -12,7 +12,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.applandeo.materialcalendarview.CalendarView;
 import com.example.mobilnaaplikacija.R;
 import com.example.mobilnaaplikacija.RecyclerViewInterface;
 import com.example.mobilnaaplikacija.adapters.TaskListAdapter;
@@ -24,7 +26,10 @@ import com.example.mobilnaaplikacija.services.UserService;
 import com.google.android.material.tabs.TabLayout;
 import com.google.firebase.auth.FirebaseUser;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Locale;
 
 public class TaskListFragment extends Fragment implements RecyclerViewInterface {
     private TaskListAdapter adapter;
@@ -53,9 +58,9 @@ public class TaskListFragment extends Fragment implements RecyclerViewInterface 
         binding.rvTasks.setAdapter(adapter);
         getTasks();
 
+        //Tabovi lista i kalendar
         TabLayout tabLayout = binding.tabLayout;
 
-        //Tab lista
         TabLayout.Tab listTab = tabLayout.newTab();
         View listView = LayoutInflater.from(getContext()).inflate(R.layout.tab, null);
         ImageView tabListImage = listView.findViewById(R.id.ivTabIcon);
@@ -65,7 +70,6 @@ public class TaskListFragment extends Fragment implements RecyclerViewInterface 
         listTab.setCustomView(listView);
         tabLayout.addTab(listTab);
 
-        //Tab kalendar
         TabLayout.Tab calendarTab = tabLayout.newTab();
         View calendarView = LayoutInflater.from(getContext()).inflate(R.layout.tab, null);
         ImageView tabCalendarImage = calendarView.findViewById(R.id.ivTabIcon);
@@ -74,6 +78,47 @@ public class TaskListFragment extends Fragment implements RecyclerViewInterface 
         tabCalendarText.setText(R.string.calendar_view);
         calendarTab.setCustomView(calendarView);
         tabLayout.addTab(calendarTab);
+
+        //Mijenjanje lista-kalendar
+        tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+            @Override
+            public void onTabSelected(TabLayout.Tab tab) {
+                if (tab == listTab) {
+                    binding.rvTasks.setVisibility(View.VISIBLE);
+                    binding.calendarView.setVisibility(View.GONE);
+                } else {
+                    binding.rvTasks.setVisibility(View.GONE);
+                    binding.calendarView.setVisibility(View.VISIBLE);
+                }
+            }
+            @Override
+            public void onTabUnselected(TabLayout.Tab tab) {}
+            @Override
+            public void onTabReselected(TabLayout.Tab tab) {}
+        });
+
+        CalendarView calendar = view.findViewById(R.id.calendarView);
+        calendar.setOnCalendarDayClickListener(day -> {
+            Calendar clickedDay = day.getCalendar();
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd", Locale.getDefault());
+            String selectedDate = dateFormat.format(clickedDay.getTime());
+
+            //taskService.filterByDate(taskService.getTasksByUser(userService.getCurrentUser().getUid()), selectedDate);
+            Toast.makeText(getContext(), "Tasks for " + selectedDate, Toast.LENGTH_SHORT).show();
+        });
+
+        binding.cgFilters.setOnCheckedStateChangeListener((group, checkedIds) -> {
+            ArrayList<Task> filteredTasks = new ArrayList<>();
+
+            if (checkedIds.get(0) == R.id.chipAll) {
+                filteredTasks = taskService.filterByFrequency(tasks, null);
+            } else if (checkedIds.get(0) == R.id.chipOneTime) {
+                filteredTasks = taskService.filterByFrequency(tasks, FrequencyType.JEDNOKRATAN);
+            } else if (checkedIds.get(0) == R.id.chipRepeat) {
+                filteredTasks = taskService.filterByFrequency(tasks, FrequencyType.PONAVLJAJUCI);
+            }
+            adapter.setTasks(filteredTasks);
+        });
 
         binding.btnAddTask.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -85,19 +130,6 @@ public class TaskListFragment extends Fragment implements RecyclerViewInterface 
 
         getChildFragmentManager().setFragmentResultListener("Task managed", getViewLifecycleOwner(), (requestKey, result) -> {
             getTasks();
-        });
-
-        binding.cgFilters.setOnCheckedStateChangeListener((group, checkedIds) -> {
-            ArrayList<Task> filteredTasks = new ArrayList<>();
-
-            if (checkedIds.get(0) == R.id.chipAll) {
-               filteredTasks = taskService.filterByFrequency(tasks, null);
-           } else if (checkedIds.get(0) == R.id.chipOneTime) {
-                filteredTasks = taskService.filterByFrequency(tasks, FrequencyType.JEDNOKRATAN);
-            } else if (checkedIds.get(0) == R.id.chipRepeat) {
-                filteredTasks = taskService.filterByFrequency(tasks, FrequencyType.PONAVLJAJUCI);
-            }
-            adapter.setTasks(filteredTasks);
         });
     }
 
