@@ -13,4 +13,5 @@
     <color name="colorAccent">#64B5F6</color>   <!-- svetlija plava za akcente -->
     <color name="yellowAccent">#fbc44a</color>
     <color name="blueAccent">#2196F3</color>
+    <color name="lightGray">#F5F5F5</color>
 </resources>

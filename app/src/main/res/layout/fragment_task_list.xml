@@ -62,6 +62,9 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"
         android:elevation="4dp"
+        android:background="@drawable/calendar_bg"
+        app:headerColor="@color/white"
+        app:headerLabelColor="@color/yellowAccent"
         app:swipeEnabled="true"
         android:visibility="gone"/>
     <!-- Zadaci odredjenog datuma -->
