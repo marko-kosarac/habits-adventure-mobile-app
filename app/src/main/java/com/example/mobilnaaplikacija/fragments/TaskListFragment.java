@@ -29,12 +29,17 @@ import com.google.firebase.auth.FirebaseUser;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
+import java.util.List;
 import java.util.Locale;
 
 public class TaskListFragment extends Fragment implements RecyclerViewInterface {
     private TaskListAdapter adapter;
     private ArrayList<Task> tasks;
+    private String selectedDate = null;
+    private Integer selectedFreq = R.id.chipAll;
     private FragmentTaskListBinding binding;
+    private TabLayout.Tab listTab, calendarTab;
     private TaskService taskService;
     private UserService userService;
 
@@ -61,7 +66,7 @@ public class TaskListFragment extends Fragment implements RecyclerViewInterface 
         //Tabovi lista i kalendar
         TabLayout tabLayout = binding.tabLayout;
 
-        TabLayout.Tab listTab = tabLayout.newTab();
+        listTab = tabLayout.newTab();
         View listView = LayoutInflater.from(getContext()).inflate(R.layout.tab, null);
         ImageView tabListImage = listView.findViewById(R.id.ivTabIcon);
         tabListImage.setImageResource(R.drawable.ic_list);
@@ -70,7 +75,7 @@ public class TaskListFragment extends Fragment implements RecyclerViewInterface 
         listTab.setCustomView(listView);
         tabLayout.addTab(listTab);
 
-        TabLayout.Tab calendarTab = tabLayout.newTab();
+        calendarTab = tabLayout.newTab();
         View calendarView = LayoutInflater.from(getContext()).inflate(R.layout.tab, null);
         ImageView tabCalendarImage = calendarView.findViewById(R.id.ivTabIcon);
         tabCalendarImage.setImageResource(R.drawable.ic_calendar);
@@ -84,8 +89,10 @@ public class TaskListFragment extends Fragment implements RecyclerViewInterface 
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
                 if (tab == listTab) {
+                    adapter.setTasks(applyFilters());
                     binding.rvTasks.setVisibility(View.VISIBLE);
                     binding.calendarView.setVisibility(View.GONE);
+                    binding.rvDateTasks.setVisibility(View.GONE);
                 } else {
                     binding.rvTasks.setVisibility(View.GONE);
                     binding.calendarView.setVisibility(View.VISIBLE);
@@ -100,24 +107,19 @@ public class TaskListFragment extends Fragment implements RecyclerViewInterface 
         CalendarView calendar = view.findViewById(R.id.calendarView);
         calendar.setOnCalendarDayClickListener(day -> {
             Calendar clickedDay = day.getCalendar();
-            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd", Locale.getDefault());
-            String selectedDate = dateFormat.format(clickedDay.getTime());
+            SimpleDateFormat dateFormat = new SimpleDateFormat("d/MM/yyyy", Locale.getDefault());
+            selectedDate = dateFormat.format(clickedDay.getTime());
 
-            //taskService.filterByDate(taskService.getTasksByUser(userService.getCurrentUser().getUid()), selectedDate);
+            binding.rvDateTasks.setLayoutManager(new LinearLayoutManager(getActivity()));
+            binding.rvDateTasks.setAdapter(adapter);
+            adapter.setTasks(applyFilters());
+            binding.rvDateTasks.setVisibility(View.VISIBLE);
             Toast.makeText(getContext(), "Tasks for " + selectedDate, Toast.LENGTH_SHORT).show();
         });
 
         binding.cgFilters.setOnCheckedStateChangeListener((group, checkedIds) -> {
-            ArrayList<Task> filteredTasks = new ArrayList<>();
-
-            if (checkedIds.get(0) == R.id.chipAll) {
-                filteredTasks = taskService.filterByFrequency(tasks, null);
-            } else if (checkedIds.get(0) == R.id.chipOneTime) {
-                filteredTasks = taskService.filterByFrequency(tasks, FrequencyType.JEDNOKRATAN);
-            } else if (checkedIds.get(0) == R.id.chipRepeat) {
-                filteredTasks = taskService.filterByFrequency(tasks, FrequencyType.PONAVLJAJUCI);
-            }
-            adapter.setTasks(filteredTasks);
+            selectedFreq = checkedIds.get(0);
+            adapter.setTasks(applyFilters());
         });
 
         binding.btnAddTask.setOnClickListener(new View.OnClickListener() {
@@ -143,6 +145,27 @@ public class TaskListFragment extends Fragment implements RecyclerViewInterface 
         tasks.clear();
         tasks.addAll(taskService.getTasksByUser(userId));
         adapter.setTasks(tasks);
+    }
+
+    private ArrayList<Task> applyFilters () {
+        ArrayList<Task> currentTasks = new ArrayList<>(taskService.getTasksByUser(userService.getCurrentUser().getUid()));
+        if (selectedDate != null && binding.tabLayout.getSelectedTabPosition() == calendarTab.getPosition()) {
+            currentTasks = taskService.filterByDate(currentTasks, selectedDate);
+        }
+        currentTasks = filterByFrequency(Collections.singletonList(selectedFreq), currentTasks);
+        return currentTasks;
+    }
+
+    private ArrayList<Task> filterByFrequency(List<Integer> checkedIds, ArrayList<Task> tasks) {
+        ArrayList<Task> filteredTasks = new ArrayList<>();
+        if (checkedIds.get(0) == R.id.chipAll) {
+            filteredTasks = taskService.filterByFrequency(tasks, null);
+        } else if (checkedIds.get(0) == R.id.chipOneTime) {
+            filteredTasks = taskService.filterByFrequency(tasks, FrequencyType.JEDNOKRATAN);
+        } else if (checkedIds.get(0) == R.id.chipRepeat) {
+            filteredTasks = taskService.filterByFrequency(tasks, FrequencyType.PONAVLJAJUCI);
+        }
+        return filteredTasks;
     }
 
     @Override

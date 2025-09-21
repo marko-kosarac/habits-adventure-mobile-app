@@ -7,65 +7,73 @@
     android:padding="8dp"
     android:orientation="vertical">
 
-        <!-- Mod: lista/kalendar -->
-        <com.google.android.material.tabs.TabLayout
-            android:id="@+id/tabLayout"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="4dp"
-            app:tabIndicatorColor="@color/tab_selection_color"/>
-        <!-- Filteri -->
-        <com.google.android.material.chip.ChipGroup
-            android:id="@+id/cgFilters"
+    <!-- Mod: lista/kalendar -->
+    <com.google.android.material.tabs.TabLayout
+        android:id="@+id/tabLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="4dp"
+        app:tabIndicatorColor="@color/tab_selection_color"/>
+    <!-- Filteri -->
+    <com.google.android.material.chip.ChipGroup
+        android:id="@+id/cgFilters"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="4dp"
+        app:singleSelection="true"
+        app:selectionRequired="true"
+        app:singleLine="true"
+        android:layout_gravity="">
+        <com.google.android.material.chip.Chip
+            android:id="@+id/chipAll"
+            style="@style/Widget.MaterialComponents.Chip.Choice"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="4dp"
-            app:singleSelection="true"
-            app:selectionRequired="true"
-            app:singleLine="true"
-            android:layout_gravity="">
-            <com.google.android.material.chip.Chip
-                android:id="@+id/chipAll"
-                style="@style/Widget.MaterialComponents.Chip.Choice"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:checked="true"
-                android:text="@string/chip_all"
-                android:textSize="12sp"/>
-            <com.google.android.material.chip.Chip
-                android:id="@+id/chipOneTime"
-                style="@style/Widget.MaterialComponents.Chip.Choice"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/chip_one_time"
-                android:textSize="12sp"/>
-            <com.google.android.material.chip.Chip
-                android:id="@+id/chipRepeat"
-                style="@style/Widget.MaterialComponents.Chip.Choice"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/chip_repeat"
-                android:textSize="12sp"/>
-        </com.google.android.material.chip.ChipGroup>
-        <!-- Zadaci -->
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/rvTasks"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            android:layout_marginBottom="16dp"
-            tools:listitem="@layout/card_task"/>
-        <!-- Kalendar -->
-        <com.applandeo.materialcalendarview.CalendarView
-            android:id="@+id/calendarView"
-            android:layout_width="match_parent"
+            android:checked="true"
+            android:text="@string/chip_all"
+            android:textSize="12sp"/>
+        <com.google.android.material.chip.Chip
+            android:id="@+id/chipOneTime"
+            style="@style/Widget.MaterialComponents.Chip.Choice"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="140dp"
-            app:headerColor="@color/selected_background"
-            app:selectionColor="@color/yellowAccent"
-            app:todayLabelColor="@color/blueAccent"
-            android:visibility="gone"/>
-
+            android:text="@string/chip_one_time"
+            android:textSize="12sp"/>
+        <com.google.android.material.chip.Chip
+            android:id="@+id/chipRepeat"
+            style="@style/Widget.MaterialComponents.Chip.Choice"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/chip_repeat"
+            android:textSize="12sp"/>
+    </com.google.android.material.chip.ChipGroup>
+    <!-- Zadaci -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvTasks"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:layout_marginBottom="16dp"
+        tools:listitem="@layout/card_task"/>
+    <!-- Kalendar -->
+    <com.applandeo.materialcalendarview.CalendarView
+        android:id="@+id/calendarView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:elevation="4dp"
+        app:swipeEnabled="true"
+        android:visibility="gone"/>
+    <!-- Zadaci odredjenog datuma -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvDateTasks"
+        android:layout_width="match_parent"
+        android:layout_height="120dp"
+        android:layout_weight="1"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp"
+        tools:listitem="@layout/card_task"
+        android:visibility="gone"/>
     <!-- Dugme za dodavanje zadatka -->
         <Button
             android:id="@+id/btnAddTask"

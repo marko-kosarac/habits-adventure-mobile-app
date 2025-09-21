@@ -12,7 +12,9 @@ import com.example.mobilnaaplikacija.repository.TaskRepository;
 import com.example.mobilnaaplikacija.model.*;
 import com.google.firebase.auth.FirebaseUser;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
@@ -76,4 +78,22 @@ public class TaskService {
         }
         return filteredTasks;
     }
+    public ArrayList<Task> filterByDate(ArrayList<Task> tasks, String calendarDate) {
+        ArrayList<Task> filteredTasks = new ArrayList<>();
+        SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+        try {
+            Date chosenDate = dateFormat.parse(calendarDate);
+
+            for (Task t : tasks) {
+                Date taskDate = dateFormat.parse(t.getStartDate());
+                if (taskDate != null && taskDate.equals(chosenDate)) {
+                    filteredTasks.add(t);
+                }
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        return filteredTasks;
+    }
+
 }
