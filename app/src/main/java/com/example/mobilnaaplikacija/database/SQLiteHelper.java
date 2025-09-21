@@ -22,7 +22,7 @@ public class SQLiteHelper extends SQLiteOpenHelper {
     public static final String COLUMN_USER_ID = "user_id";
     public static final String COLUMN_TASK_NAME = "task_name";
     public static final String COLUMN_TASK_DESCRIPTION = "task_description";
-    public static final String COLUMN_CATEGORY_ID = "category_id";
+    public static final String COLUMN_TASK_CATEGORY_ID = "category_id";
     public static final String COLUMN_FREQUENCY = "frequency";
     public static final String COLUMN_START_DATE = "start_date";
     public static final String COLUMN_END_DATE = "end_date";
@@ -34,6 +34,11 @@ public class SQLiteHelper extends SQLiteOpenHelper {
     public static final String COLUMN_IMPORTANCE = "importance";
     public static final String COLUMN_STATUS = "status";
 
+    // Categories table
+    public static final String TABLE_CATEGORIES = "CATEGORIES";
+    public static final String COLUMN_CATEGORY_ID = "id";
+    public static final String COLUMN_CATEGORY_NAME = "name";
+    public static final String COLUMN_CATEGORY_COLOR = "color";
     private static final String DATABASE_NAME = "appdata.db";
     private static final int DATABASE_VERSION = 5;
 
@@ -53,7 +58,7 @@ public class SQLiteHelper extends SQLiteOpenHelper {
                     COLUMN_USER_ID + " TEXT, " +
                     COLUMN_TASK_NAME + " TEXT, " +
                     COLUMN_TASK_DESCRIPTION + " TEXT, " +
-                    COLUMN_CATEGORY_ID + " TEXT, " +
+                    COLUMN_TASK_CATEGORY_ID + " TEXT, " +
                     COLUMN_FREQUENCY + " TEXT, " +
                     COLUMN_START_DATE + " TEXT, " +
                     COLUMN_END_DATE + " TEXT, " +
@@ -66,15 +71,22 @@ public class SQLiteHelper extends SQLiteOpenHelper {
                     COLUMN_STATUS + " TEXT" +
                     ");";
 
+    private static final String DB_CREATE_CATEGORIES = "CREATE TABLE " + TABLE_CATEGORIES + " ("
+            + COLUMN_CATEGORY_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
+            + COLUMN_CATEGORY_NAME + " TEXT, "
+            + COLUMN_CATEGORY_COLOR + " INTEGER"
+            + ");";
+
     public SQLiteHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        Log.i("DB", "Creating Equipment and Tasks table");
+        Log.i("DB", "Creating Equipment, Tasks and Categories table");
         db.execSQL(DB_CREATE_EQUIPMENT);
         db.execSQL(DB_CREATE_TASKS);
+        db.execSQL(DB_CREATE_CATEGORIES);
     }
 
     @Override
@@ -82,6 +94,7 @@ public class SQLiteHelper extends SQLiteOpenHelper {
         Log.i("DB", "Upgrading tables from " + oldVersion + " to " + newVersion);
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_EQUIPMENT);
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_TASKS);
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_CATEGORIES);
         onCreate(db);
     }
 }

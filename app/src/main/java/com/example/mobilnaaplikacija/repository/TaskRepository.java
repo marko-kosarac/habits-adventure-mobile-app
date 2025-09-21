@@ -22,14 +22,13 @@ public class TaskRepository {
         this.dbHelper = dbHelper;
     }
 
-
     public Task add(Task task){
         SQLiteDatabase db = dbHelper.getWritableDatabase();
         ContentValues values = new ContentValues();
         values.put(SQLiteHelper.COLUMN_USER_ID, task.getUserId());
         values.put(SQLiteHelper.COLUMN_TASK_NAME, task.getName());
         values.put(SQLiteHelper.COLUMN_TASK_DESCRIPTION, task.getDescription());
-        values.put(SQLiteHelper.COLUMN_CATEGORY_ID, task.getCategoryId());
+        values.put(SQLiteHelper.COLUMN_TASK_CATEGORY_ID, task.getCategoryId());
         values.put(SQLiteHelper.COLUMN_FREQUENCY, task.getFrequency().name());
         values.put(SQLiteHelper.COLUMN_START_DATE, task.getStartDate());
         values.put(SQLiteHelper.COLUMN_END_DATE, task.getEndDate());
@@ -55,7 +54,7 @@ public class TaskRepository {
         values.put(SQLiteHelper.COLUMN_USER_ID, task.getUserId());
         values.put(SQLiteHelper.COLUMN_TASK_NAME, task.getName());
         values.put(SQLiteHelper.COLUMN_TASK_DESCRIPTION, task.getDescription());
-        values.put(SQLiteHelper.COLUMN_CATEGORY_ID, task.getCategoryId());
+        values.put(SQLiteHelper.COLUMN_TASK_CATEGORY_ID, task.getCategoryId());
         values.put(SQLiteHelper.COLUMN_FREQUENCY, task.getFrequency().name());
         values.put(SQLiteHelper.COLUMN_START_DATE, task.getStartDate());
         values.put(SQLiteHelper.COLUMN_END_DATE, task.getEndDate());
@@ -88,7 +87,7 @@ public class TaskRepository {
                 task.setUserId(cursor.getString(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_USER_ID)));
                 task.setName(cursor.getString(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_TASK_NAME)));
                 task.setDescription(cursor.getString(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_TASK_DESCRIPTION)));
-                task.setCategoryId(cursor.getString(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_CATEGORY_ID)));
+                task.setCategoryId(cursor.getString(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_TASK_CATEGORY_ID)));
                 task.setFrequency(FrequencyType.valueOf(cursor.getString(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_FREQUENCY))));
                 task.setStartDate(cursor.getString(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_START_DATE)));
                 task.setEndDate(cursor.getString(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_END_DATE)));
