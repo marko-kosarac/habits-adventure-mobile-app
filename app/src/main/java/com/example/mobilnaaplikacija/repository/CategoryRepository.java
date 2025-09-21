@@ -5,12 +5,6 @@ import android.database.sqlite.SQLiteDatabase;
 
 import com.example.mobilnaaplikacija.database.SQLiteHelper;
 import com.example.mobilnaaplikacija.model.Category;
-import com.example.mobilnaaplikacija.model.DifficultyType;
-import com.example.mobilnaaplikacija.model.FrequencyType;
-import com.example.mobilnaaplikacija.model.ImportanceType;
-import com.example.mobilnaaplikacija.model.StatusType;
-import com.example.mobilnaaplikacija.model.Task;
-import com.example.mobilnaaplikacija.model.UnitType;
 
 import java.util.ArrayList;
 import java.util.List;
