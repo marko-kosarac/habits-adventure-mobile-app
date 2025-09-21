@@ -63,6 +63,33 @@
     <string name="list_view">Lista</string>
     <string name="calendar_view">Kalendar</string>
 
+    <string name="material_calendar_monday">P</string>
+    <string name="material_calendar_tuesday">U</string>
+    <string name="material_calendar_wednesday">S</string>
+    <string name="material_calendar_thursday">Č</string>
+    <string name="material_calendar_friday">P</string>
+    <string name="material_calendar_saturday">S</string>
+    <string name="material_calendar_sunday">N</string>
+
+    <array name="material_calendar_months_array">
+        <item>Januar</item>
+        <item>Februar</item>
+        <item>Mart</item>
+        <item>April</item>
+        <item>Maj</item>
+        <item>Jun</item>
+        <item>Jul</item>
+        <item>Avgust</item>
+        <item>Septembar</item>
+        <item>Oktobar</item>
+        <item>Novembar</item>
+        <item>Decembar</item>
+    </array>
+
+    <string name="material_calendar_today_button">Danas</string>
+    <string name="material_calendar_positive_button">OK</string>
+    <string name="material_calendar_negative_button">Odustani</string>
+
     <string name="lorem_ipsum">
         Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam in scelerisque sem. Mauris
         volutpat, dolor id interdum ullamcorper, risus dolor egestas lectus, sit amet mattis purus
