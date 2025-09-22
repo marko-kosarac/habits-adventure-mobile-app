@@ -19,29 +19,37 @@ import com.example.mobilnaaplikacija.R;
 import com.example.mobilnaaplikacija.RecyclerViewInterface;
 import com.example.mobilnaaplikacija.adapters.TaskListAdapter;
 import com.example.mobilnaaplikacija.databinding.FragmentTaskListBinding;
+import com.example.mobilnaaplikacija.model.Category;
 import com.example.mobilnaaplikacija.model.FrequencyType;
 import com.example.mobilnaaplikacija.model.Task;
+import com.example.mobilnaaplikacija.services.CategoryService;
 import com.example.mobilnaaplikacija.services.TaskService;
 import com.example.mobilnaaplikacija.services.UserService;
 import com.google.android.material.tabs.TabLayout;
 import com.google.firebase.auth.FirebaseUser;
 
+import org.checkerframework.checker.units.qual.C;
+
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 
 public class TaskListFragment extends Fragment implements RecyclerViewInterface {
     private TaskListAdapter adapter;
     private ArrayList<Task> tasks;
+    private ArrayList<Category> categories;
+    private HashMap<String, Category> categoryMap;
     private String selectedDate = null;
     private Integer selectedFreq = R.id.chipAll;
     private FragmentTaskListBinding binding;
     private TabLayout.Tab listTab, calendarTab;
     private TaskService taskService;
     private UserService userService;
+    private CategoryService categoryService;
 
     public TaskListFragment(){}
 
@@ -50,7 +58,10 @@ public class TaskListFragment extends Fragment implements RecyclerViewInterface 
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState){
         this.taskService = new TaskService(getContext());
         this.userService = new UserService();
+        this.categoryService = new CategoryService(getContext());
         this.tasks = new ArrayList<>();
+        this.categories = new ArrayList<>();
+        this.categoryMap = new HashMap<>();
         binding = FragmentTaskListBinding.inflate(inflater, container, false);
         return binding.getRoot();
     }
@@ -62,6 +73,9 @@ public class TaskListFragment extends Fragment implements RecyclerViewInterface 
         adapter = new TaskListAdapter(tasks, this);
         binding.rvTasks.setAdapter(adapter);
         getTasks();
+
+        //Kategorije
+        getCategories();
 
         //Tabovi lista i kalendar
         TabLayout tabLayout = binding.tabLayout;
@@ -107,7 +121,7 @@ public class TaskListFragment extends Fragment implements RecyclerViewInterface 
         CalendarView calendar = view.findViewById(R.id.calendarView);
         calendar.setOnCalendarDayClickListener(day -> {
             Calendar clickedDay = day.getCalendar();
-            SimpleDateFormat dateFormat = new SimpleDateFormat("d/MM/yyyy", Locale.getDefault());
+            SimpleDateFormat dateFormat = new SimpleDateFormat("d/M/yyyy", Locale.getDefault());
             selectedDate = dateFormat.format(clickedDay.getTime());
 
             binding.rvDateTasks.setLayoutManager(new LinearLayoutManager(getActivity()));
@@ -145,6 +159,13 @@ public class TaskListFragment extends Fragment implements RecyclerViewInterface 
         tasks.clear();
         tasks.addAll(taskService.getTasksByUser(userId));
         adapter.setTasks(tasks);
+    }
+
+    public void getCategories(){
+        categories = new ArrayList<>(categoryService.getCategories());
+        for (Category c : categories) {
+            categoryMap.put(c.getId(), c);
+        }
     }
 
     private ArrayList<Task> applyFilters () {
