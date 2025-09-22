@@ -5,21 +5,7 @@
     android:orientation="vertical"
     android:id="@+id/homePageFragment">
 
-    <FrameLayout
-        android:layout_width="match_parent"
-        android:layout_height="120dp">
 
-        <TextView
-            android:id="@+id/tvTitle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:text="@string/my_tasks"
-            android:textSize="30dp"
-            android:textStyle="bold"
-            android:textColor="@color/yellowAccent"/>
-
-    </FrameLayout>
 
     <!-- Zadaci -->
     <androidx.fragment.app.FragmentContainerView
