@@ -1,5 +1,6 @@
 package com.example.mobilnaaplikacija.fragments;
 
+import android.graphics.Color;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -14,11 +15,13 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.applandeo.materialcalendarview.CalendarDay;
 import com.applandeo.materialcalendarview.CalendarView;
 import com.example.mobilnaaplikacija.R;
 import com.example.mobilnaaplikacija.RecyclerViewInterface;
 import com.example.mobilnaaplikacija.adapters.TaskListAdapter;
 import com.example.mobilnaaplikacija.databinding.FragmentTaskListBinding;
+import com.example.mobilnaaplikacija.decorators.MultiDotDrawable;
 import com.example.mobilnaaplikacija.model.Category;
 import com.example.mobilnaaplikacija.model.FrequencyType;
 import com.example.mobilnaaplikacija.model.Task;
@@ -28,15 +31,15 @@ import com.example.mobilnaaplikacija.services.UserService;
 import com.google.android.material.tabs.TabLayout;
 import com.google.firebase.auth.FirebaseUser;
 
-import org.checkerframework.checker.units.qual.C;
-
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 public class TaskListFragment extends Fragment implements RecyclerViewInterface {
     private TaskListAdapter adapter;
@@ -119,6 +122,7 @@ public class TaskListFragment extends Fragment implements RecyclerViewInterface 
         });
 
         CalendarView calendar = view.findViewById(R.id.calendarView);
+        decorateCalendarWithTasks();
         calendar.setOnCalendarDayClickListener(day -> {
             Calendar clickedDay = day.getCalendar();
             SimpleDateFormat dateFormat = new SimpleDateFormat("d/M/yyyy", Locale.getDefault());
@@ -133,7 +137,7 @@ public class TaskListFragment extends Fragment implements RecyclerViewInterface 
 
         binding.cgFilters.setOnCheckedStateChangeListener((group, checkedIds) -> {
             selectedFreq = checkedIds.get(0);
-            adapter.setTasks(applyFilters());
+            getTasks();
         });
 
         binding.btnAddTask.setOnClickListener(new View.OnClickListener() {
@@ -157,8 +161,9 @@ public class TaskListFragment extends Fragment implements RecyclerViewInterface 
         }
 
         tasks.clear();
-        tasks.addAll(taskService.getTasksByUser(userId));
+        tasks.addAll(applyFilters());
         adapter.setTasks(tasks);
+        decorateCalendarWithTasks();
     }
 
     public void getCategories(){
@@ -187,6 +192,62 @@ public class TaskListFragment extends Fragment implements RecyclerViewInterface 
             filteredTasks = taskService.filterByFrequency(tasks, FrequencyType.PONAVLJAJUCI);
         }
         return filteredTasks;
+    }
+
+    private Map<String, List<Task>> groupByDate(ArrayList<Task> allTasks) {
+        java.util.Map<String, java.util.List<Task>> map = new java.util.HashMap<>();
+        for (Task t : allTasks) {
+            String d = t.getStartDate();
+            if (d == null) continue;
+            if (!map.containsKey(d)) map.put(d, new ArrayList<>());
+            map.get(d).add(t);
+        }
+        return map;
+    }
+
+    private void decorateCalendarWithTasks() {
+        List<CalendarDay> calendarDays = new ArrayList<>();
+        ArrayList<Task> tasks = applyFilters();
+        Map<String, List<Task>> grouped = groupByDate(tasks);
+
+        Date parsed = null;
+        SimpleDateFormat fmt = new SimpleDateFormat("d/M/yyyy", Locale.getDefault());
+        fmt.setLenient(false);
+
+        for (Map.Entry<String, List<Task>> entry : grouped.entrySet()) {
+            String dateStr = entry.getKey();
+
+            try {
+                parsed = fmt.parse(dateStr);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+
+            Calendar cal = Calendar.getInstance();
+            if (parsed != null)
+                cal.setTime(parsed);
+
+            if (cal == null) continue;
+
+            CalendarDay day = new CalendarDay(cal);
+
+            //categoryId -> color
+            List<Integer> colors = new ArrayList<>();
+            for (Task t : entry.getValue()) {
+                Integer colorInt = getCategoryColorInt(); // TODO
+                colors.add(colorInt != null ? colorInt : Color.GRAY);
+            }
+
+            MultiDotDrawable drawable = new MultiDotDrawable(colors);
+            day.setImageDrawable(drawable);
+
+            calendarDays.add(day);
+        }
+
+        binding.calendarView.setCalendarDays(calendarDays);
+    }
+    public int getCategoryColorInt() {
+        return android.graphics.Color.BLUE;
     }
 
     @Override
