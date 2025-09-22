@@ -55,7 +55,8 @@ public class HomeFragment extends Fragment {
             }
 
             userService.login(email, password, (success, message) -> {
-                Toast.makeText(getActivity(), message, Toast.LENGTH_SHORT).show();
+                if (isAdded())
+                    Toast.makeText(getActivity(), message, Toast.LENGTH_SHORT).show();
 
                 if (success) {
                     FirebaseUser fbUser = mAuth.getCurrentUser();
