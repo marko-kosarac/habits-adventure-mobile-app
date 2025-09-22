@@ -7,18 +7,18 @@ import androidx.annotation.NonNull;
 
 public class Task implements Parcelable {
     public String id;
-    public String userId;
-    public String name;
-    public String description;
-    public String categoryId;
-    public FrequencyType frequency;
-    public String startDate;
-    public String endDate;
-    public Integer interval;
-    public UnitType unit;
-    public DifficultyType difficulty;
-    public ImportanceType importance;
-    public StatusType status;
+    private String userId;
+    private String name;
+    private String description;
+    private String categoryId;
+    private FrequencyType frequency;
+    private String startDate;
+    private String endDate;
+    private Integer interval;
+    private UnitType unit;
+    private DifficultyType difficulty;
+    private ImportanceType importance;
+    private StatusType status;
 
     public Task() {}
 

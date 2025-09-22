@@ -47,7 +47,7 @@ public class DetailTaskFragment extends DialogFragment {
             binding.tvTaskCategory.setText(selectedTask.getStartDate()); //TODO category
             binding.tvTaskStartDate.setText(selectedTask.getStartDate());
             binding.tvTaskEndDate.setText(selectedTask.getEndDate());
-            binding.recurringFields.setVisibility(selectedTask.frequency == FrequencyType.PONAVLJAJUCI ? View.VISIBLE : View.GONE);
+            binding.recurringFields.setVisibility(selectedTask.getFrequency() == FrequencyType.PONAVLJAJUCI ? View.VISIBLE : View.GONE);
             binding.tvTaskRecurringNumber.setText(String.valueOf(selectedTask.getInterval()));
             binding.tvTaskRecurringUnit.setText(selectedTask.getUnit() == null ? "" : selectedTask.getUnit().getDisplayName());
             binding.tvTaskDifficulty.setText(selectedTask.getDifficulty().getDisplayName());
