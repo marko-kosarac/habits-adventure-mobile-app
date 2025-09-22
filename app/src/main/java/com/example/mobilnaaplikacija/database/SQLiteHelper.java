@@ -40,7 +40,7 @@ public class SQLiteHelper extends SQLiteOpenHelper {
     public static final String COLUMN_CATEGORY_NAME = "name";
     public static final String COLUMN_CATEGORY_COLOR = "color";
     private static final String DATABASE_NAME = "appdata.db";
-    private static final int DATABASE_VERSION = 5;
+    private static final int DATABASE_VERSION = 6;
 
     private static final String DB_CREATE_EQUIPMENT = "CREATE TABLE " + TABLE_EQUIPMENT + " ("
             + COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
