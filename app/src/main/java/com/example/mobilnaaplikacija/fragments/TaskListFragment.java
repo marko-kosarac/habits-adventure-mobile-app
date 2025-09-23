@@ -328,7 +328,7 @@ public class TaskListFragment extends Fragment implements RecyclerViewInterface 
     @Override
     public void onItemClick(int position) {
         Bundle args = new Bundle();
-        Task selectedTask = tasks.get(position); // TODO adapter getTaskAt(position)
+        Task selectedTask = adapter.getTaskAt(position);
         args.putParcelable("Task to view", selectedTask);
         DetailTaskFragment fragment = new DetailTaskFragment();
         fragment.setArguments(args);

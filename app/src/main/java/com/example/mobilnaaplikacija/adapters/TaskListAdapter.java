@@ -54,6 +54,10 @@ public class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapter.TasksV
         notifyDataSetChanged();
     }
 
+    public Task getTaskAt(int position) {
+        return tasks.get(position);
+    }
+
     public static class TasksViewHolder extends  RecyclerView.ViewHolder{
         TextView name, category;
         CheckBox isDone;
