@@ -342,65 +342,6 @@ public class TabFriendsFragment extends Fragment {
                 .addOnFailureListener(e -> Toast.makeText(getContext(), "Greška pri napuštanju prethodnog saveza.", Toast.LENGTH_SHORT).show());
     }
 
-    private void listenForAllianceInviteAcceptances(String allianceId) {
-        String creatorId = FirebaseAuth.getInstance().getCurrentUser().getUid();
-
-        FirebaseFirestore.getInstance().collection("alliance_invites")
-                .whereEqualTo("allianceId", allianceId)
-                .whereEqualTo("status", "accepted")
-                .addSnapshotListener((snapshots, error) -> {
-                    if (error != null || snapshots == null) return;
-
-                    for (DocumentChange dc : snapshots.getDocumentChanges()) {
-                        if (dc.getType() == DocumentChange.Type.ADDED || dc.getType() == DocumentChange.Type.MODIFIED) {
-                            String acceptedUserId = dc.getDocument().getString("toUserId");
-
-                            if (acceptedUserId != null && !acceptedUserId.equals(creatorId)) {
-                                // Dohvati korisnika koji je prihvatio poziv
-                                FirebaseFirestore.getInstance().collection("users").document(acceptedUserId)
-                                        .get().addOnSuccessListener(userDoc -> {
-                                            String username = userDoc.getString("username");
-
-                                            // Sistemska notifikacija za vođu
-                                            showAllianceAcceptanceNotification(username != null ? username : "Korisnik");
-                                        });
-                            }
-                        }
-                    }
-                });
-    }
-
-
-    private void showAllianceAcceptanceNotification(String username) {
-        String channelId = "alliance_notifications";
-        String channelName = "Alliance Notifications";
-
-        NotificationManager notificationManager =
-                (NotificationManager) getContext().getSystemService(Context.NOTIFICATION_SERVICE);
-
-        // Kreiraj kanal samo jednom (Android 8+)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            NotificationChannel channel = new NotificationChannel(
-                    channelId,
-                    channelName,
-                    NotificationManager.IMPORTANCE_HIGH
-            );
-            notificationManager.createNotificationChannel(channel);
-        }
-
-        Notification notification = new NotificationCompat.Builder(getContext(), channelId)
-                .setContentTitle("Novi član saveza")
-                .setContentText(username + " je prihvatio poziv u savez!")
-                .setSmallIcon(R.drawable.ic_alliance) // zameni sa svojom ikonoom iz res/drawable
-                .setAutoCancel(true)
-                .build();
-
-        notificationManager.notify((int) System.currentTimeMillis(), notification);
-    }
-
-
-
-
     @Override
     public void onDestroyView() {
         super.onDestroyView();

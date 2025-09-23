@@ -60,6 +60,12 @@ public class User {
         this.friends = new ArrayList<>();
     }
 
+    public User(String id, String username) {
+        this.id = id;
+        this.username = username;
+    }
+
+
     // GETTERI I SETTERI
     public String getId() {
         return id;
