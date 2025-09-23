@@ -48,8 +48,8 @@
     <string name="detail_name">Naziv:</string>
     <string name="detail_description">Opis:</string>
     <string name="detail_category">Kategorija:</string>
-    <string name="detail_date_start">Od:</string>
-    <string name="detail_date_end">Do:</string>
+    <string name="detail_date">Datum:</string>
+    <string name="detail_date_dash">-</string>
     <string name="detail_recurring">Ponavljanje zadatka:</string>
     <string name="detail_recurring_number">Broj:</string>
     <string name="detail_recurring_unit">Jedinica:</string>
