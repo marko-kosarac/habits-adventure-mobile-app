@@ -264,7 +264,7 @@ public class MainActivity extends AppCompatActivity {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
 
         if (friendRequestListener != null) {
-            friendRequestListener.remove();
+            friendRequestListener.remove(); // ukloni prethodni listener ako postoji
         }
 
         friendRequestListener = db.collection("friend_requests")
@@ -279,11 +279,16 @@ public class MainActivity extends AppCompatActivity {
                                 String requestId = dc.getDocument().getId();
                                 String fromUserId = dc.getDocument().getString("fromUserId");
 
+                                // Dohvati username pošiljaoca
                                 db.collection("users").document(fromUserId)
                                         .get()
                                         .addOnSuccessListener(doc -> {
                                             String fromUsername = doc.getString("username");
+
+                                            // Prikaz dijaloga
                                             showFriendRequestDialog(fromUserId, requestId);
+
+                                            // Prikaz lokalne notifikacije
                                             showFriendRequestNotification(fromUsername, requestId);
                                         });
                             }
@@ -327,15 +332,22 @@ public class MainActivity extends AppCompatActivity {
 
         db.collection("notifications")
                 .whereEqualTo("toUserId", currentUserId)
-                .whereEqualTo("seen", false)
                 .addSnapshotListener((snapshots, e) -> {
                     if (e != null || snapshots == null) return;
 
                     for (DocumentChange dc : snapshots.getDocumentChanges()) {
-                        if (dc.getType() == DocumentChange.Type.ADDED) {
-                            DocumentSnapshot doc = dc.getDocument();
-                            String docId = doc.getId();
+                        DocumentSnapshot doc = dc.getDocument();
+                        String docId = doc.getId();
 
+                        // ⚡ Ako je notifikacija pregledana, obriši je
+                        Boolean seen = doc.getBoolean("seen");
+                        if (seen != null && seen) {
+                            db.collection("notifications").document(docId).delete();
+                            continue;
+                        }
+
+                        // ⚡ Novi/active doc
+                        if (dc.getType() == DocumentChange.Type.ADDED) {
                             if (processedNotifications.contains(docId)) continue;
                             processedNotifications.add(docId);
 
@@ -348,7 +360,8 @@ public class MainActivity extends AppCompatActivity {
                                                 .setTitle("Obaveštenje o savezu")
                                                 .setMessage(message)
                                                 .setPositiveButton("OK", (dialog, which) -> {
-                                                    doc.getReference().update("seen", true);
+                                                    // Kada korisnik klikne OK, obriši notifikaciju
+                                                    db.collection("notifications").document(docId).delete();
                                                 })
                                                 .show();
 
@@ -360,6 +373,7 @@ public class MainActivity extends AppCompatActivity {
                     }
                 });
     }
+
 
     private void showAllianceAcceptanceNotificationSafe(String message) {
         String channelId = "alliance_channel";
@@ -556,33 +570,40 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void showFriendRequestDialog(String fromUserId, String requestId) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Zahtev za prijateljstvo");
-        builder.setMessage("Korisnik te je poslao zahtev za prijateljstvo.");
-        builder.setCancelable(false);
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
 
-        builder.setPositiveButton("Prihvati", (dialog, which) -> acceptFriendRequest(fromUserId, requestId));
-        builder.setNegativeButton("Odbij", (dialog, which) -> declineFriendRequest(requestId));
+        db.collection("users").document(fromUserId)
+                .get()
+                .addOnSuccessListener(doc -> {
+                    String fromUsername = doc.getString("username");
 
-        builder.show();
+                    new androidx.appcompat.app.AlertDialog.Builder(this)
+                            .setTitle("Novi zahtev za prijateljstvo")
+                            .setMessage(fromUsername + " ti je poslao zahtev.")
+                            .setPositiveButton("Prihvati", (dialog, which) -> acceptFriendRequest(fromUserId, requestId))
+                            .setNegativeButton("Odbij", (dialog, which) -> declineFriendRequest(requestId))
+                            .setCancelable(false)
+                            .show();
+                });
     }
 
     private void showFriendRequestNotification(String fromUsername, String requestId) {
-        PendingIntent pendingIntent = PendingIntent.getActivity(
+        android.app.NotificationManager notificationManager =
+                (android.app.NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+
+        android.app.PendingIntent pendingIntent = android.app.PendingIntent.getActivity(
                 this, 0, new Intent(this, MainActivity.class),
-                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
+                android.app.PendingIntent.FLAG_UPDATE_CURRENT | android.app.PendingIntent.FLAG_IMMUTABLE
         );
 
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, FRIEND_REQUEST_CHANNEL_ID)
+        android.app.Notification.Builder builder = new android.app.Notification.Builder(this, FRIEND_REQUEST_CHANNEL_ID)
                 .setSmallIcon(R.drawable.ic_friend_request)
-                .setContentTitle("Zahtev za prijateljstvo")
-                .setContentText(fromUsername + " ti je poslao zahtev za prijateljstvo.")
-                .setPriority(NotificationCompat.PRIORITY_HIGH)
+                .setContentTitle("Novi zahtev za prijateljstvo")
+                .setContentText(fromUsername + " ti je poslao zahtev.")
                 .setContentIntent(pendingIntent)
-                .setAutoCancel(true);
+                .setAutoCancel(true)
+                .setPriority(android.app.Notification.PRIORITY_HIGH);
 
-        NotificationManager notificationManager =
-                (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         if (notificationManager != null) {
             notificationManager.notify(requestId.hashCode(), builder.build());
         }
@@ -592,21 +613,23 @@ public class MainActivity extends AppCompatActivity {
         String currentUserId = FirebaseAuth.getInstance().getCurrentUser().getUid();
         FirebaseFirestore db = FirebaseFirestore.getInstance();
 
+        db.collection("users").document(currentUserId)
+                .update("friends", FieldValue.arrayUnion(fromUserId));
+        db.collection("users").document(fromUserId)
+                .update("friends", FieldValue.arrayUnion(currentUserId));
+
         db.collection("friend_requests").document(requestId)
-                .update("status", "accepted")
-                .addOnSuccessListener(aVoid -> {
-                    Map<String, Object> userMap = new HashMap<>();
-                    userMap.put("friendId", fromUserId);
-                    db.collection("users").document(currentUserId)
-                            .collection("friends").document(fromUserId).set(userMap, SetOptions.merge());
-                    db.collection("users").document(fromUserId)
-                            .collection("friends").document(currentUserId).set(userMap, SetOptions.merge());
-                });
+                .update("status", "accepted");
+
+        Toast.makeText(this, "Prihvatio si zahtev!", Toast.LENGTH_SHORT).show();
     }
 
     private void declineFriendRequest(String requestId) {
         FirebaseFirestore.getInstance().collection("friend_requests")
                 .document(requestId)
                 .update("status", "declined");
+
+        Toast.makeText(this, "Odbio si zahtev.", Toast.LENGTH_SHORT).show();
     }
+
 }
