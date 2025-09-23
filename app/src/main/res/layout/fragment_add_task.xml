@@ -82,7 +82,7 @@
                 <!-- Task start date -->
                 <EditText
                     android:id="@+id/etStartDate"
-                    android:layout_width="140dp"
+                    android:layout_width="130dp"
                     android:layout_height="wrap_content"
                     android:inputType="date"
                     android:hint="@string/task_start"
@@ -90,7 +90,7 @@
                 <!-- Task end date -->
                 <EditText
                     android:id="@+id/etEndDate"
-                    android:layout_width="140dp"
+                    android:layout_width="130dp"
                     android:layout_height="wrap_content"
                     android:inputType="date"
                     android:hint="@string/task_end"/>
@@ -106,13 +106,13 @@
                 android:layout_marginBottom="16dp">
                 <RadioButton
                     android:id="@+id/rbOneTime"
-                    android:layout_width="140dp"
+                    android:layout_width="130dp"
                     android:layout_height="wrap_content"
                     android:layout_marginEnd="20dp"
                     android:text="@string/task_not_repeatable"/>
                 <RadioButton
                     android:id="@+id/rbRepeat"
-                    android:layout_width="150dp"
+                    android:layout_width="130dp"
                     android:layout_height="wrap_content"
                     android:text="@string/task_repeatable" />
             </RadioGroup>

@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:padding="8dp"
+    android:padding="4dp"
     android:orientation="vertical">
 
     <!-- Mod: lista/kalendar -->
@@ -53,14 +53,14 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:layout_marginBottom="16dp"
+        android:layout_marginBottom="4dp"
         tools:listitem="@layout/card_task"/>
     <!-- Kalendar -->
     <com.applandeo.materialcalendarview.CalendarView
         android:id="@+id/calendarView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp"
+        android:layout_marginBottom="4dp"
         android:elevation="4dp"
         android:background="@drawable/calendar_background"
         app:headerColor="@color/white"
@@ -72,19 +72,17 @@
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvDateTasks"
         android:layout_width="match_parent"
-        android:layout_height="120dp"
+        android:layout_height="match_parent"
         android:layout_weight="1"
-        android:layout_marginTop="8dp"
-        android:layout_marginBottom="8dp"
-        tools:listitem="@layout/card_task"
-        android:visibility="gone"/>
+        android:layout_marginBottom="4dp"
+        tools:listitem="@layout/card_task"/>
     <!-- Dugme za dodavanje zadatka -->
         <Button
             android:id="@+id/btnAddTask"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal|bottom"
-            android:layout_marginBottom="8dp"
+            android:layout_marginBottom="0dp"
             android:backgroundTint="@color/blueAccent"
             android:text="@string/add_task"/>
 
