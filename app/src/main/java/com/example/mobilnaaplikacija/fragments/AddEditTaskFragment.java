@@ -26,6 +26,7 @@ import com.example.mobilnaaplikacija.services.TaskService;
 import com.example.mobilnaaplikacija.services.UserService;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
@@ -77,6 +78,9 @@ public class AddEditTaskFragment extends DialogFragment {
             binding.categoryFields.setVisibility(View.GONE);
             binding.rbOneTime.setChecked(taskToUpdate.getFrequency() == FrequencyType.JEDNOKRATAN);
             binding.rbRepeat.setChecked(taskToUpdate.getFrequency() == FrequencyType.PONAVLJAJUCI);
+            binding.spinnerStatus.setSelection((StatusType.valueOf(taskToUpdate.getStatus().name()).ordinal()));
+            if(taskToUpdate.getStatus() == StatusType.URAĐEN)
+                binding.spinnerStatus.setEnabled(false);
             binding.etStartDate.setText(taskToUpdate.getStartDate());
             binding.etEndDate.setText(taskToUpdate.getEndDate());
             binding.etReccuringNumber.setText(taskToUpdate.getInterval() == null ? "0" : String.valueOf(taskToUpdate.getInterval()));
@@ -85,6 +89,10 @@ public class AddEditTaskFragment extends DialogFragment {
             binding.spinnerImportance.setSelection((ImportanceType.valueOf(taskToUpdate.getImportance().name()).ordinal()));
             setupRemoveTaskButton();
             binding.btnRemoveTask.setVisibility(View.VISIBLE);
+            setupStatusSpinner(taskToUpdate);
+        }
+        else {
+            binding.spinnerStatus.setVisibility(View.GONE);
         }
 
         setupDateTimePickers();
@@ -109,6 +117,44 @@ public class AddEditTaskFragment extends DialogFragment {
         ArrayAdapter<ImportanceType> importanceAdapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_spinner_dropdown_item, ImportanceType.values());
         importanceAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         binding.spinnerImportance.setAdapter(importanceAdapter);
+    }
+
+    private void setupStatusSpinner (Task task) {
+        ArrayList<StatusType> possibleStatuses = new ArrayList<>();
+        SimpleDateFormat sdf = new SimpleDateFormat("d/M/yyyy", Locale.getDefault());
+        boolean isRepeating = task.getFrequency() == FrequencyType.PONAVLJAJUCI;
+
+        if (task.getStatus() != StatusType.URAĐEN) {
+            try {
+                Date startDate = sdf.parse(task.getStartDate());
+                Date endDate = sdf.parse(task.getEndDate());
+                if (startDate == null || endDate == null)
+                    return;
+
+                if (task.getStatus() == StatusType.AKTIVAN) {
+                    possibleStatuses.add(StatusType.AKTIVAN);
+                    possibleStatuses.add(StatusType.URAĐEN);
+                    possibleStatuses.add(StatusType.OTKAZAN);
+                    if (task.getFrequency() == FrequencyType.PONAVLJAJUCI) {
+                        possibleStatuses.add(StatusType.PAUZIRAN);
+                    }
+                } else if (isRepeating) {
+                    possibleStatuses.add(StatusType.AKTIVAN);
+                }
+
+                long difference = (new Date()).getTime() - endDate.getTime();
+                long differenceInDays = difference / (1000 * 60 * 60 * 24);
+                if (differenceInDays > 3) {
+                    possibleStatuses.add(StatusType.NEURAĐEN); // TODO Set status to NEURADJEN
+                }
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+
+            ArrayAdapter<StatusType> statusAdapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_spinner_dropdown_item, possibleStatuses);
+            statusAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+            binding.spinnerStatus.setAdapter(statusAdapter);
+        }
     }
 
     private void setupDateTimePickers(){
@@ -248,6 +294,7 @@ public class AddEditTaskFragment extends DialogFragment {
             boolean isRepeating = binding.rbRepeat.isChecked();
             boolean isOneTime = binding.rbOneTime.isChecked();
             FrequencyType frequency = isRepeating ? FrequencyType.PONAVLJAJUCI : FrequencyType.JEDNOKRATAN;
+            String status = binding.spinnerStatus.getSelectedItem().toString();
             String startDate = binding.etStartDate.getText().toString().trim();
             String endDate = binding.etEndDate.getText().toString().trim();
             String difficulty = binding.spinnerDifficulty.getSelectedItem().toString();
@@ -260,7 +307,7 @@ public class AddEditTaskFragment extends DialogFragment {
                     : "0";
 
             //Validacija
-            String error = taskService.validate(name, category, isRepeating, isOneTime, startDate, endDate,
+            String error = taskService.validate(name, category, isRepeating, isOneTime, status, startDate, endDate,
                     difficulty, importance, recurringUnit, recurringNumber);
             if(error != null){
                 showError(error);
@@ -277,6 +324,10 @@ public class AddEditTaskFragment extends DialogFragment {
             task.setDescription(description);
             task.setCategoryId("-1"); //TODO set categoryId
             task.setFrequency(frequency);
+            if (isEditing)
+                task.setStatus((StatusType)binding.spinnerStatus.getSelectedItem());
+            else
+                task.setStatus(StatusType.AKTIVAN);
             task.setStartDate(startDate);
             task.setEndDate(endDate);
             task.setDifficulty((DifficultyType)binding.spinnerDifficulty.getSelectedItem());
@@ -288,7 +339,6 @@ public class AddEditTaskFragment extends DialogFragment {
                 task.setUnit((UnitType) binding.spinnerRecurringUnit.getSelectedItem());
                 task.setInterval(Integer.parseInt(recurringNumber));
             }
-            task.setStatus(StatusType.AKTIVAN); //TODO set status
 
             //Čuvanje zadatka
             if (areDatesValid) {

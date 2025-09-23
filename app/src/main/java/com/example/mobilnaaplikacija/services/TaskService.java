@@ -12,6 +12,7 @@ import com.example.mobilnaaplikacija.repository.TaskRepository;
 import com.example.mobilnaaplikacija.model.*;
 import com.google.firebase.auth.FirebaseUser;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -28,7 +29,7 @@ public class TaskService {
         this.taskRepository = new TaskRepository(new SQLiteHelper(context));
     }
 
-    public String validate(String name, String category, boolean isRepeating, boolean isOneTime, String startDate, String endDate, String difficultyStr, String importanceStr, String unitStr, String intervalStr) {
+    public String validate(String name, String category, boolean isRepeating, boolean isOneTime, String status, String startDate, String endDate, String difficultyStr, String importanceStr, String unitStr, String intervalStr) {
         FrequencyType frequency = isRepeating ? FrequencyType.PONAVLJAJUCI :
                 (isOneTime ? FrequencyType.JEDNOKRATAN : null);
 
@@ -44,6 +45,16 @@ public class TaskService {
         if (frequency == FrequencyType.PONAVLJAJUCI) {
             if (unitStr.isEmpty()) return "Unesite jedinicu zadatka!";
             if (intervalStr.isEmpty()) return "Unesite broj ponavljanja zadatka!";
+        }
+
+        if (status.equals(StatusType.URAĐEN.getDisplayName())) {
+            try {
+                Date ending = (new SimpleDateFormat("d/M/yyyy", Locale.getDefault())).parse(endDate);
+                if (ending == null || ending.after(new Date())) // TODO bring time in
+                    return "Ne možete označiti zadatak kao urađen.";
+            } catch (ParseException e) {
+                throw new RuntimeException(e);
+            }
         }
 
         return null;
