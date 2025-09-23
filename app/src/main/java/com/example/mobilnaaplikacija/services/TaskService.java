@@ -78,22 +78,4 @@ public class TaskService {
         }
         return filteredTasks;
     }
-    public ArrayList<Task> filterByDate(ArrayList<Task> tasks, String calendarDate) {
-        ArrayList<Task> filteredTasks = new ArrayList<>();
-        SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
-        try {
-            Date chosenDate = dateFormat.parse(calendarDate);
-
-            for (Task t : tasks) {
-                Date taskDate = dateFormat.parse(t.getStartDate());
-                if (taskDate != null && taskDate.equals(chosenDate)) {
-                    filteredTasks.add(t);
-                }
-            }
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-        return filteredTasks;
-    }
-
 }

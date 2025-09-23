@@ -187,13 +187,24 @@ public class TaskListFragment extends Fragment implements RecyclerViewInterface 
         ArrayList<Task> currentTasks = new ArrayList<>(taskService.getTasksByUser(user.getUid()));
         Log.d("CalendarDebug", "Tasks fetched from DB: " + currentTasks.size());
         if (selectedDate != null && binding.tabLayout.getSelectedTabPosition() == calendarTab.getPosition()) {
-            currentTasks = taskService.filterByDate(currentTasks, selectedDate);
+            currentTasks = filterByDate(currentTasks, selectedDate);
             Log.d("CalendarDebug", "After date filter: " + currentTasks.size() + " (selectedDate=" + selectedDate + ")");
         }
 
         currentTasks = filterByFrequency(Collections.singletonList(selectedFreq), currentTasks);
         Log.d("CalendarDebug", "After freq filter: " + currentTasks.size() + " (chip=" + selectedFreq + ")");
         return currentTasks;
+    }
+
+    private ArrayList<Task> filterByDate(ArrayList<Task> tasks, String selectedDate) {
+        ArrayList<Task> filtered = new ArrayList<>();
+        for (Task task : tasks) {
+            List<String> allDates = getTaskOcurringDates(task);
+            if (allDates.contains(selectedDate)) {
+                filtered.add(task);
+            }
+        }
+        return filtered;
     }
 
     private ArrayList<Task> filterByFrequency(List<Integer> checkedIds, ArrayList<Task> tasks) {
