@@ -25,7 +25,10 @@ import com.example.mobilnaaplikacija.model.UnitType;
 import com.example.mobilnaaplikacija.services.TaskService;
 import com.example.mobilnaaplikacija.services.UserService;
 
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
+import java.util.Locale;
 
 public class AddEditTaskFragment extends DialogFragment {
 
@@ -138,28 +141,40 @@ public class AddEditTaskFragment extends DialogFragment {
             }
 
             //Start and end picked, but changed start
-            if (isStartDate && !binding.etEndDate.getText().toString().isEmpty()) {
+            if (!binding.etStartDate.getText().toString().isEmpty()
+                    && !binding.etEndDate.getText().toString().isEmpty()) {
+                String startStr = binding.etStartDate.getText().toString();
+                String endStr = binding.etEndDate.getText().toString();
+
+                SimpleDateFormat fmt = new SimpleDateFormat("d/M/yyyy", Locale.getDefault());
+                fmt.setLenient(false);
+
                 try {
-                    String[] partsStart = binding.etStartDate.getText().toString().split("/");
+                    String[] partsStart = startStr.split("/");
                     int dayStart = Integer.parseInt(partsStart[0]);
                     int monthStart = Integer.parseInt(partsStart[1]) - 1;
                     int yearStart = Integer.parseInt(partsStart[2]);
                     Calendar calStart = Calendar.getInstance();
                     calStart.set(yearStart, monthStart, dayStart);
 
-                    String[] partsEnd = binding.etEndDate.getText().toString().split("/");
+                    String[] partsEnd = endStr.split("/");
                     int dayEnd = Integer.parseInt(partsEnd[0]);
                     int monthEnd = Integer.parseInt(partsEnd[1]) - 1;
                     int yearEnd = Integer.parseInt(partsEnd[2]);
                     Calendar calEnd = Calendar.getInstance();
                     calEnd.set(yearEnd, monthEnd, dayEnd);
 
-                    if (calEnd.before(calStart)) {
-                        areDatesValid = false;
+                    Date startDate = fmt.parse(startStr);
+                    Date endDate = fmt.parse(endStr);
+
+                    if(startDate == null || endDate == null)
+                        return;
+
+                    if(endDate.before(startDate)) {
                         showError("Datum završetka je prije početka!");
+                        areDatesValid = false;
                     } else
                         areDatesValid = true;
-
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
