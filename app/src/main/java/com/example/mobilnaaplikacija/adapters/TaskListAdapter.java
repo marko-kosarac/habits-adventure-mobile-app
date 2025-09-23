@@ -16,6 +16,7 @@ import com.example.mobilnaaplikacija.model.StatusType;
 import com.example.mobilnaaplikacija.model.Task;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapter.TasksViewHolder> {
     private ArrayList<Task> tasks;
@@ -47,8 +48,9 @@ public class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapter.TasksV
         return tasks.size();
     }
 
-    public void setTasks(ArrayList<Task> newTasks) {
-        this.tasks = new ArrayList<>(newTasks);
+    public void updateTasks(List<Task> newTasks) {
+        this.tasks.clear();
+        this.tasks.addAll(newTasks);
         notifyDataSetChanged();
     }
 

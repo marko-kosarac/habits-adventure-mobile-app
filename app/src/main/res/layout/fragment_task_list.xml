@@ -75,7 +75,8 @@
         android:layout_height="match_parent"
         android:layout_weight="1"
         android:layout_marginBottom="4dp"
-        tools:listitem="@layout/card_task"/>
+        tools:listitem="@layout/card_task"
+        android:visibility="gone"/>
     <!-- Dugme za dodavanje zadatka -->
         <Button
             android:id="@+id/btnAddTask"

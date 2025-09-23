@@ -8,6 +8,7 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,12 +26,14 @@ import com.example.mobilnaaplikacija.decorators.MultiDotDrawable;
 import com.example.mobilnaaplikacija.model.Category;
 import com.example.mobilnaaplikacija.model.FrequencyType;
 import com.example.mobilnaaplikacija.model.Task;
+import com.example.mobilnaaplikacija.model.UnitType;
 import com.example.mobilnaaplikacija.services.CategoryService;
 import com.example.mobilnaaplikacija.services.TaskService;
 import com.example.mobilnaaplikacija.services.UserService;
 import com.google.android.material.tabs.TabLayout;
 import com.google.firebase.auth.FirebaseUser;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -40,6 +43,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class TaskListFragment extends Fragment implements RecyclerViewInterface {
     private TaskListAdapter adapter;
@@ -72,8 +76,12 @@ public class TaskListFragment extends Fragment implements RecyclerViewInterface 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+        //Inicijalizacija zadataka
         binding.rvTasks.setLayoutManager(new LinearLayoutManager(getActivity()));
+        tasks = applyFilters();
         adapter = new TaskListAdapter(tasks, this);
+        adapter.notifyDataSetChanged();
         binding.rvTasks.setAdapter(adapter);
         getTasks();
 
@@ -106,13 +114,16 @@ public class TaskListFragment extends Fragment implements RecyclerViewInterface 
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
                 if (tab == listTab) {
-                    adapter.setTasks(applyFilters());
+                    selectedDate = null;
+                    adapter.updateTasks(applyFilters());
                     binding.rvTasks.setVisibility(View.VISIBLE);
                     binding.calendarView.setVisibility(View.GONE);
                     binding.rvDateTasks.setVisibility(View.GONE);
                 } else {
+                    decorateCalendarWithTasks();
                     binding.rvTasks.setVisibility(View.GONE);
                     binding.calendarView.setVisibility(View.VISIBLE);
+                    binding.rvDateTasks.setVisibility(View.VISIBLE);
                 }
             }
             @Override
@@ -122,7 +133,6 @@ public class TaskListFragment extends Fragment implements RecyclerViewInterface 
         });
 
         CalendarView calendar = view.findViewById(R.id.calendarView);
-        decorateCalendarWithTasks();
         calendar.setOnCalendarDayClickListener(day -> {
             Calendar clickedDay = day.getCalendar();
             SimpleDateFormat dateFormat = new SimpleDateFormat("d/M/yyyy", Locale.getDefault());
@@ -130,9 +140,9 @@ public class TaskListFragment extends Fragment implements RecyclerViewInterface 
 
             binding.rvDateTasks.setLayoutManager(new LinearLayoutManager(getActivity()));
             binding.rvDateTasks.setAdapter(adapter);
-            adapter.setTasks(applyFilters());
+            adapter.updateTasks(applyFilters());
             binding.rvDateTasks.setVisibility(View.VISIBLE);
-            Toast.makeText(getContext(), "Tasks for " + selectedDate, Toast.LENGTH_SHORT).show();
+            selectedDate = null;
         });
 
         binding.cgFilters.setOnCheckedStateChangeListener((group, checkedIds) -> {
@@ -154,15 +164,9 @@ public class TaskListFragment extends Fragment implements RecyclerViewInterface 
     }
 
     public void getTasks(){
-        String userId = "";
-        FirebaseUser user = userService.getCurrentUser();
-        if(user != null){
-            userId = user.getUid();
-        }
-
-        tasks.clear();
-        tasks.addAll(applyFilters());
-        adapter.setTasks(tasks);
+        List<Task> filtered = applyFilters();
+        adapter.updateTasks(filtered);
+        Log.d("RecyclerDebug", "Adapter items after setTasks: " + adapter.getItemCount()); // 👈 add here
         decorateCalendarWithTasks();
     }
 
@@ -174,16 +178,28 @@ public class TaskListFragment extends Fragment implements RecyclerViewInterface 
     }
 
     private ArrayList<Task> applyFilters () {
-        ArrayList<Task> currentTasks = new ArrayList<>(taskService.getTasksByUser(userService.getCurrentUser().getUid()));
+        Log.d("CalendarDebug", "Before filters: " + tasks.size());
+        FirebaseUser user = userService.getCurrentUser();
+        if(user == null) {
+            Log.d("CalendarDebug", "No user logged in");
+            return tasks;
+        }
+        ArrayList<Task> currentTasks = new ArrayList<>(taskService.getTasksByUser(user.getUid()));
+        Log.d("CalendarDebug", "Tasks fetched from DB: " + currentTasks.size());
         if (selectedDate != null && binding.tabLayout.getSelectedTabPosition() == calendarTab.getPosition()) {
             currentTasks = taskService.filterByDate(currentTasks, selectedDate);
+            Log.d("CalendarDebug", "After date filter: " + currentTasks.size() + " (selectedDate=" + selectedDate + ")");
         }
+
         currentTasks = filterByFrequency(Collections.singletonList(selectedFreq), currentTasks);
+        Log.d("CalendarDebug", "After freq filter: " + currentTasks.size() + " (chip=" + selectedFreq + ")");
         return currentTasks;
     }
 
     private ArrayList<Task> filterByFrequency(List<Integer> checkedIds, ArrayList<Task> tasks) {
         ArrayList<Task> filteredTasks = new ArrayList<>();
+        if (checkedIds.isEmpty())
+            return tasks;
         if (checkedIds.get(0) == R.id.chipAll) {
             filteredTasks = taskService.filterByFrequency(tasks, null);
         } else if (checkedIds.get(0) == R.id.chipOneTime) {
@@ -194,66 +210,125 @@ public class TaskListFragment extends Fragment implements RecyclerViewInterface 
         return filteredTasks;
     }
 
-    private Map<String, List<Task>> groupByDate(ArrayList<Task> allTasks) {
-        java.util.Map<String, java.util.List<Task>> map = new java.util.HashMap<>();
-        for (Task t : allTasks) {
-            String d = t.getStartDate();
-            if (d == null) continue;
-            if (!map.containsKey(d)) map.put(d, new ArrayList<>());
-            map.get(d).add(t);
+    private List<String> getTaskOcurringDates(Task task) {
+        List<String> dates = new ArrayList<>();
+        SimpleDateFormat fmt = new SimpleDateFormat("d/M/yyyy", Locale.getDefault());
+        fmt.setLenient(false);
+        Calendar cal = Calendar.getInstance();
+
+        if(task.getFrequency() == FrequencyType.JEDNOKRATAN) {
+            try {
+                Date date = fmt.parse(task.getStartDate());
+                if(date != null) {
+                    cal.setTime(date);
+                    dates.add(fmt.format(cal.getTime()));
+                }
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        } else {
+            try {
+                Date startDate = fmt.parse(task.getStartDate());
+                Date endDate = fmt.parse(task.getEndDate());
+                if (startDate == null || endDate == null)
+                    return dates;
+
+                cal.setTime(startDate);
+                while (!cal.getTime().after(endDate)) {
+                    dates.add(fmt.format(cal.getTime()));
+
+                    if (task.getUnit() == UnitType.DAN) {
+                        cal.add(Calendar.DAY_OF_MONTH, task.getInterval());
+                    } else if (task.getUnit() == UnitType.SEDMICA) {
+                        cal.add(Calendar.WEEK_OF_YEAR, task.getInterval());
+                    } else if (task.getUnit() == UnitType.MJESEC) {
+                        cal.add(Calendar.MONTH, task.getInterval());
+                    } else {
+                        cal.add(Calendar.YEAR, task.getInterval());
+                    }
+                }
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
         }
-        return map;
+        return dates;
     }
 
     private void decorateCalendarWithTasks() {
         List<CalendarDay> calendarDays = new ArrayList<>();
         ArrayList<Task> tasks = applyFilters();
-        Map<String, List<Task>> grouped = groupByDate(tasks);
 
-        Date parsed = null;
+        //datum -> lista zadataka
+        Map<String, List<Task>> tasksPerDate = new HashMap<>();
+
+        for (Task task : tasks) {
+            Log.d("CalendarDebug", "Task: " + task.getName() + " | " + task.getStartDate() + " -> " + task.getEndDate());
+            List<String> allDates = getTaskOcurringDates(task);
+
+            for (String date : allDates) {
+                if (!tasksPerDate.containsKey(date)) {
+                    tasksPerDate.put(date, new ArrayList<>());
+                }
+                tasksPerDate.get(date).add(task);
+            }
+        }
+
+        //grupisano po datumu
         SimpleDateFormat fmt = new SimpleDateFormat("d/M/yyyy", Locale.getDefault());
-        fmt.setLenient(false);
 
-        for (Map.Entry<String, List<Task>> entry : grouped.entrySet()) {
-            String dateStr = entry.getKey();
-
+        for (Map.Entry<String, List<Task>> entry : tasksPerDate.entrySet()) {
             try {
-                parsed = fmt.parse(dateStr);
+                Date parsed = fmt.parse(entry.getKey());
+                if (parsed == null) continue;
+
+                Calendar cal = Calendar.getInstance();
+                cal.setTime(parsed);
+
+                CalendarDay day = new CalendarDay(cal);
+
+                //boje kategorija zadataka tog dana
+                List<Integer> colors = new ArrayList<>();
+                for (Task t : entry.getValue()) {
+                    colors.add(getCategoryColorInt()); // TODO: povuci boju iz kategorije
+                }
+
+                MultiDotDrawable drawable = new MultiDotDrawable(colors);
+                day.setImageDrawable(drawable);
+
+                calendarDays.add(day);
+
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
-
-            Calendar cal = Calendar.getInstance();
-            if (parsed != null)
-                cal.setTime(parsed);
-
-            if (cal == null) continue;
-
-            CalendarDay day = new CalendarDay(cal);
-
-            //categoryId -> color
-            List<Integer> colors = new ArrayList<>();
-            for (Task t : entry.getValue()) {
-                Integer colorInt = getCategoryColorInt(); // TODO
-                colors.add(colorInt != null ? colorInt : Color.GRAY);
-            }
-
-            MultiDotDrawable drawable = new MultiDotDrawable(colors);
-            day.setImageDrawable(drawable);
-
-            calendarDays.add(day);
         }
-
         binding.calendarView.setCalendarDays(calendarDays);
     }
+
+    private Date parseDate(String dateStr) {
+        if (dateStr == null) return null;
+        try {
+            SimpleDateFormat fmt = new SimpleDateFormat("d/M/yyyy", Locale.getDefault());
+            fmt.setLenient(false);
+            return fmt.parse(dateStr);
+        } catch (ParseException e) {
+            Log.e("CalendarDebug", "Invalid date: " + dateStr, e);
+            return null;
+        }
+    }
+
+    private String formatDate(Date date) {
+        SimpleDateFormat fmt = new SimpleDateFormat("d/M/yyyy", Locale.getDefault());
+        return fmt.format(date);
+    }
+
     public int getCategoryColorInt() {
-        return android.graphics.Color.BLUE;
+        return Color.BLUE; // TODO: fetch category color dynamically
     }
 
     @Override
     public void onItemClick(int position) {
         Bundle args = new Bundle();
-        Task selectedTask = tasks.get(position);
+        Task selectedTask = tasks.get(position); // TODO adapter getTaskAt(position)
         args.putParcelable("Task to view", selectedTask);
         DetailTaskFragment fragment = new DetailTaskFragment();
         fragment.setArguments(args);
