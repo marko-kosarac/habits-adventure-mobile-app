@@ -18,6 +18,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -92,6 +93,7 @@ public class MainActivity extends AppCompatActivity {
             listenForFriendRequests();
             listenForAllianceInvites();
             listenForNotifications();
+            listenForAllianceMessages();
         }
 
         mAppBarConfiguration = new AppBarConfiguration.Builder(
@@ -221,16 +223,6 @@ public class MainActivity extends AppCompatActivity {
         navView.inflateMenu(R.menu.main_drawer);
     }
 
-    private void hideSystemUI() {
-        View decorView = getWindow().getDecorView();
-        decorView.setSystemUiVisibility(
-                View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
-                        | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                        | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                        | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                        | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-                        | View.SYSTEM_UI_FLAG_FULLSCREEN);
-    }
 
     @Override
     protected void onDestroy() {
@@ -243,6 +235,47 @@ public class MainActivity extends AppCompatActivity {
         }
 
     }
+
+    private void createAllNotificationChannels() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            createNotificationChannel(FRIEND_REQUEST_CHANNEL_ID, "Friend Requests", "Zahtevi za prijateljstvo");
+            createNotificationChannel("alliance_invite_channel", "Alliance Invites", "Pozivi u saveze");
+            createNotificationChannel("alliance_accepted_channel", "Alliance Accepted", "Prihvatanje saveza");
+            createNotificationChannel("alliance_message_channel", "Alliance Messages", "Poruke u savezu");
+        }
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    private void createNotificationChannel(String channelId, String name, String description) {
+        NotificationManager notificationManager = getSystemService(NotificationManager.class);
+        if (notificationManager == null) return;
+
+        NotificationChannel channel = new NotificationChannel(channelId, name, NotificationManager.IMPORTANCE_HIGH);
+        channel.setDescription(description);
+        notificationManager.createNotificationChannel(channel);
+    }
+
+    private void showNotification(String channelId, String title, String message, String uniqueId) {
+        NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        if (notificationManager == null) return;
+
+        PendingIntent pendingIntent = PendingIntent.getActivity(
+                this, 0, new Intent(this, MainActivity.class),
+                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
+        );
+
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, channelId)
+                .setSmallIcon(R.drawable.ic_notifications)
+                .setContentTitle(title)
+                .setContentText(message)
+                .setContentIntent(pendingIntent)
+                .setAutoCancel(true)
+                .setPriority(NotificationCompat.PRIORITY_HIGH);
+
+        int id = (channelId + uniqueId).hashCode(); // jedinstveni ID
+        notificationManager.notify(id, builder.build());
+    }
+
 
     private void createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -263,43 +296,50 @@ public class MainActivity extends AppCompatActivity {
         String currentUserId = FirebaseAuth.getInstance().getCurrentUser().getUid();
         FirebaseFirestore db = FirebaseFirestore.getInstance();
 
-        if (friendRequestListener != null) {
-            friendRequestListener.remove(); // ukloni prethodni listener ako postoji
-        }
+        if (friendRequestListener != null) friendRequestListener.remove();
 
         friendRequestListener = db.collection("friend_requests")
                 .whereEqualTo("toUserId", currentUserId)
                 .whereEqualTo("status", "pending")
                 .addSnapshotListener((value, error) -> {
-                    if (error != null) return;
+                    if (error != null || value == null) return;
 
-                    if (value != null && !value.isEmpty()) {
-                        for (DocumentChange dc : value.getDocumentChanges()) {
-                            if (dc.getType() == DocumentChange.Type.ADDED) {
-                                String requestId = dc.getDocument().getId();
-                                String fromUserId = dc.getDocument().getString("fromUserId");
+                    for (DocumentChange dc : value.getDocumentChanges()) {
+                        if (dc.getType() != DocumentChange.Type.ADDED) continue;
 
-                                // Dohvati username pošiljaoca
-                                db.collection("users").document(fromUserId)
-                                        .get()
-                                        .addOnSuccessListener(doc -> {
-                                            String fromUsername = doc.getString("username");
+                        String requestId = dc.getDocument().getId();
+                        String fromUserId = dc.getDocument().getString("fromUserId");
 
-                                            // Prikaz dijaloga
-                                            showFriendRequestDialog(fromUserId, requestId);
+                        db.collection("users").document(fromUserId)
+                                .get()
+                                .addOnSuccessListener(doc -> {
+                                    String fromUsername = doc.getString("username");
 
-                                            // Prikaz lokalne notifikacije
-                                            showFriendRequestNotification(fromUsername, requestId);
-                                        });
-                            }
-                        }
+                                    runOnUiThread(() -> {
+                                        new AlertDialog.Builder(this)
+                                                .setTitle("Novi zahtev za prijateljstvo")
+                                                .setMessage(fromUsername + " ti je poslao zahtev.")
+                                                .setPositiveButton("Prihvati", (dialog, which) -> acceptFriendRequest(fromUserId, requestId))
+                                                .setNegativeButton("Odbij", (dialog, which) -> declineFriendRequest(requestId))
+                                                .setCancelable(false)
+                                                .show();
+                                    });
+
+                                    showNotification(FRIEND_REQUEST_CHANNEL_ID,
+                                            "Novi zahtev za prijateljstvo",
+                                            fromUsername + " ti je poslao zahtev.",
+                                            requestId);
+                                });
                     }
                 });
     }
 
+
     public void listenForAllianceInvites() {
         String currentUserId = FirebaseAuth.getInstance().getCurrentUser().getUid();
         FirebaseFirestore db = FirebaseFirestore.getInstance();
+
+        if (allianceInviteListener != null) allianceInviteListener.remove();
 
         allianceInviteListener = db.collection("alliance_invites")
                 .whereEqualTo("toUserId", currentUserId)
@@ -308,20 +348,19 @@ public class MainActivity extends AppCompatActivity {
                     if (error != null || value == null) return;
 
                     for (DocumentChange dc : value.getDocumentChanges()) {
-                        if (dc.getType() == DocumentChange.Type.ADDED) {
-                            DocumentSnapshot doc = dc.getDocument();
-                            Boolean notificationSent = doc.getBoolean("notificationSent");
-                            if (notificationSent != null && notificationSent) continue;
+                        if (dc.getType() != DocumentChange.Type.ADDED) continue;
 
-                            String fromUserId = doc.getString("fromUserId");
-                            String allianceId = doc.getString("allianceId");
-                            String inviteDocId = doc.getId();
+                        DocumentSnapshot doc = dc.getDocument();
+                        Boolean notificationSent = doc.getBoolean("notificationSent");
+                        if (notificationSent != null && notificationSent) continue;
 
-                            db.collection("alliance_invites").document(inviteDocId)
-                                    .update("notificationSent", true);
+                        String fromUserId = doc.getString("fromUserId");
+                        String allianceId = doc.getString("allianceId");
+                        String inviteDocId = doc.getId();
 
-                            showAllianceInviteDialog(allianceId, fromUserId, inviteDocId);
-                        }
+                        doc.getReference().update("notificationSent", true);
+
+                        showAllianceInviteDialog(fromUserId, allianceId, inviteDocId);
                     }
                 });
     }
@@ -336,43 +375,40 @@ public class MainActivity extends AppCompatActivity {
                     if (e != null || snapshots == null) return;
 
                     for (DocumentChange dc : snapshots.getDocumentChanges()) {
+                        if (dc.getType() != DocumentChange.Type.ADDED) continue;
+
                         DocumentSnapshot doc = dc.getDocument();
                         String docId = doc.getId();
+                        String message = doc.getString("message");
+                        String type = doc.getString("type");
 
-                        // ⚡ Ako je notifikacija pregledana, obriši je
-                        Boolean seen = doc.getBoolean("seen");
-                        if (seen != null && seen) {
-                            db.collection("notifications").document(docId).delete();
+                        if (message == null || type == null) {
+                            doc.getReference().delete();
                             continue;
                         }
 
-                        // ⚡ Novi/active doc
-                        if (dc.getType() == DocumentChange.Type.ADDED) {
-                            if (processedNotifications.contains(docId)) continue;
-                            processedNotifications.add(docId);
-
-                            String message = doc.getString("message");
-
-                            if (message != null) {
-                                runOnUiThread(() -> {
-                                    if (!isFinishing() && !isDestroyed()) {
-                                        new AlertDialog.Builder(this)
-                                                .setTitle("Obaveštenje o savezu")
-                                                .setMessage(message)
-                                                .setPositiveButton("OK", (dialog, which) -> {
-                                                    // Kada korisnik klikne OK, obriši notifikaciju
-                                                    db.collection("notifications").document(docId).delete();
-                                                })
-                                                .show();
-
-                                        showAllianceAcceptanceNotificationSafe(message);
-                                    }
-                                });
-                            }
+                        switch (type) {
+                            case "alliance_message":
+                                showNotification("alliance_message_channel",
+                                        "Nova poruka u savezu",
+                                        message,
+                                        docId);
+                                break;
+                            case "alliance_invite_accepted":
+                                showNotification("alliance_accepted_channel",
+                                        "Obaveštenje o savezu",
+                                        message,
+                                        docId);
+                                break;
+                            default:
+                                break;
                         }
+
+                        doc.getReference().delete();
                     }
                 });
     }
+
 
 
     private void showAllianceAcceptanceNotificationSafe(String message) {
@@ -389,9 +425,12 @@ public class MainActivity extends AppCompatActivity {
             notificationManager.createNotificationChannel(channel);
         }
 
+        // ⚡ Generiši naslov automatski iz poruke ili prosledi kao parametar
+        String title = "Obaveštenje o savezu";  // ovo je sada naslov, možeš proslediti kao parametar
+
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, channelId)
                 .setSmallIcon(R.drawable.ic_notifications)
-                .setContentTitle("Novi član u savezu")
+                .setContentTitle(title)
                 .setContentText(message)
                 .setPriority(NotificationCompat.PRIORITY_HIGH)
                 .setAutoCancel(true);
@@ -402,36 +441,38 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    private void showAllianceInviteDialog(String allianceId, String fromUserId, String inviteDocId) {
+    private void showAllianceInviteDialog(String fromUserId, String allianceId, String inviteDocId) {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
 
-        db.collection("users").document(fromUserId)
-                .get()
-                .addOnSuccessListener(userDoc -> {
-                    String fromUsername = userDoc.getString("username");
-                    if (fromUsername == null) fromUsername = "Korisnik";
+        db.collection("users").document(fromUserId).get().addOnSuccessListener(userDoc -> {
+            String fromUsername = userDoc.getString("username");
+            if (fromUsername == null) fromUsername = "Korisnik";
 
-                    String finalFromUsername = fromUsername;
-                    db.collection("alliances").document(allianceId)
-                            .get()
-                            .addOnSuccessListener(allianceDoc -> {
-                                String allianceName = allianceDoc.getString("name");
-                                if (allianceName == null) allianceName = "savez";
+            String finalFromUsername = fromUsername;
+            String finalFromUsername1 = fromUsername;
+            db.collection("alliances").document(allianceId).get().addOnSuccessListener(allianceDoc -> {
+                String allianceName = allianceDoc.getString("name");
+                if (allianceName == null) allianceName = "savez";
 
-                                AlertDialog.Builder builder = new AlertDialog.Builder(this);
-                                builder.setTitle("Poziv u savez");
-                                builder.setMessage("Korisnik " + finalFromUsername + " te pozvao u savez \"" + allianceName + "\".");
-                                builder.setCancelable(false);
-
-                                builder.setPositiveButton("Prihvati", (dialog, which) -> acceptAllianceInvite(allianceId, inviteDocId));
-                                builder.setNegativeButton("Odbij", (dialog, which) -> declineAllianceInvite(inviteDocId));
-
-                                builder.show();
-
-                                showAllianceInviteNotification(finalFromUsername, allianceId, inviteDocId);
-                            });
+                String finalAllianceName = allianceName;
+                runOnUiThread(() -> {
+                    new AlertDialog.Builder(this)
+                            .setTitle("Poziv u savez")
+                            .setMessage("Korisnik " + finalFromUsername + " te pozvao u savez \"" + finalAllianceName + "\".")
+                            .setPositiveButton("Prihvati", (dialog, which) -> acceptAllianceInvite(allianceId, inviteDocId))
+                            .setNegativeButton("Odbij", (dialog, which) -> declineAllianceInvite(inviteDocId))
+                            .setCancelable(false)
+                            .show();
                 });
+
+                showNotification("alliance_invite_channel",
+                        "Poziv u savez",
+                        finalFromUsername1 + " te je pozvao u savez \"" + allianceName + "\".",
+                        inviteDocId);
+            });
+        });
     }
+
 
     private void showAllianceInviteNotification(String fromUsername, String allianceId, String inviteDocId) {
         String ALLIANCE_INVITE_CHANNEL_ID = "alliance_invite_channel";
@@ -631,5 +672,89 @@ public class MainActivity extends AppCompatActivity {
 
         Toast.makeText(this, "Odbio si zahtev.", Toast.LENGTH_SHORT).show();
     }
+
+    //notifications for messages
+    private void listenForAllianceMessages() {
+        String currentUserId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+
+        db.collection("notifications")
+                .whereEqualTo("toUserId", currentUserId)
+                .whereEqualTo("seen", false)
+                .addSnapshotListener((snapshots, e) -> {
+                    if (e != null || snapshots == null) return;
+
+                    for (DocumentChange dc : snapshots.getDocumentChanges()) {
+                        if (dc.getType() != DocumentChange.Type.ADDED) continue;
+
+                        DocumentSnapshot doc = dc.getDocument();
+                        String docId = doc.getId();
+                        String message = doc.getString("message");
+                        String type = doc.getString("type");
+                        String fromUserId = doc.getString("fromUserId");
+
+                        // ⚡ Preskoči notifikaciju ako je pošiljalac trenutni korisnik
+                        if (fromUserId != null && fromUserId.equals(currentUserId)) {
+                            doc.getReference().delete();
+                            continue;
+                        }
+
+                        // ⚡ Ako nema poruke ili tipa, obriši dokument
+                        if (message == null || type == null) {
+                            doc.getReference().delete();
+                            continue;
+                        }
+
+                        // ⚡ Prikaz sistemske notifikacije na osnovu tipa
+                        switch (type) {
+                            case "alliance_message":
+                                showAllianceMessageNotification(message);
+                                break;
+                            case "alliance_invite_accepted":
+                                showAllianceAcceptanceNotificationSafe(message);
+                                break;
+                            default:
+                                // drugi tipovi – možeš dodati ako bude potrebno
+                                break;
+                        }
+
+                        // ⚡ Obriši dokument odmah da ne zauzima memoriju
+                        doc.getReference().delete();
+                    }
+                });
+    }
+
+
+    private void showAllianceMessageNotification(String message) {
+        String CHANNEL_ID = "alliance_message_channel";
+
+        NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            NotificationChannel channel = new NotificationChannel(
+                    CHANNEL_ID, "Alliance Messages", NotificationManager.IMPORTANCE_HIGH
+            );
+            notificationManager.createNotificationChannel(channel);
+        }
+
+        PendingIntent pendingIntent = PendingIntent.getActivity(
+                this, 0, new Intent(this, MainActivity.class),
+                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
+        );
+
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID)
+                .setSmallIcon(R.drawable.ic_notifications)
+                .setContentTitle("Nova poruka u savezu")
+                .setContentText(message)
+                .setContentIntent(pendingIntent)
+                .setAutoCancel(true)
+                .setPriority(NotificationCompat.PRIORITY_HIGH);
+
+        if (notificationManager != null) {
+            notificationManager.notify((int) System.currentTimeMillis(), builder.build());
+        }
+    }
+
+
 
 }
