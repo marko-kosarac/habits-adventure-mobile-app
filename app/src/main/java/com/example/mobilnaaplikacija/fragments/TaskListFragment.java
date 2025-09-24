@@ -54,6 +54,7 @@ public class TaskListFragment extends Fragment implements RecyclerViewInterface 
     private Integer selectedFreq = R.id.chipAll;
     private FragmentTaskListBinding binding;
     private TabLayout.Tab listTab, calendarTab;
+    private boolean isListTab;
     private TaskService taskService;
     private UserService userService;
     private CategoryService categoryService;
@@ -76,6 +77,8 @@ public class TaskListFragment extends Fragment implements RecyclerViewInterface 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+        isListTab = true;
 
         //Inicijalizacija zadataka
         binding.rvTasks.setLayoutManager(new LinearLayoutManager(getActivity()));
@@ -114,12 +117,14 @@ public class TaskListFragment extends Fragment implements RecyclerViewInterface 
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
                 if (tab == listTab) {
+                    isListTab = true;
                     selectedDate = null;
                     adapter.updateTasks(applyFilters());
                     binding.rvTasks.setVisibility(View.VISIBLE);
                     binding.calendarView.setVisibility(View.GONE);
                     binding.rvDateTasks.setVisibility(View.GONE);
                 } else {
+                    isListTab = false;
                     decorateCalendarWithTasks();
                     binding.rvTasks.setVisibility(View.GONE);
                     binding.calendarView.setVisibility(View.VISIBLE);
@@ -176,7 +181,6 @@ public class TaskListFragment extends Fragment implements RecyclerViewInterface 
         }
 
         adapter.updateTasks(filtered);
-        Log.d("RecyclerDebug", "Adapter items after setTasks: " + adapter.getItemCount()); // 👈 add here
         decorateCalendarWithTasks();
     }
 
@@ -188,25 +192,20 @@ public class TaskListFragment extends Fragment implements RecyclerViewInterface 
     }
 
     private ArrayList<Task> applyFilters () {
-        Log.d("CalendarDebug", "Before filters: " + tasks.size());
         FirebaseUser user = userService.getCurrentUser();
         if(user == null) {
-            Log.d("CalendarDebug", "No user logged in");
             return tasks;
         }
         ArrayList<Task> currentTasks = new ArrayList<>(taskService.getTasksByUser(user.getUid()));
 
-        if (listTab != null && listTab.isSelected())
+        if (isListTab)
             currentTasks = taskService.filterCurrentFutureTasks(currentTasks);
 
-        Log.d("CalendarDebug", "Tasks fetched from DB: " + currentTasks.size());
         if (selectedDate != null && binding.tabLayout.getSelectedTabPosition() == calendarTab.getPosition()) {
             currentTasks = filterByDate(currentTasks, selectedDate);
-            Log.d("CalendarDebug", "After date filter: " + currentTasks.size() + " (selectedDate=" + selectedDate + ")");
         }
 
         currentTasks = filterByFrequency(Collections.singletonList(selectedFreq), currentTasks);
-        Log.d("CalendarDebug", "After freq filter: " + currentTasks.size() + " (chip=" + selectedFreq + ")");
         return currentTasks;
     }
 
@@ -287,7 +286,6 @@ public class TaskListFragment extends Fragment implements RecyclerViewInterface 
         Map<String, List<Task>> tasksPerDate = new HashMap<>();
 
         for (Task task : tasks) {
-            Log.d("CalendarDebug", "Task: " + task.getName() + " | " + parseMillisToDate(task.getStartMillis()) + " -> " + parseMillisToDate(task.getEndMillis()));
             List<String> allDates = getTaskOcurringDates(task);
 
             for (String date : allDates) {
@@ -337,7 +335,7 @@ public class TaskListFragment extends Fragment implements RecyclerViewInterface 
     }
 
     public int getCategoryColorInt() {
-        return Color.BLUE; // TODO: fetch category color dynamically
+        return Color.BLUE; // TODO: dobavi boju kategorije
     }
 
     @Override
