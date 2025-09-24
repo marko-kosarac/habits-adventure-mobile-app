@@ -14,8 +14,8 @@ public class Task implements Parcelable {
     private String description;
     private String categoryId;
     private FrequencyType frequency;
-    private long startMillis;
-    private long endMillis;
+    private Long startMillis;
+    private Long endMillis;
     private Integer interval;
     private UnitType unit;
     private DifficultyType difficulty;
@@ -24,7 +24,7 @@ public class Task implements Parcelable {
 
     public Task() {}
 
-    public Task(String userId, String name, String description, String categoryId, FrequencyType frequency, long startMillis, long endMillis, Integer interval, UnitType unit, DifficultyType difficulty, ImportanceType importance, StatusType status) {
+    public Task(String userId, String name, String description, String categoryId, FrequencyType frequency, Long startMillis, Long endMillis, Integer interval, UnitType unit, DifficultyType difficulty, ImportanceType importance, StatusType status) {
         this.userId = userId;
         this.name = name;
         this.description = description;
@@ -39,7 +39,7 @@ public class Task implements Parcelable {
         this.status = status;
     }
 
-    public Task(String id, String userId, String name, String description, String categoryId, FrequencyType frequency, long startMillis, long endMillis, Integer interval, UnitType unit, DifficultyType difficulty, ImportanceType importance, StatusType status) {
+    public Task(String id, String userId, String name, String description, String categoryId, FrequencyType frequency, Long startMillis, Long endMillis, Integer interval, UnitType unit, DifficultyType difficulty, ImportanceType importance, StatusType status) {
         this.id = id;
         this.userId = userId;
         this.name = name;
@@ -94,15 +94,15 @@ public class Task implements Parcelable {
     public FrequencyType getFrequency() { return frequency; }
     public void setFrequency(FrequencyType frequency) { this.frequency = frequency; }
 
-    public long getEndMillis() { return endMillis; }
+    public Long getEndMillis() { return endMillis; }
 
-    public void setEndMillis(long endMillis) { this.endMillis = endMillis; }
+    public void setEndMillis(Long endMillis) { this.endMillis = endMillis; }
 
-    public long getStartMillis() {
+    public Long getStartMillis() {
         return startMillis;
     }
 
-    public void setStartMillis(long startMillis) {
+    public void setStartMillis(Long startMillis) {
         this.startMillis = startMillis;
     }
 
@@ -139,7 +139,7 @@ public class Task implements Parcelable {
         parcel.writeString(status != null ? status.name() : null);
     }
 
-    public static final Creator<Task> CREATOR = new Creator<Task>() {
+    public static final Creator<Task> CREATOR = new Creator<>() {
         @Override
         public Task createFromParcel(Parcel in) { return new Task(in); }
         @Override

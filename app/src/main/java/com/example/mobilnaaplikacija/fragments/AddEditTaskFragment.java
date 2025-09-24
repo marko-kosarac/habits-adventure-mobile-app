@@ -40,7 +40,7 @@ public class AddEditTaskFragment extends DialogFragment {
     private UserService userService;
     private boolean isEditing, areDatesValid, isTimeValid;
     private Task taskToUpdate;
-    private long startMillis = -1, endMillis = -1;
+    private Long startMillis = -1L, endMillis = -1L;
 
     @Override
     public void onStart() {
@@ -84,8 +84,7 @@ public class AddEditTaskFragment extends DialogFragment {
             binding.spinnerStatus.setSelection((StatusType.valueOf(taskToUpdate.getStatus().name()).ordinal()));
             if(taskToUpdate.getStatus() == StatusType.URAĐEN)
                 binding.spinnerStatus.setEnabled(false);
-            binding.etStartDate.setText(taskToUpdate.getStartDate());
-            binding.etEndDate.setText(taskToUpdate.getEndDate());
+            parseMillisToDateTime(taskToUpdate);
             binding.etReccuringNumber.setText(taskToUpdate.getInterval() == null ? "0" : String.valueOf(taskToUpdate.getInterval()));
             binding.spinnerRecurringUnit.setSelection(taskToUpdate.getUnit() == null ? -1 : UnitType.valueOf(taskToUpdate.getUnit().name()).ordinal());
             binding.spinnerDifficulty.setSelection((DifficultyType.valueOf(taskToUpdate.getDifficulty().name()).ordinal()));
@@ -103,6 +102,24 @@ public class AddEditTaskFragment extends DialogFragment {
         setupSaveTaskButton();
     }
 
+    private void parseMillisToDateTime(Task task) {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("d/M/yyyy", Locale.getDefault());
+        SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm", Locale.getDefault());
+
+        if (task.getStartMillis() != null) {
+            Date dateTime = new Date(task.getStartMillis());
+            binding.etStartDate.setText(dateFormat.format(dateTime));
+            binding.etStartTime.setText(timeFormat.format(dateTime));
+            startMillis = taskToUpdate.getStartMillis();
+        }
+
+        if (task.getEndMillis() != null) {
+            Date endDate = new Date(taskToUpdate.getEndMillis());
+            binding.etEndDate.setText(dateFormat.format(endDate));
+            binding.etEndTime.setText(timeFormat.format(endDate));
+            endMillis = taskToUpdate.getEndMillis();
+        }
+    }
     private void setupSpinners(){
         String[] categoryTypes = {"Zdravlje", "Učenje", "Zabava", "Sređivanje", "Sport", "Posao", "Porodica"};
         ArrayAdapter<String> categoryAdapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_spinner_dropdown_item, categoryTypes);
@@ -124,15 +141,17 @@ public class AddEditTaskFragment extends DialogFragment {
 
     private void setupStatusSpinner (Task task) {
         ArrayList<StatusType> possibleStatuses = new ArrayList<>();
-        SimpleDateFormat sdf = new SimpleDateFormat("d/M/yyyy", Locale.getDefault());
         boolean isRepeating = task.getFrequency() == FrequencyType.PONAVLJAJUCI;
 
         if (task.getStatus() != StatusType.URAĐEN) {
             try {
-                Date startDate = sdf.parse(task.getStartDate());
-                Date endDate = sdf.parse(task.getEndDate());
-                if (startDate == null || endDate == null)
-                    return;
+                Long startMillis = task.getStartMillis();
+                Long endMillis = task.getEndMillis();
+
+                if (startMillis == null || endMillis == null) return;
+
+                Date startDate = new Date(startMillis);
+                Date endDate = new Date(endMillis);
 
                 if (task.getStatus() == StatusType.AKTIVAN) {
                     possibleStatuses.add(StatusType.AKTIVAN);
@@ -379,7 +398,7 @@ public class AddEditTaskFragment extends DialogFragment {
                 return;
             }
             if (isEditing) {
-                String statusError = taskService.validateStatus(binding.spinnerStatus.getSelectedItem().toString(), startMillis, endMillis);
+                String statusError = taskService.isStatusValid(binding.spinnerStatus.getSelectedItem().toString(), startMillis, endMillis);
                 showError(statusError);
                 return;
             }
