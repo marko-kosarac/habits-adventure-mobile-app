@@ -1,6 +1,7 @@
 package com.example.mobilnaaplikacija.fragments;
 
 import android.app.DatePickerDialog;
+import android.app.TimePickerDialog;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -12,6 +13,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.DatePicker;
+import android.widget.EditText;
 import android.widget.Toast;
 
 import com.example.mobilnaaplikacija.R;
@@ -36,8 +38,9 @@ public class AddEditTaskFragment extends DialogFragment {
     private FragmentAddEditTaskBinding binding;
     private TaskService taskService;
     private UserService userService;
-    private boolean isEditing, areDatesValid;
-    private Task taskToUpdate, taskToView;
+    private boolean isEditing, areDatesValid, isTimeValid;
+    private Task taskToUpdate;
+    private long startMillis = -1, endMillis = -1;
 
     @Override
     public void onStart() {
@@ -65,8 +68,8 @@ public class AddEditTaskFragment extends DialogFragment {
 
         isEditing = false;
         areDatesValid = true;
+        isTimeValid = true;
         taskToUpdate = null;
-        taskToView = null;
         setupSpinners();
 
         if(getArguments() != null && getArguments().containsKey("Task to edit")){
@@ -160,20 +163,61 @@ public class AddEditTaskFragment extends DialogFragment {
     private void setupDateTimePickers(){
         binding.etStartDate.setFocusable(false);
         binding.etStartDate.setClickable(true);
+        binding.etStartTime.setFocusable(false);
+        binding.etStartTime.setClickable(true);
 
         binding.etEndDate.setFocusable(false);
         binding.etEndDate.setClickable(true);
+        binding.etEndTime.setFocusable(false);
+        binding.etEndTime.setClickable(true);
 
         binding.etStartDate.setOnClickListener(view -> showDatePicker(binding.etStartDate, true));
         binding.etEndDate.setOnClickListener(view -> showDatePicker(binding.etEndDate, false));
+        binding.etStartTime.setOnClickListener(view -> showTimePicker(binding.etStartTime, true));
+        binding.etEndTime.setOnClickListener(view -> showTimePicker(binding.etEndTime, false));
+
     }
 
-    private void showDatePicker(android.widget.EditText field, boolean isStartDate){
+    private void showDatePicker(EditText field, boolean isStartDate){
         Calendar calendar = Calendar.getInstance();
         DatePickerDialog datePickerDialog = new DatePickerDialog(requireContext(),
             (DatePicker view, int year, int month, int dayOfMonth) ->{
             String date = dayOfMonth + "/" + (month + 1) + "/" + year;
             field.setText(date);
+
+                Calendar chosen = Calendar.getInstance();
+                chosen.set(Calendar.YEAR, year);
+                chosen.set(Calendar.MONTH, month);
+                chosen.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+                chosen.set(Calendar.HOUR_OF_DAY, 0);
+                chosen.set(Calendar.MINUTE, 0);
+                chosen.set(Calendar.SECOND, 0);
+                chosen.set(Calendar.MILLISECOND, 0);
+
+                if (isStartDate) {
+                    if (startMillis == -1) {
+                        startMillis = chosen.getTimeInMillis();
+                    } else {
+                        Calendar tmp = Calendar.getInstance();
+                        tmp.setTimeInMillis(startMillis);
+                        tmp.set(Calendar.YEAR, year);
+                        tmp.set(Calendar.MONTH, month);
+                        tmp.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+                        startMillis = tmp.getTimeInMillis();
+                    }
+                } else {
+                    if (endMillis == -1) {
+                        endMillis = chosen.getTimeInMillis();
+                    } else {
+                        Calendar tmp = Calendar.getInstance();
+                        tmp.setTimeInMillis(endMillis);
+                        tmp.set(Calendar.YEAR, year);
+                        tmp.set(Calendar.MONTH, month);
+                        tmp.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+                        endMillis = tmp.getTimeInMillis();
+                    }
+                }
+
 
             if (binding.rbOneTime.isChecked()) {
                 // If non repeating and start, then start and end equal
@@ -196,20 +240,6 @@ public class AddEditTaskFragment extends DialogFragment {
                 fmt.setLenient(false);
 
                 try {
-                    String[] partsStart = startStr.split("/");
-                    int dayStart = Integer.parseInt(partsStart[0]);
-                    int monthStart = Integer.parseInt(partsStart[1]) - 1;
-                    int yearStart = Integer.parseInt(partsStart[2]);
-                    Calendar calStart = Calendar.getInstance();
-                    calStart.set(yearStart, monthStart, dayStart);
-
-                    String[] partsEnd = endStr.split("/");
-                    int dayEnd = Integer.parseInt(partsEnd[0]);
-                    int monthEnd = Integer.parseInt(partsEnd[1]) - 1;
-                    int yearEnd = Integer.parseInt(partsEnd[2]);
-                    Calendar calEnd = Calendar.getInstance();
-                    calEnd.set(yearEnd, monthEnd, dayEnd);
-
                     Date startDate = fmt.parse(startStr);
                     Date endDate = fmt.parse(endStr);
 
@@ -250,6 +280,41 @@ public class AddEditTaskFragment extends DialogFragment {
         }
 
         datePickerDialog.show();
+    }
+
+    private void showTimePicker(EditText field, boolean isStart) {
+        Calendar calendar = Calendar.getInstance();
+        new TimePickerDialog(requireContext(), (view, hour, minute) -> {
+            calendar.set(Calendar.HOUR_OF_DAY, hour);
+            calendar.set(Calendar.MINUTE, minute);
+            calendar.set(Calendar.SECOND, 0);
+            field.setText(new SimpleDateFormat("HH:mm", Locale.getDefault()).format(calendar.getTime()));
+
+            SimpleDateFormat sdf = new SimpleDateFormat("HH:mm", Locale.getDefault());
+            field.setText(sdf.format(calendar.getTime()));
+            
+            if (isStart) {
+                if (startMillis == -1) startMillis = calendar.getTimeInMillis();
+                else {
+                    Calendar tmp = Calendar.getInstance();
+                    tmp.setTimeInMillis(startMillis);
+                    tmp.set(Calendar.HOUR_OF_DAY, hour);
+                    tmp.set(Calendar.MINUTE, minute);
+                    tmp.set(Calendar.SECOND, 0);
+                    startMillis = tmp.getTimeInMillis();
+                }
+            } else {
+                if (endMillis == -1) endMillis = calendar.getTimeInMillis();
+                else {
+                    Calendar tmp = Calendar.getInstance();
+                    tmp.setTimeInMillis(endMillis);
+                    tmp.set(Calendar.HOUR_OF_DAY, hour);
+                    tmp.set(Calendar.MINUTE, minute);
+                    tmp.set(Calendar.SECOND, 0);
+                    endMillis = tmp.getTimeInMillis();
+                }
+            }
+        }, calendar.get(Calendar.HOUR_OF_DAY), calendar.get(Calendar.MINUTE), true).show();
     }
 
     private void setupFrequency(){
@@ -294,9 +359,10 @@ public class AddEditTaskFragment extends DialogFragment {
             boolean isRepeating = binding.rbRepeat.isChecked();
             boolean isOneTime = binding.rbOneTime.isChecked();
             FrequencyType frequency = isRepeating ? FrequencyType.PONAVLJAJUCI : FrequencyType.JEDNOKRATAN;
-            String status = binding.spinnerStatus.getSelectedItem().toString();
+            String startTime = binding.etStartTime.getText().toString().trim();
             String startDate = binding.etStartDate.getText().toString().trim();
             String endDate = binding.etEndDate.getText().toString().trim();
+            String endTime = binding.etEndTime.getText().toString().trim();
             String difficulty = binding.spinnerDifficulty.getSelectedItem().toString();
             String importance = binding.spinnerImportance.getSelectedItem().toString();
             String recurringUnit = binding.spinnerRecurringUnit.getSelectedItem() != null
@@ -307,10 +373,20 @@ public class AddEditTaskFragment extends DialogFragment {
                     : "0";
 
             //Validacija
-            String error = taskService.validate(name, category, isRepeating, isOneTime, status, startDate, endDate,
-                    difficulty, importance, recurringUnit, recurringNumber);
+            String error = taskService.validate(name, category, isRepeating, isOneTime, startDate, endDate, startTime, endTime, startMillis, endMillis, difficulty, importance, recurringUnit, recurringNumber);
             if(error != null){
                 showError(error);
+                return;
+            }
+            if (isEditing) {
+                String statusError = taskService.validateStatus(binding.spinnerStatus.getSelectedItem().toString(), startMillis, endMillis);
+                showError(statusError);
+                return;
+            }
+
+            isTimeValid = taskService.isTimeValid(startMillis, endMillis);
+            if (!isTimeValid) {
+                showError("Vrijeme završetka mora biti prije početka!");
                 return;
             }
 
@@ -328,8 +404,8 @@ public class AddEditTaskFragment extends DialogFragment {
                 task.setStatus((StatusType)binding.spinnerStatus.getSelectedItem());
             else
                 task.setStatus(StatusType.AKTIVAN);
-            task.setStartDate(startDate);
-            task.setEndDate(endDate);
+            task.setStartMillis(startMillis);
+            task.setEndMillis(endMillis);
             task.setDifficulty((DifficultyType)binding.spinnerDifficulty.getSelectedItem());
             task.setImportance((ImportanceType)binding.spinnerImportance.getSelectedItem());
             if (isOneTime) {
@@ -341,7 +417,7 @@ public class AddEditTaskFragment extends DialogFragment {
             }
 
             //Čuvanje zadatka
-            if (areDatesValid) {
+            if (areDatesValid && isTimeValid) {
                 if(isEditing){
                     task = taskService.update(task);
                     Toast.makeText(requireContext(), "Zadatak izmijenjen!", Toast.LENGTH_SHORT).show();
