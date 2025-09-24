@@ -157,6 +157,11 @@ public class AddEditTaskFragment extends DialogFragment {
 
         if (current == StatusType.URAĐEN || current == StatusType.NEURAĐEN || current == StatusType.OTKAZAN)
             binding.spinnerStatus.setEnabled(false);
+
+        int index = possibleStatuses.indexOf(task.getStatus());
+        if (index >= 0) {
+            binding.spinnerStatus.setSelection(index);
+        }
     }
 
     private void setupDateTimePickers(){
