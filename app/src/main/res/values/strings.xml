@@ -52,6 +52,7 @@
     <string name="detail_category">Kategorija:</string>
     <string name="detail_date">Datum:</string>
     <string name="detail_date_dash">-</string>
+    <string name="detail_time">Vrijeme:</string>
     <string name="detail_recurring">Ponavljanje zadatka:</string>
     <string name="detail_recurring_number">Broj:</string>
     <string name="detail_recurring_unit">Jedinica:</string>

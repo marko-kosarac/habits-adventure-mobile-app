@@ -96,21 +96,6 @@
                     android:inputType="date"
                     android:hint="@string/task_start"
                     android:layout_marginEnd="20dp"/>
-                <!-- Task start time -->
-                <EditText
-                    android:id="@+id/etStartTime"
-                    android:layout_width="130dp"
-                    android:layout_height="wrap_content"
-                    android:inputType="date"
-                    android:hint="@string/task_start_time"/>
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_horizontal"
-                android:layout_marginBottom="16dp">
                 <!-- Task end date -->
                 <EditText
                     android:id="@+id/etEndDate"
@@ -119,6 +104,21 @@
                     android:inputType="date"
                     android:hint="@string/task_end"
                     android:layout_marginEnd="20dp"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_horizontal"
+                android:layout_marginBottom="16dp">
+                <!-- Task start time -->
+                <EditText
+                    android:id="@+id/etStartTime"
+                    android:layout_width="130dp"
+                    android:layout_height="wrap_content"
+                    android:inputType="date"
+                    android:hint="@string/task_start_time"/>
                 <!-- Task end time -->
                 <EditText
                     android:id="@+id/etEndTime"

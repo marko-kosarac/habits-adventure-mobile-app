@@ -13,6 +13,10 @@ import com.example.mobilnaaplikacija.databinding.FragmentDetailTaskBinding;
 import com.example.mobilnaaplikacija.model.FrequencyType;
 import com.example.mobilnaaplikacija.model.Task;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
+
 public class DetailTaskFragment extends DialogFragment {
     private FragmentDetailTaskBinding binding;
     private Task selectedTask;
@@ -44,9 +48,8 @@ public class DetailTaskFragment extends DialogFragment {
             selectedTask = getArguments().getParcelable("Task to view");
             binding.tvTaskName.setText(selectedTask.getName());
             binding.tvTaskDescription.setText(selectedTask.getDescription());
-            binding.tvTaskCategory.setText(selectedTask.getStartDate()); //TODO category
-            binding.tvTaskStartDate.setText(selectedTask.getStartDate());
-            binding.tvTaskEndDate.setText(selectedTask.getEndDate());
+            binding.tvTaskCategory.setText(selectedTask.getName()); //TODO category
+            parseMillisToDateTime(selectedTask);
             binding.recurringFields.setVisibility(selectedTask.getFrequency() == FrequencyType.PONAVLJAJUCI ? View.VISIBLE : View.GONE);
             binding.tvTaskRecurringNumber.setText(String.valueOf(selectedTask.getInterval()));
             binding.tvTaskRecurringUnit.setText(selectedTask.getUnit() == null ? "" : selectedTask.getUnit().getDisplayName());
@@ -66,6 +69,23 @@ public class DetailTaskFragment extends DialogFragment {
             getParentFragmentManager().setFragmentResult("Task managed", result);
             dismiss();
         });
+    }
+
+    private void parseMillisToDateTime(Task task) {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("d/M/yyyy", Locale.getDefault());
+        SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm", Locale.getDefault());
+
+        if (task.getStartMillis() != null) {
+            Date dateTime = new Date(task.getStartMillis());
+            binding.tvTaskStartDate.setText(dateFormat.format(dateTime));
+            binding.tvTaskStartTime.setText(timeFormat.format(dateTime));
+        }
+
+        if (task.getEndMillis() != null) {
+            Date endDate = new Date(task.getEndMillis());
+            binding.tvTaskEndDate.setText(dateFormat.format(endDate));
+            binding.tvTaskEndTime.setText(timeFormat.format(endDate));
+        }
     }
 
     @Override

@@ -126,6 +126,39 @@
                 android:textSize="18sp" />
         </LinearLayout>
 
+        <!-- Task time -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="32dp"
+            android:gravity="center_vertical">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="4dp"
+                android:text="@string/detail_time"
+                android:textSize="18sp"/>
+            <TextView
+                android:id="@+id/tvTaskStartTime"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="4dp"
+                android:textSize="18sp"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/detail_date_dash"
+                android:layout_marginHorizontal="3dp"
+                android:textSize="18sp"/>
+
+            <TextView
+                android:id="@+id/tvTaskEndTime"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:textSize="18sp" />
+        </LinearLayout>
+
         <!-- Task frequency -->
         <LinearLayout
             android:id="@+id/recurringFields"

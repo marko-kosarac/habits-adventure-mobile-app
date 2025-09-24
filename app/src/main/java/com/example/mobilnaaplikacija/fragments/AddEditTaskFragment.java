@@ -110,14 +110,14 @@ public class AddEditTaskFragment extends DialogFragment {
             Date dateTime = new Date(task.getStartMillis());
             binding.etStartDate.setText(dateFormat.format(dateTime));
             binding.etStartTime.setText(timeFormat.format(dateTime));
-            startMillis = taskToUpdate.getStartMillis();
+            startMillis = task.getStartMillis();
         }
 
         if (task.getEndMillis() != null) {
-            Date endDate = new Date(taskToUpdate.getEndMillis());
+            Date endDate = new Date(task.getEndMillis());
             binding.etEndDate.setText(dateFormat.format(endDate));
             binding.etEndTime.setText(timeFormat.format(endDate));
-            endMillis = taskToUpdate.getEndMillis();
+            endMillis = task.getEndMillis();
         }
     }
     private void setupSpinners(){
