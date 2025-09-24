@@ -170,7 +170,7 @@ public class TaskListFragment extends Fragment implements RecyclerViewInterface 
         for (Task t : filtered) {
             Task updatedTask = taskService.autoUpdateStatus(t);
             if (!updatedTask.getStatus().equals(t.getStatus())) {
-                taskService.update(updatedTask); // persist to DB if changed
+                taskService.update(updatedTask);
             }
             updated.add(updatedTask);
         }
@@ -195,6 +195,10 @@ public class TaskListFragment extends Fragment implements RecyclerViewInterface 
             return tasks;
         }
         ArrayList<Task> currentTasks = new ArrayList<>(taskService.getTasksByUser(user.getUid()));
+
+        if (listTab != null && listTab.isSelected())
+            currentTasks = taskService.filterCurrentFutureTasks(currentTasks);
+
         Log.d("CalendarDebug", "Tasks fetched from DB: " + currentTasks.size());
         if (selectedDate != null && binding.tabLayout.getSelectedTabPosition() == calendarTab.getPosition()) {
             currentTasks = filterByDate(currentTasks, selectedDate);

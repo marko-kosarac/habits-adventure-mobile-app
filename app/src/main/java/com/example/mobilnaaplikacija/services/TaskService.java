@@ -166,4 +166,16 @@ public class TaskService {
 
         return source.getTimeInMillis();
     }
+
+    public ArrayList<Task> filterCurrentFutureTasks (ArrayList<Task> tasks) {
+        ArrayList<Task> filtered = new ArrayList<>();
+        long now = System.currentTimeMillis();
+
+        for (Task task : tasks) {
+            if (task.getEndMillis() >= now) {
+                filtered.add(task);
+            }
+        }
+        return filtered;
+    }
 }
