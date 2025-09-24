@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <EditText
+        android:id="@+id/editAllianceName"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Unesite naziv saveza"
+        android:padding="10dp"
+        android:background="@drawable/search_bg"
+        android:inputType="text" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerAllianceFriends"
+        android:layout_width="match_parent"
+        android:layout_height="300dp"
+        android:layout_marginTop="16dp" />
+
+    <Button
+        android:id="@+id/buttonCreateAlliance"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Kreiraj savez"
+        android:layout_marginTop="16dp" />
+
+</LinearLayout>

@@ -27,6 +27,14 @@
             android:id="@+id/nav_statistics"
             android:icon="@drawable/ic_bar_chart"
             android:title="Statistika" />
+        <item
+            android:id="@+id/nav_friends"
+            android:icon="@drawable/ic_friends"
+            android:title="Prijatelji" />
+        <item
+            android:id="@+id/nav_alliance"
+            android:icon="@drawable/ic_alliance"
+            android:title="Moj savez" />
     </group>
 
     <!-- Odjava -->

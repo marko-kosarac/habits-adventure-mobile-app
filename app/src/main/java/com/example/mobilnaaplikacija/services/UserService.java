@@ -12,6 +12,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.messaging.FirebaseMessaging;
 
 public class UserService {
 
@@ -86,6 +87,26 @@ public class UserService {
                     if (task.isSuccessful()) {
                         FirebaseUser firebaseUser = auth.getCurrentUser();
                         if (firebaseUser != null && firebaseUser.isEmailVerified()) {
+
+                            FirebaseMessaging.getInstance().getToken()
+                                    .addOnCompleteListener(tokenTask -> {
+                                        if (tokenTask.isSuccessful()) {
+                                            String token = tokenTask.getResult();
+                                            FirebaseFirestore.getInstance()
+                                                    .collection("users")
+                                                    .document(firebaseUser.getUid())
+                                                    .update("fcmToken", token)
+                                                    .addOnSuccessListener(aVoid -> {
+                                                        Log.d("UserService", "FCM token snimljen.");
+                                                    })
+                                                    .addOnFailureListener(e -> {
+                                                        Log.e("UserService", "Greška pri snimanju FCM tokena", e);
+                                                    });
+                                        } else {
+                                            Log.e("UserService", "Nije moguće dobiti FCM token", tokenTask.getException());
+                                        }
+                                    });
+
                             callback.onComplete(true, "Uspešan login.");
                         } else {
                             callback.onComplete(false, "Verifikujte email pre logovanja.");
@@ -95,6 +116,7 @@ public class UserService {
                     }
                 });
     }
+
 
     /**
      * Logout

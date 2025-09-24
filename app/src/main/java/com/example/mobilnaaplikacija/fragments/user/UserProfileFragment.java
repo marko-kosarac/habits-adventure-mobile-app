@@ -1,4 +1,4 @@
-package com.example.mobilnaaplikacija.fragments;
+package com.example.mobilnaaplikacija.fragments.user;
 
 import android.app.AlertDialog;
 import android.graphics.Bitmap;
@@ -28,20 +28,16 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.MultiFormatWriter;
 import com.google.zxing.common.BitMatrix;
 import com.journeyapps.barcodescanner.BarcodeEncoder;
 
-import org.w3c.dom.Text;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 public class UserProfileFragment extends Fragment {
 
@@ -114,15 +110,21 @@ public class UserProfileFragment extends Fragment {
                 .addOnSuccessListener(document -> {
                     if (document.exists()) {
                         List<Map<String, Object>> equipmentData = (List<Map<String, Object>>) document.get("equipment");
+
                         userEquipmentList = new ArrayList<>();
-                        for (Map<String, Object> data : equipmentData) {
-                            Equipment eq = mapToEquipment(data);
-                            userEquipmentList.add(eq);
+
+                        if (equipmentData != null) {  // ✅ zaštita od null-a
+                            for (Map<String, Object> data : equipmentData) {
+                                Equipment eq = mapToEquipment(data);
+                                userEquipmentList.add(eq);
+                            }
                         }
+
                         displayEquipment();
                     }
                 });
     }
+
 
     private Equipment mapToEquipment(Map<String, Object> data) {
         Equipment eq = new Equipment();
@@ -258,9 +260,6 @@ public class UserProfileFragment extends Fragment {
         });
     }
 
-
-
-
     private void bindUserData(@NonNull DocumentSnapshot document, String userId) {
         String username = document.getString("username");
         long xp = document.getLong("experiencePoints") != null ? document.getLong("experiencePoints") : 0;
@@ -287,7 +286,7 @@ public class UserProfileFragment extends Fragment {
             }
         }
         updateLevelUI(xp, userId);
-        generateQRCode(userId, username, email);
+        generateQRCode(userId);
     }
 
     private void updateLevelUI(long currentXP, String userId) {
@@ -336,7 +335,7 @@ public class UserProfileFragment extends Fragment {
                 pp = pp + (pp * 3 / 4);
             }
         }
-        textPP.setText("PP: " + pp);
+        textPP.setText("Snaga: " + pp);
 
         // Ažuriranje baze
         db.collection("users").document(userId)
@@ -347,10 +346,10 @@ public class UserProfileFragment extends Fragment {
 
 
 
-    private void generateQRCode(String userId, String username, String email) {
+    private void generateQRCode(String userId) {
         MultiFormatWriter writer = new MultiFormatWriter();
         try {
-            String qrContent = "username:" + username + ", email:" + email;
+            String qrContent = "userId:" + userId;
             BitMatrix matrix = writer.encode(qrContent, BarcodeFormat.QR_CODE, 300, 300);
             BarcodeEncoder encoder = new BarcodeEncoder();
             Bitmap bitmap = encoder.createBitmap(matrix);
@@ -359,6 +358,7 @@ public class UserProfileFragment extends Fragment {
             e.printStackTrace();
         }
     }
+
 
     private void showChangePasswordDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(getContext());

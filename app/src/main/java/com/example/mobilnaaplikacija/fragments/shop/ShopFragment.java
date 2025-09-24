@@ -1,4 +1,4 @@
-package com.example.mobilnaaplikacija.fragments;
+package com.example.mobilnaaplikacija.fragments.shop;
 
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
@@ -19,7 +19,6 @@ import com.example.mobilnaaplikacija.database.SQLiteHelper;
 import com.example.mobilnaaplikacija.model.Equipment;
 
 import java.util.ArrayList;
-import java.util.Locale;
 
 public class ShopFragment extends Fragment {
 

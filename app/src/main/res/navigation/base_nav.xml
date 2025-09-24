@@ -8,12 +8,9 @@
     <!-- Home fragment (login ekran) -->
     <fragment
         android:id="@+id/homeFragment"
-        android:name="com.example.mobilnaaplikacija.fragments.HomeFragment"
+        android:name="com.example.mobilnaaplikacija.fragments.login.HomeFragment"
         android:label="Login"
         tools:layout="@layout/fragment_home">
-        <action
-            android:id="@+id/action_homeFragment_to_profile_page"
-            app:destination="@id/profile_page" />
         <action
             android:id="@+id/action_homeFragment_to_registerFragment"
             app:destination="@id/nav_register" />
@@ -22,18 +19,17 @@
     <!-- Main fragment sa Drawer-om -->
     <fragment
         android:id="@+id/mainFragment"
-        android:name="com.example.mobilnaaplikacija.fragments.HomePageFragment"
+        android:name="com.example.mobilnaaplikacija.fragments.home.HomePageFragment"
         android:label="Početna"
-        tools:layout="@layout/fragment_home_page"/>
-
+        tools:layout="@layout/fragment_home_page" />
     <fragment
         android:id="@+id/profile_page"
-        android:name="com.example.mobilnaaplikacija.fragments.UserProfileFragment"
+        android:name="com.example.mobilnaaplikacija.fragments.user.UserProfileFragment"
         android:label="Profil"
         tools:layout="@layout/fragment_user_profile"/>
     <fragment
         android:id="@+id/nav_register"
-        android:name="com.example.mobilnaaplikacija.fragments.RegisterFragment"
+        android:name="com.example.mobilnaaplikacija.fragments.registration.RegisterFragment"
         android:label="Registracija"
         tools:layout="@layout/fragment_register">
         <action
@@ -42,18 +38,43 @@
     </fragment>
     <fragment
         android:id="@+id/statistics_page"
-        android:name="com.example.mobilnaaplikacija.fragments.StatisticsFragment"
+        android:name="com.example.mobilnaaplikacija.fragments.user.StatisticsFragment"
         android:label="Statistika"
         tools:layout="@layout/fragment_statistics" >
-        <action
-            android:id="@+id/action_statistics_page_to_shopFragment"
-            app:destination="@id/shopFragment" />
     </fragment>
     <fragment
         android:id="@+id/shopFragment"
-        android:name="com.example.mobilnaaplikacija.fragments.ShopFragment"
+        android:name="com.example.mobilnaaplikacija.fragments.shop.ShopFragment"
         android:label="Prodavnica"
         tools:layout="@layout/fragment_shop" />
+    <fragment
+        android:id="@+id/friendsFragment"
+        android:name="com.example.mobilnaaplikacija.fragments.friends.FriendsFragment"
+        android:label="Prijatelji"
+        tools:layout="@layout/fragment_friends" >
+        <action
+            android:id="@+id/action_friendsFragment_to_friendProfileFragment"
+            app:destination="@id/friendProfileFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/friendProfileFragment"
+        android:name="com.example.mobilnaaplikacija.fragments.friends.FriendProfileFragment"
+        android:label="Profil prijatelja"
+        tools:layout="@layout/fragment_friend_profile"/>
+    <fragment
+        android:id="@+id/myAllianceFragment"
+        android:name="com.example.mobilnaaplikacija.fragments.alliance.MyAllianceFragment"
+        android:label="Moj savez"
+        tools:layout="@layout/fragment_my_alliance" >
+        <action
+            android:id="@+id/action_myAllianceFragment_to_allianceChatFragment"
+            app:destination="@id/allianceChatFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/allianceChatFragment"
+        android:name="com.example.mobilnaaplikacija.fragments.alliance.AllianceChatFragment"
+        android:label="Savez Chat"
+        tools:layout="@layout/fragment_alliance_chat" />
     <fragment
         android:id="@+id/addTaskFragment"
         android:name="com.example.mobilnaaplikacija.fragments.AddTaskFragment"

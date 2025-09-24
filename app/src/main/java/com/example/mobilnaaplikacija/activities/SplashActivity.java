@@ -1,11 +1,10 @@
-package com.example.mobilnaaplikacija;
+package com.example.mobilnaaplikacija.activities;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
 import android.os.Bundle;
 
-import com.example.mobilnaaplikacija.MainActivity;
 import com.example.mobilnaaplikacija.R;
 
 import java.util.Timer;

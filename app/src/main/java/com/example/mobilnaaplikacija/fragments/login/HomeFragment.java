@@ -1,7 +1,8 @@
-package com.example.mobilnaaplikacija.fragments;
+package com.example.mobilnaaplikacija.fragments.login;
 
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,12 +17,14 @@ import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.NavOptions;
 
-import com.example.mobilnaaplikacija.MainActivity;
+import com.example.mobilnaaplikacija.activities.MainActivity;
 import com.example.mobilnaaplikacija.R;
 import com.example.mobilnaaplikacija.databinding.FragmentHomeBinding;
 import com.example.mobilnaaplikacija.services.UserService;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.messaging.FirebaseMessaging;
 
 public class HomeFragment extends Fragment {
 
@@ -62,8 +65,35 @@ public class HomeFragment extends Fragment {
                     FirebaseUser fbUser = mAuth.getCurrentUser();
                     if (fbUser != null) {
                         // Promeni meni drawera na logged_in verziju
+                        // 🔹 Dohvati FCM token
+                        FirebaseMessaging.getInstance().getToken()
+                                .addOnCompleteListener(task -> {
+                                    if (task.isSuccessful()) {
+                                        String token = task.getResult();
+                                        // 🔹 Snimi token u Firestore pod user dokument
+                                        FirebaseFirestore.getInstance()
+                                                .collection("users")
+                                                .document(fbUser.getUid())
+                                                .update("fcmToken", token)
+                                                .addOnSuccessListener(aVoid -> {
+                                                    Log.d("FCM", "Token sačuvan: " + token);
+                                                })
+                                                .addOnFailureListener(e -> {
+                                                    Log.e("FCM", "Greška pri čuvanju tokena", e);
+                                                });
+                                    } else {
+                                        Log.w("FCM", "Nisam uspeo da dobijem token", task.getException());
+                                    }
+                                });
+
+
+
+
                         MainActivity activity = (MainActivity) getActivity();
                         if (activity != null) {
+                            activity.listenForFriendRequests();
+                            activity.listenForAllianceInvites();
+                            activity.listenForNotifications();
                             activity.setMainDrawer();
                             activity.updateDrawerHeader();
                         }

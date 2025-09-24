@@ -1,4 +1,4 @@
-package com.example.mobilnaaplikacija.fragments;
+package com.example.mobilnaaplikacija.fragments.user;
 
 import android.graphics.Color;
 import android.os.Bundle;
