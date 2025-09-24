@@ -77,8 +77,6 @@ public class TaskService {
     }
 
     public Task autoUpdateStatus (Task task) {
-        if (task.getStatus() == StatusType.AKTIVAN) return task;
-
         long now = System.currentTimeMillis();
         long threeDaysMills = 3L * 24 * 60 * 60 * 1000;
         if (now - threeDaysMills > task.getEndMillis()) {

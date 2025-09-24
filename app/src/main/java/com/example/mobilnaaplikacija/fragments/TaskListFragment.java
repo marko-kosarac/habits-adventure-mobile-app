@@ -165,6 +165,16 @@ public class TaskListFragment extends Fragment implements RecyclerViewInterface 
 
     public void getTasks(){
         List<Task> filtered = applyFilters();
+
+        List<Task> updated = new ArrayList<>();
+        for (Task t : filtered) {
+            Task updatedTask = taskService.autoUpdateStatus(t);
+            if (!updatedTask.getStatus().equals(t.getStatus())) {
+                taskService.update(updatedTask); // persist to DB if changed
+            }
+            updated.add(updatedTask);
+        }
+
         adapter.updateTasks(filtered);
         Log.d("RecyclerDebug", "Adapter items after setTasks: " + adapter.getItemCount()); // 👈 add here
         decorateCalendarWithTasks();
