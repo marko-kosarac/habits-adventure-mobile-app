@@ -96,11 +96,12 @@ public class AddEditTaskFragment extends DialogFragment {
 
         setupDateTimePickers();
         setupFrequency();
-        if (taskToUpdate != null  && taskToUpdate.getStatus() != StatusType.OTKAZAN && taskToUpdate.getStatus() != StatusType.NEURAĐEN) {
+        if (taskToUpdate != null  && (taskToUpdate.getStatus() == StatusType.OTKAZAN || taskToUpdate.getStatus() == StatusType.NEURAĐEN)) {
+            binding.btnSaveTask.setVisibility(View.GONE);
+        } else{
             binding.btnSaveTask.setVisibility(View.VISIBLE);
             setupSaveTaskButton();
-        } else
-            binding.btnSaveTask.setVisibility(View.GONE);
+        }
     }
 
     private void parseMillisToDateTime(Task task) {
