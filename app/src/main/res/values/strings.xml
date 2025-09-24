@@ -43,7 +43,9 @@
     <string name="task_not_repeatable">Ne ponavlja se</string>
     <string name="task_repeatable">Ponavlja se</string>
     <string name="task_start">Počinje</string>
+    <string name="task_start_time">Od</string>
     <string name="task_end">Završava</string>
+    <string name="task_end_time">Do</string>
     <string name="task_recurring_number">Broj ponavljanja</string>
     <string name="detail_name">Naziv:</string>
     <string name="detail_description">Opis:</string>

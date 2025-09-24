@@ -15,7 +15,7 @@ import android.widget.DatePicker;
 import android.widget.Toast;
 
 import com.example.mobilnaaplikacija.R;
-import com.example.mobilnaaplikacija.databinding.FragmentAddTaskBinding;
+import com.example.mobilnaaplikacija.databinding.FragmentAddEditTaskBinding;
 import com.example.mobilnaaplikacija.model.DifficultyType;
 import com.example.mobilnaaplikacija.model.FrequencyType;
 import com.example.mobilnaaplikacija.model.ImportanceType;
@@ -33,7 +33,7 @@ import java.util.Locale;
 
 public class AddEditTaskFragment extends DialogFragment {
 
-    private FragmentAddTaskBinding binding;
+    private FragmentAddEditTaskBinding binding;
     private TaskService taskService;
     private UserService userService;
     private boolean isEditing, areDatesValid;
@@ -53,7 +53,7 @@ public class AddEditTaskFragment extends DialogFragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        binding = FragmentAddTaskBinding.inflate(inflater, container, false);
+        binding = FragmentAddEditTaskBinding.inflate(inflater, container, false);
         return binding.getRoot();
     }
 
