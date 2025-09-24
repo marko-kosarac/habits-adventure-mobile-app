@@ -96,7 +96,7 @@ public class AddEditTaskFragment extends DialogFragment {
 
         setupDateTimePickers();
         setupFrequency();
-        if (taskToUpdate.getStatus() != StatusType.OTKAZAN) {
+        if (taskToUpdate != null  && taskToUpdate.getStatus() != StatusType.OTKAZAN && taskToUpdate.getStatus() != StatusType.NEURAĐEN) {
             binding.btnSaveTask.setVisibility(View.VISIBLE);
             setupSaveTaskButton();
         } else

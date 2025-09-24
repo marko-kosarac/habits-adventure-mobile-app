@@ -42,10 +42,10 @@ public class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapter.TasksV
         holder.category.setText(task.getName()); // TODO : retrieve category by id
         holder.isDone.setChecked(task.getStatus() == StatusType.URAĐEN);
 
-        if (task.getStatus() == StatusType.OTKAZAN) {
-            holder.editButton.setVisibility(View.GONE);
-        } else {
+        if (task.getStatus() == StatusType.OTKAZAN || task.getStatus() == StatusType.NEURAĐEN) {
             holder.editButton.setVisibility(View.INVISIBLE);
+        } else {
+            holder.editButton.setVisibility(View.VISIBLE);
         }
     }
 

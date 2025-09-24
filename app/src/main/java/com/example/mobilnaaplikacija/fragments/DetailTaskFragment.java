@@ -55,6 +55,9 @@ public class DetailTaskFragment extends DialogFragment {
             binding.tvTaskRecurringUnit.setText(selectedTask.getUnit() == null ? "" : selectedTask.getUnit().getDisplayName());
             binding.tvTaskDifficulty.setText(selectedTask.getDifficulty().getDisplayName());
             binding.tvTaskImportance.setText(selectedTask.getImportance().getDisplayName());
+
+            if (selectedTask.getStatus() == StatusType.OTKAZAN || selectedTask.getStatus() == StatusType.NEURAĐEN)
+                binding.btnEditTask.setVisibility(View.GONE);
         }
 
         binding.btnEditTask.setOnClickListener(v -> {
