@@ -11,6 +11,7 @@ import androidx.fragment.app.DialogFragment;
 
 import com.example.mobilnaaplikacija.databinding.FragmentDetailTaskBinding;
 import com.example.mobilnaaplikacija.model.FrequencyType;
+import com.example.mobilnaaplikacija.model.StatusType;
 import com.example.mobilnaaplikacija.model.Task;
 
 import java.text.SimpleDateFormat;
@@ -49,6 +50,7 @@ public class DetailTaskFragment extends DialogFragment {
             binding.tvTaskName.setText(selectedTask.getName());
             binding.tvTaskDescription.setText(selectedTask.getDescription());
             binding.tvTaskCategory.setText(selectedTask.getName()); //TODO category
+            binding.tvTaskStatus.setText(selectedTask.getStatus() == null ? "" : selectedTask.getStatus().getDisplayName());
             parseMillisToDateTime(selectedTask);
             binding.recurringFields.setVisibility(selectedTask.getFrequency() == FrequencyType.PONAVLJAJUCI ? View.VISIBLE : View.GONE);
             binding.tvTaskRecurringNumber.setText(String.valueOf(selectedTask.getInterval()));
