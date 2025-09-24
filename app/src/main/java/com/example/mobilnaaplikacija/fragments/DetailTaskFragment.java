@@ -76,15 +76,15 @@ public class DetailTaskFragment extends DialogFragment {
         SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm", Locale.getDefault());
 
         if (task.getStartMillis() != null) {
-            Date dateTime = new Date(task.getStartMillis());
-            binding.tvTaskStartDate.setText(dateFormat.format(dateTime));
-            binding.tvTaskStartTime.setText(timeFormat.format(dateTime));
+            Date startDateTime = new Date(task.getStartMillis());
+            binding.tvTaskStartDate.setText(dateFormat.format(startDateTime));
+            binding.tvTaskStartTime.setText(timeFormat.format(startDateTime));
         }
 
         if (task.getEndMillis() != null) {
-            Date endDate = new Date(task.getEndMillis());
-            binding.tvTaskEndDate.setText(dateFormat.format(endDate));
-            binding.tvTaskEndTime.setText(timeFormat.format(endDate));
+            Date endDateTime = new Date(task.getEndMillis());
+            binding.tvTaskEndDate.setText(dateFormat.format(endDateTime));
+            binding.tvTaskEndTime.setText(timeFormat.format(endDateTime));
         }
     }
 

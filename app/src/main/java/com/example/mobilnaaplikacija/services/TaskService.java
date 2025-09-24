@@ -106,4 +106,19 @@ public class TaskService {
         }
         return filteredTasks;
     }
+
+    public Long copyDateButKeepTime(Long sourceDateMillis, Long targetDateMillis) {
+        Calendar source = Calendar.getInstance();
+        source.setTimeInMillis(sourceDateMillis);
+
+        Calendar target = Calendar.getInstance();
+        target.setTimeInMillis(targetDateMillis);
+
+        source.set(Calendar.YEAR, target.get(Calendar.YEAR));
+        source.set(Calendar.MONTH, target.get(Calendar.MONTH));
+        source.set(Calendar.DAY_OF_MONTH, target.get(Calendar.DAY_OF_MONTH));
+
+        return source.getTimeInMillis();
+    }
+
 }

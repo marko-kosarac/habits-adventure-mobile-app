@@ -239,12 +239,22 @@ public class AddEditTaskFragment extends DialogFragment {
 
 
             if (binding.rbOneTime.isChecked()) {
-                // If non repeating and start, then start and end equal
+                //Jednokratab => start = end
                 if (isStartDate) {
+                    if (endMillis != -1L) {
+                        endMillis = taskService.copyDateButKeepTime(endMillis, startMillis);
+                    } else {
+                        endMillis = startMillis;
+                    }
                     binding.etEndDate.setText(date);
                     Toast.makeText(requireContext(), "Kraj je postavljen na isti datum.", Toast.LENGTH_LONG).show();
-                } else if (!binding.etEndDate.getText().toString().isEmpty()) {
-                    binding.etStartDate.setText(date);
+                } else {
+                    if (startMillis != -1) {
+                        startMillis = taskService.copyDateButKeepTime(startMillis, endMillis);
+                    } else {
+                        startMillis = endMillis;
+                    }
+                    binding.etStartDate.setText(binding.etEndDate.getText().toString());
                     Toast.makeText(requireContext(), "Početak je postavljen na isti datum.", Toast.LENGTH_LONG).show();
                 }
             }
@@ -399,13 +409,15 @@ public class AddEditTaskFragment extends DialogFragment {
             }
             if (isEditing) {
                 String statusError = taskService.isStatusValid(binding.spinnerStatus.getSelectedItem().toString(), startMillis, endMillis);
-                showError(statusError);
-                return;
+                if (statusError != null) {
+                    showError(statusError);
+                    return;
+                }
             }
 
             isTimeValid = taskService.isTimeValid(startMillis, endMillis);
             if (!isTimeValid) {
-                showError("Vrijeme završetka mora biti prije početka!");
+                showError("Vrijeme završetka mora biti posle početka!");
                 return;
             }
 
