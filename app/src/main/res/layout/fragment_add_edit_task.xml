@@ -91,19 +91,20 @@
                 <!-- Task start date -->
                 <EditText
                     android:id="@+id/etStartDate"
-                    android:layout_width="130dp"
+                    android:layout_width="125dp"
                     android:layout_height="wrap_content"
                     android:inputType="date"
                     android:hint="@string/task_start"
+                    android:textAlignment="center"
                     android:layout_marginEnd="20dp"/>
                 <!-- Task end date -->
                 <EditText
                     android:id="@+id/etEndDate"
-                    android:layout_width="130dp"
+                    android:layout_width="125dp"
                     android:layout_height="wrap_content"
                     android:inputType="date"
-                    android:hint="@string/task_end"
-                    android:layout_marginEnd="20dp"/>
+                    android:textAlignment="center"
+                    android:hint="@string/task_end"/>
             </LinearLayout>
 
             <LinearLayout
@@ -115,16 +116,19 @@
                 <!-- Task start time -->
                 <EditText
                     android:id="@+id/etStartTime"
-                    android:layout_width="130dp"
+                    android:layout_width="125dp"
                     android:layout_height="wrap_content"
                     android:inputType="date"
-                    android:hint="@string/task_start_time"/>
+                    android:hint="@string/task_start_time"
+                    android:textAlignment="center"
+                    android:layout_marginEnd="20dp"/>
                 <!-- Task end time -->
                 <EditText
                     android:id="@+id/etEndTime"
-                    android:layout_width="130dp"
+                    android:layout_width="125dp"
                     android:layout_height="wrap_content"
                     android:inputType="date"
+                    android:textAlignment="center"
                     android:hint="@string/task_end_time"/>
             </LinearLayout>
 
@@ -138,9 +142,9 @@
                 android:layout_marginBottom="16dp">
                 <RadioButton
                     android:id="@+id/rbOneTime"
-                    android:layout_width="130dp"
+                    android:layout_width="140dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginEnd="20dp"
+                    android:layout_marginEnd="17dp"
                     android:text="@string/task_not_repeatable"/>
                 <RadioButton
                     android:id="@+id/rbRepeat"
@@ -160,11 +164,12 @@
                 <!-- Task interval -->
                 <EditText
                     android:id="@+id/etReccuringNumber"
-                    android:layout_width="150dp"
+                    android:layout_width="90dp"
                     android:layout_height="wrap_content"
                     android:inputType="number"
                     android:layout_marginStart="3dp"
-                    android:layout_marginEnd="7dp"
+                    android:layout_marginEnd="17dp"
+                    android:textAlignment="center"
                     android:hint="@string/task_recurring_number"/>
                 <!-- Task unit -->
                 <Spinner
