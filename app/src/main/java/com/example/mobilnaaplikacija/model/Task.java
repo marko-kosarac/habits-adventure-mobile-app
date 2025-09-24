@@ -5,6 +5,8 @@ import android.os.Parcelable;
 
 import androidx.annotation.NonNull;
 
+import java.time.LocalTime;
+
 public class Task implements Parcelable {
     public String id;
     private String userId;
@@ -12,8 +14,8 @@ public class Task implements Parcelable {
     private String description;
     private String categoryId;
     private FrequencyType frequency;
-    private String startDate;
-    private String endDate;
+    private long startMillis;
+    private long endMillis;
     private Integer interval;
     private UnitType unit;
     private DifficultyType difficulty;
@@ -22,14 +24,14 @@ public class Task implements Parcelable {
 
     public Task() {}
 
-    public Task(String userId, String name, String description, String categoryId, FrequencyType frequency, String startDate, String endDate, Integer interval, UnitType unit, DifficultyType difficulty, ImportanceType importance, StatusType status) {
+    public Task(String userId, String name, String description, String categoryId, FrequencyType frequency, long startMillis, long endMillis, Integer interval, UnitType unit, DifficultyType difficulty, ImportanceType importance, StatusType status) {
         this.userId = userId;
         this.name = name;
         this.description = description;
         this.categoryId = categoryId;
         this.frequency = frequency;
-        this.startDate = startDate;
-        this.endDate = endDate;
+        this.startMillis = startMillis;
+        this.endMillis = endMillis;
         this.interval = interval;
         this.unit = unit;
         this.difficulty = difficulty;
@@ -37,15 +39,15 @@ public class Task implements Parcelable {
         this.status = status;
     }
 
-    public Task(String id, String userId, String name, String description, String categoryId, FrequencyType frequency, String startDate, String endDate, Integer interval, UnitType unit, DifficultyType difficulty, ImportanceType importance, StatusType status) {
+    public Task(String id, String userId, String name, String description, String categoryId, FrequencyType frequency, long startMillis, long endMillis, Integer interval, UnitType unit, DifficultyType difficulty, ImportanceType importance, StatusType status) {
         this.id = id;
         this.userId = userId;
         this.name = name;
         this.description = description;
         this.categoryId = categoryId;
         this.frequency = frequency;
-        this.startDate = startDate;
-        this.endDate = endDate;
+        this.startMillis = startMillis;
+        this.endMillis = endMillis;
         this.interval = interval;
         this.unit = unit;
         this.difficulty = difficulty;
@@ -61,8 +63,8 @@ public class Task implements Parcelable {
         categoryId = in.readString();
         String freqName = in.readString();
         frequency = freqName != null ? FrequencyType.valueOf(freqName) : null;
-        startDate = in.readString();
-        endDate = in.readString();
+        startMillis = in.readLong();
+        endMillis = in.readLong();
         interval = in.readInt();
         String unitName = in.readString();
         unit = unitName != null ? UnitType.valueOf(unitName) : null;
@@ -92,11 +94,17 @@ public class Task implements Parcelable {
     public FrequencyType getFrequency() { return frequency; }
     public void setFrequency(FrequencyType frequency) { this.frequency = frequency; }
 
-    public String getStartDate() { return startDate; }
-    public void setStartDate(String startDate) { this.startDate = startDate; }
+    public long getEndMillis() { return endMillis; }
 
-    public String getEndDate() { return endDate; }
-    public void setEndDate(String endDate) { this.endDate = endDate; }
+    public void setEndMillis(long endMillis) { this.endMillis = endMillis; }
+
+    public long getStartMillis() {
+        return startMillis;
+    }
+
+    public void setStartMillis(long startMillis) {
+        this.startMillis = startMillis;
+    }
 
     public Integer getInterval() { return interval; }
     public void setInterval(Integer interval) { this.interval = interval; }
@@ -124,8 +132,6 @@ public class Task implements Parcelable {
         parcel.writeString(description);
         parcel.writeString(categoryId != null ? categoryId : "-1");
         parcel.writeString(frequency != null ? frequency.name() : null);
-        parcel.writeString(startDate);
-        parcel.writeString(endDate);
         parcel.writeInt(interval != null ? interval : 0);
         parcel.writeString(unit != null ? unit.name() : null);
         parcel.writeString(difficulty != null ? difficulty.name() : null);
