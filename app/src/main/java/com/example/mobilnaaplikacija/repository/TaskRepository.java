@@ -30,8 +30,8 @@ public class TaskRepository {
         values.put(SQLiteHelper.COLUMN_TASK_DESCRIPTION, task.getDescription());
         values.put(SQLiteHelper.COLUMN_TASK_CATEGORY_ID, task.getCategoryId());
         values.put(SQLiteHelper.COLUMN_FREQUENCY, task.getFrequency().name());
-        values.put(SQLiteHelper.COLUMN_START_DATE, task.getStartDate());
-        values.put(SQLiteHelper.COLUMN_END_DATE, task.getEndDate());
+        values.put(SQLiteHelper.COLUMN_START_MILLIS, task.getStartMillis());
+        values.put(SQLiteHelper.COLUMN_END_MILLIS, task.getEndMillis());
         values.put(SQLiteHelper.COLUMN_INTERVAL, task.getInterval());
         values.put(SQLiteHelper.COLUMN_UNIT, task.getUnit() != null ? task.getUnit().name() : null);
         values.put(SQLiteHelper.COLUMN_DIFFICULTY, task.getDifficulty().name());
@@ -56,8 +56,8 @@ public class TaskRepository {
         values.put(SQLiteHelper.COLUMN_TASK_DESCRIPTION, task.getDescription());
         values.put(SQLiteHelper.COLUMN_TASK_CATEGORY_ID, task.getCategoryId());
         values.put(SQLiteHelper.COLUMN_FREQUENCY, task.getFrequency().name());
-        values.put(SQLiteHelper.COLUMN_START_DATE, task.getStartDate());
-        values.put(SQLiteHelper.COLUMN_END_DATE, task.getEndDate());
+        values.put(SQLiteHelper.COLUMN_START_MILLIS, task.getStartMillis());
+        values.put(SQLiteHelper.COLUMN_END_MILLIS, task.getEndMillis());
         values.put(SQLiteHelper.COLUMN_INTERVAL, task.getInterval());
         values.put(SQLiteHelper.COLUMN_UNIT, task.getUnit() != null ? task.getUnit().name() : null);
         values.put(SQLiteHelper.COLUMN_DIFFICULTY, task.getDifficulty().name());
@@ -89,8 +89,8 @@ public class TaskRepository {
                 task.setDescription(cursor.getString(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_TASK_DESCRIPTION)));
                 task.setCategoryId(cursor.getString(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_TASK_CATEGORY_ID)));
                 task.setFrequency(FrequencyType.valueOf(cursor.getString(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_FREQUENCY))));
-                task.setStartDate(cursor.getString(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_START_DATE)));
-                task.setEndDate(cursor.getString(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_END_DATE)));
+                task.setStartMillis(cursor.getLong(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_START_MILLIS)));
+                task.setEndMillis(cursor.getLong(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_END_MILLIS)));
                 task.setInterval(cursor.getInt(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_INTERVAL)));
                 int unitIndex = cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_UNIT);
                 String unitStr = cursor.getString(unitIndex);
