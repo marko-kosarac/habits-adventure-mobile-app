@@ -82,15 +82,12 @@ public class AddEditTaskFragment extends DialogFragment {
             binding.rbOneTime.setChecked(taskToUpdate.getFrequency() == FrequencyType.JEDNOKRATAN);
             binding.rbRepeat.setChecked(taskToUpdate.getFrequency() == FrequencyType.PONAVLJAJUCI);
             binding.spinnerStatus.setSelection((StatusType.valueOf(taskToUpdate.getStatus().name()).ordinal()));
-            if(taskToUpdate.getStatus() == StatusType.URAĐEN)
-                binding.spinnerStatus.setEnabled(false);
             parseMillisToDateTime(taskToUpdate);
             binding.etReccuringNumber.setText(taskToUpdate.getInterval() == null ? "0" : String.valueOf(taskToUpdate.getInterval()));
             binding.spinnerRecurringUnit.setSelection(taskToUpdate.getUnit() == null ? -1 : UnitType.valueOf(taskToUpdate.getUnit().name()).ordinal());
             binding.spinnerDifficulty.setSelection((DifficultyType.valueOf(taskToUpdate.getDifficulty().name()).ordinal()));
             binding.spinnerImportance.setSelection((ImportanceType.valueOf(taskToUpdate.getImportance().name()).ordinal()));
             setupRemoveTaskButton();
-            binding.btnRemoveTask.setVisibility(View.VISIBLE);
             setupStatusSpinner(taskToUpdate);
         }
         else {
@@ -99,7 +96,11 @@ public class AddEditTaskFragment extends DialogFragment {
 
         setupDateTimePickers();
         setupFrequency();
-        setupSaveTaskButton();
+        if (taskToUpdate.getStatus() != StatusType.OTKAZAN) {
+            binding.btnSaveTask.setVisibility(View.VISIBLE);
+            setupSaveTaskButton();
+        } else
+            binding.btnSaveTask.setVisibility(View.GONE);
     }
 
     private void parseMillisToDateTime(Task task) {
@@ -140,43 +141,21 @@ public class AddEditTaskFragment extends DialogFragment {
     }
 
     private void setupStatusSpinner (Task task) {
+        task = taskService.autoUpdateStatus(task);
         ArrayList<StatusType> possibleStatuses = new ArrayList<>();
-        boolean isRepeating = task.getFrequency() == FrequencyType.PONAVLJAJUCI;
+        StatusType current = task.getStatus();
 
-        if (task.getStatus() != StatusType.URAĐEN) {
-            try {
-                Long startMillis = task.getStartMillis();
-                Long endMillis = task.getEndMillis();
-
-                if (startMillis == null || endMillis == null) return;
-
-                Date startDate = new Date(startMillis);
-                Date endDate = new Date(endMillis);
-
-                if (task.getStatus() == StatusType.AKTIVAN) {
-                    possibleStatuses.add(StatusType.AKTIVAN);
-                    possibleStatuses.add(StatusType.URAĐEN);
-                    possibleStatuses.add(StatusType.OTKAZAN);
-                    if (task.getFrequency() == FrequencyType.PONAVLJAJUCI) {
-                        possibleStatuses.add(StatusType.PAUZIRAN);
-                    }
-                } else if (isRepeating) {
-                    possibleStatuses.add(StatusType.AKTIVAN);
-                }
-
-                long difference = (new Date()).getTime() - endDate.getTime();
-                long differenceInDays = difference / (1000 * 60 * 60 * 24);
-                if (differenceInDays > 3) {
-                    possibleStatuses.add(StatusType.NEURAĐEN); // TODO Set status to NEURADJEN
-                }
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-
-            ArrayAdapter<StatusType> statusAdapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_spinner_dropdown_item, possibleStatuses);
-            statusAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-            binding.spinnerStatus.setAdapter(statusAdapter);
+        for (StatusType status : StatusType.values()) {
+            if (taskService.canChangeStatus(task, status) || status == current)
+                possibleStatuses.add(status);
         }
+
+        ArrayAdapter<StatusType> statusAdapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_spinner_dropdown_item, possibleStatuses);
+        statusAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        binding.spinnerStatus.setAdapter(statusAdapter);
+
+        if (current == StatusType.URAĐEN || current == StatusType.NEURAĐEN || current == StatusType.OTKAZAN)
+            binding.spinnerStatus.setEnabled(false);
     }
 
     private void setupDateTimePickers(){
@@ -259,7 +238,7 @@ public class AddEditTaskFragment extends DialogFragment {
                 }
             }
 
-            //Start and end picked, but changed start
+            //Start i end izabrani, a ponovo se promijeni izbor
             if (!binding.etStartDate.getText().toString().isEmpty()
                     && !binding.etEndDate.getText().toString().isEmpty()) {
                 String startStr = binding.etStartDate.getText().toString();
@@ -292,7 +271,7 @@ public class AddEditTaskFragment extends DialogFragment {
         long today = System.currentTimeMillis() - 1000;
         datePickerDialog.getDatePicker().setMinDate(today);
 
-        //Prevent choosing older than start date
+        //Ne moze datum prije startnog da bira
         if (!isStartDate && !binding.etStartDate.getText().toString().isEmpty()) {
            try {
                String[] partsOfStart = binding.etStartDate.getText().toString().split("/");
@@ -367,16 +346,20 @@ public class AddEditTaskFragment extends DialogFragment {
     }
 
     private void setupRemoveTaskButton(){
-        binding.btnRemoveTask.setOnClickListener(view -> {
+        if (taskToUpdate.getStatus() != StatusType.OTKAZAN) {
+            binding.btnRemoveTask.setVisibility(View.VISIBLE);
+            binding.btnRemoveTask.setOnClickListener(view -> {
             boolean removed = taskService.deleteById(taskToUpdate.getId());
             if (removed)
                 Toast.makeText(requireContext(), "Zadatak izbrisan!", Toast.LENGTH_SHORT).show();
             else
                 Toast.makeText(requireContext(), "Greška u brisanju zadatka!", Toast.LENGTH_SHORT).show();
-            sendBackToTaskList(taskToUpdate);
-            dismiss();
-        });
+                sendBackToTaskList(taskToUpdate);
+                dismiss();
+            });
+        }
     }
+
     private void setupSaveTaskButton() {
         binding.btnSaveTask.setOnClickListener(view -> {
             Task task = new Task();

@@ -41,6 +41,12 @@ public class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapter.TasksV
         holder.name.setText(task.getName());
         holder.category.setText(task.getName()); // TODO : retrieve category by id
         holder.isDone.setChecked(task.getStatus() == StatusType.URAĐEN);
+
+        if (task.getStatus() == StatusType.OTKAZAN) {
+            holder.editButton.setVisibility(View.GONE);
+        } else {
+            holder.editButton.setVisibility(View.INVISIBLE);
+        }
     }
 
     @Override

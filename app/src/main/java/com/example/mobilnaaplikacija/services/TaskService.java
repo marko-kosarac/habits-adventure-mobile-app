@@ -21,6 +21,23 @@ public class TaskService {
         this.taskRepository = new TaskRepository(new SQLiteHelper(context));
     }
 
+    public Task add(Task task) {
+        return taskRepository.add(task);
+    }
+
+
+    public Task update(Task task) {
+        return taskRepository.update(task);
+    }
+
+    public List<Task> getTasksByUser(String userId){
+        return taskRepository.getTasksByUser(userId);
+    }
+
+    public Boolean deleteById(String id){
+        return taskRepository.delete(id) > 0;
+    }
+
     public String validate(String name, String category, boolean isRepeating, boolean isOneTime, String startDate, String endDate, String startTime, String endTime, Long startMillis, Long endMillis, String difficultyStr, String importanceStr, String unitStr, String intervalStr) {
         FrequencyType frequency = isRepeating ? FrequencyType.PONAVLJAJUCI :
                 (isOneTime ? FrequencyType.JEDNOKRATAN : null);
@@ -45,6 +62,54 @@ public class TaskService {
         }
 
         return null;
+    }
+
+    public String changeStatus (Task task, StatusType newStatus) {
+        autoUpdateStatus(task);
+
+        if (!canChangeStatus(task, newStatus)) {
+            return "Nevažeća promjena statusa.";
+        }
+
+        task.setStatus(newStatus);
+        taskRepository.update(task);
+        return null;
+    }
+
+    public Task autoUpdateStatus (Task task) {
+        if (task.getStatus() == StatusType.AKTIVAN) return task;
+
+        long now = System.currentTimeMillis();
+        long threeDaysMills = 3L * 24 * 60 * 60 * 1000;
+        if (now - threeDaysMills > task.getEndMillis()) {
+            task.setStatus(StatusType.NEURAĐEN);
+            taskRepository.update(task);
+        }
+        return task;
+    }
+
+    public boolean canChangeStatus(Task task, StatusType newStatus) {
+        StatusType currentStatus = task.getStatus();
+        FrequencyType currentFreq = task.getFrequency();
+
+        if (currentStatus == StatusType.NEURAĐEN || currentStatus == StatusType.OTKAZAN || currentStatus == StatusType.URAĐEN) {
+            return false;
+        }
+
+        switch (currentStatus) {
+            case AKTIVAN:
+                if (newStatus == StatusType.PAUZIRAN && currentFreq == FrequencyType.PONAVLJAJUCI) {
+                    return true;
+                } else if (newStatus == StatusType.URAĐEN && System.currentTimeMillis() >= task.getEndMillis() && task.getEndMillis() != null) {
+                    return true;
+                } else if (newStatus == StatusType.OTKAZAN)
+                    return true;
+                return false;
+            case PAUZIRAN:
+                return newStatus == StatusType.AKTIVAN;
+            default:
+                return false;
+        }
     }
 
     public String isStatusValid (String status, Long start, Long end) {
@@ -77,23 +142,6 @@ public class TaskService {
         return true;
     }
 
-    public Task add(Task task) {
-        return taskRepository.add(task);
-    }
-
-
-    public Task update(Task task) {
-        return taskRepository.update(task);
-    }
-
-    public List<Task> getTasksByUser(String userId){
-        return taskRepository.getTasksByUser(userId);
-    }
-
-    public Boolean deleteById(String id){
-        return taskRepository.delete(id) > 0;
-    }
-
     public ArrayList<Task> filterByFrequency(ArrayList<Task> tasks, @Nullable FrequencyType type) {
         if (type == null)
             return tasks;
@@ -120,5 +168,4 @@ public class TaskService {
 
         return source.getTimeInMillis();
     }
-
 }
