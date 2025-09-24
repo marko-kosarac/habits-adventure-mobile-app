@@ -229,7 +229,7 @@ public class TaskListFragment extends Fragment implements RecyclerViewInterface 
 
         if(task.getFrequency() == FrequencyType.JEDNOKRATAN) {
             try {
-                Date date = fmt.parse(task.getStartDate());
+                Date date = parseMillisToDate(task.getStartMillis());
                 if(date != null) {
                     cal.setTime(date);
                     dates.add(fmt.format(cal.getTime()));
@@ -239,8 +239,8 @@ public class TaskListFragment extends Fragment implements RecyclerViewInterface 
             }
         } else {
             try {
-                Date startDate = fmt.parse(task.getStartDate());
-                Date endDate = fmt.parse(task.getEndDate());
+                Date startDate = parseMillisToDate(task.getStartMillis());
+                Date endDate = parseMillisToDate(task.getEndMillis());
                 if (startDate == null || endDate == null)
                     return dates;
 
@@ -273,7 +273,7 @@ public class TaskListFragment extends Fragment implements RecyclerViewInterface 
         Map<String, List<Task>> tasksPerDate = new HashMap<>();
 
         for (Task task : tasks) {
-            Log.d("CalendarDebug", "Task: " + task.getName() + " | " + task.getStartDate() + " -> " + task.getEndDate());
+            Log.d("CalendarDebug", "Task: " + task.getName() + " | " + parseMillisToDate(task.getStartMillis()) + " -> " + parseMillisToDate(task.getEndMillis()));
             List<String> allDates = getTaskOcurringDates(task);
 
             for (String date : allDates) {
@@ -315,21 +315,11 @@ public class TaskListFragment extends Fragment implements RecyclerViewInterface 
         binding.calendarView.setCalendarDays(calendarDays);
     }
 
-    private Date parseDate(String dateStr) {
-        if (dateStr == null) return null;
-        try {
-            SimpleDateFormat fmt = new SimpleDateFormat("d/M/yyyy", Locale.getDefault());
-            fmt.setLenient(false);
-            return fmt.parse(dateStr);
-        } catch (ParseException e) {
-            Log.e("CalendarDebug", "Invalid date: " + dateStr, e);
-            return null;
+    private Date parseMillisToDate(Long millis) {
+        if (millis != null) {
+            return new Date(millis);
         }
-    }
-
-    private String formatDate(Date date) {
-        SimpleDateFormat fmt = new SimpleDateFormat("d/M/yyyy", Locale.getDefault());
-        return fmt.format(date);
+        return null;
     }
 
     public int getCategoryColorInt() {
