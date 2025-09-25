@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:layout_marginTop="16dp"
+    android:padding="16dp">
+
+    <!-- Category name -->
+    <EditText
+        android:id="@+id/etCategoryName"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:inputType="text"
+        android:layout_marginBottom="16dp"
+        android:hint="@string/category_name"/>
+
+    <!-- Category color -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginBottom="16dp">
+
+        <Button
+            android:id="@+id/btnPickColor"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_marginEnd="35dp"
+            android:backgroundTint="@color/colorPrimary"
+            android:text="@string/category_choose_color"/>
+        <TextView
+            android:layout_width="130dp"
+            android:layout_height="35dp"
+            android:layout_marginEnd="10dp"
+            android:textSize="18sp"
+            android:hint="@string/category_color"
+            android:layout_gravity="bottom"/>
+        <Button
+            android:layout_width="33dp"
+            android:layout_height="40dp"
+            android:layout_marginEnd="20dp"
+            android:backgroundTint="@color/lightGray"
+            android:clickable="false"
+            android:enabled="false"
+            app:cornerRadius="50dp"
+            app:strokeWidth="2dp"
+            android:layout_marginStart="15dp"
+            android:layout_gravity="center_vertical"/>
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/btnAddCategory"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginTop="16dp"
+        android:backgroundTint="@color/colorPrimary"
+        android:text="Dodaj kategoriju"/>
+</LinearLayout>
