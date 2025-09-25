@@ -75,9 +75,4 @@
         android:name="com.example.mobilnaaplikacija.fragments.alliance.AllianceChatFragment"
         android:label="Savez Chat"
         tools:layout="@layout/fragment_alliance_chat" />
-    <fragment
-        android:id="@+id/addTaskFragment"
-        android:name="com.example.mobilnaaplikacija.fragments.AddTaskFragment"
-        android:label="Dodaj zadatak"
-        tools:layout="@layout/fragment_add_task" />
 </navigation>
