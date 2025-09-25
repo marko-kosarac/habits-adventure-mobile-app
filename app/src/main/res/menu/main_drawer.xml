@@ -35,6 +35,10 @@
             android:id="@+id/nav_alliance"
             android:icon="@drawable/ic_alliance"
             android:title="Moj savez" />
+        <item
+            android:id="@+id/nav_categories"
+            android:icon="@drawable/ic_palette"
+            android:title="Kategorije" />
     </group>
 
     <!-- Odjava -->

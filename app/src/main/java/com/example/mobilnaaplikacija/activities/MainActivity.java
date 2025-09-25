@@ -135,6 +135,8 @@ public class MainActivity extends AppCompatActivity {
                 navController.navigate(R.id.friendsFragment);
             } else if(id == R.id.nav_alliance){
                 navController.navigate(R.id.myAllianceFragment);
+            } else if (id == R.id.nav_categories) {
+                navController.navigate(R.id.categoriesFragment);
             } else if (id == R.id.nav_logout) {
                 FirebaseAuth.getInstance().signOut();
 
