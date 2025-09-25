@@ -5,7 +5,21 @@
     android:layout_height="wrap_content"
     android:orientation="vertical"
     android:layout_marginTop="16dp"
-    android:padding="16dp">
+    android:paddingVertical="16dp"
+    android:paddingHorizontal="32dp">
+
+    <!-- Title -->
+    <TextView
+        android:id="@+id/tvAddCategoryTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="24dp"
+        android:layout_marginBottom="16dp"
+        android:text="@string/add_category_title"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:textColor="@color/yellowAccent" />
 
     <!-- Category name -->
     <EditText
@@ -13,7 +27,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:inputType="text"
-        android:layout_marginBottom="16dp"
+        android:layout_marginBottom="10dp"
         android:hint="@string/category_name"/>
 
     <!-- Category color -->
@@ -21,27 +35,25 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:layout_marginBottom="16dp">
+        android:layout_marginBottom="10dp">
 
         <Button
             android:id="@+id/btnPickColor"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
-            android:layout_marginEnd="35dp"
+            android:layout_marginEnd="25dp"
             android:backgroundTint="@color/colorPrimary"
             android:text="@string/category_choose_color"/>
         <TextView
-            android:layout_width="130dp"
+            android:layout_width="110dp"
             android:layout_height="35dp"
-            android:layout_marginEnd="10dp"
             android:textSize="18sp"
             android:hint="@string/category_color"
             android:layout_gravity="bottom"/>
         <Button
             android:layout_width="33dp"
             android:layout_height="40dp"
-            android:layout_marginEnd="20dp"
             android:backgroundTint="@color/lightGray"
             android:clickable="false"
             android:enabled="false"
@@ -57,6 +69,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:layout_marginTop="16dp"
+        android:layout_marginBottom="24dp"
         android:backgroundTint="@color/colorPrimary"
-        android:text="Dodaj kategoriju"/>
+        android:text="@string/save_category"/>
 </LinearLayout>
