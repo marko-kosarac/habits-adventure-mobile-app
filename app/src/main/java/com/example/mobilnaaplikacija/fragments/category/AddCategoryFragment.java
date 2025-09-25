@@ -1,21 +1,27 @@
 package com.example.mobilnaaplikacija.fragments.category;
 
+import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
-import androidx.fragment.app.Fragment;
 
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import com.example.mobilnaaplikacija.R;
 import com.example.mobilnaaplikacija.databinding.FragmentAddCategoryBinding;
 import com.example.mobilnaaplikacija.model.Category;
 import com.example.mobilnaaplikacija.services.CategoryService;
+import com.github.dhaval2404.colorpicker.ColorPickerDialog;
+import com.github.dhaval2404.colorpicker.listener.ColorListener;
+import com.github.dhaval2404.colorpicker.model.ColorShape;
+
+import org.jetbrains.annotations.NotNull;
 
 public class AddCategoryFragment extends DialogFragment {
 
@@ -52,8 +58,23 @@ public class AddCategoryFragment extends DialogFragment {
     }
 
     private void showColorPicker() {
+        String defaultColor = "#000000";
         binding.btnPickColor.setOnClickListener(view -> {
-            //ColorPicker
+            new ColorPickerDialog
+                    .Builder(getContext())
+                    .setTitle("Izaberi boju")
+                    .setColorShape(ColorShape.SQAURE)
+                    .setDefaultColor(R.color.light_gray)
+                    .setPositiveButton("OK")
+                    .setNegativeButton("Otkaži")
+                    .setColorListener(new ColorListener() {
+                        @Override
+                        public void onColorSelected(int color, @NotNull String colorHex) {
+                            pickedColor = color;
+                            binding.btnPickedColor.setBackgroundTintList(ColorStateList.valueOf(pickedColor));
+                        }
+                    })
+                    .show();
         });
     }
 
