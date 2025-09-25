@@ -1,4 +1,4 @@
-package com.example.mobilnaaplikacija.fragments;
+package com.example.mobilnaaplikacija.fragments.task;
 
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
