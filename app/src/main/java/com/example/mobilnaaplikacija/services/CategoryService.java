@@ -18,4 +18,10 @@ public class CategoryService {
     public List<Category> getCategories() {
         return categoryRepository.getCategories();
     }
+
+    public Category add(Category category) {
+        categoryRepository.add(category);
+        return category;
+    }
+
 }

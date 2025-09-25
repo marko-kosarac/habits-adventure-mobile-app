@@ -58,7 +58,6 @@ public class AddCategoryFragment extends DialogFragment {
     }
 
     private void showColorPicker() {
-        String defaultColor = "#000000";
         binding.btnPickColor.setOnClickListener(view -> {
             new ColorPickerDialog
                     .Builder(getContext())
@@ -93,6 +92,7 @@ public class AddCategoryFragment extends DialogFragment {
             category.setName(name);
             categoryService.add(category);
             Toast.makeText(getContext(), "Kategorija dodana!", Toast.LENGTH_SHORT).show();
+
             dismiss();
         });
     }

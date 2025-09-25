@@ -19,19 +19,19 @@ public class Category {
     }
 
     public void setId(String id) {
-        id = id;
+        this.id = id;
     }
 
     public String getName() {
         return name;
     }
-    public void setName(String name) { name = name; }
+    public void setName(String name) { this.name = name; }
 
     public Integer getColor() {
         return color;
     }
 
     public void setColor(Integer color) {
-        color = color;
+        this.color = color;
     }
 }

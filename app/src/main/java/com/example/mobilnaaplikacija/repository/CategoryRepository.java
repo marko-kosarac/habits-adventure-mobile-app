@@ -1,10 +1,14 @@
 package com.example.mobilnaaplikacija.repository;
 
+import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
 import com.example.mobilnaaplikacija.database.SQLiteHelper;
 import com.example.mobilnaaplikacija.model.Category;
+import com.example.mobilnaaplikacija.model.Task;
+
+import org.checkerframework.checker.units.qual.C;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,6 +36,23 @@ public class CategoryRepository {
 
         db.close();
         return categories;
+    }
+
+    public Category add(Category category){
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(SQLiteHelper.COLUMN_CATEGORY_ID, category.getId());
+        values.put(SQLiteHelper.COLUMN_CATEGORY_NAME, category.getName());
+        values.put(SQLiteHelper.COLUMN_CATEGORY_COLOR, category.getColor());
+
+        long rowId = db.insert(SQLiteHelper.TABLE_CATEGORIES, null, values);
+        db.close();
+
+        if (rowId == -1)
+            return null;
+
+        category.setId(String.valueOf(rowId));
+        return category;
     }
 
 }
