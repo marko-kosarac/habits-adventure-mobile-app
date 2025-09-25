@@ -13,8 +13,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
-import com.example.mobilnaaplikacija.R;
-import com.example.mobilnaaplikacija.databinding.FragmentAddCategoryBinding;
+import com.example.mobilnaaplikacija.databinding.DialogAddCategoryBinding;
 import com.example.mobilnaaplikacija.model.Category;
 import com.example.mobilnaaplikacija.services.CategoryService;
 import com.github.dhaval2404.colorpicker.ColorPickerDialog;
@@ -25,7 +24,7 @@ import org.jetbrains.annotations.NotNull;
 
 public class AddCategoryFragment extends DialogFragment {
 
-    private FragmentAddCategoryBinding binding;
+    private DialogAddCategoryBinding binding;
     private CategoryService categoryService;
     private int pickedColor = Color.WHITE;
 
@@ -46,7 +45,7 @@ public class AddCategoryFragment extends DialogFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         categoryService = new CategoryService(getContext());
-        binding = FragmentAddCategoryBinding.inflate(inflater, container, false);
+        binding = DialogAddCategoryBinding.inflate(inflater, container, false);
         return binding.getRoot();
     }
 

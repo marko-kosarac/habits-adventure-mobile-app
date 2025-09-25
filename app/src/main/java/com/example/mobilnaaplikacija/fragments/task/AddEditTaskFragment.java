@@ -19,7 +19,7 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.example.mobilnaaplikacija.R;
-import com.example.mobilnaaplikacija.databinding.FragmentAddEditTaskBinding;
+import com.example.mobilnaaplikacija.databinding.DialogAddEditTaskBinding;
 import com.example.mobilnaaplikacija.fragments.category.AddCategoryFragment;
 import com.example.mobilnaaplikacija.model.DifficultyType;
 import com.example.mobilnaaplikacija.model.FrequencyType;
@@ -38,7 +38,7 @@ import java.util.Locale;
 
 public class AddEditTaskFragment extends DialogFragment {
 
-    private FragmentAddEditTaskBinding binding;
+    private DialogAddEditTaskBinding binding;
     private TaskService taskService;
     private UserService userService;
     private boolean isEditing, areDatesValid, isTimeValid;
@@ -59,7 +59,7 @@ public class AddEditTaskFragment extends DialogFragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        binding = FragmentAddEditTaskBinding.inflate(inflater, container, false);
+        binding = DialogAddEditTaskBinding.inflate(inflater, container, false);
         return binding.getRoot();
     }
 

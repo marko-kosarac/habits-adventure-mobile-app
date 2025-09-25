@@ -9,7 +9,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
 
-import com.example.mobilnaaplikacija.databinding.FragmentDetailTaskBinding;
+import com.example.mobilnaaplikacija.databinding.DialogDetailTaskBinding;
 import com.example.mobilnaaplikacija.model.FrequencyType;
 import com.example.mobilnaaplikacija.model.StatusType;
 import com.example.mobilnaaplikacija.model.Task;
@@ -19,7 +19,7 @@ import java.util.Date;
 import java.util.Locale;
 
 public class DetailTaskFragment extends DialogFragment {
-    private FragmentDetailTaskBinding binding;
+    private DialogDetailTaskBinding binding;
     private Task selectedTask;
 
     @Override
@@ -36,7 +36,7 @@ public class DetailTaskFragment extends DialogFragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        binding = FragmentDetailTaskBinding.inflate(inflater, container, false);
+        binding = DialogDetailTaskBinding.inflate(inflater, container, false);
         return binding.getRoot();
     }
 
