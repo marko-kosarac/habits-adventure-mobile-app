@@ -24,4 +24,20 @@ public class CategoryService {
         return category;
     }
 
+
+    public String validate(String name, int color) {
+        if (name.isEmpty()) return  "Unesi naziv kategorije!";
+        if (color == -1) return "Izaberi boju!";
+        if (isColorTaken(color)) return "Boja je vec zauzeta!";
+        return null;
+    }
+
+    public boolean isColorTaken(int pickedColor) {
+        ArrayList<Category> categories = new ArrayList<>(getCategories());
+        for (Category c: categories) {
+            if (c.getColor()!= null && c.getColor() == pickedColor)
+                return true;
+        }
+        return false;
+    }
 }

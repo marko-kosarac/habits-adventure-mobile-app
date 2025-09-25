@@ -63,7 +63,6 @@ public class AddCategoryFragment extends DialogFragment {
                     .Builder(getContext())
                     .setTitle("Izaberi boju")
                     .setColorShape(ColorShape.SQAURE)
-                    .setDefaultColor(R.color.light_gray)
                     .setPositiveButton("OK")
                     .setNegativeButton("Otkaži")
                     .setColorListener(new ColorListener() {

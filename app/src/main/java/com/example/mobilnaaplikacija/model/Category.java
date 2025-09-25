@@ -9,9 +9,9 @@ public class Category {
     }
 
     public Category(String id, Integer color, String name) {
-        id = id;
-        color = color;
-        name = name;
+        this.id = id;
+        this.color = color;
+        this.name = name;
     }
 
     public String getId() {
@@ -27,9 +27,7 @@ public class Category {
     }
     public void setName(String name) { this.name = name; }
 
-    public Integer getColor() {
-        return color;
-    }
+    public Integer getColor() { return color; }
 
     public void setColor(Integer color) {
         this.color = color;
