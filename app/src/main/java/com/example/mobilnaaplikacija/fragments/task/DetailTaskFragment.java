@@ -10,9 +10,11 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
 
 import com.example.mobilnaaplikacija.databinding.DialogDetailTaskBinding;
+import com.example.mobilnaaplikacija.model.Category;
 import com.example.mobilnaaplikacija.model.FrequencyType;
 import com.example.mobilnaaplikacija.model.StatusType;
 import com.example.mobilnaaplikacija.model.Task;
+import com.example.mobilnaaplikacija.services.CategoryService;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -21,6 +23,7 @@ import java.util.Locale;
 public class DetailTaskFragment extends DialogFragment {
     private DialogDetailTaskBinding binding;
     private Task selectedTask;
+    private CategoryService categoryService;
 
     @Override
     public void onStart() {
@@ -37,6 +40,7 @@ public class DetailTaskFragment extends DialogFragment {
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         binding = DialogDetailTaskBinding.inflate(inflater, container, false);
+        categoryService = new CategoryService(getContext());
         return binding.getRoot();
     }
 
@@ -49,7 +53,9 @@ public class DetailTaskFragment extends DialogFragment {
             selectedTask = getArguments().getParcelable("Task to view");
             binding.tvTaskName.setText(selectedTask.getName());
             binding.tvTaskDescription.setText(selectedTask.getDescription());
-            binding.tvTaskCategory.setText(selectedTask.getName()); //TODO category
+            Category category = categoryService.getCategoryById(selectedTask.getCategoryId());
+            String categoryName = (category == null) ? "Nema kategoriju" : category.getName();
+            binding.tvTaskCategory.setText(categoryName);
             binding.tvTaskStatus.setText(selectedTask.getStatus() == null ? "" : selectedTask.getStatus().getDisplayName());
             parseMillisToDateTime(selectedTask);
             binding.recurringFields.setVisibility(selectedTask.getFrequency() == FrequencyType.PONAVLJAJUCI ? View.VISIBLE : View.GONE);

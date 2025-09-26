@@ -8,7 +8,7 @@ import androidx.annotation.NonNull;
 import java.time.LocalTime;
 
 public class Task implements Parcelable {
-    public String id;
+    private String id;
     private String userId;
     private String name;
     private String description;

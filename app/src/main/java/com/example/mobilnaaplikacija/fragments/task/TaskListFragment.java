@@ -175,7 +175,7 @@ public class TaskListFragment extends Fragment implements RecyclerViewInterface 
             updated.add(updatedTask);
         }
 
-        adapter.updateTasks(filtered);
+        adapter.updateTasks(updated);
         decorateCalendarWithTasks();
     }
 
@@ -307,7 +307,7 @@ public class TaskListFragment extends Fragment implements RecyclerViewInterface 
                 //boje kategorija zadataka tog dana
                 List<Integer> colors = new ArrayList<>();
                 for (Task t : entry.getValue()) {
-                    colors.add(getCategoryColorInt()); // TODO: povuci boju iz kategorije
+                    colors.add(getCategoryColorInt(t));
                 }
 
                 MultiDotDrawable drawable = new MultiDotDrawable(colors);
@@ -329,8 +329,9 @@ public class TaskListFragment extends Fragment implements RecyclerViewInterface 
         return null;
     }
 
-    public int getCategoryColorInt() {
-        return Color.BLUE; // TODO: dobavi boju kategorije
+    public int getCategoryColorInt(Task task) {
+        Category category = categoryService.getCategoryById(task.getCategoryId());
+        return category.getColor();
     }
 
     @Override
