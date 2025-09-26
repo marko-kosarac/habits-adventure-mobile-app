@@ -207,7 +207,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginEnd="32dp"
                     android:backgroundTint="@color/colorPrimary"
-                    android:text="@string/remove_task"
+                    android:text="@string/remove"
                     android:visibility="gone"/>
                 <!-- Add task button -->
                 <Button
@@ -215,7 +215,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:backgroundTint="@color/colorPrimary"
-                    android:text="@string/save_task" />
+                    android:text="@string/save" />
             </LinearLayout>
 
     </LinearLayout>

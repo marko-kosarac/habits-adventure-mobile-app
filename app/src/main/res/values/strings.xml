@@ -33,9 +33,9 @@
 
     <string name="my_tasks">Moji zadaci</string>
     <string name="add_task">Novi zadatak</string>
-    <string name="remove_task">Izbriši</string>
-    <string name="save_task">Sačuvaj</string>
-    <string name="edit_task">Izmijeni</string>
+    <string name="remove">Izbriši</string>
+    <string name="save">Sačuvaj</string>
+    <string name="edit">Izmeni</string>
     <string name="task_name">Naziv zadatka</string>
     <string name="task_category">Kategorija</string>
     <string name="task_description">Opis (opciono)</string>
@@ -53,7 +53,7 @@
     <string name="detail_status">Status:</string>
     <string name="detail_date">Datum:</string>
     <string name="detail_date_dash">-</string>
-    <string name="detail_time">Vrijeme:</string>
+    <string name="detail_time">Vreme:</string>
     <string name="detail_recurring">Ponavljanje zadatka:</string>
     <string name="detail_recurring_number">Broj:</string>
     <string name="detail_recurring_unit">Jedinica:</string>
@@ -96,10 +96,10 @@
 
     <string name="category_name">Naziv kategorije</string>
     <string name="category_color">Boja kategorije</string>
-    <string name="category_chosen_color">Izabrana boja</string>
+    <string name="category_chosen_color">Boja:</string>
     <string name="category_choose_color">Izaberi boju</string>
     <string name="add_category_title">Kreiraj novu kategoriju</string>
-    <string name="save_category">Dodaj kategoriju</string>
+    <string name="categories_title">Kategorije</string>
 
     <string name="lorem_ipsum">
         Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam in scelerisque sem. Mauris
