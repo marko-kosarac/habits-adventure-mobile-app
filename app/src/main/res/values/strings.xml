@@ -36,6 +36,7 @@
     <string name="remove">Izbriši</string>
     <string name="save">Sačuvaj</string>
     <string name="edit">Izmeni</string>
+    <string name="task_edit_title">Izmeni zadatak</string>
     <string name="task_name">Naziv zadatka</string>
     <string name="task_category">Kategorija</string>
     <string name="task_description">Opis (opciono)</string>

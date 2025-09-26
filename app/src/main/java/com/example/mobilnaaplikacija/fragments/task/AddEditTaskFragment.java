@@ -76,7 +76,7 @@ public class AddEditTaskFragment extends DialogFragment {
         if(getArguments() != null && getArguments().containsKey("Task to edit")){
             isEditing = true;
             taskToUpdate = getArguments().getParcelable("Task to edit");
-            binding.tvAddTaskTitle.setText("Izmijeni zadatak");
+            binding.tvAddTaskTitle.setText(R.string.task_edit_title);
             binding.etTaskName.setText(taskToUpdate.getName());
             binding.etTaskDescription.setText(taskToUpdate.getDescription());
             binding.categoryFields.setVisibility(View.GONE);
@@ -270,7 +270,7 @@ public class AddEditTaskFragment extends DialogFragment {
                         return;
 
                     if(endDate.before(startDate)) {
-                        showError("Datum završetka je prije početka!");
+                        showError("Datum završetka je pre početka!");
                         areDatesValid = false;
                     } else
                         areDatesValid = true;
@@ -415,7 +415,7 @@ public class AddEditTaskFragment extends DialogFragment {
 
             isTimeValid = taskService.isTimeValid(startMillis, endMillis);
             if (!isTimeValid) {
-                showError("Vrijeme završetka mora biti posle početka!");
+                showError("Vreme završetka mora biti posle početka!");
                 return;
             }
 
