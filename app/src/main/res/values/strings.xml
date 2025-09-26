@@ -95,7 +95,8 @@
     <string name="material_calendar_negative_button">Odustani</string>
 
     <string name="category_name">Naziv kategorije</string>
-    <string name="category_color">Izabrana boja</string>
+    <string name="category_color">Boja kategorije</string>
+    <string name="category_chosen_color">Izabrana boja</string>
     <string name="category_choose_color">Izaberi boju</string>
     <string name="add_category_title">Kreiraj novu kategoriju</string>
     <string name="save_category">Dodaj kategoriju</string>

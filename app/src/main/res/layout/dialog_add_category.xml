@@ -49,7 +49,7 @@
             android:layout_width="110dp"
             android:layout_height="35dp"
             android:textSize="18sp"
-            android:hint="@string/category_color"
+            android:hint="@string/category_chosen_color"
             android:layout_gravity="bottom"/>
         <Button
             android:id="@+id/btnPickedColor"

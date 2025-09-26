@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/task_card_item"
+    android:layout_width="match_parent"
+    android:layout_height="70dp"
+    app:cardBackgroundColor="@android:color/white"
+    app:cardCornerRadius="12dp"
+    app:cardUseCompatPadding="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
+            <!-- Category color -->
+            <Button
+                android:id="@+id/btnPickedColor"
+                android:layout_width="33dp"
+                android:layout_height="40dp"
+                android:layout_marginStart="15dp"
+                android:layout_gravity="center_vertical|start"                android:clickable="false"
+                android:enabled="false"
+                app:cornerRadius="50dp"
+                app:strokeWidth="2dp"
+                />
+            <!-- Category name -->
+            <TextView
+                android:id="@+id/tvCategoryName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:layout_marginEnd="10dp"
+                android:textSize="18sp"
+                android:hint="@string/category_name"
+                android:layout_gravity="center"/>
+    </LinearLayout>
+        <!-- Edit category -->
+        <ImageButton
+            android:id="@+id/btnEditCategory"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="@null"
+            android:layout_marginEnd="10dp"
+            app:srcCompat="@drawable/ic_edit"
+            android:layout_gravity="center_vertical|end"/>
+
+</androidx.cardview.widget.CardView>
