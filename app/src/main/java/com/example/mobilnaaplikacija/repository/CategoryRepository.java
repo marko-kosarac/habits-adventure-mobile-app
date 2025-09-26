@@ -68,4 +68,31 @@ public class CategoryRepository {
 
         return category;
     }
+
+    public int delete(String id){
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
+        int rows = db.delete(SQLiteHelper.TABLE_CATEGORIES, SQLiteHelper.COLUMN_CATEGORY_ID + " = ?", new String[]{String.valueOf(id)});
+        db.close();
+        return rows;
+    }
+
+    public Category getCategoryById(String id) {
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+        Category category = null;
+
+        Cursor cursor = db.query(
+                SQLiteHelper.TABLE_CATEGORIES, new String[]{"id", "name", "color"}, "id = ?", new String[]{id}, null, null, null);
+
+        if (cursor != null && cursor.moveToFirst()) {
+            category = new Category(
+                    cursor.getString(cursor.getColumnIndexOrThrow("id")),
+                    cursor.getInt(cursor.getColumnIndexOrThrow("color")),
+                    cursor.getString(cursor.getColumnIndexOrThrow("name"))
+            );
+            cursor.close();
+        }
+
+        db.close();
+        return category;
+    }
 }

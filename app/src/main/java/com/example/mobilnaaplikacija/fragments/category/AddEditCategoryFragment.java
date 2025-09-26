@@ -1,5 +1,6 @@
 package com.example.mobilnaaplikacija.fragments.category;
 
+import android.app.AlertDialog;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -17,6 +18,7 @@ import com.example.mobilnaaplikacija.R;
 import com.example.mobilnaaplikacija.databinding.DialogAddEditCategoryBinding;
 import com.example.mobilnaaplikacija.model.Category;
 import com.example.mobilnaaplikacija.services.CategoryService;
+import com.example.mobilnaaplikacija.services.UserService;
 import com.github.dhaval2404.colorpicker.ColorPickerDialog;
 import com.github.dhaval2404.colorpicker.listener.ColorListener;
 import com.github.dhaval2404.colorpicker.model.ColorShape;
@@ -30,6 +32,7 @@ public class AddEditCategoryFragment extends DialogFragment {
     private int pickedColor = Color.WHITE;
     private boolean isEditing;
     private Category categoryToUpdate;
+    private UserService userService;
 
     public AddEditCategoryFragment() {}
 
@@ -48,6 +51,7 @@ public class AddEditCategoryFragment extends DialogFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         categoryService = new CategoryService(getContext());
+        userService = new UserService();
         binding = DialogAddEditCategoryBinding.inflate(inflater, container, false);
         return binding.getRoot();
     }
@@ -128,15 +132,33 @@ public class AddEditCategoryFragment extends DialogFragment {
     }
 
     private void setupRemoveCategoryButton(){
-/*        binding.btnRemoveTask.setOnClickListener(view -> {
-            boolean removed = categoryService.deleteById(categoryToUpdate.getId());
-            if (removed)
-                Toast.makeText(requireContext(), "Kategorija izbrisana!", Toast.LENGTH_SHORT).show();
-            else
-                Toast.makeText(requireContext(), "Greška u brisanju kategorije!", Toast.LENGTH_SHORT).show();
-            sendBackToCategoryList(categoryToUpdate);
-            dismiss();
-        });*/
+        binding.btnRemoveCategory.setVisibility(View.VISIBLE);
+        binding.btnRemoveCategory.setOnClickListener(view -> {
+            String error = categoryService.canBeRemoved(categoryToUpdate, userService.getCurrentUser().getUid());
+            if (error == null) {
+                confirmDeleteCategory(categoryToUpdate);
+            } else {
+                Toast.makeText(requireContext(), error, Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void confirmDeleteCategory(Category category) {
+        new AlertDialog.Builder(requireActivity())
+                .setTitle("Brisanje kategorije")
+                .setMessage("Brisanjem kategorije obrisaćete i sve zadatke u njoj. Da li ste sigurni?")
+                .setPositiveButton("Obriši", (dialog, which) -> {
+                    boolean isRemoved = categoryService.deleteById(categoryToUpdate.getId(), userService.getCurrentUser().getUid());
+                    if (isRemoved) {
+                        Toast.makeText(getActivity(), "Kategorija izbrisana!", Toast.LENGTH_SHORT).show();
+                    } else {
+                        Toast.makeText(getActivity(), "Greška u brisanju kategorije!", Toast.LENGTH_SHORT).show();
+                    }
+                    sendBackToCategoryList(categoryToUpdate);
+                    dismiss();
+                })
+                .setNegativeButton("Otkaži", (dialog, which) -> dialog.dismiss())
+                .show();
     }
 
     @Override

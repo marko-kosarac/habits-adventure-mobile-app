@@ -74,13 +74,29 @@
                 android:text="@string/category_choose_color"/>
         </LinearLayout>
     </LinearLayout>
-    <Button
-        android:id="@+id/btnAddCategory"
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="center"
+        android:orientation="horizontal"
+        android:gravity="center_horizontal"
         android:layout_marginTop="16dp"
-        android:layout_marginBottom="24dp"
-        android:backgroundTint="@color/colorPrimary"
-        android:text="@string/save"/>
+        android:layout_marginBottom="24dp">
+        <!-- Remove category button -->
+        <Button
+            android:id="@+id/btnRemoveCategory"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="32dp"
+            android:backgroundTint="@color/colorPrimary"
+            android:text="@string/remove"
+            android:visibility="gone"/>
+        <!-- Add category button -->
+        <Button
+            android:id="@+id/btnAddCategory"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:backgroundTint="@color/colorPrimary"
+            android:text="@string/save"/>
+    </LinearLayout>
+
 </LinearLayout>

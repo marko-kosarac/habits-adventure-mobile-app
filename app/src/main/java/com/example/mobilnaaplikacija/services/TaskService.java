@@ -178,4 +178,12 @@ public class TaskService {
         }
         return filtered;
     }
+
+    public void deleteByCategory(String categoryId, String userId) {
+        ArrayList<Task> tasks = new ArrayList<>(getTasksByUser(userId));
+        for (Task task : tasks) {
+            if (task.getCategoryId().equals(categoryId))
+                deleteById(task.getId());
+        }
+    }
 }
