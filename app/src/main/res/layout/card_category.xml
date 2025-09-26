@@ -22,8 +22,7 @@
                 android:layout_gravity="center_vertical|start"                android:clickable="false"
                 android:enabled="false"
                 app:cornerRadius="50dp"
-                app:strokeWidth="2dp"
-                />
+                app:strokeWidth="1dp"/>
             <!-- Category name -->
             <TextView
                 android:id="@+id/tvCategoryName"
