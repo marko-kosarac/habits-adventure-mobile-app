@@ -111,7 +111,7 @@ public class AddEditTaskFragment extends DialogFragment {
     private void setupNewCategoryButton() {
         binding.btnSaveCategory.setOnClickListener(view -> {
             AddCategoryFragment fragment = new AddCategoryFragment();
-            fragment.show(getChildFragmentManager(), "Add category");
+            fragment.show(getChildFragmentManager(), "New category");
         });
     }
 
@@ -451,7 +451,7 @@ public class AddEditTaskFragment extends DialogFragment {
             if (areDatesValid && isTimeValid) {
                 if(isEditing){
                     task = taskService.update(task);
-                    Toast.makeText(requireContext(), "Zadatak izmijenjen!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(requireContext(), "Zadatak izmjenjen!", Toast.LENGTH_SHORT).show();
                 } else {
                     task = taskService.add(task);
                     Toast.makeText(requireContext(), "Zadatak dodan!", Toast.LENGTH_SHORT).show();
@@ -459,7 +459,7 @@ public class AddEditTaskFragment extends DialogFragment {
                 sendBackToTaskList(task);
                 dismiss();
             } else
-                showError("Datum završetka je prije početka!");
+                showError("Datum završetka je pre početka!");
         });
     }
 

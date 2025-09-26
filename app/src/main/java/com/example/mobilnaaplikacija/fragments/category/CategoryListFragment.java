@@ -34,7 +34,7 @@ public class CategoryListFragment extends Fragment implements RecyclerViewInterf
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         binding = FragmentCategoryListBinding.inflate(inflater, container,false);
         this.categoryService = new CategoryService(getContext());
-        return inflater.inflate(R.layout.fragment_category_list, container, false);
+        return binding.getRoot();
     }
 
     @Override

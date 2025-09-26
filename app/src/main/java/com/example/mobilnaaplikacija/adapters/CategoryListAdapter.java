@@ -4,6 +4,7 @@ import android.content.res.ColorStateList;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
@@ -39,7 +40,7 @@ public class CategoryListAdapter extends RecyclerView.Adapter<CategoryListAdapte
         Category category = categories.get(position);
         int color = category.getColor();
         holder.name.setText(category.getName());
-        holder.editButton.setBackgroundTintList(ColorStateList.valueOf(color));
+        holder.pickedColorButton.setBackgroundTintList(ColorStateList.valueOf(color));
 
         // TODO check if trenutan zadatak i aktivan
         /*if (category.getStatus() == StatusType.AKTIVAN) {
@@ -65,11 +66,13 @@ public class CategoryListAdapter extends RecyclerView.Adapter<CategoryListAdapte
     }
     public static class CategoriesViewHolder extends RecyclerView.ViewHolder {
         TextView name;
+        Button pickedColorButton;
         ImageButton editButton;
         public CategoriesViewHolder(@NonNull View view, RecyclerViewInterface recyclerViewInterface){
             super(view);
-            name = view.findViewById(R.id.tvTaskName);
-            editButton = view.findViewById(R.id.btnEditTask);
+            name = view.findViewById(R.id.tvCategoryName);
+            pickedColorButton = view.findViewById(R.id.btnPickedColor);
+            editButton = view.findViewById(R.id.btnEditCategory);
 
             editButton.setOnClickListener(new View.OnClickListener() {
                 @Override

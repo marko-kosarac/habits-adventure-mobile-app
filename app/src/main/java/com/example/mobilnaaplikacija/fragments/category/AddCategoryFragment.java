@@ -79,19 +79,33 @@ public class AddCategoryFragment extends DialogFragment {
         binding.btnAddCategory.setOnClickListener(view -> {
             String name = binding.etCategoryName.getText().toString();
 
+            //Validacija
             String error = categoryService.validate(name, pickedColor);
             if (error != null) {
                 Toast.makeText(getContext(), error, Toast.LENGTH_SHORT).show();
                 return;
             }
 
+            //Čuvanje kategorije
             Category category = new Category();
             category.setColor(pickedColor);
             category.setName(name);
             categoryService.add(category);
             Toast.makeText(getContext(), "Kategorija dodana!", Toast.LENGTH_SHORT).show();
-
+            sendBackToCategoryList(category);
             dismiss();
         });
+    }
+
+    private void sendBackToCategoryList(Category category) {
+        Bundle bundle = new Bundle();
+        bundle.putParcelable("category", category);
+        getParentFragmentManager().setFragmentResult("Category managed", bundle);
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        binding = null;
     }
 }
