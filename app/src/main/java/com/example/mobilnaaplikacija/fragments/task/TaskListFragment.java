@@ -154,8 +154,7 @@ public class TaskListFragment extends Fragment implements RecyclerViewInterface 
         binding.btnAddTask.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                new AddEditTaskFragment().show(
-                        getChildFragmentManager(), "New task");
+                new AddEditTaskFragment().show(getChildFragmentManager(), "New task");
             }
         });
 

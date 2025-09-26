@@ -2,65 +2,84 @@ package com.example.mobilnaaplikacija.fragments.category;
 
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
 
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.example.mobilnaaplikacija.R;
+import com.example.mobilnaaplikacija.RecyclerViewInterface;
+import com.example.mobilnaaplikacija.adapters.CategoryListAdapter;
+import com.example.mobilnaaplikacija.databinding.FragmentCategoryListBinding;
+import com.example.mobilnaaplikacija.fragments.task.AddEditTaskFragment;
+import com.example.mobilnaaplikacija.model.Category;
+import com.example.mobilnaaplikacija.services.CategoryService;
 
-/**
- * A simple {@link Fragment} subclass.
- * Use the {@link CategoryListFragment#newInstance} factory method to
- * create an instance of this fragment.
- */
-public class CategoryListFragment extends Fragment {
+import java.util.ArrayList;
+import java.util.List;
 
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
+public class CategoryListFragment extends Fragment implements RecyclerViewInterface {
+    private FragmentCategoryListBinding binding;
+    private CategoryService categoryService;
+    private CategoryListAdapter adapter;
+    private ArrayList<Category> categories;
 
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
-
-    public CategoryListFragment() {
-        // Required empty public constructor
-    }
-
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment CategoryListFragment.
-     */
-    // TODO: Rename and change types and number of parameters
-    public static CategoryListFragment newInstance(String param1, String param2) {
-        CategoryListFragment fragment = new CategoryListFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
-        return fragment;
-    }
+    public CategoryListFragment() {}
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
-    }
-
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        binding = FragmentCategoryListBinding.inflate(inflater, container,false);
+        this.categoryService = new CategoryService(getContext());
         return inflater.inflate(R.layout.fragment_category_list, container, false);
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        binding.rvCategories.setLayoutManager(new LinearLayoutManager(getActivity()));
+        categories = new ArrayList<>(categoryService.getCategories());
+        adapter = new CategoryListAdapter(categories, this);
+        adapter.notifyDataSetChanged();
+        binding.rvCategories.setAdapter(adapter);
+
+        binding.btnAddCategory.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                new AddCategoryFragment().show(getChildFragmentManager(), "New category");
+            }
+        });
+
+        getChildFragmentManager().setFragmentResultListener("Category managed", getViewLifecycleOwner(), (requestKey, result) -> {
+            getCategories();
+        });
+    }
+
+    private void getCategories() {
+        List<Category> categories = categoryService.getCategories();
+        adapter.updateCategories(categories);
+    }
+
+    @Override
+    public void onItemClick(int position) {}
+
+    @Override
+    public void onEditClick(int position) {
+        Bundle args = new Bundle();
+        Category selectedCategory = categories.get(position);
+        args.putParcelable("Category to edit", selectedCategory);
+        AddCategoryFragment fragment = new AddCategoryFragment();
+        fragment.setArguments(args);
+        fragment.show(getChildFragmentManager(), "Edit category");
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        binding = null;
     }
 }
