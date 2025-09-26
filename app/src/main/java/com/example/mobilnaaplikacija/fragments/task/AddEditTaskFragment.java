@@ -7,8 +7,6 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
-import androidx.navigation.NavController;
-import androidx.navigation.Navigation;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -20,7 +18,7 @@ import android.widget.Toast;
 
 import com.example.mobilnaaplikacija.R;
 import com.example.mobilnaaplikacija.databinding.DialogAddEditTaskBinding;
-import com.example.mobilnaaplikacija.fragments.category.AddCategoryFragment;
+import com.example.mobilnaaplikacija.fragments.category.AddEditCategoryFragment;
 import com.example.mobilnaaplikacija.model.DifficultyType;
 import com.example.mobilnaaplikacija.model.FrequencyType;
 import com.example.mobilnaaplikacija.model.ImportanceType;
@@ -110,7 +108,7 @@ public class AddEditTaskFragment extends DialogFragment {
 
     private void setupNewCategoryButton() {
         binding.btnSaveCategory.setOnClickListener(view -> {
-            AddCategoryFragment fragment = new AddCategoryFragment();
+            AddEditCategoryFragment fragment = new AddEditCategoryFragment();
             fragment.show(getChildFragmentManager(), "New category");
         });
     }

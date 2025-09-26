@@ -14,9 +14,8 @@ import android.view.ViewGroup;
 import android.widget.Toast;
 
 import com.example.mobilnaaplikacija.R;
-import com.example.mobilnaaplikacija.databinding.DialogAddCategoryBinding;
+import com.example.mobilnaaplikacija.databinding.DialogAddEditCategoryBinding;
 import com.example.mobilnaaplikacija.model.Category;
-import com.example.mobilnaaplikacija.model.StatusType;
 import com.example.mobilnaaplikacija.services.CategoryService;
 import com.github.dhaval2404.colorpicker.ColorPickerDialog;
 import com.github.dhaval2404.colorpicker.listener.ColorListener;
@@ -24,15 +23,15 @@ import com.github.dhaval2404.colorpicker.model.ColorShape;
 
 import org.jetbrains.annotations.NotNull;
 
-public class AddCategoryFragment extends DialogFragment {
+public class AddEditCategoryFragment extends DialogFragment {
 
-    private DialogAddCategoryBinding binding;
+    private DialogAddEditCategoryBinding binding;
     private CategoryService categoryService;
     private int pickedColor = Color.WHITE;
     private boolean isEditing;
     private Category categoryToUpdate;
 
-    public AddCategoryFragment() {}
+    public AddEditCategoryFragment() {}
 
     @Override
     public void onStart() {
@@ -49,7 +48,7 @@ public class AddCategoryFragment extends DialogFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         categoryService = new CategoryService(getContext());
-        binding = DialogAddCategoryBinding.inflate(inflater, container, false);
+        binding = DialogAddEditCategoryBinding.inflate(inflater, container, false);
         return binding.getRoot();
     }
 
@@ -67,7 +66,7 @@ public class AddCategoryFragment extends DialogFragment {
             binding.etCategoryName.setEnabled(false);
             binding.btnPickedColor.setBackgroundTintList(ColorStateList.valueOf(categoryToUpdate.getColor()));
             binding.btnPickColor.setText(getString(R.string.category_edit_color));
-            setupRemoveTaskButton();
+            setupRemoveCategoryButton();
         }
         showColorPicker();
         setupSaveCategoryButton();
@@ -128,9 +127,8 @@ public class AddCategoryFragment extends DialogFragment {
         getParentFragmentManager().setFragmentResult("Category managed", bundle);
     }
 
-    private void setupRemoveTaskButton(){
-        /*binding.btnRemoveTask.setVisibility(View.VISIBLE);
-        binding.btnRemoveTask.setOnClickListener(view -> {
+    private void setupRemoveCategoryButton(){
+/*        binding.btnRemoveTask.setOnClickListener(view -> {
             boolean removed = categoryService.deleteById(categoryToUpdate.getId());
             if (removed)
                 Toast.makeText(requireContext(), "Kategorija izbrisana!", Toast.LENGTH_SHORT).show();

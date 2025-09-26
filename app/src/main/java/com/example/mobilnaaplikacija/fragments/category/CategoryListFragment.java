@@ -48,7 +48,7 @@ public class CategoryListFragment extends Fragment implements RecyclerViewInterf
         binding.btnAddCategory.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                new AddCategoryFragment().show(getChildFragmentManager(), "New category");
+                new AddEditCategoryFragment().show(getChildFragmentManager(), "New category");
             }
         });
 
@@ -70,7 +70,7 @@ public class CategoryListFragment extends Fragment implements RecyclerViewInterf
         Bundle args = new Bundle();
         Category selectedCategory = categories.get(position);
         args.putParcelable("Category to edit", selectedCategory);
-        AddCategoryFragment fragment = new AddCategoryFragment();
+        AddEditCategoryFragment fragment = new AddEditCategoryFragment();
         fragment.setArguments(args);
         fragment.show(getChildFragmentManager(), "Edit category");
     }
