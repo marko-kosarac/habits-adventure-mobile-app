@@ -13,6 +13,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import com.example.mobilnaaplikacija.R;
 import com.example.mobilnaaplikacija.databinding.DialogAddCategoryBinding;
 import com.example.mobilnaaplikacija.model.Category;
 import com.example.mobilnaaplikacija.model.StatusType;
@@ -61,11 +62,12 @@ public class AddCategoryFragment extends DialogFragment {
         if(getArguments() != null && getArguments().containsKey("Category to edit")) {
             isEditing = true;
             categoryToUpdate = getArguments().getParcelable("Category to edit");
-            binding.tvAddCategoryTitle.setText("Izmeni kategoriju");
+            binding.tvAddCategoryTitle.setText(getString(R.string.category_edit));
             binding.etCategoryName.setText(categoryToUpdate.getName());
             binding.etCategoryName.setEnabled(false);
             binding.btnPickedColor.setBackgroundTintList(ColorStateList.valueOf(categoryToUpdate.getColor()));
-            binding.btnPickColor.setText("Promeni boju");
+            binding.btnPickColor.setText(getString(R.string.category_edit_color));
+            setupRemoveTaskButton();
         }
         showColorPicker();
         setupSaveCategoryButton();
@@ -74,11 +76,11 @@ public class AddCategoryFragment extends DialogFragment {
     private void showColorPicker() {
         binding.btnPickColor.setOnClickListener(view -> {
             new ColorPickerDialog
-                    .Builder(getContext())
-                    .setTitle("Izaberi boju")
+                    .Builder(requireContext())
+                    .setTitle(R.string.category_choose_color)
                     .setColorShape(ColorShape.SQAURE)
-                    .setPositiveButton("OK")
-                    .setNegativeButton("Otkaži")
+                    .setPositiveButton(getString(R.string.color_picker_ok))
+                    .setNegativeButton(R.string.color_picker_decline)
                     .setColorListener(new ColorListener() {
                         @Override
                         public void onColorSelected(int color, @NotNull String colorHex) {
@@ -124,6 +126,19 @@ public class AddCategoryFragment extends DialogFragment {
         Bundle bundle = new Bundle();
         bundle.putParcelable("category", category);
         getParentFragmentManager().setFragmentResult("Category managed", bundle);
+    }
+
+    private void setupRemoveTaskButton(){
+        /*binding.btnRemoveTask.setVisibility(View.VISIBLE);
+        binding.btnRemoveTask.setOnClickListener(view -> {
+            boolean removed = categoryService.deleteById(categoryToUpdate.getId());
+            if (removed)
+                Toast.makeText(requireContext(), "Kategorija izbrisana!", Toast.LENGTH_SHORT).show();
+            else
+                Toast.makeText(requireContext(), "Greška u brisanju kategorije!", Toast.LENGTH_SHORT).show();
+            sendBackToCategoryList(categoryToUpdate);
+            dismiss();
+        });*/
     }
 
     @Override

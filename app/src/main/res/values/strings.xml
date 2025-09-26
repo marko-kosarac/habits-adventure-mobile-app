@@ -1,4 +1,4 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="app_name">Habits Adventure</string>
@@ -98,8 +98,13 @@
     <string name="category_color">Boja kategorije</string>
     <string name="category_chosen_color">Boja:</string>
     <string name="category_choose_color">Izaberi boju</string>
+    <string name="title_recent_colors">Nedavne boje</string>
     <string name="add_category_title">Kreiraj novu kategoriju</string>
     <string name="categories_title">Kategorije</string>
+    <string name="color_picker_ok">OK</string>
+    <string name="color_picker_decline">Otkaži</string>
+    <string name="category_edit">Izmeni kategoriju</string>
+    <string name="category_edit_color">Promeni boju</string>
 
     <string name="lorem_ipsum">
         Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam in scelerisque sem. Mauris
