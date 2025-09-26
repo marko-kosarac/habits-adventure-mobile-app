@@ -100,14 +100,12 @@ public class MyAllianceFragment extends Fragment {
                     String currentAllianceId = userDoc.getString("currentAllianceId");
                     if (currentAllianceId == null) return;
 
-                    // 🔹 Prvo dohvatimo trenutni savez da uzmemo članove
                     db.collection("alliances").document(currentAllianceId)
                             .get()
                             .addOnSuccessListener(allianceDoc -> {
                                 List<String> currentMembers = (List<String>) allianceDoc.get("members");
                                 if (currentMembers == null) currentMembers = new ArrayList<>();
 
-                                // 🔹 Dohvati sve pending pozive za ovaj savez
                                 List<String> finalCurrentMembers = currentMembers;
                                 db.collection("alliance_invites")
                                         .whereEqualTo("allianceId", currentAllianceId)
@@ -121,7 +119,6 @@ public class MyAllianceFragment extends Fragment {
                                                 if (toUserId != null) pendingUserIds.add(toUserId);
                                             }
 
-                                            // 🔹 Dohvati prijatelje trenutnog korisnika
                                             db.collection("users")
                                                     .whereArrayContains("friends", currentUserId)
                                                     .get()
@@ -135,13 +132,10 @@ public class MyAllianceFragment extends Fragment {
                                                             String username = doc.getString("username");
                                                             String friendAllianceId = doc.getString("currentAllianceId");
 
-                                                            // ❌ preskoči ako je već član saveza
                                                             if (finalCurrentMembers.contains(friendId)) continue;
 
-                                                            // ❌ preskoči ako već postoji pending zahtev
                                                             if (pendingUserIds.contains(friendId)) continue;
 
-                                                            // ✔️ provera da li je vođa drugog saveza
                                                             tasks.add(db.collection("alliances")
                                                                     .document(friendAllianceId != null ? friendAllianceId : "nonexistent")
                                                                     .get()
@@ -165,7 +159,6 @@ public class MyAllianceFragment extends Fragment {
                                                                         return;
                                                                     }
 
-                                                                    // 🔹 Prikazi dijalog sa listom prijatelja
                                                                     AllianceFriendsAdapter adapter = new AllianceFriendsAdapter(friendsNotInAlliance);
                                                                     RecyclerView recyclerView = new RecyclerView(getContext());
                                                                     recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));

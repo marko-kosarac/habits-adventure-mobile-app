@@ -83,18 +83,48 @@ public class AllianceChatFragment extends Fragment {
                 .addSnapshotListener((snapshots, error) -> {
                     if (error != null || snapshots == null) return;
 
+                    boolean shouldScroll = false;
+                    LinearLayoutManager layoutManager = (LinearLayoutManager) recyclerMessages.getLayoutManager();
+                    if (layoutManager != null) {
+                        int lastVisible = layoutManager.findLastCompletelyVisibleItemPosition();
+                        shouldScroll = lastVisible == messageList.size() - 1;
+                    }
+
                     for (DocumentChange dc : snapshots.getDocumentChanges()) {
                         if (dc.getType() == DocumentChange.Type.ADDED) {
-                            Map<String, Object> message = dc.getDocument().getData();
-                            messageList.add(message);
-                            chatAdapter.notifyItemInserted(messageList.size() - 1);
+                            Map<String, Object> newMessage = dc.getDocument().getData();
 
-                            // ⚡ Scroll do poslednje poruke
-                            recyclerMessages.scrollToPosition(messageList.size() - 1);
+                            // Dodaj samo ako već nije u listi (po id-u dokumenta)
+                            String docId = dc.getDocument().getId();
+                            boolean exists = false;
+                            for (Map<String, Object> msg : messageList) {
+                                if (docId.equals(msg.get("docId"))) {
+                                    exists = true;
+                                    break;
+                                }
+                            }
+                            if (!exists) {
+                                newMessage.put("docId", docId); // čuvamo da bismo proverili duplikate
+                                messageList.add(newMessage);
+                            }
                         }
+                    }
+
+                    // Sortiraj listu po timestamp-u
+                    messageList.sort((m1, m2) -> {
+                        long t1 = (long) m1.get("timestamp");
+                        long t2 = (long) m2.get("timestamp");
+                        return Long.compare(t1, t2);
+                    });
+
+                    chatAdapter.notifyDataSetChanged();
+
+                    if (shouldScroll) {
+                        recyclerMessages.scrollToPosition(messageList.size() - 1);
                     }
                 });
     }
+
 
 
     private void sendMessage() {
