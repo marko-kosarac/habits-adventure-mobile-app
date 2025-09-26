@@ -55,4 +55,17 @@ public class CategoryRepository {
         return category;
     }
 
+    public Category update(Category category) {
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(SQLiteHelper.COLUMN_CATEGORY_NAME, category.getName());
+        values.put(SQLiteHelper.COLUMN_CATEGORY_COLOR, category.getColor());
+
+        db.update(SQLiteHelper.TABLE_CATEGORIES, values,
+                SQLiteHelper.COLUMN_CATEGORY_ID + " = ?",
+                new String[]{category.getId()});
+        db.close();
+
+        return category;
+    }
 }

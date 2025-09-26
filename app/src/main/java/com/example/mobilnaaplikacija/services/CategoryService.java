@@ -24,6 +24,10 @@ public class CategoryService {
         return category;
     }
 
+    public Category update(Category category) {
+        categoryRepository.update(category);
+        return category;
+    }
 
     public String validate(String name, int color) {
         if (name.isEmpty()) return  "Unesi naziv kategorije!";
