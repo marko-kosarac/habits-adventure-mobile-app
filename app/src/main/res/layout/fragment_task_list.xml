@@ -78,14 +78,14 @@
         tools:listitem="@layout/card_task"
         android:visibility="gone"/>
     <!-- Dugme za dodavanje zadatka -->
-        <Button
-            android:id="@+id/btnAddTask"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal|bottom"
-            android:layout_marginBottom="0dp"
-            android:backgroundTint="@color/colorPrimary"
-            android:text="@string/add_task"/>
+    <Button
+        android:id="@+id/btnAddTask"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal|bottom"
+        android:layout_marginBottom="0dp"
+        android:backgroundTint="@color/colorPrimary"
+        android:text="@string/add_task"/>
 
 </LinearLayout>
 
