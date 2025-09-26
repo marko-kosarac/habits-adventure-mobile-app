@@ -63,19 +63,7 @@ public class TaskService {
 
         return null;
     }
-
-    public String changeStatus (Task task, StatusType newStatus) {
-        autoUpdateStatus(task);
-
-        if (!canChangeStatus(task, newStatus)) {
-            return "Nevažeća promjena statusa.";
-        }
-
-        task.setStatus(newStatus);
-        taskRepository.update(task);
-        return null;
-    }
-
+    
     public Task autoUpdateStatus (Task task) {
         long now = System.currentTimeMillis();
         long threeDaysMills = 3L * 24 * 60 * 60 * 1000;
