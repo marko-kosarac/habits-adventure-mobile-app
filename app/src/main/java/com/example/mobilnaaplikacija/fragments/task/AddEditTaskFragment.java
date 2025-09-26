@@ -451,7 +451,7 @@ public class AddEditTaskFragment extends DialogFragment {
             if (areDatesValid && isTimeValid) {
                 if(isEditing){
                     task = taskService.update(task);
-                    Toast.makeText(requireContext(), "Zadatak izmjenjen!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(requireContext(), "Zadatak izmenjen!", Toast.LENGTH_SHORT).show();
                 } else {
                     task = taskService.add(task);
                     Toast.makeText(requireContext(), "Zadatak dodan!", Toast.LENGTH_SHORT).show();

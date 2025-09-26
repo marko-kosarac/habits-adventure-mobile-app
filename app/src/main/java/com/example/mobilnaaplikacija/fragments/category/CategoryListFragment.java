@@ -11,11 +11,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.example.mobilnaaplikacija.R;
 import com.example.mobilnaaplikacija.RecyclerViewInterface;
 import com.example.mobilnaaplikacija.adapters.CategoryListAdapter;
 import com.example.mobilnaaplikacija.databinding.FragmentCategoryListBinding;
-import com.example.mobilnaaplikacija.fragments.task.AddEditTaskFragment;
 import com.example.mobilnaaplikacija.model.Category;
 import com.example.mobilnaaplikacija.services.CategoryService;
 

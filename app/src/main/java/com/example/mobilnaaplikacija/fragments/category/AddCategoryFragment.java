@@ -15,6 +15,7 @@ import android.widget.Toast;
 
 import com.example.mobilnaaplikacija.databinding.DialogAddCategoryBinding;
 import com.example.mobilnaaplikacija.model.Category;
+import com.example.mobilnaaplikacija.model.StatusType;
 import com.example.mobilnaaplikacija.services.CategoryService;
 import com.github.dhaval2404.colorpicker.ColorPickerDialog;
 import com.github.dhaval2404.colorpicker.listener.ColorListener;
@@ -27,6 +28,8 @@ public class AddCategoryFragment extends DialogFragment {
     private DialogAddCategoryBinding binding;
     private CategoryService categoryService;
     private int pickedColor = Color.WHITE;
+    private boolean isEditing;
+    private Category categoryToUpdate;
 
     public AddCategoryFragment() {}
 
@@ -52,8 +55,20 @@ public class AddCategoryFragment extends DialogFragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        isEditing = false;
+        categoryToUpdate = null;
+
+        if(getArguments() != null && getArguments().containsKey("Category to edit")) {
+            isEditing = true;
+            categoryToUpdate = getArguments().getParcelable("Category to edit");
+            binding.tvAddCategoryTitle.setText("Izmeni kategoriju");
+            binding.etCategoryName.setText(categoryToUpdate.getName());
+            binding.etCategoryName.setEnabled(false);
+            binding.btnPickedColor.setBackgroundTintList(ColorStateList.valueOf(categoryToUpdate.getColor()));
+            binding.btnPickColor.setText("Promeni boju");
+        }
         showColorPicker();
-        setupAddCategoryButton();
+        setupSaveCategoryButton();
     }
 
     private void showColorPicker() {
@@ -75,7 +90,7 @@ public class AddCategoryFragment extends DialogFragment {
         });
     }
 
-    private void setupAddCategoryButton(){
+    private void setupSaveCategoryButton(){
         binding.btnAddCategory.setOnClickListener(view -> {
             String name = binding.etCategoryName.getText().toString();
 
@@ -88,10 +103,18 @@ public class AddCategoryFragment extends DialogFragment {
 
             //Čuvanje kategorije
             Category category = new Category();
+            if(isEditing)
+                category.setId(categoryToUpdate.getId());
             category.setColor(pickedColor);
             category.setName(name);
-            categoryService.add(category);
-            Toast.makeText(getContext(), "Kategorija dodana!", Toast.LENGTH_SHORT).show();
+
+            if(isEditing){
+                category = categoryService.update(category);
+                Toast.makeText(requireContext(), "Kategorija izmenjena!", Toast.LENGTH_SHORT).show();
+            } else {
+                category = categoryService.add(category);
+                Toast.makeText(getContext(), "Kategorija dodana!", Toast.LENGTH_SHORT).show();
+            }
             sendBackToCategoryList(category);
             dismiss();
         });
