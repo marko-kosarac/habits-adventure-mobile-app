@@ -1,6 +1,12 @@
 package com.example.mobilnaaplikacija.model;
 
-public class Category {
+import android.graphics.Color;
+import android.os.Parcel;
+import android.os.Parcelable;
+
+import androidx.annotation.NonNull;
+
+public class Category implements Parcelable {
     private String id;
     private String name;
     private Integer color;
@@ -32,4 +38,27 @@ public class Category {
     public void setColor(Integer color) {
         this.color = color;
     }
+
+    protected Category(Parcel in) {
+        id = in.readString();
+        name = in.readString();
+        color = in.readInt();
+    }
+
+    @Override
+    public int describeContents() { return 0; }
+
+    @Override
+    public void writeToParcel(@NonNull Parcel parcel, int i) {
+        parcel.writeString(id != null ? id : "-1");
+        parcel.writeString(name);
+        parcel.writeInt(color != null ? color : Color.WHITE);
+    }
+
+    public static final Creator<Category> CREATOR = new Creator<>() {
+        @Override
+        public Category createFromParcel(Parcel in) { return new Category(in); }
+        @Override
+        public Category[] newArray(int size) { return new Category[size]; }
+    };
 }
