@@ -19,12 +19,14 @@ import android.widget.Toast;
 import com.example.mobilnaaplikacija.R;
 import com.example.mobilnaaplikacija.databinding.DialogAddEditTaskBinding;
 import com.example.mobilnaaplikacija.fragments.category.AddEditCategoryFragment;
+import com.example.mobilnaaplikacija.model.Category;
 import com.example.mobilnaaplikacija.model.DifficultyType;
 import com.example.mobilnaaplikacija.model.FrequencyType;
 import com.example.mobilnaaplikacija.model.ImportanceType;
 import com.example.mobilnaaplikacija.model.StatusType;
 import com.example.mobilnaaplikacija.model.Task;
 import com.example.mobilnaaplikacija.model.UnitType;
+import com.example.mobilnaaplikacija.services.CategoryService;
 import com.example.mobilnaaplikacija.services.TaskService;
 import com.example.mobilnaaplikacija.services.UserService;
 
@@ -39,9 +41,12 @@ public class AddEditTaskFragment extends DialogFragment {
     private DialogAddEditTaskBinding binding;
     private TaskService taskService;
     private UserService userService;
+    private CategoryService categoryService;
     private boolean isEditing, areDatesValid, isTimeValid;
     private Task taskToUpdate;
     private Long startMillis = -1L, endMillis = -1L;
+    private ArrayList<String> categoryNames;
+    private ArrayList<String> categoryIds;
 
     @Override
     public void onStart() {
@@ -58,14 +63,17 @@ public class AddEditTaskFragment extends DialogFragment {
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         binding = DialogAddEditTaskBinding.inflate(inflater, container, false);
+        taskService = new TaskService(requireContext());
+        userService = new UserService();
+        categoryService = new CategoryService(getContext());
+        categoryNames = new ArrayList<>();
+        categoryIds = new ArrayList<>();
         return binding.getRoot();
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        taskService = new TaskService(requireContext());
-        userService = new UserService();
 
         isEditing = false;
         areDatesValid = true;
@@ -132,8 +140,14 @@ public class AddEditTaskFragment extends DialogFragment {
         }
     }
     private void setupSpinners(){
-        String[] categoryTypes = {"Zdravlje", "Učenje", "Zabava", "Sređivanje", "Sport", "Posao", "Porodica"};
-        ArrayAdapter<String> categoryAdapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_spinner_dropdown_item, categoryTypes);
+        ArrayList<Category> categories = new ArrayList<>(categoryService.getCategories());
+
+        for (Category c : categories) {
+            categoryNames.add(c.getName());
+            categoryIds.add(c.getId());
+        }
+
+        ArrayAdapter<String> categoryAdapter = new ArrayAdapter<String>(requireContext(), android.R.layout.simple_spinner_dropdown_item, categoryNames);
         categoryAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         binding.spinnerCategory.setAdapter(categoryAdapter);
 
@@ -382,7 +396,8 @@ public class AddEditTaskFragment extends DialogFragment {
             //Polja novog/izmijenjenog zadatka
             String name = binding.etTaskName.getText().toString();
             String description = binding.etTaskDescription.getText().toString();
-            String category = binding.spinnerCategory.getSelectedItem().toString();
+            int categoryPos = binding.spinnerCategory.getSelectedItemPosition();
+            String category = categoryIds.get(categoryPos);
             boolean isRepeating = binding.rbRepeat.isChecked();
             boolean isOneTime = binding.rbOneTime.isChecked();
             FrequencyType frequency = isRepeating ? FrequencyType.PONAVLJAJUCI : FrequencyType.JEDNOKRATAN;
@@ -427,7 +442,7 @@ public class AddEditTaskFragment extends DialogFragment {
             }
             task.setName(name);
             task.setDescription(description);
-            task.setCategoryId("-1"); //TODO set categoryId
+            task.setCategoryId(category);
             task.setFrequency(frequency);
             if (isEditing)
                 task.setStatus((StatusType)binding.spinnerStatus.getSelectedItem());

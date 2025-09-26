@@ -56,6 +56,7 @@ public class DetailTaskFragment extends DialogFragment {
             Category category = categoryService.getCategoryById(selectedTask.getCategoryId());
             String categoryName = (category == null) ? "Nema kategoriju" : category.getName();
             binding.tvTaskCategory.setText(categoryName);
+            binding.tvTaskCategory.setTextColor(category.getColor());
             binding.tvTaskStatus.setText(selectedTask.getStatus() == null ? "" : selectedTask.getStatus().getDisplayName());
             parseMillisToDateTime(selectedTask);
             binding.recurringFields.setVisibility(selectedTask.getFrequency() == FrequencyType.PONAVLJAJUCI ? View.VISIBLE : View.GONE);

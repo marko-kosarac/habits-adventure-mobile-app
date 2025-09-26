@@ -45,8 +45,8 @@ public class TaskService {
         if (name.isEmpty()) return "Unesite naziv zadatka!";
         if (category.isEmpty()) return "Izaberite kategoriju zadatka!";
         if (startDate.isEmpty()) return "Izaberite datum početka!";
-        if (startTime.isEmpty()) return "Izaberite vreme početka!";
         if (endDate.isEmpty()) return "Izaberite datum završetka!";
+        if (startTime.isEmpty()) return "Izaberite vreme početka!";
         if (endTime.isEmpty()) return "Izaberite vreme završetka!";
         if (startMillis != -1L && endMillis != -1L && endMillis < startMillis) {
             return "Vreme završetka mora biti nakon početka!";

@@ -1,6 +1,5 @@
 package com.example.mobilnaaplikacija.fragments.task;
 
-import android.graphics.Color;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -78,14 +77,12 @@ public class TaskListFragment extends Fragment implements RecyclerViewInterface 
 
         //Inicijalizacija zadataka
         binding.rvTasks.setLayoutManager(new LinearLayoutManager(getActivity()));
+        getCategories();
         tasks = applyFilters();
-        adapter = new TaskListAdapter(tasks, this);
+        adapter = new TaskListAdapter(tasks, this, categoryMap);
         adapter.notifyDataSetChanged();
         binding.rvTasks.setAdapter(adapter);
         getTasks();
-
-        //Kategorije
-        getCategories();
 
         //Tabovi lista i kalendar
         TabLayout tabLayout = binding.tabLayout;
