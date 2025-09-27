@@ -11,6 +11,8 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.example.mobilnaaplikacija.R;
+import com.example.mobilnaaplikacija.model.StatusType;
+import com.example.mobilnaaplikacija.services.TaskService;
 import com.github.mikephil.charting.charts.BarChart;
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.charts.PieChart;
@@ -29,6 +31,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class StatisticsFragment extends Fragment {
 
@@ -37,6 +40,8 @@ public class StatisticsFragment extends Fragment {
     private BarChart barChart;            // zavrseni po kategorijama
     private LineChart lineChartXP;        // XP poslednjih 7 dana
     private LineChart lineChartDifficulty;// prosečna težina zadataka
+    private TaskService taskService;
+
 
     // TextViews
     private TextView tvActiveDays;
@@ -72,9 +77,10 @@ public class StatisticsFragment extends Fragment {
                     }
                 });
 
-
+        taskService = new TaskService(requireContext());
+        String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        updatePieChart(userId);
         // Setup
-        setupPieChart();
         setupBarChart();
         setupLineChartXP();
         setupLineChartDifficulty();
@@ -85,11 +91,23 @@ public class StatisticsFragment extends Fragment {
         return view;
     }
 
-    private void setupPieChart() {
+    private void updatePieChart(String userId) {
+        // Dohvati statistiku iz baze preko TaskService
+        Map<String, Integer> counts = taskService.getTaskCounts(userId);
+
+        int uradjeni = counts.getOrDefault("URAĐENI", 0);
+        int neuradjeni = counts.getOrDefault("NEURAĐENI", 0);
+        int otkazani = counts.getOrDefault("OTKAZANI", 0);
+        int aktivni = counts.getOrDefault("AKTIVNI", 0);
+
+        // Kreirani = aktivni + urađeni + neurađeni + otkazani
+        int kreirani = aktivni + uradjeni + neuradjeni + otkazani;
+
         List<PieEntry> entries = new ArrayList<>();
-        entries.add(new PieEntry(10, "Urađeni"));
-        entries.add(new PieEntry(5, "Neurađeni"));
-        entries.add(new PieEntry(2, "Otkazani"));
+        entries.add(new PieEntry(kreirani, "Kreirani"));
+        entries.add(new PieEntry(uradjeni, "Urađeni"));
+        entries.add(new PieEntry(neuradjeni, "Neurađeni"));
+        entries.add(new PieEntry(otkazani, "Otkazani"));
 
         PieDataSet dataSet = new PieDataSet(entries, "Zadaci");
         dataSet.setColors(ColorTemplate.MATERIAL_COLORS);
@@ -99,6 +117,8 @@ public class StatisticsFragment extends Fragment {
         pieChart.getDescription().setEnabled(false);
         pieChart.invalidate();
     }
+
+
 
     private void setupBarChart() {
         List<BarEntry> entries = new ArrayList<>();

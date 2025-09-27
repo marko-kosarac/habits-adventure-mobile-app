@@ -13,7 +13,10 @@ import com.example.mobilnaaplikacija.model.Task;
 import com.example.mobilnaaplikacija.model.UnitType;
 
 import java.util.ArrayList;
+import java.util.EnumMap;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class TaskRepository {
     private final SQLiteHelper dbHelper;
@@ -118,4 +121,61 @@ public class TaskRepository {
         db.close();
         return rows;
     }
+
+    public Map<String, Integer> getTaskCountsByStatus(String userId) {
+        Map<String, Integer> counts = new HashMap<>();
+        counts.put("AKTIVNI", 0);
+        counts.put("URAĐENI", 0);
+        counts.put("NEURAĐENI", 0);
+        counts.put("OTKAZANI", 0);
+
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+        Cursor cursor = db.rawQuery(
+                "SELECT status, COUNT(*) as count FROM " + SQLiteHelper.TABLE_TASKS +
+                        " WHERE " + SQLiteHelper.COLUMN_USER_ID + " = ? GROUP BY status",
+                new String[]{userId}
+        );
+
+        if (cursor.moveToFirst()) {
+            do {
+                String status = cursor.getString(cursor.getColumnIndexOrThrow("status"));
+                int count = cursor.getInt(cursor.getColumnIndexOrThrow("count"));
+
+                switch (status) {
+                    case "URAĐEN":
+                        counts.put("URAĐENI", count);
+                        break;
+                    case "NEURAĐEN":
+                        counts.put("NEURAĐENI", count);
+                        break;
+                    case "OTKAZAN":
+                        counts.put("OTKAZANI", count);
+                        break;
+                    case "AKTIVAN":
+                        counts.put("AKTIVNI", count);
+                        break;
+                }
+            } while (cursor.moveToNext());
+        }
+
+        cursor.close();
+        db.close();
+        return counts;
+    }
+
+    public void updateStatus(String taskId, StatusType newStatus) {
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(SQLiteHelper.COLUMN_STATUS, newStatus.name());
+
+        db.update(SQLiteHelper.TABLE_TASKS,
+                values,
+                SQLiteHelper.COLUMN_TASK_ID + " = ?",
+                new String[]{taskId});
+
+        db.close();
+    }
+
+
+
 }

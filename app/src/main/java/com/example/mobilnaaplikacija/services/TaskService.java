@@ -10,6 +10,7 @@ import com.example.mobilnaaplikacija.model.*;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+import java.util.Map;
 
 public class TaskService {
 
@@ -19,6 +20,8 @@ public class TaskService {
     public TaskService(Context context) {
         this.context = context;
         this.taskRepository = new TaskRepository(new SQLiteHelper(context));
+        taskRepository.updateStatus("17", StatusType.URAĐEN);
+        taskRepository.updateStatus("18", StatusType.OTKAZAN);
     }
 
     public Task add(Task task) {
@@ -32,6 +35,10 @@ public class TaskService {
 
     public List<Task> getTasksByUser(String userId){
         return taskRepository.getTasksByUser(userId);
+    }
+
+    public Map<String, Integer> getTaskCounts(String userId) {
+        return taskRepository.getTaskCountsByStatus(userId);
     }
 
     public Boolean deleteById(String id){
