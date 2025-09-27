@@ -83,18 +83,46 @@ public class AllianceChatFragment extends Fragment {
                 .addSnapshotListener((snapshots, error) -> {
                     if (error != null || snapshots == null) return;
 
+                    boolean addedNew = false;
+
                     for (DocumentChange dc : snapshots.getDocumentChanges()) {
                         if (dc.getType() == DocumentChange.Type.ADDED) {
-                            Map<String, Object> message = dc.getDocument().getData();
-                            messageList.add(message);
-                            chatAdapter.notifyItemInserted(messageList.size() - 1);
+                            Map<String, Object> newMessage = dc.getDocument().getData();
+                            String docId = dc.getDocument().getId();
 
-                            // ⚡ Scroll do poslednje poruke
-                            recyclerMessages.scrollToPosition(messageList.size() - 1);
+                            boolean exists = false;
+                            for (Map<String, Object> msg : messageList) {
+                                if (docId.equals(msg.get("docId"))) {
+                                    exists = true;
+                                    break;
+                                }
+                            }
+                            if (!exists) {
+                                newMessage.put("docId", docId);
+                                messageList.add(newMessage);
+                                addedNew = true;
+                            }
                         }
+                    }
+
+                    if (addedNew) {
+                        // Sortiraj po timestamp-u
+                        messageList.sort((m1, m2) -> {
+                            long t1 = (long) m1.get("timestamp");
+                            long t2 = (long) m2.get("timestamp");
+                            return Long.compare(t1, t2);
+                        });
+
+                        chatAdapter.notifyDataSetChanged();
+
+                        // Skroluj do poslednje poruke
+                        recyclerMessages.post(() ->
+                                recyclerMessages.smoothScrollToPosition(messageList.size() - 1));
                     }
                 });
     }
+
+
 
 
     private void sendMessage() {
