@@ -24,6 +24,8 @@ import com.github.mikephil.charting.data.PieData;
 import com.github.mikephil.charting.data.PieDataSet;
 import com.github.mikephil.charting.data.PieEntry;
 import com.github.mikephil.charting.utils.ColorTemplate;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -56,14 +58,27 @@ public class StatisticsFragment extends Fragment {
         tvLongestStreak = view.findViewById(R.id.tvLongestStreak);
         tvMissions = view.findViewById(R.id.tvMissions);
 
+        String currentUserId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+
+        db.collection("users").document(currentUserId).get()
+                .addOnSuccessListener(userDoc -> {
+                    if (userDoc.exists()) {
+                        int activeDays = userDoc.contains("activeDays")
+                                ? userDoc.getLong("activeDays").intValue()
+                                : 0;
+
+                        tvActiveDays.setText("Aktivnih dana: " + activeDays);
+                    }
+                });
+
+
         // Setup
         setupPieChart();
         setupBarChart();
         setupLineChartXP();
         setupLineChartDifficulty();
 
-        // Tekstualni podaci
-        tvActiveDays.setText("Aktivni dani: 34");
         tvLongestStreak.setText("Najduži niz: 12 dana");
         tvMissions.setText("Specijalne misije: 3 započete / 2 završene");
 

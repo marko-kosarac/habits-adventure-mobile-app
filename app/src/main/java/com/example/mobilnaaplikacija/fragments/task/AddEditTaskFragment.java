@@ -406,6 +406,8 @@ public class AddEditTaskFragment extends DialogFragment {
                 Toast.makeText(requireContext(), "Zadatak izbrisan!", Toast.LENGTH_SHORT).show();
             else
                 Toast.makeText(requireContext(), "Greška u brisanju zadatka!", Toast.LENGTH_SHORT).show();
+
+            updateStreak();
             sendBackToTaskList(taskToUpdate);
             dismiss();
             });
@@ -500,6 +502,7 @@ public class AddEditTaskFragment extends DialogFragment {
                     Toast.makeText(requireContext(), "Zadatak dodan!", Toast.LENGTH_SHORT).show();
                 }
                 sendBackToTaskList(task);
+                updateStreak();
                 dismiss();
             } else
                 showError("Datum završetka je pre početka!");
@@ -520,5 +523,10 @@ public class AddEditTaskFragment extends DialogFragment {
     public void onDestroyView() {
         super.onDestroyView();
         binding = null;
+    }
+
+    private void updateStreak() {
+        String currentUserId = userService.getCurrentUser().getUid();
+        userService.updateActiveDaysOnTaskAction(currentUserId);
     }
 }

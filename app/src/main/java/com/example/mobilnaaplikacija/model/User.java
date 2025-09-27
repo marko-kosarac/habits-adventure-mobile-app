@@ -28,6 +28,8 @@ public class User {
     private List<String> badges; // lista naziva bedževa
     private List<Equipment> equipment;
     private List<User> friends;
+    private int activeDays;
+    private long lastActive;
 
     private String qrCode; // može biti putanja do slike ili generisani kod
 
@@ -58,6 +60,8 @@ public class User {
         this.experiencePoints = 0;
         this.coins = 0;
         this.friends = new ArrayList<>();
+        this.activeDays = 0;
+        this.lastActive = System.currentTimeMillis();
     }
 
     public User(String id, String username) {
