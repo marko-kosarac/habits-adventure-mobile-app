@@ -7,6 +7,7 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -156,6 +157,11 @@ public class TaskListFragment extends Fragment implements RecyclerViewInterface 
         });
 
         getChildFragmentManager().setFragmentResultListener("Task managed", getViewLifecycleOwner(), (requestKey, result) -> {
+            Task newTask = result.getParcelable("task");
+            if (newTask != null) {
+                getCategories(); // <-- reload all categories from DB
+                categoryMap.put(newTask.getCategoryId(), categoryService.getCategoryById(newTask.getCategoryId()));
+            }
             getTasks();
         });
     }

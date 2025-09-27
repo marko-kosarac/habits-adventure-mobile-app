@@ -1,5 +1,6 @@
 package com.example.mobilnaaplikacija.adapters;
 
+import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -46,7 +47,8 @@ public class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapter.TasksV
         Category category = categoryMap.get(task.getCategoryId());
         String categoryName = (category == null) ? "Nema kategoriju" : category.getName();
         holder.category.setText(categoryName);
-        holder.cardColor.setBackgroundColor(category.getColor());
+        int categoryColor = (category == null) ? Color.WHITE : category.getColor();
+        holder.cardColor.setBackgroundColor(categoryColor);
         holder.isDone.setChecked(task.getStatus() == StatusType.URAĐEN);
 
         if (task.getStatus() == StatusType.OTKAZAN || task.getStatus() == StatusType.NEURAĐEN) {
