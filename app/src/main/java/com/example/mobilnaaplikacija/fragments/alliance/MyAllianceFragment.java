@@ -100,83 +100,90 @@ public class MyAllianceFragment extends Fragment {
                     String currentAllianceId = userDoc.getString("currentAllianceId");
                     if (currentAllianceId == null) return;
 
-                    // 1. Dohvati sve aktivne pozive za ovaj savez
-                    db.collection("alliance_invites")
-                            .whereEqualTo("allianceId", currentAllianceId)
-                            .whereEqualTo("status", "pending")
+                    db.collection("alliances").document(currentAllianceId)
                             .get()
-                            .addOnSuccessListener(invitesSnapshot -> {
+                            .addOnSuccessListener(allianceDoc -> {
+                                List<String> currentMembers = (List<String>) allianceDoc.get("members");
+                                if (currentMembers == null) currentMembers = new ArrayList<>();
 
-                                Set<String> pendingUserIds = new HashSet<>();
-                                for (DocumentSnapshot inviteDoc : invitesSnapshot.getDocuments()) {
-                                    String toUserId = inviteDoc.getString("toUserId");
-                                    if (toUserId != null) pendingUserIds.add(toUserId);
-                                }
-
-                                // 2. Dohvati prijatelje trenutnog korisnika
-                                db.collection("users")
-                                        .whereArrayContains("friends", currentUserId)
+                                List<String> finalCurrentMembers = currentMembers;
+                                db.collection("alliance_invites")
+                                        .whereEqualTo("allianceId", currentAllianceId)
+                                        .whereEqualTo("status", "pending")
                                         .get()
-                                        .addOnSuccessListener(friendsSnapshot -> {
+                                        .addOnSuccessListener(invitesSnapshot -> {
 
-                                            List<User> friendsNotInAlliance = new ArrayList<>();
-                                            List<com.google.android.gms.tasks.Task<DocumentSnapshot>> tasks = new ArrayList<>();
-
-                                            for (DocumentSnapshot doc : friendsSnapshot.getDocuments()) {
-                                                String friendId = doc.getId();
-                                                String username = doc.getString("username");
-                                                String friendAllianceId = doc.getString("currentAllianceId");
-
-                                                // preskoči ako je vođa drugog saveza ili već ima pending zahtev
-                                                if (pendingUserIds.contains(friendId)) continue;
-
-                                                tasks.add(db.collection("alliances")
-                                                        .document(friendAllianceId != null ? friendAllianceId : "nonexistent")
-                                                        .get()
-                                                        .continueWith(t -> {
-                                                            if (t.isSuccessful() && t.getResult() != null && t.getResult().exists()) {
-                                                                String leaderId = t.getResult().getString("leaderId");
-                                                                if (!friendId.equals(leaderId)) {
-                                                                    friendsNotInAlliance.add(new User(friendId, username));
-                                                                }
-                                                            } else if (friendAllianceId == null || friendAllianceId.isEmpty()) {
-                                                                friendsNotInAlliance.add(new User(friendId, username));
-                                                            }
-                                                            return null;
-                                                        }));
+                                            Set<String> pendingUserIds = new HashSet<>();
+                                            for (DocumentSnapshot inviteDoc : invitesSnapshot.getDocuments()) {
+                                                String toUserId = inviteDoc.getString("toUserId");
+                                                if (toUserId != null) pendingUserIds.add(toUserId);
                                             }
 
-                                            com.google.android.gms.tasks.Tasks.whenAll(tasks)
-                                                    .addOnSuccessListener(v -> {
-                                                        if (friendsNotInAlliance.isEmpty()) {
-                                                            Toast.makeText(getContext(), "Nema prijatelja za dodavanje.", Toast.LENGTH_SHORT).show();
-                                                            return;
+                                            db.collection("users")
+                                                    .whereArrayContains("friends", currentUserId)
+                                                    .get()
+                                                    .addOnSuccessListener(friendsSnapshot -> {
+
+                                                        List<User> friendsNotInAlliance = new ArrayList<>();
+                                                        List<com.google.android.gms.tasks.Task<DocumentSnapshot>> tasks = new ArrayList<>();
+
+                                                        for (DocumentSnapshot doc : friendsSnapshot.getDocuments()) {
+                                                            String friendId = doc.getId();
+                                                            String username = doc.getString("username");
+                                                            String friendAllianceId = doc.getString("currentAllianceId");
+
+                                                            if (finalCurrentMembers.contains(friendId)) continue;
+
+                                                            if (pendingUserIds.contains(friendId)) continue;
+
+                                                            tasks.add(db.collection("alliances")
+                                                                    .document(friendAllianceId != null ? friendAllianceId : "nonexistent")
+                                                                    .get()
+                                                                    .continueWith(t -> {
+                                                                        if (t.isSuccessful() && t.getResult() != null && t.getResult().exists()) {
+                                                                            String leaderId = t.getResult().getString("leaderId");
+                                                                            if (!friendId.equals(leaderId)) {
+                                                                                friendsNotInAlliance.add(new User(friendId, username));
+                                                                            }
+                                                                        } else if (friendAllianceId == null || friendAllianceId.isEmpty()) {
+                                                                            friendsNotInAlliance.add(new User(friendId, username));
+                                                                        }
+                                                                        return null;
+                                                                    }));
                                                         }
 
-                                                        // Prikazi dijalog
-                                                        AllianceFriendsAdapter adapter = new AllianceFriendsAdapter(friendsNotInAlliance);
-                                                        RecyclerView recyclerView = new RecyclerView(getContext());
-                                                        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-                                                        recyclerView.setAdapter(adapter);
-
-                                                        AlertDialog dialog = new AlertDialog.Builder(getContext())
-                                                                .setTitle("Dodaj članove u savez")
-                                                                .setView(recyclerView)
-                                                                .setPositiveButton("Pošalji pozive", (d, which) -> {
-                                                                    List<User> selectedFriends = adapter.getSelectedFriends();
-                                                                    for (User friend : selectedFriends) {
-                                                                        sendAllianceInvite(friend.getId(), currentAllianceId, currentUserId);
+                                                        com.google.android.gms.tasks.Tasks.whenAll(tasks)
+                                                                .addOnSuccessListener(v -> {
+                                                                    if (friendsNotInAlliance.isEmpty()) {
+                                                                        Toast.makeText(getContext(), "Nema prijatelja za dodavanje.", Toast.LENGTH_SHORT).show();
+                                                                        return;
                                                                     }
-                                                                })
-                                                                .setNegativeButton("Otkaži", null)
-                                                                .create();
 
-                                                        dialog.show();
+                                                                    AllianceFriendsAdapter adapter = new AllianceFriendsAdapter(friendsNotInAlliance);
+                                                                    RecyclerView recyclerView = new RecyclerView(getContext());
+                                                                    recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+                                                                    recyclerView.setAdapter(adapter);
+
+                                                                    AlertDialog dialog = new AlertDialog.Builder(getContext())
+                                                                            .setTitle("Dodaj članove u savez")
+                                                                            .setView(recyclerView)
+                                                                            .setPositiveButton("Pošalji pozive", (d, which) -> {
+                                                                                List<User> selectedFriends = adapter.getSelectedFriends();
+                                                                                for (User friend : selectedFriends) {
+                                                                                    sendAllianceInvite(friend.getId(), currentAllianceId, currentUserId);
+                                                                                }
+                                                                            })
+                                                                            .setNegativeButton("Otkaži", null)
+                                                                            .create();
+
+                                                                    dialog.show();
+                                                                });
                                                     });
                                         });
                             });
                 });
     }
+
 
 
 

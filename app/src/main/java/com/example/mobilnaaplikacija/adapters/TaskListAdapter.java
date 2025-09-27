@@ -1,5 +1,6 @@
 package com.example.mobilnaaplikacija.adapters;
 
+import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,19 +13,23 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.mobilnaaplikacija.R;
 import com.example.mobilnaaplikacija.RecyclerViewInterface;
+import com.example.mobilnaaplikacija.model.Category;
 import com.example.mobilnaaplikacija.model.StatusType;
 import com.example.mobilnaaplikacija.model.Task;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 public class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapter.TasksViewHolder> {
     private ArrayList<Task> tasks;
+    private HashMap<String, Category> categoryMap;
     private final RecyclerViewInterface recyclerViewInterface;
 
-    public TaskListAdapter(ArrayList<Task> tasks, RecyclerViewInterface recyclerViewInterface) {
+    public TaskListAdapter(ArrayList<Task> tasks, RecyclerViewInterface recyclerViewInterface, HashMap<String, Category> categoryMap) {
         this.tasks = tasks;
         this.recyclerViewInterface = recyclerViewInterface;
+        this.categoryMap = categoryMap;
     }
 
     @NonNull
@@ -39,7 +44,11 @@ public class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapter.TasksV
     public void onBindViewHolder(@NonNull TasksViewHolder holder, int position) {
         Task task = tasks.get(position);
         holder.name.setText(task.getName());
-        holder.category.setText(task.getName()); // TODO : retrieve category by id
+        Category category = categoryMap.get(task.getCategoryId());
+        String categoryName = (category == null) ? "Nema kategoriju" : category.getName();
+        holder.category.setText(categoryName);
+        int categoryColor = (category == null) ? Color.WHITE : category.getColor();
+        holder.cardColor.setBackgroundColor(categoryColor);
         holder.isDone.setChecked(task.getStatus() == StatusType.URAĐEN);
 
         if (task.getStatus() == StatusType.OTKAZAN || task.getStatus() == StatusType.NEURAĐEN) {
@@ -68,6 +77,7 @@ public class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapter.TasksV
         TextView name, category;
         CheckBox isDone;
         ImageButton editButton;
+        View cardColor;
 
         public TasksViewHolder(@NonNull View view, RecyclerViewInterface recyclerViewInterface){
             super(view);
@@ -75,6 +85,7 @@ public class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapter.TasksV
             category = view.findViewById(R.id.tvTaskCategory);
             isDone = view.findViewById(R.id.cbIsTaskDone);
             editButton = view.findViewById(R.id.btnEditTask);
+            cardColor = view.findViewById(R.id.vCardColor);
 
             editButton.setOnClickListener(new View.OnClickListener() {
                 @Override

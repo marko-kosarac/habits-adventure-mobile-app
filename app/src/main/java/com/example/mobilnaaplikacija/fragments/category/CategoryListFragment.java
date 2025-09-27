@@ -52,14 +52,14 @@ public class CategoryListFragment extends Fragment implements RecyclerViewInterf
             }
         });
 
-        getChildFragmentManager().setFragmentResultListener("Category managed", getViewLifecycleOwner(), (requestKey, result) -> {
-            getCategories();
+        requireActivity().getSupportFragmentManager().setFragmentResultListener("Category managed", getViewLifecycleOwner(), (requestKey, result) -> {
+            Category newCategory = result.getParcelable("category");
+            if (newCategory != null) {
+                categories.clear();
+                categories.addAll(categoryService.getCategories());
+                adapter.notifyDataSetChanged();
+            }
         });
-    }
-
-    private void getCategories() {
-        List<Category> categories = categoryService.getCategories();
-        adapter.updateCategories(categories);
     }
 
     @Override

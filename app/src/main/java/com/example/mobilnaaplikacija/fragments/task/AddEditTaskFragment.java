@@ -8,6 +8,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,12 +20,14 @@ import android.widget.Toast;
 import com.example.mobilnaaplikacija.R;
 import com.example.mobilnaaplikacija.databinding.DialogAddEditTaskBinding;
 import com.example.mobilnaaplikacija.fragments.category.AddEditCategoryFragment;
+import com.example.mobilnaaplikacija.model.Category;
 import com.example.mobilnaaplikacija.model.DifficultyType;
 import com.example.mobilnaaplikacija.model.FrequencyType;
 import com.example.mobilnaaplikacija.model.ImportanceType;
 import com.example.mobilnaaplikacija.model.StatusType;
 import com.example.mobilnaaplikacija.model.Task;
 import com.example.mobilnaaplikacija.model.UnitType;
+import com.example.mobilnaaplikacija.services.CategoryService;
 import com.example.mobilnaaplikacija.services.TaskService;
 import com.example.mobilnaaplikacija.services.UserService;
 
@@ -39,9 +42,14 @@ public class AddEditTaskFragment extends DialogFragment {
     private DialogAddEditTaskBinding binding;
     private TaskService taskService;
     private UserService userService;
+    private CategoryService categoryService;
     private boolean isEditing, areDatesValid, isTimeValid;
     private Task taskToUpdate;
     private Long startMillis = -1L, endMillis = -1L;
+    private ArrayList<String> categoryNames;
+    private ArrayList<String> categoryIds;
+    private ArrayAdapter<String> categoryAdapter;
+    private Category newCategory;
 
     @Override
     public void onStart() {
@@ -58,19 +66,23 @@ public class AddEditTaskFragment extends DialogFragment {
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         binding = DialogAddEditTaskBinding.inflate(inflater, container, false);
+        taskService = new TaskService(requireContext());
+        userService = new UserService();
+        categoryService = new CategoryService(getContext());
+        categoryNames = new ArrayList<>();
+        categoryIds = new ArrayList<>();
         return binding.getRoot();
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        taskService = new TaskService(requireContext());
-        userService = new UserService();
 
         isEditing = false;
         areDatesValid = true;
         isTimeValid = true;
         taskToUpdate = null;
+        newCategory = null;
         setupSpinners();
 
         if(getArguments() != null && getArguments().containsKey("Task to edit")){
@@ -79,7 +91,10 @@ public class AddEditTaskFragment extends DialogFragment {
             binding.tvAddTaskTitle.setText(R.string.task_edit_title);
             binding.etTaskName.setText(taskToUpdate.getName());
             binding.etTaskDescription.setText(taskToUpdate.getDescription());
-            binding.categoryFields.setVisibility(View.GONE);
+            int categoryPos = categoryIds.indexOf(taskToUpdate.getCategoryId());
+            if (categoryPos != -1) {
+                binding.spinnerCategory.setSelection(categoryPos);
+            }binding.categoryFields.setVisibility(View.GONE);
             binding.rbOneTime.setChecked(taskToUpdate.getFrequency() == FrequencyType.JEDNOKRATAN);
             binding.rbRepeat.setChecked(taskToUpdate.getFrequency() == FrequencyType.PONAVLJAJUCI);
             binding.spinnerStatus.setSelection((StatusType.valueOf(taskToUpdate.getStatus().name()).ordinal()));
@@ -94,6 +109,22 @@ public class AddEditTaskFragment extends DialogFragment {
         else {
             binding.spinnerStatus.setVisibility(View.GONE);
         }
+
+        requireActivity().getSupportFragmentManager().setFragmentResultListener("Category managed", getViewLifecycleOwner(),
+                (requestKey, result) -> {
+                    Category newCategory = result.getParcelable("category");
+
+                    if (newCategory != null) {
+                        categoryIds.add(newCategory.getId());
+                        categoryNames.add(newCategory.getName());
+                        categoryAdapter.notifyDataSetChanged();
+
+                        int position = categoryIds.indexOf(newCategory.getId());
+                        if (position >= 0) {
+                            binding.spinnerCategory.setSelection(position);
+                        }
+                        getChildFragmentManager().setFragmentResult("Category managed", result); // forward up to TaskList
+                }});
 
         setupNewCategoryButton();
         setupDateTimePickers();
@@ -132,8 +163,14 @@ public class AddEditTaskFragment extends DialogFragment {
         }
     }
     private void setupSpinners(){
-        String[] categoryTypes = {"Zdravlje", "Učenje", "Zabava", "Sređivanje", "Sport", "Posao", "Porodica"};
-        ArrayAdapter<String> categoryAdapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_spinner_dropdown_item, categoryTypes);
+        ArrayList<Category> categories = new ArrayList<>(categoryService.getCategories());
+
+        for (Category c : categories) {
+            categoryNames.add(c.getName());
+            categoryIds.add(c.getId());
+        }
+
+        categoryAdapter = new ArrayAdapter<String>(requireContext(), android.R.layout.simple_spinner_dropdown_item, categoryNames);
         categoryAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         binding.spinnerCategory.setAdapter(categoryAdapter);
 
@@ -382,7 +419,15 @@ public class AddEditTaskFragment extends DialogFragment {
             //Polja novog/izmijenjenog zadatka
             String name = binding.etTaskName.getText().toString();
             String description = binding.etTaskDescription.getText().toString();
-            String category = binding.spinnerCategory.getSelectedItem().toString();
+            int categoryPos = binding.spinnerCategory.getSelectedItemPosition();
+            String categoryId = categoryIds.get(categoryPos);
+            if (newCategory != null) {
+                categoryId = newCategory.getId();
+                categoryService.add(newCategory);
+                Bundle result = new Bundle();
+                result.putParcelable("category", newCategory);
+                getParentFragmentManager().setFragmentResult("Category managed", result);
+            }
             boolean isRepeating = binding.rbRepeat.isChecked();
             boolean isOneTime = binding.rbOneTime.isChecked();
             FrequencyType frequency = isRepeating ? FrequencyType.PONAVLJAJUCI : FrequencyType.JEDNOKRATAN;
@@ -400,7 +445,7 @@ public class AddEditTaskFragment extends DialogFragment {
                     : "0";
 
             //Validacija
-            String error = taskService.validate(name, category, isRepeating, isOneTime, startDate, endDate, startTime, endTime, startMillis, endMillis, difficulty, importance, recurringUnit, recurringNumber);
+            String error = taskService.validate(name, categoryId, isRepeating, isOneTime, startDate, endDate, startTime, endTime, startMillis, endMillis, difficulty, importance, recurringUnit, recurringNumber);
             if(error != null){
                 showError(error);
                 return;
@@ -427,7 +472,7 @@ public class AddEditTaskFragment extends DialogFragment {
             }
             task.setName(name);
             task.setDescription(description);
-            task.setCategoryId("-1"); //TODO set categoryId
+            task.setCategoryId(categoryId);
             task.setFrequency(frequency);
             if (isEditing)
                 task.setStatus((StatusType)binding.spinnerStatus.getSelectedItem());

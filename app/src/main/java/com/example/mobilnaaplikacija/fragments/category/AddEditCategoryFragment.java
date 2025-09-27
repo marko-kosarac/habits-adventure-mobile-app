@@ -48,8 +48,7 @@ public class AddEditCategoryFragment extends DialogFragment {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         categoryService = new CategoryService(getContext());
         userService = new UserService();
         binding = DialogAddEditCategoryBinding.inflate(inflater, container, false);
@@ -126,9 +125,12 @@ public class AddEditCategoryFragment extends DialogFragment {
     }
 
     private void sendBackToCategoryList(Category category) {
+        if (category == null)
+            return;
         Bundle bundle = new Bundle();
         bundle.putParcelable("category", category);
-        getParentFragmentManager().setFragmentResult("Category managed", bundle);
+        requireActivity().getSupportFragmentManager()
+                .setFragmentResult("Category managed", bundle);
     }
 
     private void setupRemoveCategoryButton(){
@@ -154,7 +156,7 @@ public class AddEditCategoryFragment extends DialogFragment {
                     } else {
                         Toast.makeText(getActivity(), "Greška u brisanju kategorije!", Toast.LENGTH_SHORT).show();
                     }
-                    sendBackToCategoryList(categoryToUpdate);
+                    sendBackToCategoryList(category);
                     dismiss();
                 })
                 .setNegativeButton("Otkaži", (dialog, which) -> dialog.dismiss())

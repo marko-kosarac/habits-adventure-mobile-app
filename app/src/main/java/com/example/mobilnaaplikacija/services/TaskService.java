@@ -45,11 +45,11 @@ public class TaskService {
         if (name.isEmpty()) return "Unesite naziv zadatka!";
         if (category.isEmpty()) return "Izaberite kategoriju zadatka!";
         if (startDate.isEmpty()) return "Izaberite datum početka!";
-        if (startTime.isEmpty()) return "Izaberite vrijeme početka!";
         if (endDate.isEmpty()) return "Izaberite datum završetka!";
-        if (endTime.isEmpty()) return "Izaberite vrijeme završetka!";
+        if (startTime.isEmpty()) return "Izaberite vreme početka!";
+        if (endTime.isEmpty()) return "Izaberite vreme završetka!";
         if (startMillis != -1L && endMillis != -1L && endMillis < startMillis) {
-            return "Vrijeme završetka mora biti nakon početka!";
+            return "Vreme završetka mora biti nakon početka!";
         }
         if (frequency == null) return "Izaberite jednokratan ili ponavljajući zadatak!";
         if (difficultyStr.isEmpty()) return "Izaberite težinu zadatka!";
@@ -63,7 +63,7 @@ public class TaskService {
 
         return null;
     }
-    
+
     public Task autoUpdateStatus (Task task) {
         long now = System.currentTimeMillis();
         long threeDaysMills = 3L * 24 * 60 * 60 * 1000;
@@ -104,7 +104,7 @@ public class TaskService {
         if (status.equals(StatusType.URAĐEN.getDisplayName())) {
             Long now = System.currentTimeMillis();
             if (end > now) {
-                return "Ne možete označiti zadatak kao urađen prije nego istekne kraj.";
+                return "Ne možete označiti zadatak kao urađen pre nego istekne kraj.";
             }
         }
         return null;

@@ -41,13 +41,6 @@ public class CategoryListAdapter extends RecyclerView.Adapter<CategoryListAdapte
         int color = category.getColor();
         holder.name.setText(category.getName());
         holder.pickedColorButton.setBackgroundTintList(ColorStateList.valueOf(color));
-
-        // TODO check if trenutan zadatak i aktivan
-        /*if (category.getStatus() == StatusType.AKTIVAN) {
-            holder.editButton.setVisibility(View.GONE);
-        } else {
-            holder.editButton.setVisibility(View.VISIBLE);
-        }*/
     }
 
     @Override
