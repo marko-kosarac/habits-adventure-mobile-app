@@ -37,8 +37,18 @@ public class SQLiteHelper extends SQLiteOpenHelper {
     public static final String COLUMN_CATEGORY_ID = "id";
     public static final String COLUMN_CATEGORY_NAME = "name";
     public static final String COLUMN_CATEGORY_COLOR = "color";
+
+    // Task occurrences table
+    public static final String TABLE_TASK_OCCURRENCES = "TASK_OCCURRENCES";
+    public static final String COLUMN_TASK_OCCURRENCE_ID = "id";
+    public static final String COLUMN_TASK_OCCURRENCE_TASK_ID = "task_id";
+    public static final String COLUMN_TASK_OCCURRENCE_NAME = "name";
+    public static final String COLUMN_TASK_OCCURRENCE_DESCRIPTION = "color";
+    public static final String COLUMN_TASK_OCCURRENCE_START_MILLIS = "color";
+    public static final String COLUMN_TASK_OCCURRENCE_END_MILLIS = "color";
+    public static final String COLUMN_TASK_OCCURRENCE_STATUS = "color";
+    private static final int DATABASE_VERSION = 8;
     private static final String DATABASE_NAME = "appdata.db";
-    private static final int DATABASE_VERSION = 7;
 
     private static final String DB_CREATE_EQUIPMENT = "CREATE TABLE " + TABLE_EQUIPMENT + " ("
             + COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
@@ -73,6 +83,17 @@ public class SQLiteHelper extends SQLiteOpenHelper {
             + COLUMN_CATEGORY_COLOR + " INTEGER"
             + ");";
 
+    private static final String DB_CREATE_TASK_OCCURRENCES =
+            "CREATE TABLE " + TABLE_TASK_OCCURRENCES + " (" +
+                    COLUMN_TASK_OCCURRENCE_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                    COLUMN_TASK_OCCURRENCE_TASK_ID + " TEXT, " +
+                    COLUMN_TASK_OCCURRENCE_NAME + " TEXT, " +
+                    COLUMN_TASK_OCCURRENCE_DESCRIPTION + " TEXT, " +
+                    COLUMN_TASK_OCCURRENCE_START_MILLIS + " INTEGER, " +
+                    COLUMN_TASK_OCCURRENCE_END_MILLIS + " INTEGER, " +
+                    COLUMN_TASK_OCCURRENCE_STATUS + " TEXT" +
+                    ");";
+
     public SQLiteHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
@@ -83,6 +104,7 @@ public class SQLiteHelper extends SQLiteOpenHelper {
         db.execSQL(DB_CREATE_EQUIPMENT);
         db.execSQL(DB_CREATE_TASKS);
         db.execSQL(DB_CREATE_CATEGORIES);
+        db.execSQL(DB_CREATE_TASK_OCCURRENCES);
     }
 
     @Override
@@ -91,6 +113,7 @@ public class SQLiteHelper extends SQLiteOpenHelper {
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_EQUIPMENT);
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_TASKS);
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_CATEGORIES);
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_TASK_OCCURRENCES);
         onCreate(db);
     }
 }
