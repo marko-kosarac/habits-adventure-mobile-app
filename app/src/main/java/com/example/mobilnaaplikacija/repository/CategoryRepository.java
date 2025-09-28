@@ -95,4 +95,40 @@ public class CategoryRepository {
         db.close();
         return category;
     }
+
+    public Integer getColorById(String categoryId) {
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+        Integer color = null;
+        Cursor cursor = db.query(SQLiteHelper.TABLE_CATEGORIES,
+                new String[]{SQLiteHelper.COLUMN_CATEGORY_COLOR},
+                SQLiteHelper.COLUMN_CATEGORY_ID + " = ?",
+                new String[]{categoryId}, null, null, null);
+        if (cursor.moveToFirst()) {
+            color = cursor.getInt(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_CATEGORY_COLOR));
+        }
+        cursor.close();
+        db.close();
+        return color;
+    }
+
+    public String getCategoryNameById(String categoryId) {
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+        String name = null;
+
+        Cursor cursor = db.query(SQLiteHelper.TABLE_CATEGORIES,
+                new String[]{SQLiteHelper.COLUMN_CATEGORY_NAME},
+                SQLiteHelper.COLUMN_CATEGORY_ID + " = ?",
+                new String[]{categoryId},
+                null, null, null);
+
+        if (cursor.moveToFirst()) {
+            name = cursor.getString(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_CATEGORY_NAME));
+        }
+
+        cursor.close();
+        db.close();
+        return name;
+    }
+
+
 }

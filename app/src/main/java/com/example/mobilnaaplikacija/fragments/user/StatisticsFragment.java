@@ -11,11 +11,14 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.example.mobilnaaplikacija.R;
+import com.example.mobilnaaplikacija.model.DifficultyType;
 import com.example.mobilnaaplikacija.model.StatusType;
+import com.example.mobilnaaplikacija.model.Task;
 import com.example.mobilnaaplikacija.services.TaskService;
 import com.github.mikephil.charting.charts.BarChart;
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.charts.PieChart;
+import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.data.BarData;
 import com.github.mikephil.charting.data.BarDataSet;
 import com.github.mikephil.charting.data.BarEntry;
@@ -25,11 +28,13 @@ import com.github.mikephil.charting.data.LineDataSet;
 import com.github.mikephil.charting.data.PieData;
 import com.github.mikephil.charting.data.PieDataSet;
 import com.github.mikephil.charting.data.PieEntry;
+import com.github.mikephil.charting.formatter.ValueFormatter;
 import com.github.mikephil.charting.utils.ColorTemplate;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -44,10 +49,7 @@ public class StatisticsFragment extends Fragment {
 
 
     // TextViews
-    private TextView tvActiveDays;
-    private TextView tvLongestStreak;
-    private TextView tvMissions;
-
+    private TextView tvActiveDays, tvAverageDifficulty, tvLongestStreak, tvMissions;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -58,6 +60,7 @@ public class StatisticsFragment extends Fragment {
         barChart = view.findViewById(R.id.barChart);
         lineChartXP = view.findViewById(R.id.lineChartXP);
         lineChartDifficulty = view.findViewById(R.id.lineChartDifficulty);
+        tvAverageDifficulty = view.findViewById(R.id.tvAverageDifficulty);
 
         tvActiveDays = view.findViewById(R.id.tvActiveDays);
         tvLongestStreak = view.findViewById(R.id.tvLongestStreak);
@@ -76,16 +79,19 @@ public class StatisticsFragment extends Fragment {
                         tvActiveDays.setText("Aktivnih dana: " + activeDays);
                     }
                 });
-
+        //pie chart
         taskService = new TaskService(requireContext());
         String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
         updatePieChart(userId);
-        // Setup
-        setupBarChart();
-        setupLineChartXP();
-        setupLineChartDifficulty();
+        //streak
+        int longestStreak = taskService.getLongestStreak();
+        tvLongestStreak.setText("Najduži niz: "+ longestStreak);
+        //bar chart
+        taskService = new TaskService(requireContext());
+        setupBarChartCompletedByCategory(userId);
+        //line chart for difficulty
+        setupLineChartDifficulty(userId);
 
-        tvLongestStreak.setText("Najduži niz: 12 dana");
         tvMissions.setText("Specijalne misije: 3 započete / 2 završene");
 
         return view;
@@ -120,55 +126,78 @@ public class StatisticsFragment extends Fragment {
 
 
 
-    private void setupBarChart() {
-        List<BarEntry> entries = new ArrayList<>();
-        entries.add(new BarEntry(0, 10)); // Zdravlje
-        entries.add(new BarEntry(1, 14)); // Učenje
-        entries.add(new BarEntry(2, 6));  // Posao
+    private void setupBarChartCompletedByCategory(String userId) {
+        Map<String, Integer> completedWithColors = taskService.getCompletedTasksWithColors(userId);
 
-        BarDataSet dataSet = new BarDataSet(entries, "Kategorije");
-        dataSet.setColors(ColorTemplate.COLORFUL_COLORS);
+        List<BarEntry> entries = new ArrayList<>();
+        List<String> labels = new ArrayList<>();
+        List<Integer> colors = new ArrayList<>();
+        int index = 0;
+
+        for (Map.Entry<String, Integer> e : completedWithColors.entrySet()) {
+            String[] parts = e.getKey().split(":");
+            String categoryName = parts[0];
+            int color = Integer.parseInt(parts[1]);
+
+            labels.add(categoryName);
+            entries.add(new BarEntry(index, e.getValue()));
+            colors.add(color);
+            index++;
+        }
+
+        BarDataSet dataSet = new BarDataSet(entries, "Završeni zadaci po kategoriji");
+        dataSet.setColors(colors);
 
         BarData data = new BarData(dataSet);
+        data.setBarWidth(0.9f);
+
         barChart.setData(data);
+        barChart.setFitBars(true);
         barChart.getDescription().setEnabled(false);
+
+        barChart.getXAxis().setGranularity(1f);
+        barChart.getXAxis().setGranularityEnabled(true);
+        barChart.getXAxis().setValueFormatter(new ValueFormatter() {
+            @Override
+            public String getFormattedValue(float value) {
+                int i = (int) value;
+                if (i >= 0 && i < labels.size()) return labels.get(i);
+                else return "";
+            }
+        });
+
         barChart.invalidate();
     }
 
-    private void setupLineChartXP() {
+    private void setupLineChartDifficulty(String userId) {
+        List<Task> tasks = taskService.getCompletedTasks(userId);
         List<Entry> entries = new ArrayList<>();
-        entries.add(new Entry(1, 20));
-        entries.add(new Entry(2, 30));
-        entries.add(new Entry(3, 25));
-        entries.add(new Entry(4, 40));
-        entries.add(new Entry(5, 50));
-        entries.add(new Entry(6, 35));
-        entries.add(new Entry(7, 45));
+        int index = 1;
+        for (Task t : tasks) {
+            int xp = taskService.getXPFromDifficulty(t.getDifficulty());
+            entries.add(new Entry(index, xp));
+            index++;
+        }
 
-        LineDataSet dataSet = new LineDataSet(entries, "XP poslednjih 7 dana");
-        dataSet.setColor(Color.BLUE);
-        dataSet.setValueTextColor(Color.BLACK);
-
-        LineData lineData = new LineData(dataSet);
-        lineChartXP.setData(lineData);
-        lineChartXP.getDescription().setEnabled(false);
-        lineChartXP.invalidate();
-    }
-
-    private void setupLineChartDifficulty() {
-        List<Entry> entries = new ArrayList<>();
-        entries.add(new Entry(1, 2)); // laka
-        entries.add(new Entry(2, 3)); // srednja
-        entries.add(new Entry(3, 4)); // teža
-        entries.add(new Entry(4, 5)); // najteža
-
-        LineDataSet dataSet = new LineDataSet(entries, "Prosečna težina zadataka");
+        LineDataSet dataSet = new LineDataSet(entries, "Težina završenih zadataka");
         dataSet.setColor(Color.RED);
+        dataSet.setCircleColor(Color.BLACK);
         dataSet.setValueTextColor(Color.BLACK);
+        dataSet.setLineWidth(2f);
+        dataSet.setCircleRadius(4f);
 
         LineData lineData = new LineData(dataSet);
         lineChartDifficulty.setData(lineData);
         lineChartDifficulty.getDescription().setEnabled(false);
         lineChartDifficulty.invalidate();
+
+        // Prosečna težina
+        float avgXP = taskService.getAverageXPOfCompletedTasks(userId);
+        DifficultyType mainDifficulty = taskService.getDifficultyFromXP(avgXP);
+        tvAverageDifficulty.setText("Korisnik uglavnom rešava: " + mainDifficulty.name() +
+                " (prosek XP: " + avgXP + ")");
     }
+
+
+
 }

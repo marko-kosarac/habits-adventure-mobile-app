@@ -1,14 +1,18 @@
 package com.example.mobilnaaplikacija.services;
 
 import android.content.Context;
+import android.graphics.Color;
+
 import androidx.annotation.Nullable;
 
 import com.example.mobilnaaplikacija.database.SQLiteHelper;
+import com.example.mobilnaaplikacija.repository.CategoryRepository;
 import com.example.mobilnaaplikacija.repository.TaskRepository;
 import com.example.mobilnaaplikacija.model.*;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -16,12 +20,17 @@ public class TaskService {
 
     private final Context context;
     private final TaskRepository taskRepository;
+    private final CategoryRepository categoryRepository;
 
     public TaskService(Context context) {
         this.context = context;
         this.taskRepository = new TaskRepository(new SQLiteHelper(context));
+        this.categoryRepository = new CategoryRepository(new SQLiteHelper(context));
         taskRepository.updateStatus("17", StatusType.URAĐEN);
         taskRepository.updateStatus("18", StatusType.OTKAZAN);
+        taskRepository.updateStatus("20", StatusType.URAĐEN);
+        taskRepository.updateStatus("21", StatusType.URAĐEN);
+
     }
 
     public Task add(Task task) {
@@ -40,6 +49,55 @@ public class TaskService {
     public Map<String, Integer> getTaskCounts(String userId) {
         return taskRepository.getTaskCountsByStatus(userId);
     }
+
+    public int getLongestStreak() {
+        return taskRepository.getLongestStreak();
+    }
+
+    public Map<String, Integer> getCompletedTasksWithColors(String userId) {
+        return taskRepository.getCompletedTasksWithColors(userId);
+    }
+
+
+    public List<Task> getCompletedTasks(String userId) {
+        return taskRepository.getCompletedTasks(userId);
+    }
+
+    public float getAverageXPOfCompletedTasks(String userId) {
+        return taskRepository.getAverageXPOfCompletedTasks(userId);
+    }
+
+    public int getXPFromDifficulty(DifficultyType difficulty) {
+        return taskRepository.getXPFromDifficulty(difficulty);
+    }
+
+    public DifficultyType getDifficultyFromXP(float xp) {
+        return taskRepository.getDifficultyFromXP(xp);
+    }
+
+
+
+    public Map<String, Integer> getCategoryColorsById(Map<String, String> categoryIdToName) {
+        Map<String, Integer> colorMap = new HashMap<>();
+        for (Map.Entry<String, String> entry : categoryIdToName.entrySet()) {
+            String categoryId = entry.getKey();
+            String name = entry.getValue();
+            Integer color = categoryRepository.getColorById(categoryId);
+            if (color != null) {
+                colorMap.put(name, color);
+            } else {
+                colorMap.put(name, Color.GRAY);
+            }
+        }
+        return colorMap;
+    }
+
+    public String getCategoryNameById(String categoryId) {
+        return categoryRepository.getCategoryNameById(categoryId);
+    }
+
+
+
 
     public Boolean deleteById(String id){
         return taskRepository.delete(id) > 0;
