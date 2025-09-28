@@ -165,9 +165,16 @@ public class AddEditTaskFragment extends DialogFragment {
     private void setupSpinners(){
         ArrayList<Category> categories = new ArrayList<>(categoryService.getCategories());
 
-        for (Category c : categories) {
-            categoryNames.add(c.getName());
-            categoryIds.add(c.getId());
+        if (categories.isEmpty()) {
+            categoryNames.add("Kategorija");
+            categoryIds.add("-1");
+            binding.spinnerCategory.setEnabled(false);
+        } else {
+            binding.spinnerCategory.setEnabled(true);
+            for (Category c : categories) {
+                categoryNames.add(c.getName());
+                categoryIds.add(c.getId());
+            }
         }
 
         categoryAdapter = new ArrayAdapter<String>(requireContext(), android.R.layout.simple_spinner_dropdown_item, categoryNames);

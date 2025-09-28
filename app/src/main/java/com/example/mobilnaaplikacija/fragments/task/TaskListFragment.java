@@ -159,7 +159,7 @@ public class TaskListFragment extends Fragment implements RecyclerViewInterface 
         getChildFragmentManager().setFragmentResultListener("Task managed", getViewLifecycleOwner(), (requestKey, result) -> {
             Task newTask = result.getParcelable("task");
             if (newTask != null) {
-                getCategories(); // <-- reload all categories from DB
+                getCategories();
                 categoryMap.put(newTask.getCategoryId(), categoryService.getCategoryById(newTask.getCategoryId()));
             }
             getTasks();

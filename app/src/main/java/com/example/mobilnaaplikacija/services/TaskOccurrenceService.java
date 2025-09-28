@@ -3,7 +3,6 @@ package com.example.mobilnaaplikacija.services;
 import android.content.Context;
 
 import com.example.mobilnaaplikacija.database.SQLiteHelper;
-import com.example.mobilnaaplikacija.model.Task;
 import com.example.mobilnaaplikacija.model.TaskOccurrence;
 import com.example.mobilnaaplikacija.repository.TaskOccurrenceRepository;
 
