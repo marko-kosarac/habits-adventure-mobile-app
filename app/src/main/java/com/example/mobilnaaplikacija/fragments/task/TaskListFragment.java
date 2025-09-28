@@ -210,7 +210,7 @@ public class TaskListFragment extends Fragment implements RecyclerViewInterface 
     private ArrayList<Task> filterByDate(ArrayList<Task> tasks, String selectedDate) {
         ArrayList<Task> filtered = new ArrayList<>();
         for (Task task : tasks) {
-            List<String> allDates = getTaskOcurringDates(task);
+            List<String> allDates = taskService.getTaskOcurringDates(task);
             if (allDates.contains(selectedDate)) {
                 filtered.add(task);
             }
@@ -232,49 +232,6 @@ public class TaskListFragment extends Fragment implements RecyclerViewInterface 
         return filteredTasks;
     }
 
-    private List<String> getTaskOcurringDates(Task task) {
-        List<String> dates = new ArrayList<>();
-        SimpleDateFormat fmt = new SimpleDateFormat("d/M/yyyy", Locale.getDefault());
-        fmt.setLenient(false);
-        Calendar cal = Calendar.getInstance();
-
-        if(task.getFrequency() == FrequencyType.JEDNOKRATAN) {
-            try {
-                Date date = parseMillisToDate(task.getStartMillis());
-                if(date != null) {
-                    cal.setTime(date);
-                    dates.add(fmt.format(cal.getTime()));
-                }
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-        } else {
-            try {
-                Date startDate = parseMillisToDate(task.getStartMillis());
-                Date endDate = parseMillisToDate(task.getEndMillis());
-                if (startDate == null || endDate == null)
-                    return dates;
-
-                cal.setTime(startDate);
-                while (!cal.getTime().after(endDate)) {
-                    dates.add(fmt.format(cal.getTime()));
-
-                    if (task.getUnit() == UnitType.DAN) {
-                        cal.add(Calendar.DAY_OF_MONTH, task.getInterval());
-                    } else if (task.getUnit() == UnitType.SEDMICA) {
-                        cal.add(Calendar.WEEK_OF_YEAR, task.getInterval());
-                    } else if (task.getUnit() == UnitType.MJESEC) {
-                        cal.add(Calendar.MONTH, task.getInterval());
-                    } else {
-                        cal.add(Calendar.YEAR, task.getInterval());
-                    }
-                }
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-        }
-        return dates;
-    }
 
     private void decorateCalendarWithTasks() {
         List<CalendarDay> calendarDays = new ArrayList<>();
@@ -284,7 +241,7 @@ public class TaskListFragment extends Fragment implements RecyclerViewInterface 
         Map<String, List<Task>> tasksPerDate = new HashMap<>();
 
         for (Task task : tasks) {
-            List<String> allDates = getTaskOcurringDates(task);
+            List<String> allDates = taskService.getTaskOcurringDates(task);
 
             for (String date : allDates) {
                 if (!tasksPerDate.containsKey(date)) {
@@ -323,13 +280,6 @@ public class TaskListFragment extends Fragment implements RecyclerViewInterface 
             }
         }
         binding.calendarView.setCalendarDays(calendarDays);
-    }
-
-    private Date parseMillisToDate(Long millis) {
-        if (millis != null) {
-            return new Date(millis);
-        }
-        return null;
     }
 
     public int getCategoryColorInt(Task task) {

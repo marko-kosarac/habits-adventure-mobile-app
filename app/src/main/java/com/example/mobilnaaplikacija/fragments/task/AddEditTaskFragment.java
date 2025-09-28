@@ -26,8 +26,10 @@ import com.example.mobilnaaplikacija.model.FrequencyType;
 import com.example.mobilnaaplikacija.model.ImportanceType;
 import com.example.mobilnaaplikacija.model.StatusType;
 import com.example.mobilnaaplikacija.model.Task;
+import com.example.mobilnaaplikacija.model.TaskOccurrence;
 import com.example.mobilnaaplikacija.model.UnitType;
 import com.example.mobilnaaplikacija.services.CategoryService;
+import com.example.mobilnaaplikacija.services.TaskOccurrenceService;
 import com.example.mobilnaaplikacija.services.TaskService;
 import com.example.mobilnaaplikacija.services.UserService;
 
@@ -35,6 +37,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 
 public class AddEditTaskFragment extends DialogFragment {
@@ -43,6 +46,7 @@ public class AddEditTaskFragment extends DialogFragment {
     private TaskService taskService;
     private UserService userService;
     private CategoryService categoryService;
+    private TaskOccurrenceService taskOccurrenceService;
     private boolean isEditing, areDatesValid, isTimeValid;
     private Task taskToUpdate;
     private Long startMillis = -1L, endMillis = -1L;
@@ -69,6 +73,7 @@ public class AddEditTaskFragment extends DialogFragment {
         taskService = new TaskService(requireContext());
         userService = new UserService();
         categoryService = new CategoryService(getContext());
+        taskOccurrenceService = new TaskOccurrenceService(requireContext());
         categoryNames = new ArrayList<>();
         categoryIds = new ArrayList<>();
         return binding.getRoot();
@@ -483,7 +488,9 @@ public class AddEditTaskFragment extends DialogFragment {
                     Toast.makeText(requireContext(), "Zadatak izmenjen!", Toast.LENGTH_SHORT).show();
                 } else {
                     task = taskService.add(task);
-                    //Create task occurrences if repeatable task
+                    if(isRepeating) {
+                        List<TaskOccurrence> taskOccurrences = taskOccurrenceService.generateOccurrences(task);
+                    }
                     Toast.makeText(requireContext(), "Zadatak dodan!", Toast.LENGTH_SHORT).show();
                 }
                 sendBackToTaskList(task);

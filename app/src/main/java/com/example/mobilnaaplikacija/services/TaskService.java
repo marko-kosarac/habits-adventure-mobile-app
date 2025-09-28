@@ -7,9 +7,12 @@ import com.example.mobilnaaplikacija.database.SQLiteHelper;
 import com.example.mobilnaaplikacija.repository.TaskRepository;
 import com.example.mobilnaaplikacija.model.*;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 public class TaskService {
 
@@ -161,5 +164,56 @@ public class TaskService {
             if (task.getCategoryId().equals(categoryId))
                 deleteById(task.getId());
         }
+    }
+
+    public List<String> getTaskOcurringDates(Task task) {
+        List<String> dates = new ArrayList<>();
+        SimpleDateFormat fmt = new SimpleDateFormat("d/M/yyyy", Locale.getDefault());
+        fmt.setLenient(false);
+        Calendar cal = Calendar.getInstance();
+
+        if(task.getFrequency() == FrequencyType.JEDNOKRATAN) {
+            try {
+                Date date = parseMillisToDate(task.getStartMillis());
+                if(date != null) {
+                    cal.setTime(date);
+                    dates.add(fmt.format(cal.getTime()));
+                }
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        } else {
+            try {
+                Date startDate = parseMillisToDate(task.getStartMillis());
+                Date endDate = parseMillisToDate(task.getEndMillis());
+                if (startDate == null || endDate == null)
+                    return dates;
+
+                cal.setTime(startDate);
+                while (!cal.getTime().after(endDate)) {
+                    dates.add(fmt.format(cal.getTime()));
+
+                    if (task.getUnit() == UnitType.DAN) {
+                        cal.add(Calendar.DAY_OF_MONTH, task.getInterval());
+                    } else if (task.getUnit() == UnitType.SEDMICA) {
+                        cal.add(Calendar.WEEK_OF_YEAR, task.getInterval());
+                    } else if (task.getUnit() == UnitType.MJESEC) {
+                        cal.add(Calendar.MONTH, task.getInterval());
+                    } else {
+                        cal.add(Calendar.YEAR, task.getInterval());
+                    }
+                }
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+        return dates;
+    }
+
+    private Date parseMillisToDate(Long millis) {
+        if (millis != null) {
+            return new Date(millis);
+        }
+        return null;
     }
 }
