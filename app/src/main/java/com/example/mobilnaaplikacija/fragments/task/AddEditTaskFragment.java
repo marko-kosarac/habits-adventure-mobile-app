@@ -124,7 +124,7 @@ public class AddEditTaskFragment extends DialogFragment {
                             binding.spinnerCategory.setSelection(position);
                         }
                         getChildFragmentManager().setFragmentResult("Category managed", result); // forward up to TaskList
-                }});
+        }});
 
         setupNewCategoryButton();
         setupDateTimePickers();
@@ -231,112 +231,90 @@ public class AddEditTaskFragment extends DialogFragment {
     private void showDatePicker(EditText field, boolean isStartDate){
         Calendar calendar = Calendar.getInstance();
         DatePickerDialog datePickerDialog = new DatePickerDialog(requireContext(),
-            (DatePicker view, int year, int month, int dayOfMonth) ->{
-            String date = dayOfMonth + "/" + (month + 1) + "/" + year;
-            field.setText(date);
+                (DatePicker view, int year, int month, int dayOfMonth) ->{
+                    String date = dayOfMonth + "/" + (month + 1) + "/" + year;
+                    field.setText(date);
 
-                Calendar chosen = Calendar.getInstance();
-                chosen.set(Calendar.YEAR, year);
-                chosen.set(Calendar.MONTH, month);
-                chosen.set(Calendar.DAY_OF_MONTH, dayOfMonth);
-                chosen.set(Calendar.HOUR_OF_DAY, 0);
-                chosen.set(Calendar.MINUTE, 0);
-                chosen.set(Calendar.SECOND, 0);
-                chosen.set(Calendar.MILLISECOND, 0);
+                    Calendar chosen = Calendar.getInstance();
+                    chosen.set(Calendar.YEAR, year);
+                    chosen.set(Calendar.MONTH, month);
+                    chosen.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+                    chosen.set(Calendar.HOUR_OF_DAY, 0);
+                    chosen.set(Calendar.MINUTE, 0);
+                    chosen.set(Calendar.SECOND, 0);
+                    chosen.set(Calendar.MILLISECOND, 0);
 
-                if (isStartDate) {
-                    if (startMillis == -1) {
-                        startMillis = chosen.getTimeInMillis();
+                    if (isStartDate) {
+                        if (startMillis == -1) {
+                            startMillis = chosen.getTimeInMillis();
+                        } else {
+                            Calendar tmp = Calendar.getInstance();
+                            tmp.setTimeInMillis(startMillis);
+                            tmp.set(Calendar.YEAR, year);
+                            tmp.set(Calendar.MONTH, month);
+                            tmp.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+                            startMillis = tmp.getTimeInMillis();
+                        }
                     } else {
-                        Calendar tmp = Calendar.getInstance();
-                        tmp.setTimeInMillis(startMillis);
-                        tmp.set(Calendar.YEAR, year);
-                        tmp.set(Calendar.MONTH, month);
-                        tmp.set(Calendar.DAY_OF_MONTH, dayOfMonth);
-                        startMillis = tmp.getTimeInMillis();
+                        if (endMillis == -1) {
+                            endMillis = chosen.getTimeInMillis();
+                        } else {
+                            Calendar tmp = Calendar.getInstance();
+                            tmp.setTimeInMillis(endMillis);
+                            tmp.set(Calendar.YEAR, year);
+                            tmp.set(Calendar.MONTH, month);
+                            tmp.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+                            endMillis = tmp.getTimeInMillis();
+                        }
                     }
-                } else {
-                    if (endMillis == -1) {
-                        endMillis = chosen.getTimeInMillis();
-                    } else {
-                        Calendar tmp = Calendar.getInstance();
-                        tmp.setTimeInMillis(endMillis);
-                        tmp.set(Calendar.YEAR, year);
-                        tmp.set(Calendar.MONTH, month);
-                        tmp.set(Calendar.DAY_OF_MONTH, dayOfMonth);
-                        endMillis = tmp.getTimeInMillis();
+
+                    //Start i end izabrani, a ponovo se promijeni izbor
+                    if (!binding.etStartDate.getText().toString().isEmpty()
+                            && !binding.etEndDate.getText().toString().isEmpty()) {
+                        String startStr = binding.etStartDate.getText().toString();
+                        String endStr = binding.etEndDate.getText().toString();
+
+                        SimpleDateFormat fmt = new SimpleDateFormat("d/M/yyyy", Locale.getDefault());
+                        fmt.setLenient(false);
+
+                        try {
+                            Date startDate = fmt.parse(startStr);
+                            Date endDate = fmt.parse(endStr);
+
+                            if(startDate == null || endDate == null)
+                                return;
+
+                            if(endDate.before(startDate)) {
+                                showError("Datum završetka je pre početka!");
+                                areDatesValid = false;
+                            } else
+                                areDatesValid = true;
+                        } catch (Exception e) {
+                            throw new RuntimeException(e);
+                        }
                     }
-                }
-
-
-            if (binding.rbOneTime.isChecked()) {
-                //Jednokratab => start = end
-                if (isStartDate) {
-                    if (endMillis != -1L) {
-                        endMillis = taskService.copyDateButKeepTime(endMillis, startMillis);
-                    } else {
-                        endMillis = startMillis;
-                    }
-                    binding.etEndDate.setText(date);
-                    Toast.makeText(requireContext(), "Kraj je postavljen na isti datum.", Toast.LENGTH_LONG).show();
-                } else {
-                    if (startMillis != -1) {
-                        startMillis = taskService.copyDateButKeepTime(startMillis, endMillis);
-                    } else {
-                        startMillis = endMillis;
-                    }
-                    binding.etStartDate.setText(binding.etEndDate.getText().toString());
-                    Toast.makeText(requireContext(), "Početak je postavljen na isti datum.", Toast.LENGTH_LONG).show();
-                }
-            }
-
-            //Start i end izabrani, a ponovo se promijeni izbor
-            if (!binding.etStartDate.getText().toString().isEmpty()
-                    && !binding.etEndDate.getText().toString().isEmpty()) {
-                String startStr = binding.etStartDate.getText().toString();
-                String endStr = binding.etEndDate.getText().toString();
-
-                SimpleDateFormat fmt = new SimpleDateFormat("d/M/yyyy", Locale.getDefault());
-                fmt.setLenient(false);
-
-                try {
-                    Date startDate = fmt.parse(startStr);
-                    Date endDate = fmt.parse(endStr);
-
-                    if(startDate == null || endDate == null)
-                        return;
-
-                    if(endDate.before(startDate)) {
-                        showError("Datum završetka je pre početka!");
-                        areDatesValid = false;
-                    } else
-                        areDatesValid = true;
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
-            }
-        },
-        calendar.get(Calendar.YEAR),
-        calendar.get(Calendar.MONTH),
-        calendar.get(Calendar.DAY_OF_MONTH));
+                },
+                calendar.get(Calendar.YEAR),
+                calendar.get(Calendar.MONTH),
+                calendar.get(Calendar.DAY_OF_MONTH));
 
         long today = System.currentTimeMillis() - 1000;
         datePickerDialog.getDatePicker().setMinDate(today);
 
         //Ne moze datum prije startnog da bira
         if (!isStartDate && !binding.etStartDate.getText().toString().isEmpty()) {
-           try {
-               String[] partsOfStart = binding.etStartDate.getText().toString().split("/");
-               int day = Integer.parseInt(partsOfStart[0]);
-               int month = Integer.parseInt(partsOfStart[1]) - 1;
-               int year = Integer.parseInt(partsOfStart[2]);
+            try {
+                String[] partsOfStart = binding.etStartDate.getText().toString().split("/");
+                int day = Integer.parseInt(partsOfStart[0]);
+                int month = Integer.parseInt(partsOfStart[1]) - 1;
+                int year = Integer.parseInt(partsOfStart[2]);
 
-               Calendar calendarStart = Calendar.getInstance();
-               calendarStart.set(year, month, day);
-               datePickerDialog.getDatePicker().setMinDate(calendarStart.getTimeInMillis());
-           } catch (Exception e) {
-               throw new RuntimeException(e);
-           }
+                Calendar calendarStart = Calendar.getInstance();
+                calendarStart.set(year, month, day);
+                datePickerDialog.getDatePicker().setMinDate(calendarStart.getTimeInMillis());
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
         }
 
         datePickerDialog.show();
@@ -352,7 +330,7 @@ public class AddEditTaskFragment extends DialogFragment {
 
             SimpleDateFormat sdf = new SimpleDateFormat("HH:mm", Locale.getDefault());
             field.setText(sdf.format(calendar.getTime()));
-            
+
             if (isStart) {
                 if (startMillis == -1) startMillis = calendar.getTimeInMillis();
                 else {
@@ -389,10 +367,6 @@ public class AddEditTaskFragment extends DialogFragment {
                 binding.layoutRecurringOptions.setVisibility(View.VISIBLE);
             } else if (checkedId == R.id.rbOneTime){
                 binding.layoutRecurringOptions.setVisibility(View.GONE);
-                binding.etReccuringNumber.setText("");
-                binding.spinnerRecurringUnit.setSelection(0);
-                binding.etEndDate.setText(binding.etStartDate.getText());
-                Toast.makeText(requireContext(),"Datumi su isti.", Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -401,13 +375,17 @@ public class AddEditTaskFragment extends DialogFragment {
         if (taskToUpdate.getStatus() != StatusType.OTKAZAN) {
             binding.btnRemoveTask.setVisibility(View.VISIBLE);
             binding.btnRemoveTask.setOnClickListener(view -> {
-            boolean removed = taskService.deleteById(taskToUpdate.getId());
-            if (removed)
-                Toast.makeText(requireContext(), "Zadatak izbrisan!", Toast.LENGTH_SHORT).show();
-            else
-                Toast.makeText(requireContext(), "Greška u brisanju zadatka!", Toast.LENGTH_SHORT).show();
-            sendBackToTaskList(taskToUpdate);
-            dismiss();
+                if (taskToUpdate.getStatus() == StatusType.URAĐEN) {
+                    Toast.makeText(requireContext(), "Ne mogu se izbrisati urađeni zadaci.", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                boolean removed = taskService.deleteById(taskToUpdate.getId());
+                if (removed)
+                    Toast.makeText(requireContext(), "Zadatak izbrisan!", Toast.LENGTH_SHORT).show();
+                else
+                    Toast.makeText(requireContext(), "Greška u brisanju zadatka!", Toast.LENGTH_SHORT).show();
+                sendBackToTaskList(taskToUpdate);
+                dismiss();
             });
         }
     }
@@ -464,6 +442,7 @@ public class AddEditTaskFragment extends DialogFragment {
                 return;
             }
 
+
             if(isEditing){
                 task.setId(taskToUpdate.getId());
                 task.setUserId(taskToUpdate.getUserId());
@@ -497,6 +476,7 @@ public class AddEditTaskFragment extends DialogFragment {
                     Toast.makeText(requireContext(), "Zadatak izmenjen!", Toast.LENGTH_SHORT).show();
                 } else {
                     task = taskService.add(task);
+                    //Create task occurrences if repeatable task
                     Toast.makeText(requireContext(), "Zadatak dodan!", Toast.LENGTH_SHORT).show();
                 }
                 sendBackToTaskList(task);

@@ -49,7 +49,7 @@ public class TaskService {
         if (startTime.isEmpty()) return "Izaberite vreme početka!";
         if (endTime.isEmpty()) return "Izaberite vreme završetka!";
         if (startMillis != -1L && endMillis != -1L && endMillis < startMillis) {
-            return "Vreme završetka mora biti nakon početka!";
+            return "Vreme i datum završetka moraju biti nakon početka!";
         }
         if (frequency == null) return "Izaberite jednokratan ili ponavljajući zadatak!";
         if (difficultyStr.isEmpty()) return "Izaberite težinu zadatka!";
@@ -59,6 +59,8 @@ public class TaskService {
         if (frequency == FrequencyType.PONAVLJAJUCI) {
             if (unitStr.isEmpty()) return "Unesite jedinicu zadatka!";
             if (intervalStr.isEmpty()) return "Unesite broj ponavljanja zadatka!";
+        } else if (frequency == FrequencyType.JEDNOKRATAN && !startDate.equals(endDate)) {
+            return "Jednokratan zadatak zahteva isti početni i krajnji datum!";
         }
 
         return null;
@@ -139,20 +141,6 @@ public class TaskService {
             }
         }
         return filteredTasks;
-    }
-
-    public Long copyDateButKeepTime(Long sourceDateMillis, Long targetDateMillis) {
-        Calendar source = Calendar.getInstance();
-        source.setTimeInMillis(sourceDateMillis);
-
-        Calendar target = Calendar.getInstance();
-        target.setTimeInMillis(targetDateMillis);
-
-        source.set(Calendar.YEAR, target.get(Calendar.YEAR));
-        source.set(Calendar.MONTH, target.get(Calendar.MONTH));
-        source.set(Calendar.DAY_OF_MONTH, target.get(Calendar.DAY_OF_MONTH));
-
-        return source.getTimeInMillis();
     }
 
     public ArrayList<Task> filterCurrentFutureTasks (ArrayList<Task> tasks) {
