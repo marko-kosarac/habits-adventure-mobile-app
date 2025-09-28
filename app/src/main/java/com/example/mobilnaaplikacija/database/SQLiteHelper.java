@@ -43,10 +43,10 @@ public class SQLiteHelper extends SQLiteOpenHelper {
     public static final String COLUMN_TASK_OCCURRENCE_ID = "id";
     public static final String COLUMN_TASK_OCCURRENCE_TASK_ID = "task_id";
     public static final String COLUMN_TASK_OCCURRENCE_NAME = "name";
-    public static final String COLUMN_TASK_OCCURRENCE_DESCRIPTION = "color";
-    public static final String COLUMN_TASK_OCCURRENCE_START_MILLIS = "color";
-    public static final String COLUMN_TASK_OCCURRENCE_END_MILLIS = "color";
-    public static final String COLUMN_TASK_OCCURRENCE_STATUS = "color";
+    public static final String COLUMN_TASK_OCCURRENCE_DESCRIPTION = "description";
+    public static final String COLUMN_TASK_OCCURRENCE_START_MILLIS = "start_millis";
+    public static final String COLUMN_TASK_OCCURRENCE_END_MILLIS = "end_millis";
+    public static final String COLUMN_TASK_OCCURRENCE_STATUS = "status";
     private static final int DATABASE_VERSION = 8;
     private static final String DATABASE_NAME = "appdata.db";
 
