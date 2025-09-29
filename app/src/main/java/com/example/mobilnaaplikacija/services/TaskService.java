@@ -46,7 +46,7 @@ public class TaskService {
                 (isOneTime ? FrequencyType.JEDNOKRATAN : null);
 
         if (name.isEmpty()) return "Unesite naziv zadatka!";
-        if (category.isEmpty()) return "Izaberite kategoriju zadatka!";
+        if (category.equals("-1")) return "Izaberite kategoriju zadatka!";
         if (startDate.isEmpty()) return "Izaberite datum početka!";
         if (endDate.isEmpty()) return "Izaberite datum završetka!";
         if (startTime.isEmpty()) return "Izaberite vreme početka!";
