@@ -97,12 +97,17 @@ public class AddEditTaskFragment extends DialogFragment {
             if (categoryPos != -1)
                 binding.spinnerCategory.setSelection(categoryPos);
             binding.categoryFields.setVisibility(View.GONE);
+            binding.rbOneTime.setEnabled(false);
             binding.rbOneTime.setChecked(taskToUpdate.getFrequency() == FrequencyType.JEDNOKRATAN);
+            binding.rbRepeat.setEnabled(false);
             binding.rbRepeat.setChecked(taskToUpdate.getFrequency() == FrequencyType.PONAVLJAJUCI);
             binding.spinnerStatus.setSelection((StatusType.valueOf(taskToUpdate.getStatus().name()).ordinal()));
+            binding.spinnerStatus.setEnabled(false);
             parseMillisToDateTime(taskToUpdate);
             binding.etReccuringNumber.setText(taskToUpdate.getInterval() == null ? "0" : String.valueOf(taskToUpdate.getInterval()));
+            binding.etReccuringNumber.setEnabled(false);
             binding.spinnerRecurringUnit.setSelection(taskToUpdate.getUnit() == null ? -1 : UnitType.valueOf(taskToUpdate.getUnit().name()).ordinal());
+            binding.spinnerRecurringUnit.setEnabled(false);
             binding.spinnerDifficulty.setSelection((DifficultyType.valueOf(taskToUpdate.getDifficulty().name()).ordinal()));
             binding.spinnerImportance.setSelection((ImportanceType.valueOf(taskToUpdate.getImportance().name()).ordinal()));
             setupRemoveTaskButton();
@@ -472,14 +477,13 @@ public class AddEditTaskFragment extends DialogFragment {
                 return;
             }
 
-
             if(isEditing){
                 task.setId(taskToUpdate.getId());
                 task.setUserId(taskToUpdate.getUserId());
             } else {
                 task.setUserId(userService.getCurrentUser().getUid());
             }
-            if(isOneTime){
+            if(isOneTime && !isEditing){
                 task.setTaskId(UUID.randomUUID().toString());
             }
             task.setName(name);
@@ -505,14 +509,17 @@ public class AddEditTaskFragment extends DialogFragment {
             //Čuvanje zadatka
             if (areDatesValid && isTimeValid) {
                 if(isEditing){
+                    if (taskToUpdate.getEndMillis() < System.currentTimeMillis() || taskToUpdate.getStatus() == StatusType.URAĐEN) {
+                        Toast.makeText(requireContext(), "Nije moguće menjati zadatke koji su završeni ili odrađeni.", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
                     task = taskService.update(task);
                     Toast.makeText(requireContext(), "Zadatak izmenjen!", Toast.LENGTH_SHORT).show();
                 } else {
-                    if(isRepeating) {
-                        List<Task> taskOccurrences = taskService.addRepeatingTask(task);
-                    } else {
-                        task = taskService.add(task);
-                    }
+                    if(isRepeating)
+                        taskService.addRepeatingTask(task);
+                    else
+                        taskService.add(task);
                     Toast.makeText(requireContext(), "Zadatak dodan!", Toast.LENGTH_SHORT).show();
                 }
                 sendBackToTaskList(task);

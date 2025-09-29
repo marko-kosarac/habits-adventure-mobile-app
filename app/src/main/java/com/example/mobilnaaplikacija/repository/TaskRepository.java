@@ -67,7 +67,7 @@ public class TaskRepository {
         values.put(SQLiteHelper.COLUMN_STATUS, task.getStatus().name());
 
         db.update(SQLiteHelper.TABLE_TASKS, values,
-                SQLiteHelper.COLUMN_TASK_ID + " = ?",
+                SQLiteHelper.COLUMN_TASK_OCCURRENCE_ID + " = ?",
                 new String[]{task.getId()});
         db.close();
 
@@ -117,7 +117,7 @@ public class TaskRepository {
 
     public int delete(String id){
         SQLiteDatabase db = dbHelper.getWritableDatabase();
-        int rows = db.delete(SQLiteHelper.TABLE_TASKS, SQLiteHelper.COLUMN_TASK_ID + " = ?", new String[]{String.valueOf(id)});
+        int rows = db.delete(SQLiteHelper.TABLE_TASKS, SQLiteHelper.COLUMN_TASK_OCCURRENCE_ID + " = ?", new String[]{String.valueOf(id)});
         db.close();
         return rows;
     }
