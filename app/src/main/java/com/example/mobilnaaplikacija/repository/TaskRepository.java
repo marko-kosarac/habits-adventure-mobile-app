@@ -26,6 +26,7 @@ public class TaskRepository {
         SQLiteDatabase db = dbHelper.getWritableDatabase();
         ContentValues values = new ContentValues();
         values.put(SQLiteHelper.COLUMN_USER_ID, task.getUserId());
+        values.put(SQLiteHelper.COLUMN_TASK_ID, task.getTaskId());
         values.put(SQLiteHelper.COLUMN_TASK_NAME, task.getName());
         values.put(SQLiteHelper.COLUMN_TASK_DESCRIPTION, task.getDescription());
         values.put(SQLiteHelper.COLUMN_TASK_CATEGORY_ID, task.getCategoryId());
@@ -52,6 +53,7 @@ public class TaskRepository {
         SQLiteDatabase db = dbHelper.getWritableDatabase();
         ContentValues values = new ContentValues();
         values.put(SQLiteHelper.COLUMN_USER_ID, task.getUserId());
+        values.put(SQLiteHelper.COLUMN_TASK_ID, task.getTaskId());
         values.put(SQLiteHelper.COLUMN_TASK_NAME, task.getName());
         values.put(SQLiteHelper.COLUMN_TASK_DESCRIPTION, task.getDescription());
         values.put(SQLiteHelper.COLUMN_TASK_CATEGORY_ID, task.getCategoryId());
@@ -83,8 +85,9 @@ public class TaskRepository {
         if (cursor.moveToFirst()) {
             do {
                 Task task = new Task();
-                task.setId(cursor.getString(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_TASK_ID)));
+                task.setId(cursor.getString(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_TASK_OCCURRENCE_ID)));
                 task.setUserId(cursor.getString(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_USER_ID)));
+                task.setTaskId(cursor.getString(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_TASK_ID)));
                 task.setName(cursor.getString(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_TASK_NAME)));
                 task.setDescription(cursor.getString(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_TASK_DESCRIPTION)));
                 task.setCategoryId(cursor.getString(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_TASK_CATEGORY_ID)));

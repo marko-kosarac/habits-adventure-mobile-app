@@ -18,6 +18,7 @@ public class SQLiteHelper extends SQLiteOpenHelper {
 
     // Tasks table
     public static final String TABLE_TASKS = "TASKS";
+    public static final String COLUMN_TASK_OCCURRENCE_ID = "id";
     public static final String COLUMN_TASK_ID = "task_id";
     public static final String COLUMN_USER_ID = "user_id";
     public static final String COLUMN_TASK_NAME = "task_name";
@@ -37,7 +38,7 @@ public class SQLiteHelper extends SQLiteOpenHelper {
     public static final String COLUMN_CATEGORY_ID = "id";
     public static final String COLUMN_CATEGORY_NAME = "name";
     public static final String COLUMN_CATEGORY_COLOR = "color";
-    private static final int DATABASE_VERSION = 8;
+    private static final int DATABASE_VERSION = 9;
     private static final String DATABASE_NAME = "appdata.db";
 
     private static final String DB_CREATE_EQUIPMENT = "CREATE TABLE " + TABLE_EQUIPMENT + " ("
@@ -52,7 +53,8 @@ public class SQLiteHelper extends SQLiteOpenHelper {
 
     private static final String DB_CREATE_TASKS =
             "CREATE TABLE " + TABLE_TASKS + " (" +
-                    COLUMN_TASK_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                    COLUMN_TASK_OCCURRENCE_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                    COLUMN_TASK_ID + " TEXT, " +
                     COLUMN_USER_ID + " TEXT, " +
                     COLUMN_TASK_NAME + " TEXT, " +
                     COLUMN_TASK_DESCRIPTION + " TEXT, " +

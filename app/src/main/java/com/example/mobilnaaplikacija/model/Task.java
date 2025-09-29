@@ -9,6 +9,7 @@ import java.time.LocalTime;
 
 public class Task implements Parcelable {
     private String id;
+    private String taskId;
     private String userId;
     private String name;
     private String description;
@@ -24,8 +25,9 @@ public class Task implements Parcelable {
 
     public Task() {}
 
-    public Task(String userId, String name, String description, String categoryId, FrequencyType frequency, Long startMillis, Long endMillis, Integer interval, UnitType unit, DifficultyType difficulty, ImportanceType importance, StatusType status) {
+    public Task(String userId, String taskId, String name, String description, String categoryId, FrequencyType frequency, Long startMillis, Long endMillis, Integer interval, UnitType unit, DifficultyType difficulty, ImportanceType importance, StatusType status) {
         this.userId = userId;
+        this.taskId = taskId;
         this.name = name;
         this.description = description;
         this.categoryId = categoryId;
@@ -39,9 +41,10 @@ public class Task implements Parcelable {
         this.status = status;
     }
 
-    public Task(String id, String userId, String name, String description, String categoryId, FrequencyType frequency, Long startMillis, Long endMillis, Integer interval, UnitType unit, DifficultyType difficulty, ImportanceType importance, StatusType status) {
+    public Task(String id, String userId, String taskId, String name, String description, String categoryId, FrequencyType frequency, Long startMillis, Long endMillis, Integer interval, UnitType unit, DifficultyType difficulty, ImportanceType importance, StatusType status) {
         this.id = id;
         this.userId = userId;
+        this.taskId = taskId;
         this.name = name;
         this.description = description;
         this.categoryId = categoryId;
@@ -58,6 +61,7 @@ public class Task implements Parcelable {
     protected Task(Parcel in) {
         id = in.readString();
         userId = in.readString();
+        taskId = in.readString();
         name = in.readString();
         description = in.readString();
         categoryId = in.readString();
@@ -81,6 +85,8 @@ public class Task implements Parcelable {
 
     public String getUserId() { return userId; }
     public void setUserId(String userId) { this.userId = userId; }
+    public String getTaskId() { return taskId; }
+    public void setTaskId(String taskId) { this.taskId = taskId; }
 
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }
@@ -127,6 +133,7 @@ public class Task implements Parcelable {
     @Override
     public void writeToParcel(@NonNull Parcel parcel, int i) {
         parcel.writeString(id != null ? id : "-1");
+        parcel.writeString(taskId != null ? taskId : "-1");
         parcel.writeString(userId != null ? userId : "-1");
         parcel.writeString(name);
         parcel.writeString(description);
