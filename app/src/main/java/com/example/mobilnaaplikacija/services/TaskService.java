@@ -74,30 +74,7 @@ public class TaskService {
     public DifficultyType getDifficultyFromXP(float xp) {
         return taskRepository.getDifficultyFromXP(xp);
     }
-
-
-
-    public Map<String, Integer> getCategoryColorsById(Map<String, String> categoryIdToName) {
-        Map<String, Integer> colorMap = new HashMap<>();
-        for (Map.Entry<String, String> entry : categoryIdToName.entrySet()) {
-            String categoryId = entry.getKey();
-            String name = entry.getValue();
-            Integer color = categoryRepository.getColorById(categoryId);
-            if (color != null) {
-                colorMap.put(name, color);
-            } else {
-                colorMap.put(name, Color.GRAY);
-            }
-        }
-        return colorMap;
-    }
-
-    public String getCategoryNameById(String categoryId) {
-        return categoryRepository.getCategoryNameById(categoryId);
-    }
-
-
-
+    
 
     public Boolean deleteById(String id){
         return taskRepository.delete(id) > 0;
