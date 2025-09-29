@@ -1,5 +1,6 @@
 package com.example.mobilnaaplikacija.fragments.task;
 
+import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
 import android.os.Bundle;
@@ -8,7 +9,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
 
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -26,10 +26,8 @@ import com.example.mobilnaaplikacija.model.FrequencyType;
 import com.example.mobilnaaplikacija.model.ImportanceType;
 import com.example.mobilnaaplikacija.model.StatusType;
 import com.example.mobilnaaplikacija.model.Task;
-import com.example.mobilnaaplikacija.model.TaskOccurrence;
 import com.example.mobilnaaplikacija.model.UnitType;
 import com.example.mobilnaaplikacija.services.CategoryService;
-import com.example.mobilnaaplikacija.services.TaskOccurrenceService;
 import com.example.mobilnaaplikacija.services.TaskService;
 import com.example.mobilnaaplikacija.services.UserService;
 
@@ -39,6 +37,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.UUID;
 
 public class AddEditTaskFragment extends DialogFragment {
 
@@ -46,7 +45,6 @@ public class AddEditTaskFragment extends DialogFragment {
     private TaskService taskService;
     private UserService userService;
     private CategoryService categoryService;
-    private TaskOccurrenceService taskOccurrenceService;
     private boolean isEditing, areDatesValid, isTimeValid;
     private Task taskToUpdate;
     private Long startMillis = -1L, endMillis = -1L;
@@ -73,7 +71,6 @@ public class AddEditTaskFragment extends DialogFragment {
         taskService = new TaskService(requireContext());
         userService = new UserService();
         categoryService = new CategoryService(getContext());
-        taskOccurrenceService = new TaskOccurrenceService(requireContext());
         categoryNames = new ArrayList<>();
         categoryIds = new ArrayList<>();
         return binding.getRoot();
@@ -97,9 +94,9 @@ public class AddEditTaskFragment extends DialogFragment {
             binding.etTaskName.setText(taskToUpdate.getName());
             binding.etTaskDescription.setText(taskToUpdate.getDescription());
             int categoryPos = categoryIds.indexOf(taskToUpdate.getCategoryId());
-            if (categoryPos != -1) {
+            if (categoryPos != -1)
                 binding.spinnerCategory.setSelection(categoryPos);
-            }binding.categoryFields.setVisibility(View.GONE);
+            binding.categoryFields.setVisibility(View.GONE);
             binding.rbOneTime.setChecked(taskToUpdate.getFrequency() == FrequencyType.JEDNOKRATAN);
             binding.rbRepeat.setChecked(taskToUpdate.getFrequency() == FrequencyType.PONAVLJAJUCI);
             binding.spinnerStatus.setSelection((StatusType.valueOf(taskToUpdate.getStatus().name()).ordinal()));
@@ -384,22 +381,43 @@ public class AddEditTaskFragment extends DialogFragment {
     }
 
     private void setupRemoveTaskButton(){
-        if (taskToUpdate.getStatus() != StatusType.OTKAZAN) {
-            binding.btnRemoveTask.setVisibility(View.VISIBLE);
-            binding.btnRemoveTask.setOnClickListener(view -> {
-                if (taskToUpdate.getStatus() == StatusType.URAĐEN) {
-                    Toast.makeText(requireContext(), "Ne mogu se izbrisati urađeni zadaci.", Toast.LENGTH_SHORT).show();
-                    return;
-                }
-                boolean removed = taskService.deleteById(taskToUpdate.getId());
-                if (removed)
-                    Toast.makeText(requireContext(), "Zadatak izbrisan!", Toast.LENGTH_SHORT).show();
-                else
-                    Toast.makeText(requireContext(), "Greška u brisanju zadatka!", Toast.LENGTH_SHORT).show();
-                sendBackToTaskList(taskToUpdate);
-                dismiss();
-            });
-        }
+        binding.btnRemoveTask.setOnClickListener(view -> {
+            boolean removed = false;
+            if (taskToUpdate.getEndMillis() < System.currentTimeMillis()) {
+                Toast.makeText(requireContext(), "Nije moguće obrisati zadatke koji su završeni.", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            if (taskToUpdate.getFrequency() == FrequencyType.JEDNOKRATAN){
+                removed = taskService.deleteById(taskToUpdate.getId());
+            } else {
+                SimpleDateFormat fmt = new SimpleDateFormat("d. MMM yyyy, HH:mm", Locale.getDefault());
+                String clickedDateStr = fmt.format(new Date());
+
+                new AlertDialog.Builder(requireContext())
+                        .setTitle("Brisanje ponavljajućeg zadatka")
+                        .setMessage("Obrisaćeš sve ponavljajuće zadatke nakon ovog trenutka "
+                                + clickedDateStr
+                                + ". Prethodni ostaju sačuvani u kalendaru. Da li se slažeš?")
+                        .setPositiveButton("Da", (dialog, which) -> {
+                            boolean deleted = taskService.deleteFutureOccurrences(taskToUpdate.getTaskId());
+                            showDeleteResult(deleted);
+                        })
+                        .setNegativeButton("Ne", null)
+                        .show();
+                return;
+            }
+            showDeleteResult(removed);
+        });
+    }
+
+    private void showDeleteResult(boolean removed) {
+        if (removed)
+            Toast.makeText(requireContext(), "Zadatak izbrisan!", Toast.LENGTH_SHORT).show();
+        else
+            Toast.makeText(requireContext(), "Greška u brisanju zadatka!", Toast.LENGTH_SHORT).show();
+
+        sendBackToTaskList(taskToUpdate);
+        dismiss();
     }
 
     private void setupSaveTaskButton() {
@@ -461,6 +479,9 @@ public class AddEditTaskFragment extends DialogFragment {
             } else {
                 task.setUserId(userService.getCurrentUser().getUid());
             }
+            if(isOneTime){
+                task.setTaskId(UUID.randomUUID().toString());
+            }
             task.setName(name);
             task.setDescription(description);
             task.setCategoryId(categoryId);
@@ -487,9 +508,10 @@ public class AddEditTaskFragment extends DialogFragment {
                     task = taskService.update(task);
                     Toast.makeText(requireContext(), "Zadatak izmenjen!", Toast.LENGTH_SHORT).show();
                 } else {
-                    task = taskService.add(task);
                     if(isRepeating) {
-                        List<TaskOccurrence> taskOccurrences = taskOccurrenceService.generateOccurrences(task);
+                        List<Task> taskOccurrences = taskService.addRepeatingTask(task);
+                    } else {
+                        task = taskService.add(task);
                     }
                     Toast.makeText(requireContext(), "Zadatak dodan!", Toast.LENGTH_SHORT).show();
                 }

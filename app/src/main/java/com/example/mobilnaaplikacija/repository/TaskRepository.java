@@ -121,4 +121,20 @@ public class TaskRepository {
         db.close();
         return rows;
     }
+
+    public boolean deleteFutureOccurrences(String taskId) {
+        long now = System.currentTimeMillis();
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
+
+        //start > now
+        int deleted = db.delete(
+                SQLiteHelper.TABLE_TASKS,
+                "task_id = ? AND start_millis > ?",
+                new String[]{taskId, String.valueOf(now)}
+        );
+
+        db.close();
+        return deleted > 0;
+    }
+
 }

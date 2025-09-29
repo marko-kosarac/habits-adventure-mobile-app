@@ -13,6 +13,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.UUID;
 
 public class TaskService {
 
@@ -27,7 +28,66 @@ public class TaskService {
     public Task add(Task task) {
         return taskRepository.add(task);
     }
+    
+    public ArrayList<Task> addRepeatingTask(Task task) {
+        ArrayList<Task> taskOccurrences = new ArrayList<>();
+        String taskId = UUID.randomUUID().toString();
+        List<String> dates = getTaskOcurringDates(task);
 
+        //HH:mm iz start i end millis
+        Calendar calStart = Calendar.getInstance();
+        calStart.setTimeInMillis(task.getStartMillis());
+        int startHour = calStart.get(Calendar.HOUR_OF_DAY);
+        int startMinute = calStart.get(Calendar.MINUTE);
+
+        Calendar calEnd = Calendar.getInstance();
+        calEnd.setTimeInMillis(task.getEndMillis());
+        int endHour = calEnd.get(Calendar.HOUR_OF_DAY);
+        int endMinute = calEnd.get(Calendar.MINUTE);
+
+        SimpleDateFormat fmt = new SimpleDateFormat("d/M/yyyy", Locale.getDefault());
+
+        for (String date : dates) {
+            try {
+                Date baseDate = fmt.parse(date);
+                if (baseDate == null) continue;
+
+                Calendar startCal = Calendar.getInstance();
+                startCal.setTime(baseDate);
+                startCal.set(Calendar.HOUR_OF_DAY, startHour);
+                startCal.set(Calendar.MINUTE, startMinute);
+                startCal.set(Calendar.SECOND, 0);
+
+                Calendar endCal = Calendar.getInstance();
+                endCal.setTime(baseDate);
+                endCal.set(Calendar.HOUR_OF_DAY, endHour);
+                endCal.set(Calendar.MINUTE, endMinute);
+                endCal.set(Calendar.SECOND, 0);
+
+                Task taskOccurrence = new Task();
+                taskOccurrence.setId(task.getId());
+                taskOccurrence.setUserId(task.getUserId());
+                taskOccurrence.setTaskId(taskId);
+                taskOccurrence.setName(task.getName());
+                taskOccurrence.setDescription(task.getDescription());
+                taskOccurrence.setCategoryId(task.getCategoryId());
+                taskOccurrence.setFrequency(task.getFrequency());
+                taskOccurrence.setStartMillis(startCal.getTimeInMillis());
+                taskOccurrence.setEndMillis(endCal.getTimeInMillis());
+                taskOccurrence.setInterval(task.getInterval());
+                taskOccurrence.setUnit(task.getUnit());
+                taskOccurrence.setDifficulty(task.getDifficulty());
+                taskOccurrence.setImportance(task.getImportance());
+                taskOccurrence.setStatus(task.getStatus());
+
+                taskRepository.add(taskOccurrence);
+                taskOccurrences.add(taskOccurrence);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        return taskOccurrences;
+    }
 
     public Task update(Task task) {
         return taskRepository.update(task);
@@ -39,6 +99,10 @@ public class TaskService {
 
     public Boolean deleteById(String id){
         return taskRepository.delete(id) > 0;
+    }
+
+    public Boolean deleteFutureOccurrences(String id){
+        return taskRepository.deleteFutureOccurrences(id);
     }
 
     public String validate(String name, String category, boolean isRepeating, boolean isOneTime, String startDate, String endDate, String startTime, String endTime, Long startMillis, Long endMillis, String difficultyStr, String importanceStr, String unitStr, String intervalStr) {
