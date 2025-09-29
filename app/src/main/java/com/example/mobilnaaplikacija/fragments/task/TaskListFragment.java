@@ -207,6 +207,23 @@ public class TaskListFragment extends Fragment implements RecyclerViewInterface 
         return currentTasks;
     }
 
+    private ArrayList<Task> getOneTimeTasks() {
+        ArrayList<Task> ontTimeTasks = new ArrayList<>();
+        for (Task task : tasks) {
+            if (task.getFrequency() == FrequencyType.JEDNOKRATAN)
+                ontTimeTasks.add(task);
+        }
+        return ontTimeTasks;
+    }
+
+    private ArrayList<Task> getRepeatingTasks() {
+        ArrayList<Task> repeatingTasks = new ArrayList<>();
+        for (Task task : tasks) {
+            if (task.getFrequency() == FrequencyType.PONAVLJAJUCI)
+                repeatingTasks.add(task);
+        }
+        return repeatingTasks;
+    }
     private ArrayList<Task> filterByDate(ArrayList<Task> tasks, String selectedDate) {
         ArrayList<Task> filtered = new ArrayList<>();
         for (Task task : tasks) {
@@ -231,7 +248,6 @@ public class TaskListFragment extends Fragment implements RecyclerViewInterface 
         }
         return filteredTasks;
     }
-
 
     private void decorateCalendarWithTasks() {
         List<CalendarDay> calendarDays = new ArrayList<>();
