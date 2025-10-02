@@ -9,6 +9,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
 
+import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -104,10 +105,8 @@ public class AddEditTaskFragment extends DialogFragment {
             binding.spinnerStatus.setSelection((StatusType.valueOf(taskToUpdate.getStatus().name()).ordinal()));
             binding.spinnerStatus.setEnabled(false);
             parseMillisToDateTime(taskToUpdate);
-            binding.etReccuringNumber.setText(taskToUpdate.getInterval() == null ? "0" : String.valueOf(taskToUpdate.getInterval()));
-            binding.etReccuringNumber.setEnabled(false);
+            binding.etRecurringNumber.setText(taskToUpdate.getInterval() == null ? "0" : String.valueOf(taskToUpdate.getInterval()));
             binding.spinnerRecurringUnit.setSelection(taskToUpdate.getUnit() == null ? -1 : UnitType.valueOf(taskToUpdate.getUnit().name()).ordinal());
-            binding.spinnerRecurringUnit.setEnabled(false);
             binding.spinnerDifficulty.setSelection((DifficultyType.valueOf(taskToUpdate.getDifficulty().name()).ordinal()));
             binding.spinnerImportance.setSelection((ImportanceType.valueOf(taskToUpdate.getImportance().name()).ordinal()));
             setupRemoveTaskButton();
@@ -168,7 +167,16 @@ public class AddEditTaskFragment extends DialogFragment {
             binding.etEndTime.setText(timeFormat.format(endDate));
             endMillis = task.getEndMillis();
         }
+
+        if (task.getFrequency() == FrequencyType.PONAVLJAJUCI) {
+            Pair<Long, Long> bounds = taskService.getTaskGroupBounds(task.getTaskId());
+            if (bounds.first != null && bounds.second != null) {
+                binding.etStartDate.setText(dateFormat.format(new Date(bounds.first)));
+                binding.etEndDate.setText(dateFormat.format(new Date(bounds.second)));
+            }
+        }
     }
+
     private void setupSpinners(){
         ArrayList<Category> categories = new ArrayList<>(categoryService.getCategories());
 
@@ -453,8 +461,8 @@ public class AddEditTaskFragment extends DialogFragment {
             String recurringUnit = binding.spinnerRecurringUnit.getSelectedItem() != null
                     ? binding.spinnerRecurringUnit.getSelectedItem().toString()
                     : null;
-            String recurringNumber = binding.etReccuringNumber.getText() != null
-                    ? binding.etReccuringNumber.getText().toString()
+            String recurringNumber = binding.etRecurringNumber.getText() != null
+                    ? binding.etRecurringNumber.getText().toString()
                     : "0";
 
             //Validacija
@@ -480,6 +488,7 @@ public class AddEditTaskFragment extends DialogFragment {
             if(isEditing){
                 task.setId(taskToUpdate.getId());
                 task.setUserId(taskToUpdate.getUserId());
+                task.setTaskId(taskToUpdate.getTaskId());
             } else {
                 task.setUserId(userService.getCurrentUser().getUid());
             }
@@ -506,26 +515,59 @@ public class AddEditTaskFragment extends DialogFragment {
                 task.setInterval(Integer.parseInt(recurringNumber));
             }
 
-            //Čuvanje zadatka
+            // Čuvanje zadatka
             if (areDatesValid && isTimeValid) {
-                if(isEditing){
-                    if (taskToUpdate.getEndMillis() < System.currentTimeMillis() || taskToUpdate.getStatus() == StatusType.URAĐEN) {
+                if (isEditing) {
+                    if (taskToUpdate.getEndMillis() < System.currentTimeMillis() ||
+                            taskToUpdate.getStatus() == StatusType.URAĐEN) {
                         Toast.makeText(requireContext(), "Nije moguće menjati zadatke koji su završeni ili odrađeni.", Toast.LENGTH_SHORT).show();
                         return;
                     }
-                    task = taskService.update(task);
-                    Toast.makeText(requireContext(), "Zadatak izmenjen!", Toast.LENGTH_SHORT).show();
+
+                    if (taskToUpdate.getFrequency() == FrequencyType.PONAVLJAJUCI) {
+                        new AlertDialog.Builder(requireContext())
+                                .setTitle("Izmena zadatka")
+                                .setMessage("Promene će važiti samo za buduće pojavljivanja ovog zadatka počevši od danas. " +
+                                        "Završeni i odrađeni zadaci se neće menjati.\n\nDa li želite da nastavite?")
+                                .setPositiveButton("Da", (dialog, which) -> {
+                                    List<Task> list = taskService.updateFutureOccurrences(task);
+                                    if (!list.isEmpty()) {
+                                        Toast.makeText(requireContext(),
+                                                "Zadatak izmenjen!",
+                                                Toast.LENGTH_SHORT).show();
+                                        sendBackToTaskList(task);
+                                        dismiss();
+                                    } else {
+                                        Toast.makeText(requireContext(),
+                                                "Greška pri izmeni zadatka!",
+                                                Toast.LENGTH_SHORT).show();
+                                    }
+                                })
+                                .setNegativeButton("Ne", (dialog, which) -> dialog.dismiss())
+                                .show();
+                    } else {
+                        Task updated = taskService.update(task);
+                        if (updated != null) {
+                            Toast.makeText(requireContext(), "Zadatak izmenjen!", Toast.LENGTH_SHORT).show();
+                            sendBackToTaskList(task);
+                            dismiss();
+                        } else {
+                            Toast.makeText(requireContext(), "Greška pri izmeni zadatka!", Toast.LENGTH_SHORT).show();
+                        }
+                    }
                 } else {
-                    if(isRepeating)
+                    if (isRepeating)
                         taskService.addRepeatingTask(task);
                     else
                         taskService.add(task);
+
                     Toast.makeText(requireContext(), "Zadatak dodan!", Toast.LENGTH_SHORT).show();
+                    sendBackToTaskList(task);
+                    dismiss();
                 }
-                sendBackToTaskList(task);
-                dismiss();
-            } else
+            } else {
                 showError("Datum završetka je pre početka!");
+            }
         });
     }
 
