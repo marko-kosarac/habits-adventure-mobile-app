@@ -206,11 +206,11 @@ public class TaskRepository {
     public boolean deleteFutureOccurrences(String taskId, long now) {
         SQLiteDatabase db = dbHelper.getWritableDatabase();
 
-        //start > now
+        //start >= now
         int deleted = db.delete(
                 SQLiteHelper.TABLE_TASKS,
-                "task_id = ? AND start_millis > ?",
-                new String[]{taskId, String.valueOf(now)}
+                "task_id = ? AND (start_millis >= ? OR (start_millis <= ? AND end_millis >= ?))",
+                new String[]{taskId, String.valueOf(now), String.valueOf(now), String.valueOf(now)}
         );
 
         db.close();
