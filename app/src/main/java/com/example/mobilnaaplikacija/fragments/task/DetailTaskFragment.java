@@ -1,6 +1,7 @@
 package com.example.mobilnaaplikacija.fragments.task;
 
 import android.os.Bundle;
+import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,6 +16,7 @@ import com.example.mobilnaaplikacija.model.FrequencyType;
 import com.example.mobilnaaplikacija.model.StatusType;
 import com.example.mobilnaaplikacija.model.Task;
 import com.example.mobilnaaplikacija.services.CategoryService;
+import com.example.mobilnaaplikacija.services.TaskService;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -24,6 +26,7 @@ public class DetailTaskFragment extends DialogFragment {
     private DialogDetailTaskBinding binding;
     private Task selectedTask;
     private CategoryService categoryService;
+    private TaskService taskService;
 
     @Override
     public void onStart() {
@@ -41,6 +44,7 @@ public class DetailTaskFragment extends DialogFragment {
                              Bundle savedInstanceState) {
         binding = DialogDetailTaskBinding.inflate(inflater, container, false);
         categoryService = new CategoryService(getContext());
+        taskService = new TaskService(getContext());
         return binding.getRoot();
     }
 
@@ -89,14 +93,22 @@ public class DetailTaskFragment extends DialogFragment {
 
         if (task.getStartMillis() != null) {
             Date startDateTime = new Date(task.getStartMillis());
-            binding.tvTaskStartDate.setText(dateFormat.format(startDateTime));
+            binding.tvTaskOccurringDate.setText(dateFormat.format(startDateTime));
             binding.tvTaskStartTime.setText(timeFormat.format(startDateTime));
         }
 
         if (task.getEndMillis() != null) {
             Date endDateTime = new Date(task.getEndMillis());
-            binding.tvTaskEndDate.setText(dateFormat.format(endDateTime));
             binding.tvTaskEndTime.setText(timeFormat.format(endDateTime));
+        }
+
+        if (task.getFrequency() == FrequencyType.PONAVLJAJUCI) {
+            Pair<Long, Long> bounds = taskService.getTaskGroupBounds(task.getTaskId());
+            if (bounds.first != null && bounds.second != null) {
+                String period = dateFormat.format(new Date(bounds.first))
+                        + " - " + dateFormat.format(new Date(bounds.second));
+                binding.tvTaskPeriod.setText(period);
+            }
         }
     }
 

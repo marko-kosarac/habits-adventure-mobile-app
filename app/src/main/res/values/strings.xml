@@ -31,7 +31,6 @@
     <string name="next">Next</string>
     <string name="previous">Previous</string>
 
-    <string name="my_tasks">Moji zadaci</string>
     <string name="add_task">Novi zadatak</string>
     <string name="remove">Izbriši</string>
     <string name="save">Sačuvaj</string>
@@ -52,12 +51,12 @@
     <string name="detail_description">Opis:</string>
     <string name="detail_category">Kategorija:</string>
     <string name="detail_status">Status:</string>
-    <string name="detail_date">Datum:</string>
+    <string name="detail_date_occurring">Pojavljivanje:</string>
+    <string name="detail_period">Period:</string>
     <string name="detail_date_dash">-</string>
     <string name="detail_time">Vreme:</string>
-    <string name="detail_recurring">Ponavljanje zadatka:</string>
-    <string name="detail_recurring_number">Broj:</string>
-    <string name="detail_recurring_unit">Jedinica:</string>
+    <string name="detail_recurring">Ponavljanje:</string>
+    <string name="detail_recurring_each">Svakih</string>
     <string name="detail_difficulty">Težina:</string>
     <string name="detail_importance">Bitnost:</string>
     <string name="detail_title">Detalji zadatka</string>

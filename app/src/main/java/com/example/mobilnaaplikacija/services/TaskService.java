@@ -1,6 +1,8 @@
 package com.example.mobilnaaplikacija.services;
 
 import android.content.Context;
+import android.util.Pair;
+
 import androidx.annotation.Nullable;
 
 import com.example.mobilnaaplikacija.database.SQLiteHelper;
@@ -28,10 +30,12 @@ public class TaskService {
     public Task add(Task task) {
         return taskRepository.add(task);
     }
-    
+
     public ArrayList<Task> addRepeatingTask(Task task) {
         ArrayList<Task> taskOccurrences = new ArrayList<>();
-        String taskId = UUID.randomUUID().toString();
+        String taskId;
+        if (task.getTaskId() == null) taskId = UUID.randomUUID().toString();
+        else taskId = task.getTaskId();
         List<String> dates = getTaskOcurringDates(task);
 
         //HH:mm iz start i end millis
@@ -93,6 +97,11 @@ public class TaskService {
         return taskRepository.update(task);
     }
 
+    public ArrayList<Task> updateFutureOccurrences(Task task) {
+        deleteFutureOccurrences(task.getTaskId());
+         return addRepeatingTask(task);
+    }
+
     public List<Task> getTasksByUser(String userId){
         return taskRepository.getTasksByUser(userId);
     }
@@ -102,7 +111,8 @@ public class TaskService {
     }
 
     public Boolean deleteFutureOccurrences(String id){
-        return taskRepository.deleteFutureOccurrences(id);
+        long now = System.currentTimeMillis();
+        return taskRepository.deleteFutureOccurrences(id, now);
     }
 
     public String validate(String name, String category, boolean isRepeating, boolean isOneTime, String startDate, String endDate, String startTime, String endTime, Long startMillis, Long endMillis, String difficultyStr, String importanceStr, String unitStr, String intervalStr) {
@@ -279,5 +289,9 @@ public class TaskService {
             return new Date(millis);
         }
         return null;
+    }
+
+    public Pair<Long, Long> getTaskGroupBounds(String taskId) {
+        return taskRepository.getTaskGroupBounds(taskId);
     }
 }
