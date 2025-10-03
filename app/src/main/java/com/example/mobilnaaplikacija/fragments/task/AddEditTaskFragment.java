@@ -46,7 +46,7 @@ public class AddEditTaskFragment extends DialogFragment {
     private TaskService taskService;
     private UserService userService;
     private CategoryService categoryService;
-    private boolean isEditing, areDatesValid, isTimeValid;
+    private boolean isEditing, areDatesValid;
     private Task taskToUpdate;
     private Long startMillis = -1L, endMillis = -1L;
     private ArrayList<String> categoryNames;
@@ -83,7 +83,6 @@ public class AddEditTaskFragment extends DialogFragment {
 
         isEditing = false;
         areDatesValid = true;
-        isTimeValid = true;
         taskToUpdate = null;
         newCategory = null;
         setupSpinners();
@@ -479,9 +478,9 @@ public class AddEditTaskFragment extends DialogFragment {
                 }
             }
 
-            isTimeValid = taskService.isTimeValid(startMillis, endMillis);
-            if (!isTimeValid) {
-                showError("Vreme završetka mora biti posle početka!");
+            String isTimeValid = taskService.isTimeValid(startMillis, endMillis);
+            if (isTimeValid != null) {
+                showError(isTimeValid);
                 return;
             }
 
@@ -516,7 +515,7 @@ public class AddEditTaskFragment extends DialogFragment {
             }
 
             // Čuvanje zadatka
-            if (areDatesValid && isTimeValid) {
+            if (areDatesValid) {
                 if (isEditing) {
                     if (taskToUpdate.getEndMillis() < System.currentTimeMillis() ||
                             taskToUpdate.getStatus() == StatusType.URAĐEN) {

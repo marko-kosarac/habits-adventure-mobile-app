@@ -285,22 +285,20 @@ public class TaskService {
         return null;
     }
 
-    public boolean isTimeValid (Long start, Long end) {
-        if(start > 0 && end > 0 && start > end) return false;
-
-        Calendar startCal = Calendar.getInstance();
-        startCal.setTimeInMillis(start);
-        int hourSt = startCal.get(Calendar.HOUR_OF_DAY);
-        int minSt = startCal.get(Calendar.MINUTE);
-        Calendar endCal = Calendar.getInstance();
-        endCal.setTimeInMillis(end);
-        int hourEnd = endCal.get(Calendar.HOUR_OF_DAY);
-        int minEnd = endCal.get(Calendar.MINUTE);
-
-        if (hourEnd < hourSt || (hourSt == hourEnd && minEnd <= minSt)) {
-            return false;
+    public String isTimeValid(Long start, Long end) {
+        Long now = System.currentTimeMillis();
+        if (start <= now) {
+            return "Početak mora biti u budućnosti.";
         }
-        return true;
+
+        if (end <= now) {
+            return "Kraj mora biti u budućnosti.";
+        }
+
+        if (end <= start) {
+            return "Kraj mora biti nakon početka.";
+        }
+        return null;
     }
 
     public ArrayList<Task> filterByFrequency(ArrayList<Task> tasks, @Nullable FrequencyType type) {
