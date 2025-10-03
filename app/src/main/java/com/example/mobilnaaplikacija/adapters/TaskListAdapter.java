@@ -49,7 +49,29 @@ public class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapter.TasksV
         holder.category.setText(categoryName);
         int categoryColor = (category == null) ? Color.WHITE : category.getColor();
         holder.cardColor.setBackgroundColor(categoryColor);
-        holder.isDone.setChecked(task.getStatus() == StatusType.URAĐEN);
+        holder.status.setText(task.getStatus().getDisplayName());
+        switch (task.getStatus()) {
+            case AKTIVAN:
+                holder.status.setBackgroundResource(R.drawable.status_pill_blue);
+                holder.status.setTextColor(Color.WHITE);
+                break;
+            case URAĐEN:
+                holder.status.setBackgroundResource(R.drawable.status_pill_green);
+                holder.status.setTextColor(Color.WHITE);
+                break;
+            case NEURAĐEN:
+                holder.status.setBackgroundResource(R.drawable.status_pill_red);
+                holder.status.setTextColor(Color.WHITE);
+                break;
+            case PAUZIRAN:
+                holder.status.setBackgroundResource(R.drawable.status_pill_yellow);
+                holder.status.setTextColor(Color.WHITE);
+                break;
+            case OTKAZAN:
+                holder.status.setBackgroundResource(R.drawable.status_pill_gray);
+                holder.status.setTextColor(Color.WHITE);
+                break;
+        }
 
         if (task.getStatus() == StatusType.OTKAZAN || task.getStatus() == StatusType.NEURAĐEN) {
             holder.editButton.setVisibility(View.INVISIBLE);
@@ -74,8 +96,7 @@ public class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapter.TasksV
     }
 
     public static class TasksViewHolder extends  RecyclerView.ViewHolder{
-        TextView name, category;
-        CheckBox isDone;
+        TextView name, category, status;
         ImageButton editButton;
         View cardColor;
 
@@ -83,7 +104,7 @@ public class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapter.TasksV
             super(view);
             name = view.findViewById(R.id.tvTaskName);
             category = view.findViewById(R.id.tvTaskCategory);
-            isDone = view.findViewById(R.id.cbIsTaskDone);
+            status = view.findViewById(R.id.tvTaskStatus);
             editButton = view.findViewById(R.id.btnEditTask);
             cardColor = view.findViewById(R.id.vCardColor);
 
