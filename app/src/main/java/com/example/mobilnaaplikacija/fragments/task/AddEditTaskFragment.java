@@ -530,6 +530,9 @@ public class AddEditTaskFragment extends DialogFragment {
                                 .setMessage("Promene će važiti samo za buduće pojavljivanja ovog zadatka počevši od danas. " +
                                         "Završeni i odrađeni zadaci se neće menjati.\n\nDa li želite da nastavite?")
                                 .setPositiveButton("Da", (dialog, which) -> {
+                                    //before calling serivce update startMillis and endMillis by picking up values from startDate, endDate, startTime and endTime and combining them
+                                    updateStartEndMillis(task);
+
                                     List<Task> list = taskService.updateFutureOccurrences(task);
                                     if (!list.isEmpty()) {
                                         Toast.makeText(requireContext(),
@@ -579,6 +582,32 @@ public class AddEditTaskFragment extends DialogFragment {
 
     private void showError(String message){
         Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show();
+    }
+
+    private long combineDateAndTimeToMillis(String dateStr, String timeStr) {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("d/M/yyyy HH:mm", Locale.getDefault());
+        Date dateTime;
+        try {
+            dateTime = dateFormat.parse(dateStr + " " + timeStr);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        return dateTime != null ? dateTime.getTime() : 0;
+    }
+
+    private void updateStartEndMillis (Task task) {
+        long startMillis = combineDateAndTimeToMillis(
+                binding.etStartDate.getText().toString(),
+                binding.etStartTime.getText().toString()
+        );
+
+        long endMillis = combineDateAndTimeToMillis(
+                binding.etEndDate.getText().toString(),
+                binding.etEndTime.getText().toString()
+        );
+
+        task.setStartMillis(startMillis);
+        task.setEndMillis(endMillis);
     }
 
     @Override

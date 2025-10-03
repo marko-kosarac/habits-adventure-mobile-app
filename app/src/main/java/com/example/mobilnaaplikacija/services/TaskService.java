@@ -9,6 +9,7 @@ import com.example.mobilnaaplikacija.database.SQLiteHelper;
 import com.example.mobilnaaplikacija.repository.TaskRepository;
 import com.example.mobilnaaplikacija.model.*;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -36,7 +37,8 @@ public class TaskService {
         String taskId;
         if (task.getTaskId() == null) taskId = UUID.randomUUID().toString();
         else taskId = task.getTaskId();
-        List<String> dates = getTaskOcurringDates(task);
+        List<String> dates = getTaskOccurringDates(task);
+        SimpleDateFormat fmt = new SimpleDateFormat("d/M/yyyy", Locale.getDefault());
 
         //HH:mm iz start i end millis
         Calendar calStart = Calendar.getInstance();
@@ -48,8 +50,6 @@ public class TaskService {
         calEnd.setTimeInMillis(task.getEndMillis());
         int endHour = calEnd.get(Calendar.HOUR_OF_DAY);
         int endMinute = calEnd.get(Calendar.MINUTE);
-
-        SimpleDateFormat fmt = new SimpleDateFormat("d/M/yyyy", Locale.getDefault());
 
         for (String date : dates) {
             try {
@@ -98,8 +98,104 @@ public class TaskService {
     }
 
     public ArrayList<Task> updateFutureOccurrences(Task task) {
-        deleteFutureOccurrences(task.getTaskId());
-         return addRepeatingTask(task);
+        ArrayList<Task> taskOccurrences = new ArrayList<>();
+        Long now = System.currentTimeMillis();
+
+        List<String> allDates = getTaskOccurringDates(task);
+
+        //Filter only today or future dates
+        List<String> futureDates = new ArrayList<>();
+        SimpleDateFormat fmt = new SimpleDateFormat("d/M/yyyy", Locale.getDefault());
+
+        Calendar calStart = Calendar.getInstance();
+        calStart.setTimeInMillis(task.getStartMillis());
+        int startHour = calStart.get(Calendar.HOUR_OF_DAY);
+        int startMinute = calStart.get(Calendar.MINUTE);
+
+        for (String dateStr : allDates) {
+            try {
+                Date date = fmt.parse(dateStr);
+                if (date == null) continue;
+
+                Calendar startCal = Calendar.getInstance();
+                startCal.setTime(date);
+                startCal.set(Calendar.HOUR_OF_DAY, startHour);
+                startCal.set(Calendar.MINUTE, startMinute);
+                startCal.set(Calendar.SECOND, 0);
+                startCal.set(Calendar.MILLISECOND, 0);
+
+                //update if startMillis is strictly in the future
+                if (startCal.getTimeInMillis() > now) {
+                    futureDates.add(dateStr);
+                }
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+        }
+
+        taskRepository.deleteFutureOccurrences(task.getTaskId(), System.currentTimeMillis());
+        taskOccurrences = createTasksFromFutureDates(task, task.getTaskId(), futureDates);
+
+        return taskOccurrences;
+    }
+
+    private ArrayList<Task> createTasksFromFutureDates(Task task, String taskId, List<String> dates) {
+        ArrayList<Task> taskOccurrences = new ArrayList<>();
+        SimpleDateFormat fmt = new SimpleDateFormat("d/M/yyyy", Locale.getDefault());
+
+        Calendar calStart = Calendar.getInstance();
+        calStart.setTimeInMillis(task.getStartMillis());
+        int startHour = calStart.get(Calendar.HOUR_OF_DAY);
+        int startMinute = calStart.get(Calendar.MINUTE);
+
+        Calendar calEnd = Calendar.getInstance();
+        calEnd.setTimeInMillis(task.getEndMillis());
+        int endHour = calEnd.get(Calendar.HOUR_OF_DAY);
+        int endMinute = calEnd.get(Calendar.MINUTE);
+
+        for (String dateStr : dates) {
+            try {
+                Date baseDate = fmt.parse(dateStr);
+                if (baseDate == null) continue;
+
+                Calendar startCal = Calendar.getInstance();
+                startCal.setTime(baseDate);
+                startCal.set(Calendar.HOUR_OF_DAY, startHour);
+                startCal.set(Calendar.MINUTE, startMinute);
+                startCal.set(Calendar.SECOND, 0);
+                startCal.set(Calendar.MILLISECOND, 0);
+
+                Calendar endCal = Calendar.getInstance();
+                endCal.setTime(baseDate);
+                endCal.set(Calendar.HOUR_OF_DAY, endHour);
+                endCal.set(Calendar.MINUTE, endMinute);
+                endCal.set(Calendar.SECOND, 0);
+                endCal.set(Calendar.MILLISECOND, 0);
+
+                Task taskOccurrence = new Task();
+                taskOccurrence.setId(task.getId());
+                taskOccurrence.setUserId(task.getUserId());
+                taskOccurrence.setTaskId(taskId);
+                taskOccurrence.setName(task.getName());
+                taskOccurrence.setDescription(task.getDescription());
+                taskOccurrence.setCategoryId(task.getCategoryId());
+                taskOccurrence.setFrequency(task.getFrequency());
+                taskOccurrence.setStartMillis(startCal.getTimeInMillis());
+                taskOccurrence.setEndMillis(endCal.getTimeInMillis());
+                taskOccurrence.setInterval(task.getInterval());
+                taskOccurrence.setUnit(task.getUnit());
+                taskOccurrence.setDifficulty(task.getDifficulty());
+                taskOccurrence.setImportance(task.getImportance());
+                taskOccurrence.setStatus(task.getStatus());
+
+                taskRepository.add(taskOccurrence);
+                taskOccurrences.add(taskOccurrence);
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+        }
+
+        return taskOccurrences;
     }
 
     public List<Task> getTasksByUser(String userId){
@@ -240,7 +336,7 @@ public class TaskService {
         }
     }
 
-    public List<String> getTaskOcurringDates(Task task) {
+    public List<String> getTaskOccurringDates(Task task) {
         List<String> dates = new ArrayList<>();
         SimpleDateFormat fmt = new SimpleDateFormat("d/M/yyyy", Locale.getDefault());
         fmt.setLenient(false);

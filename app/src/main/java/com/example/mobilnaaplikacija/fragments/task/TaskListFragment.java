@@ -7,7 +7,6 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,7 +23,6 @@ import com.example.mobilnaaplikacija.decorators.MultiDotDrawable;
 import com.example.mobilnaaplikacija.model.Category;
 import com.example.mobilnaaplikacija.model.FrequencyType;
 import com.example.mobilnaaplikacija.model.Task;
-import com.example.mobilnaaplikacija.model.UnitType;
 import com.example.mobilnaaplikacija.services.CategoryService;
 import com.example.mobilnaaplikacija.services.TaskService;
 import com.example.mobilnaaplikacija.services.UserService;
@@ -227,7 +225,7 @@ public class TaskListFragment extends Fragment implements RecyclerViewInterface 
     private ArrayList<Task> filterByDate(ArrayList<Task> tasks, String selectedDate) {
         ArrayList<Task> filtered = new ArrayList<>();
         for (Task task : tasks) {
-            List<String> allDates = taskService.getTaskOcurringDates(task);
+            List<String> allDates = taskService.getTaskOccurringDates(task);
             if (allDates.contains(selectedDate)) {
                 filtered.add(task);
             }
@@ -257,7 +255,7 @@ public class TaskListFragment extends Fragment implements RecyclerViewInterface 
         Map<String, List<Task>> tasksPerDate = new HashMap<>();
 
         for (Task task : tasks) {
-            List<String> allDates = taskService.getTaskOcurringDates(task);
+            List<String> allDates = taskService.getTaskOccurringDates(task);
 
             for (String date : allDates) {
                 if (!tasksPerDate.containsKey(date)) {

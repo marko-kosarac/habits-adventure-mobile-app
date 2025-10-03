@@ -23,61 +23,6 @@ public class TaskRepository {
         this.dbHelper = dbHelper;
     }
 
-    public List<Task> getTasksByTaskId(String taskId) {
-        SQLiteDatabase db = dbHelper.getReadableDatabase();
-        List<Task> tasks = new ArrayList<>();
-
-        Cursor cursor = db.query(
-                SQLiteHelper.TABLE_TASKS,
-                null,
-                SQLiteHelper.COLUMN_TASK_ID + " = ?",
-                new String[]{taskId},
-                null, null, null
-        );
-
-        if (cursor.moveToFirst()) {
-            do {
-                tasks.add(parseCursorToTask(cursor));
-            } while (cursor.moveToNext());
-        }
-        cursor.close();
-        db.close();
-        return tasks;
-    }
-
-    private Task parseCursorToTask(Cursor cursor) {
-        Task task = new Task();
-
-        task.setId(cursor.getString(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_TASK_OCCURRENCE_ID)));
-        task.setTaskId(cursor.getString(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_TASK_ID)));
-        task.setUserId(cursor.getString(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_USER_ID)));
-        task.setName(cursor.getString(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_TASK_NAME)));
-        task.setDescription(cursor.getString(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_TASK_DESCRIPTION)));
-        task.setCategoryId(cursor.getString(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_TASK_CATEGORY_ID)));
-
-        String frequency = cursor.getString(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_FREQUENCY));
-        task.setFrequency(FrequencyType.valueOf(frequency));
-
-        task.setStartMillis(cursor.getLong(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_START_MILLIS)));
-        task.setEndMillis(cursor.getLong(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_END_MILLIS)));
-        task.setInterval(cursor.getInt(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_INTERVAL)));
-
-        String unit = cursor.getString(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_UNIT));
-        task.setUnit(unit != null ? UnitType.valueOf(unit) : null);
-
-        String difficulty = cursor.getString(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_DIFFICULTY));
-        task.setDifficulty(DifficultyType.valueOf(difficulty));
-
-        String importance = cursor.getString(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_IMPORTANCE));
-        task.setImportance(ImportanceType.valueOf(importance));
-
-        String status = cursor.getString(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_STATUS));
-        task.setStatus(StatusType.valueOf(status));
-
-        return task;
-    }
-
-
     public Task add(Task task){
         SQLiteDatabase db = dbHelper.getWritableDatabase();
         ContentValues values = new ContentValues();
@@ -128,31 +73,6 @@ public class TaskRepository {
         db.close();
 
         return task;
-    }
-
-    public int updateFutureOccurrences(Task task) {
-        SQLiteDatabase db = dbHelper.getWritableDatabase();
-
-        ContentValues values = new ContentValues();
-        values.put(SQLiteHelper.COLUMN_TASK_NAME, task.getName());
-        values.put(SQLiteHelper.COLUMN_TASK_DESCRIPTION, task.getDescription());
-        values.put(SQLiteHelper.COLUMN_START_MILLIS, task.getStartMillis());
-        values.put(SQLiteHelper.COLUMN_END_MILLIS, task.getEndMillis());
-        values.put(SQLiteHelper.COLUMN_IMPORTANCE, task.getImportance().name());
-        values.put(SQLiteHelper.COLUMN_DIFFICULTY, task.getDifficulty().name());
-
-        String where = SQLiteHelper.COLUMN_TASK_ID + " = ? AND " +
-                SQLiteHelper.COLUMN_END_MILLIS + " > ? AND " +
-                SQLiteHelper.COLUMN_STATUS + " != ?";
-        String[] whereArgs = {
-                task.getTaskId(),
-                String.valueOf(System.currentTimeMillis()),
-                StatusType.URAĐEN.name()
-        };
-
-        int rows = db.update(SQLiteHelper.TABLE_TASKS, values, where, whereArgs);
-        db.close();
-        return rows;
     }
 
     public List<Task> getTasksByUser(String userId){
@@ -233,5 +153,4 @@ public class TaskRepository {
         cursor.close();
         return new Pair<>(minStart, maxEnd);
     }
-
 }
