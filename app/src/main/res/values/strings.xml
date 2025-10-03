@@ -66,6 +66,7 @@
     <string name="chip_repeat">Ponavljajući</string>
     <string name="list_view">Lista</string>
     <string name="calendar_view">Kalendar</string>
+    <string name="no_tasks">Nema predstojećih zadataka.</string>
 
     <string name="material_calendar_monday">P</string>
     <string name="material_calendar_tuesday">U</string>

@@ -47,6 +47,15 @@
             android:text="@string/chip_repeat"
             android:textSize="12sp"/>
     </com.google.android.material.chip.ChipGroup>
+    <!-- Nema zadataka -->
+    <TextView
+        android:id="@+id/tvNoTasks"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginTop="90dp"
+        android:textSize="18sp"
+        android:text="@string/no_tasks"/>
     <!-- Zadaci -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvTasks"

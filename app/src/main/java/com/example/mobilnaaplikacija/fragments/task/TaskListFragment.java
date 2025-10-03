@@ -83,6 +83,8 @@ public class TaskListFragment extends Fragment implements RecyclerViewInterface 
         binding.rvTasks.setAdapter(adapter);
         getTasks();
 
+
+
         //Tabovi lista i kalendar
         TabLayout tabLayout = binding.tabLayout;
 
@@ -176,6 +178,9 @@ public class TaskListFragment extends Fragment implements RecyclerViewInterface 
             updated.add(updatedTask);
         }
 
+        if (updated.isEmpty()) binding.tvNoTasks.setVisibility(View.VISIBLE);
+        else binding.tvNoTasks.setVisibility(View.GONE);
+
         adapter.updateTasks(updated);
         decorateCalendarWithTasks();
     }
@@ -205,23 +210,6 @@ public class TaskListFragment extends Fragment implements RecyclerViewInterface 
         return currentTasks;
     }
 
-    private ArrayList<Task> getOneTimeTasks() {
-        ArrayList<Task> ontTimeTasks = new ArrayList<>();
-        for (Task task : tasks) {
-            if (task.getFrequency() == FrequencyType.JEDNOKRATAN)
-                ontTimeTasks.add(task);
-        }
-        return ontTimeTasks;
-    }
-
-    private ArrayList<Task> getRepeatingTasks() {
-        ArrayList<Task> repeatingTasks = new ArrayList<>();
-        for (Task task : tasks) {
-            if (task.getFrequency() == FrequencyType.PONAVLJAJUCI)
-                repeatingTasks.add(task);
-        }
-        return repeatingTasks;
-    }
     private ArrayList<Task> filterByDate(ArrayList<Task> tasks, String selectedDate) {
         ArrayList<Task> filtered = new ArrayList<>();
         for (Task task : tasks) {
