@@ -64,6 +64,7 @@
         android:layout_marginTop="15dp"
         android:scaleType="centerInside"
         android:adjustViewBounds="true"
+        app:tint="#49454F"
         android:src="@drawable/no_tasks"/>
     <!-- Zadaci -->
     <androidx.recyclerview.widget.RecyclerView
