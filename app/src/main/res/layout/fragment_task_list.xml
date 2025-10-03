@@ -89,12 +89,12 @@
         app:firstDayOfWeek="monday"/>
     <!-- Zadaci odredjenog datuma -->
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rvDateTasks"
+        android:id="@+id/rvCalendarTasks"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_weight="1"
         android:layout_marginBottom="4dp"
-        tools:listitem="@layout/card_task"
+        tools:listitem="@layout/card_task_calendar"
         android:visibility="gone"/>
     <!-- Dugme za dodavanje zadatka -->
     <Button

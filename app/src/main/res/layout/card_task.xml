@@ -7,7 +7,7 @@
     app:cardBackgroundColor="@android:color/white"
     app:cardCornerRadius="12dp"
     app:cardUseCompatPadding="true"
-android:orientation="horizontal">
+    android:orientation="horizontal">
     <View
         android:id="@+id/vCardColor"
         android:layout_width="4dp"

@@ -261,7 +261,7 @@ public class TaskService {
             case AKTIVAN:
                 if (newStatus == StatusType.PAUZIRAN && currentFreq == FrequencyType.PONAVLJAJUCI) {
                     return true;
-                } else if (newStatus == StatusType.URAĐEN && System.currentTimeMillis() >= task.getEndMillis() && task.getEndMillis() != null) {
+                } else if (newStatus == StatusType.URAĐEN && System.currentTimeMillis() >= task.getStartMillis() && task.getEndMillis() != null) {
                     return true;
                 } else if (newStatus == StatusType.OTKAZAN)
                     return true;

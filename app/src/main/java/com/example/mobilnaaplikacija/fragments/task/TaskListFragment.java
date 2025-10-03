@@ -80,7 +80,7 @@ public class TaskListFragment extends Fragment implements RecyclerViewInterface 
         binding.rvTasks.setLayoutManager(new LinearLayoutManager(getActivity()));
         getCategories();
         tasks = applyFilters();
-        adapter = new TaskListAdapter(tasks, this, categoryMap, taskService);
+        adapter = new TaskListAdapter(tasks, this, categoryMap, taskService, false);
         adapter.notifyDataSetChanged();
         binding.rvTasks.setAdapter(adapter);
         getTasks();
@@ -119,23 +119,26 @@ public class TaskListFragment extends Fragment implements RecyclerViewInterface 
                 if (tab == listTab) {
                     isListTab = true;
                     selectedDate = null;
+                    adapter.setCalendarMode(false);
                     adapter.updateTasks(applyFilters());
                     binding.rvTasks.setVisibility(View.VISIBLE);
                     binding.calendarView.setVisibility(View.GONE);
-                    binding.rvDateTasks.setVisibility(View.GONE);
+                    binding.rvCalendarTasks.setVisibility(View.GONE);
                     if (tasks.isEmpty() && isListTab) {
                         binding.tvNoTasks.setVisibility(View.VISIBLE);
                         binding.ivNoTasks.setVisibility(View.VISIBLE);
                     }
                 } else {
                     isListTab = false;
+                    adapter.setCalendarMode(true);
                     decorateCalendarWithTasks();
                     binding.rvTasks.setVisibility(View.GONE);
                     binding.calendarView.setVisibility(View.VISIBLE);
-                    binding.rvDateTasks.setVisibility(View.VISIBLE);
+                    binding.rvCalendarTasks.setVisibility(View.VISIBLE);
                     binding.tvNoTasks.setVisibility(View.GONE);
                     binding.ivNoTasks.setVisibility(View.GONE);
                 }
+                adapter.notifyDataSetChanged(); //TODO
             }
             @Override
             public void onTabUnselected(TabLayout.Tab tab) {}
@@ -149,10 +152,10 @@ public class TaskListFragment extends Fragment implements RecyclerViewInterface 
             SimpleDateFormat dateFormat = new SimpleDateFormat("d/M/yyyy", Locale.getDefault());
             selectedDate = dateFormat.format(clickedDay.getTime());
 
-            binding.rvDateTasks.setLayoutManager(new LinearLayoutManager(getActivity()));
-            binding.rvDateTasks.setAdapter(adapter);
+            binding.rvCalendarTasks.setLayoutManager(new LinearLayoutManager(getActivity()));
+            binding.rvCalendarTasks.setAdapter(adapter);
             adapter.updateTasks(applyFilters());
-            binding.rvDateTasks.setVisibility(View.VISIBLE);
+            binding.rvCalendarTasks.setVisibility(View.VISIBLE);
             selectedDate = null;
         });
 

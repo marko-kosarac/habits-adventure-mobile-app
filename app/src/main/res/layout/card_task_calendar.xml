@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="55dp"
+    app:cardCornerRadius="8dp"
+    app:cardUseCompatPadding="true"
+    android:orientation="horizontal"
+    app:cardBackgroundColor="@android:color/white">
+    <View
+        android:id="@+id/vCardColor"
+        android:layout_width="6dp"
+        android:layout_height="match_parent"
+        android:background="@color/white"/>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingStart="16dp">
+        <!-- Naziv -->
+        <TextView
+            android:id="@+id/tvTaskName"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:textColor="@color/black"
+            android:maxLines="1"
+            android:ellipsize="end"
+            android:text="@string/task_name"/>
+        <!-- Status -->
+        <TextView
+            android:id="@+id/tvTaskStatus"
+            android:layout_width="85dp"
+            android:layout_height="28dp"
+            android:layout_marginEnd="16dp"
+            android:textSize="14sp"
+            android:gravity="center"
+            android:textAlignment="center"
+            android:textColor="@android:color/white"
+            android:background="@drawable/status_pill_yellow"/>
+    </LinearLayout>
+
+</androidx.cardview.widget.CardView>
