@@ -83,8 +83,6 @@ public class TaskListFragment extends Fragment implements RecyclerViewInterface 
         binding.rvTasks.setAdapter(adapter);
         getTasks();
 
-
-
         //Tabovi lista i kalendar
         TabLayout tabLayout = binding.tabLayout;
 
@@ -106,6 +104,12 @@ public class TaskListFragment extends Fragment implements RecyclerViewInterface 
         calendarTab.setCustomView(calendarView);
         tabLayout.addTab(calendarTab);
 
+
+        if (tasks.isEmpty() && isListTab) {
+            binding.tvNoTasks.setVisibility(View.VISIBLE);
+            binding.ivNoTasks.setVisibility(View.VISIBLE);
+        }
+
         //Mijenjanje lista-kalendar
         tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
@@ -117,12 +121,18 @@ public class TaskListFragment extends Fragment implements RecyclerViewInterface 
                     binding.rvTasks.setVisibility(View.VISIBLE);
                     binding.calendarView.setVisibility(View.GONE);
                     binding.rvDateTasks.setVisibility(View.GONE);
+                    if (tasks.isEmpty() && isListTab) {
+                        binding.tvNoTasks.setVisibility(View.VISIBLE);
+                        binding.ivNoTasks.setVisibility(View.VISIBLE);
+                    }
                 } else {
                     isListTab = false;
                     decorateCalendarWithTasks();
                     binding.rvTasks.setVisibility(View.GONE);
                     binding.calendarView.setVisibility(View.VISIBLE);
                     binding.rvDateTasks.setVisibility(View.VISIBLE);
+                    binding.tvNoTasks.setVisibility(View.GONE);
+                    binding.ivNoTasks.setVisibility(View.GONE);
                 }
             }
             @Override
@@ -178,8 +188,13 @@ public class TaskListFragment extends Fragment implements RecyclerViewInterface 
             updated.add(updatedTask);
         }
 
-        if (updated.isEmpty()) binding.tvNoTasks.setVisibility(View.VISIBLE);
-        else binding.tvNoTasks.setVisibility(View.GONE);
+        if (!updated.isEmpty()) {
+            binding.tvNoTasks.setVisibility(View.GONE);
+            binding.ivNoTasks.setVisibility(View.GONE);
+        } else {
+            binding.tvNoTasks.setVisibility(View.VISIBLE);
+            binding.ivNoTasks.setVisibility(View.VISIBLE);
+        }
 
         adapter.updateTasks(updated);
         decorateCalendarWithTasks();
