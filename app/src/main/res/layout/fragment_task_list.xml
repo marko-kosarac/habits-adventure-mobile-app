@@ -56,6 +56,15 @@
         android:layout_marginTop="90dp"
         android:textSize="18sp"
         android:text="@string/no_tasks"/>
+    <ImageView
+        android:id="@+id/ivNoTasks"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:layout_gravity="center"
+        android:layout_marginTop="15dp"
+        android:scaleType="centerInside"
+        android:adjustViewBounds="true"
+        android:src="@drawable/no_tasks"/>
     <!-- Zadaci -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvTasks"
