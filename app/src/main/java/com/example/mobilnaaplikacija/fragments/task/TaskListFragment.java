@@ -11,6 +11,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.PopupMenu;
 import android.widget.TextView;
 
 import com.applandeo.materialcalendarview.CalendarDay;
@@ -22,6 +23,7 @@ import com.example.mobilnaaplikacija.databinding.FragmentTaskListBinding;
 import com.example.mobilnaaplikacija.decorators.MultiDotDrawable;
 import com.example.mobilnaaplikacija.model.Category;
 import com.example.mobilnaaplikacija.model.FrequencyType;
+import com.example.mobilnaaplikacija.model.StatusType;
 import com.example.mobilnaaplikacija.model.Task;
 import com.example.mobilnaaplikacija.services.CategoryService;
 import com.example.mobilnaaplikacija.services.TaskService;
@@ -78,7 +80,7 @@ public class TaskListFragment extends Fragment implements RecyclerViewInterface 
         binding.rvTasks.setLayoutManager(new LinearLayoutManager(getActivity()));
         getCategories();
         tasks = applyFilters();
-        adapter = new TaskListAdapter(tasks, this, categoryMap);
+        adapter = new TaskListAdapter(tasks, this, categoryMap, taskService);
         adapter.notifyDataSetChanged();
         binding.rvTasks.setAdapter(adapter);
         getTasks();
@@ -304,6 +306,33 @@ public class TaskListFragment extends Fragment implements RecyclerViewInterface 
         return category.getColor();
     }
 
+    private void showStatusPopup(View anchor, Task task, int position) {
+        PopupMenu popup = new PopupMenu(requireContext(), anchor);
+        ArrayList<StatusType> possibleStatuses = new ArrayList<>();
+
+        for (StatusType status : StatusType.values()) {
+            if (taskService.canChangeStatus(task, status) || status == task.getStatus()) {
+                popup.getMenu().add(status.getDisplayName());
+                possibleStatuses.add(status);
+            }
+        }
+
+        popup.setOnMenuItemClickListener(item -> {
+            String chosen = item.getTitle().toString();
+            for (StatusType status : possibleStatuses) {
+                if (status.getDisplayName().equals(chosen)) {
+                    task.setStatus(status);
+                    taskService.update(task);
+                    adapter.notifyItemChanged(position);
+                    break;
+                }
+            }
+            return true;
+        });
+
+        popup.show();
+    }
+
     @Override
     public void onItemClick(int position) {
         Bundle args = new Bundle();
@@ -322,6 +351,12 @@ public class TaskListFragment extends Fragment implements RecyclerViewInterface 
         AddEditTaskFragment fragment = new AddEditTaskFragment();
         fragment.setArguments(args);
         fragment.show(getChildFragmentManager(), "Edit task");
+    }
+
+    @Override
+    public void onStatusClick(int position, View anchor) {
+        Task task = adapter.getTaskAt(position);
+        showStatusPopup(anchor, task, position);
     }
 
     @Override

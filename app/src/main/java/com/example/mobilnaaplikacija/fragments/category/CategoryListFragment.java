@@ -76,6 +76,9 @@ public class CategoryListFragment extends Fragment implements RecyclerViewInterf
     }
 
     @Override
+    public void onStatusClick(int position, View anchor) {}
+
+    @Override
     public void onDestroyView() {
         super.onDestroyView();
         binding = null;

@@ -102,6 +102,7 @@ public class AddEditTaskFragment extends DialogFragment {
             binding.rbRepeat.setEnabled(false);
             binding.rbRepeat.setChecked(taskToUpdate.getFrequency() == FrequencyType.PONAVLJAJUCI);
             binding.spinnerStatus.setSelection((StatusType.valueOf(taskToUpdate.getStatus().name()).ordinal()));
+            binding.spinnerStatus.setEnabled(false);
             parseMillisToDateTime(taskToUpdate);
             binding.etRecurringNumber.setText(taskToUpdate.getInterval() == null ? "0" : String.valueOf(taskToUpdate.getInterval()));
             binding.spinnerRecurringUnit.setSelection(taskToUpdate.getUnit() == null ? -1 : UnitType.valueOf(taskToUpdate.getUnit().name()).ordinal());

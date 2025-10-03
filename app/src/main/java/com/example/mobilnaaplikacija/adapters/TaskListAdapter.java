@@ -6,6 +6,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.ImageButton;
+import android.widget.PopupMenu;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -16,6 +17,7 @@ import com.example.mobilnaaplikacija.RecyclerViewInterface;
 import com.example.mobilnaaplikacija.model.Category;
 import com.example.mobilnaaplikacija.model.StatusType;
 import com.example.mobilnaaplikacija.model.Task;
+import com.example.mobilnaaplikacija.services.TaskService;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -25,11 +27,13 @@ public class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapter.TasksV
     private ArrayList<Task> tasks;
     private HashMap<String, Category> categoryMap;
     private final RecyclerViewInterface recyclerViewInterface;
+    private TaskService taskService;
 
-    public TaskListAdapter(ArrayList<Task> tasks, RecyclerViewInterface recyclerViewInterface, HashMap<String, Category> categoryMap) {
+    public TaskListAdapter(ArrayList<Task> tasks, RecyclerViewInterface recyclerViewInterface, HashMap<String, Category> categoryMap, TaskService service) {
         this.tasks = tasks;
         this.recyclerViewInterface = recyclerViewInterface;
         this.categoryMap = categoryMap;
+        this.taskService = service;
     }
 
     @NonNull
@@ -74,6 +78,7 @@ public class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapter.TasksV
         }
 
         if (task.getStatus() == StatusType.OTKAZAN || task.getStatus() == StatusType.NEURAĐEN) {
+            holder.status.setClickable(false);
             holder.editButton.setVisibility(View.INVISIBLE);
         } else {
             holder.editButton.setVisibility(View.VISIBLE);
@@ -127,6 +132,13 @@ public class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapter.TasksV
                             recyclerViewInterface.onItemClick(pos);
                         }
                     }
+                }
+            });
+
+            status.setOnClickListener(v -> {
+                int pos = getAdapterPosition();
+                if (pos != RecyclerView.NO_POSITION && recyclerViewInterface != null) {
+                    recyclerViewInterface.onStatusClick(pos, v);
                 }
             });
         }

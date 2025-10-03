@@ -59,6 +59,8 @@ android:orientation="horizontal">
                 android:textSize="14sp"
                 android:textColor="@android:color/white"
                 android:gravity="center"
+                android:clickable="true"
+                android:focusable="true"
                 android:background="@drawable/status_pill_yellow"/>
             <!-- Task edit button -->
             <ImageButton
