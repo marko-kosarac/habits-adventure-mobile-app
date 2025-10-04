@@ -103,7 +103,7 @@ public class TaskService {
 
         List<String> allDates = getTaskOccurringDates(task);
 
-        //Filter only today or future dates
+        //Filtrira danas i buduce datume
         List<String> futureDates = new ArrayList<>();
         SimpleDateFormat fmt = new SimpleDateFormat("d/M/yyyy", Locale.getDefault());
 
@@ -124,7 +124,7 @@ public class TaskService {
                 startCal.set(Calendar.SECOND, 0);
                 startCal.set(Calendar.MILLISECOND, 0);
 
-                //update if startMillis is strictly in the future
+                //startMillis u buducnosti => update
                 if (startCal.getTimeInMillis() > now) {
                     futureDates.add(dateStr);
                 }
@@ -410,4 +410,11 @@ public class TaskService {
         return task.getEndMillis() < System.currentTimeMillis();
     }
 
+    public List<Task> getTasksByTask(String taskId){
+        return taskRepository.getTaskOccurrencesByTask(taskId);
+    }
+
+    public void updateRepeatingTaskStatus(String taskId, StatusType oldStatus, StatusType newStatus) {
+        taskRepository.updateRepeatingTaskStatus(taskId, System.currentTimeMillis(), oldStatus, newStatus);
+    }
 }

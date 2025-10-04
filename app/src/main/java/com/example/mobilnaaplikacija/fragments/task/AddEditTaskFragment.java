@@ -485,9 +485,7 @@ public class AddEditTaskFragment extends DialogFragment {
                                 .setMessage("Promene će važiti samo za buduće pojavljivanja ovog zadatka počevši od danas. " +
                                         "Završeni i odrađeni zadaci se neće menjati.\n\nDa li želite da nastavite?")
                                 .setPositiveButton("Da", (dialog, which) -> {
-                                    //before calling serivce update startMillis and endMillis by picking up values from startDate, endDate, startTime and endTime and combining them
                                     updateStartEndMillis(task);
-
                                     List<Task> list = taskService.updateFutureOccurrences(task);
                                     if (!list.isEmpty()) {
                                         Toast.makeText(requireContext(),

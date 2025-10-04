@@ -13,6 +13,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.PopupMenu;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.applandeo.materialcalendarview.CalendarDay;
 import com.applandeo.materialcalendarview.CalendarView;
@@ -330,18 +331,43 @@ public class TaskListFragment extends Fragment implements RecyclerViewInterface 
             String chosen = item.getTitle().toString();
             for (StatusType status : possibleStatuses) {
                 if (status.getDisplayName().equals(chosen)) {
-                    task.setStatus(status);
-                    taskService.update(task);
-                    adapter.notifyItemChanged(position);
+                    StatusType oldStatus = task.getStatus();
+
+                    long now = System.currentTimeMillis();
+
+                    //Samo AKTIVAN <-> PAUZIRAN
+                    if (task.getFrequency() == FrequencyType.PONAVLJAJUCI &&
+                            ((oldStatus == StatusType.AKTIVAN && status == StatusType.PAUZIRAN) ||
+                                    (oldStatus == StatusType.PAUZIRAN && status == StatusType.AKTIVAN))) {
+
+                        if (task.getEndMillis() > now) {
+                            taskService.updateRepeatingTaskStatus(task.getTaskId(), oldStatus, status);
+                            task.setStatus(status);
+                            taskService.update(task);
+
+                            String targetTaskId = task.getTaskId();
+                            for (int i = 0; i < adapter.getItemCount(); i++) {
+                                Task t = adapter.getTaskAt(i);
+                                if (t.getTaskId().equals(targetTaskId)) {
+                                    adapter.notifyItemChanged(i);
+                                }
+                            }
+                        } else Toast.makeText(requireContext(), "Ne možeš menjati status završenog zadatka.", Toast.LENGTH_SHORT).show();
+
+                    } else {
+                        //Pojavu zadatka update
+                        task.setStatus(status);
+                        taskService.update(task);
+                    }
+
+                    getTasks();
                     break;
                 }
             }
             return true;
         });
-
         popup.show();
     }
-
 
     @Override
     public void onItemClick(int position) {

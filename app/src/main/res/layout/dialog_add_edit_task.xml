@@ -166,7 +166,7 @@
                 <!-- Task interval -->
                 <EditText
                     android:id="@+id/etRecurringNumber"
-                    android:layout_width="100dp"
+                    android:layout_width="138dp"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="4dp"
                     android:layout_marginEnd="15dp"
