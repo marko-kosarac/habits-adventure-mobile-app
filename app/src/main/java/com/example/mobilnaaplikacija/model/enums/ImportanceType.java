@@ -1,4 +1,4 @@
-package com.example.mobilnaaplikacija.model;
+package com.example.mobilnaaplikacija.model.enums;
 
 public enum ImportanceType {
     NORMALAN("Normalan"),

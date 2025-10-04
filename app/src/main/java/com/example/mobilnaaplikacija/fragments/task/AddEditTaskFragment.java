@@ -5,10 +5,8 @@ import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
 import android.os.Bundle;
 
-import androidx.annotation.ColorInt;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.core.content.ContextCompat;
 import androidx.fragment.app.DialogFragment;
 
 import android.util.Pair;
@@ -24,12 +22,12 @@ import com.example.mobilnaaplikacija.R;
 import com.example.mobilnaaplikacija.databinding.DialogAddEditTaskBinding;
 import com.example.mobilnaaplikacija.fragments.category.AddEditCategoryFragment;
 import com.example.mobilnaaplikacija.model.Category;
-import com.example.mobilnaaplikacija.model.DifficultyType;
-import com.example.mobilnaaplikacija.model.FrequencyType;
-import com.example.mobilnaaplikacija.model.ImportanceType;
-import com.example.mobilnaaplikacija.model.StatusType;
+import com.example.mobilnaaplikacija.model.enums.DifficultyType;
+import com.example.mobilnaaplikacija.model.enums.FrequencyType;
+import com.example.mobilnaaplikacija.model.enums.ImportanceType;
+import com.example.mobilnaaplikacija.model.enums.StatusType;
 import com.example.mobilnaaplikacija.model.Task;
-import com.example.mobilnaaplikacija.model.UnitType;
+import com.example.mobilnaaplikacija.model.enums.UnitType;
 import com.example.mobilnaaplikacija.services.CategoryService;
 import com.example.mobilnaaplikacija.services.TaskService;
 import com.example.mobilnaaplikacija.services.UserService;

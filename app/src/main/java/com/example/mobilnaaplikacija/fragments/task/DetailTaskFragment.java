@@ -14,8 +14,8 @@ import androidx.fragment.app.DialogFragment;
 
 import com.example.mobilnaaplikacija.databinding.DialogDetailTaskBinding;
 import com.example.mobilnaaplikacija.model.Category;
-import com.example.mobilnaaplikacija.model.FrequencyType;
-import com.example.mobilnaaplikacija.model.StatusType;
+import com.example.mobilnaaplikacija.model.enums.FrequencyType;
+import com.example.mobilnaaplikacija.model.enums.StatusType;
 import com.example.mobilnaaplikacija.model.Task;
 import com.example.mobilnaaplikacija.services.CategoryService;
 import com.example.mobilnaaplikacija.services.TaskService;

@@ -5,7 +5,11 @@ import android.os.Parcelable;
 
 import androidx.annotation.NonNull;
 
-import java.time.LocalTime;
+import com.example.mobilnaaplikacija.model.enums.DifficultyType;
+import com.example.mobilnaaplikacija.model.enums.FrequencyType;
+import com.example.mobilnaaplikacija.model.enums.ImportanceType;
+import com.example.mobilnaaplikacija.model.enums.StatusType;
+import com.example.mobilnaaplikacija.model.enums.UnitType;
 
 public class Task implements Parcelable {
     private String id;

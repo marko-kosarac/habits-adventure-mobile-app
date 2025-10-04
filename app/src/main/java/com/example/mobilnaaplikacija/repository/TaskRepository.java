@@ -6,12 +6,12 @@ import android.database.sqlite.SQLiteDatabase;
 import android.util.Pair;
 
 import com.example.mobilnaaplikacija.database.SQLiteHelper;
-import com.example.mobilnaaplikacija.model.DifficultyType;
-import com.example.mobilnaaplikacija.model.FrequencyType;
-import com.example.mobilnaaplikacija.model.ImportanceType;
-import com.example.mobilnaaplikacija.model.StatusType;
+import com.example.mobilnaaplikacija.model.enums.DifficultyType;
+import com.example.mobilnaaplikacija.model.enums.FrequencyType;
+import com.example.mobilnaaplikacija.model.enums.ImportanceType;
+import com.example.mobilnaaplikacija.model.enums.StatusType;
 import com.example.mobilnaaplikacija.model.Task;
-import com.example.mobilnaaplikacija.model.UnitType;
+import com.example.mobilnaaplikacija.model.enums.UnitType;
 
 import java.util.ArrayList;
 import java.util.List;

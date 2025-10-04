@@ -6,6 +6,9 @@ import android.util.Pair;
 import androidx.annotation.Nullable;
 
 import com.example.mobilnaaplikacija.database.SQLiteHelper;
+import com.example.mobilnaaplikacija.model.enums.FrequencyType;
+import com.example.mobilnaaplikacija.model.enums.StatusType;
+import com.example.mobilnaaplikacija.model.enums.UnitType;
 import com.example.mobilnaaplikacija.repository.TaskRepository;
 import com.example.mobilnaaplikacija.model.*;
 
