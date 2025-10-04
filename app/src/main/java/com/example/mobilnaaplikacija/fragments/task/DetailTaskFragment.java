@@ -1,10 +1,12 @@
 package com.example.mobilnaaplikacija.fragments.task;
 
+import android.app.AlertDialog;
 import android.os.Bundle;
 import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -71,6 +73,7 @@ public class DetailTaskFragment extends DialogFragment {
 
             if (selectedTask.getStatus() == StatusType.OTKAZAN || selectedTask.getStatus() == StatusType.NEURAĐEN)
                 binding.btnEditTask.setVisibility(View.GONE);
+            setupRemoveTaskButton();
         }
 
         binding.btnEditTask.setOnClickListener(v -> {
@@ -110,6 +113,53 @@ public class DetailTaskFragment extends DialogFragment {
                 binding.tvTaskPeriod.setText(period);
             }
         }
+    }
+
+
+    private void setupRemoveTaskButton(){
+        binding.btnRemoveTask.setOnClickListener(view -> {
+            boolean removed = false;
+            if (taskService.isInPast(selectedTask)) {
+                Toast.makeText(requireContext(), "Nije moguće obrisati zadatke koji su završeni.", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            if (selectedTask.getFrequency() == FrequencyType.JEDNOKRATAN){
+                removed = taskService.deleteById(selectedTask.getId());
+            } else {
+                SimpleDateFormat fmt = new SimpleDateFormat("d. MMM yyyy, HH:mm", Locale.getDefault());
+                String clickedDateStr = fmt.format(new Date());
+
+                new AlertDialog.Builder(requireContext())
+                        .setTitle("Brisanje ponavljajućeg zadatka")
+                        .setMessage("Obrisaćeš sve ponavljajuće zadatke nakon ovog trenutka "
+                                + clickedDateStr
+                                + ". Prethodni ostaju sačuvani u kalendaru. Da li se slažeš?")
+                        .setPositiveButton("Da", (dialog, which) -> {
+                            boolean deleted = taskService.deleteFutureOccurrences(selectedTask.getTaskId());
+                            showDeleteResult(deleted);
+                        })
+                        .setNegativeButton("Ne", null)
+                        .show();
+                return;
+            }
+            showDeleteResult(removed);
+        });
+    }
+
+    private void showDeleteResult(boolean removed) {
+        if (removed)
+            Toast.makeText(requireContext(), "Zadatak izbrisan!", Toast.LENGTH_SHORT).show();
+        else
+            Toast.makeText(requireContext(), "Greška u brisanju zadatka!", Toast.LENGTH_SHORT).show();
+
+        sendBackToTaskList(selectedTask);
+        dismiss();
+    }
+
+    private void sendBackToTaskList(Task task) {
+        Bundle bundle = new Bundle();
+        bundle.putParcelable("task", task);
+        getParentFragmentManager().setFragmentResult("Task managed", bundle);
     }
 
     @Override

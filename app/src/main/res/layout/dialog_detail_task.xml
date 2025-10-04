@@ -259,14 +259,28 @@
                 android:textSize="18sp"/>
         </LinearLayout>
 
-        <!-- Edit task button -->
-        <Button
-            android:id="@+id/btnEditTask"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginBottom="24dp"
-            android:backgroundTint="@color/colorPrimary"
-            android:text="@string/edit"/>
+            android:orientation="horizontal"
+            android:gravity="center_horizontal"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="16dp">
+            <!-- Remove task button -->
+            <Button
+                android:id="@+id/btnRemoveTask"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:backgroundTint="@color/colorPrimary"
+                android:text="@string/remove"/>
+            <!-- Edit task button -->
+            <Button
+                android:id="@+id/btnEditTask"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="32dp"
+                android:backgroundTint="@color/colorPrimary"
+                android:text="@string/edit"/>
+        </LinearLayout>
     </LinearLayout>
 </FrameLayout>

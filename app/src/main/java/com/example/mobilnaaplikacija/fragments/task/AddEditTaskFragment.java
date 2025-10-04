@@ -5,8 +5,10 @@ import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
 import android.os.Bundle;
 
+import androidx.annotation.ColorInt;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.DialogFragment;
 
 import android.util.Pair;
@@ -108,8 +110,24 @@ public class AddEditTaskFragment extends DialogFragment {
             binding.spinnerRecurringUnit.setSelection(taskToUpdate.getUnit() == null ? -1 : UnitType.valueOf(taskToUpdate.getUnit().name()).ordinal());
             binding.spinnerDifficulty.setSelection((DifficultyType.valueOf(taskToUpdate.getDifficulty().name()).ordinal()));
             binding.spinnerImportance.setSelection((ImportanceType.valueOf(taskToUpdate.getImportance().name()).ordinal()));
-            setupRemoveTaskButton();
             setupStatusSpinner(taskToUpdate);
+            if (taskToUpdate.getStatus() == StatusType.URAĐEN || taskService.isInPast(taskToUpdate)) {
+                Toast.makeText(getContext(), "Ne mogu se menjati završeni ili urađeni zadaci.", Toast.LENGTH_LONG).show();
+                binding.tvAddTaskTitle.setText(R.string.task_cannot_edit_title);
+                binding.tvAddTaskTitle.setTextColor(ContextCompat.getColor(requireContext(), com.github.dhaval2404.colorpicker.R.color.grey_500));
+                binding.etTaskName.setEnabled(false);
+                binding.etTaskDescription.setEnabled(false);
+                binding.etTaskOccurringDate.setVisibility(View.VISIBLE);
+                binding.etTaskOccurringDate.setEnabled(false);
+                binding.etStartDate.setEnabled(false);
+                binding.etEndDate.setEnabled(false);
+                binding.etStartTime.setEnabled(false);
+                binding.etEndTime.setEnabled(false);
+                binding.etRecurringNumber.setEnabled(false);
+                binding.spinnerRecurringUnit.setEnabled(false);
+                binding.spinnerDifficulty.setEnabled(false);
+                binding.spinnerImportance.setEnabled(false);
+            }
         }
         else {
             binding.spinnerStatus.setVisibility(View.GONE);
@@ -157,6 +175,7 @@ public class AddEditTaskFragment extends DialogFragment {
             Date dateTime = new Date(task.getStartMillis());
             binding.etStartDate.setText(dateFormat.format(dateTime));
             binding.etStartTime.setText(timeFormat.format(dateTime));
+            binding.etTaskOccurringDate.setText(dateFormat.format(dateTime));
             startMillis = task.getStartMillis();
         }
 
@@ -392,49 +411,14 @@ public class AddEditTaskFragment extends DialogFragment {
         });
     }
 
-    private void setupRemoveTaskButton(){
-        binding.btnRemoveTask.setOnClickListener(view -> {
-            boolean removed = false;
-            if (taskToUpdate.getEndMillis() < System.currentTimeMillis()) {
-                Toast.makeText(requireContext(), "Nije moguće obrisati zadatke koji su završeni.", Toast.LENGTH_SHORT).show();
-                return;
-            }
-            if (taskToUpdate.getFrequency() == FrequencyType.JEDNOKRATAN){
-                removed = taskService.deleteById(taskToUpdate.getId());
-            } else {
-                SimpleDateFormat fmt = new SimpleDateFormat("d. MMM yyyy, HH:mm", Locale.getDefault());
-                String clickedDateStr = fmt.format(new Date());
-
-                new AlertDialog.Builder(requireContext())
-                        .setTitle("Brisanje ponavljajućeg zadatka")
-                        .setMessage("Obrisaćeš sve ponavljajuće zadatke nakon ovog trenutka "
-                                + clickedDateStr
-                                + ". Prethodni ostaju sačuvani u kalendaru. Da li se slažeš?")
-                        .setPositiveButton("Da", (dialog, which) -> {
-                            boolean deleted = taskService.deleteFutureOccurrences(taskToUpdate.getTaskId());
-                            showDeleteResult(deleted);
-                        })
-                        .setNegativeButton("Ne", null)
-                        .show();
-                return;
-            }
-            showDeleteResult(removed);
-        });
-    }
-
-    private void showDeleteResult(boolean removed) {
-        if (removed)
-            Toast.makeText(requireContext(), "Zadatak izbrisan!", Toast.LENGTH_SHORT).show();
-        else
-            Toast.makeText(requireContext(), "Greška u brisanju zadatka!", Toast.LENGTH_SHORT).show();
-
-        sendBackToTaskList(taskToUpdate);
-        dismiss();
-    }
-
     private void setupSaveTaskButton() {
         binding.btnSaveTask.setOnClickListener(view -> {
             Task task = new Task();
+
+            if (isEditing && (taskService.isInPast(taskToUpdate) || taskToUpdate.getStatus() == StatusType.URAĐEN)) {
+                Toast.makeText(requireContext(), "Ne mogu se menjati završeni ili urađeni zadaci.", Toast.LENGTH_SHORT).show();
+                return;
+            }
 
             //Polja novog/izmijenjenog zadatka
             String name = binding.etTaskName.getText().toString();
@@ -517,12 +501,6 @@ public class AddEditTaskFragment extends DialogFragment {
             // Čuvanje zadatka
             if (areDatesValid) {
                 if (isEditing) {
-                    if (taskToUpdate.getEndMillis() < System.currentTimeMillis() ||
-                            taskToUpdate.getStatus() == StatusType.URAĐEN) {
-                        Toast.makeText(requireContext(), "Nije moguće menjati zadatke koji su završeni ili odrađeni.", Toast.LENGTH_SHORT).show();
-                        return;
-                    }
-
                     if (taskToUpdate.getFrequency() == FrequencyType.PONAVLJAJUCI) {
                         new AlertDialog.Builder(requireContext())
                                 .setTitle("Izmena zadatka")

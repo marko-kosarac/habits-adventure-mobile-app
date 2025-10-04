@@ -47,6 +47,16 @@
                 android:hint="@string/task_description"
                 android:layout_marginBottom="10dp"/>
 
+            <!-- Task date occurrence -->
+            <EditText
+                android:id="@+id/etTaskOccurringDate"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/task_date_occurrence"
+                android:textSize="18sp"
+                android:layout_marginBottom="10dp"
+                android:visibility="gone"/>
+
             <LinearLayout
                 android:id="@+id/categoryFields"
                 android:layout_width="match_parent"
@@ -187,30 +197,16 @@
                 android:layout_marginBottom="10dp"
                 android:spinnerMode="dropdown"/>
 
-            <LinearLayout
-                android:layout_width="match_parent"
+            <!-- Add task button -->
+            <Button
+                android:id="@+id/btnSaveTask"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_horizontal"
+                android:backgroundTint="@color/colorPrimary"
+                android:layout_gravity="center_horizontal"
                 android:layout_marginTop="10dp"
-                android:layout_marginBottom="16dp">
-                <!-- Remove task button -->
-                <Button
-                    android:id="@+id/btnRemoveTask"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginEnd="32dp"
-                    android:backgroundTint="@color/colorPrimary"
-                    android:text="@string/remove"/>
-                <!-- Add task button -->
-                <Button
-                    android:id="@+id/btnSaveTask"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:backgroundTint="@color/colorPrimary"
-                    android:text="@string/save" />
-            </LinearLayout>
-
+                android:layout_marginBottom="16dp"
+                android:text="@string/save" />
     </LinearLayout>
     </ScrollView>
 </FrameLayout>
