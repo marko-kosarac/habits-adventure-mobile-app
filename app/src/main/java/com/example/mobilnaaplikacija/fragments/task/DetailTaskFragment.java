@@ -130,8 +130,8 @@ public class DetailTaskFragment extends DialogFragment {
     private void setupRemoveTaskButton(){
         binding.btnRemoveTask.setOnClickListener(view -> {
             boolean removed = false;
-            if (taskService.isInPast(selectedTask)) {
-                Toast.makeText(requireContext(), "Nije moguće obrisati zadatke koji su završeni.", Toast.LENGTH_SHORT).show();
+            if (selectedTask.getStatus() == StatusType.URAĐEN) {
+                Toast.makeText(requireContext(), "Nije moguće obrisati urađene zadatke.", Toast.LENGTH_SHORT).show();
                 return;
             } else if (selectedTask.getStatus() == StatusType.OTKAZAN) {
                 Toast.makeText(requireContext(), "Nije moguće obrisati otkazane zadatke.", Toast.LENGTH_SHORT).show();
@@ -139,8 +139,8 @@ public class DetailTaskFragment extends DialogFragment {
             } else if (selectedTask.getStatus() == StatusType.NEURAĐEN) {
                 Toast.makeText(requireContext(), "Nije moguće obrisati neurađene zadatke.", Toast.LENGTH_SHORT).show();
                 return;
-            } else if (selectedTask.getStatus() == StatusType.URAĐEN) {
-                Toast.makeText(requireContext(), "Nije moguće obrisati urađene zadatke.", Toast.LENGTH_SHORT).show();
+            } else if (taskService.isInPast(selectedTask)) {
+                Toast.makeText(requireContext(), "Nije moguće obrisati zadatke koji su završeni.", Toast.LENGTH_SHORT).show();
                 return;
             }
 
