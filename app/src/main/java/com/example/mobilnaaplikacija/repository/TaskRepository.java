@@ -153,49 +153,7 @@ public class TaskRepository {
         cursor.close();
         return new Pair<>(minStart, maxEnd);
     }
-
-
-    public List<Task> getTaskOccurrencesByTask(String taskId){
-        List<Task> tasks = new ArrayList<>();
-        SQLiteDatabase db = dbHelper.getReadableDatabase();
-
-        Cursor cursor = db.query(SQLiteHelper.TABLE_TASKS, null,
-                SQLiteHelper.COLUMN_TASK_ID + " = ?", new String[]{String.valueOf(taskId)},
-                null, null, null);
-
-        if (cursor.moveToFirst()) {
-            do {
-                Task task = new Task();
-                task.setId(cursor.getString(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_TASK_OCCURRENCE_ID)));
-                task.setUserId(cursor.getString(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_USER_ID)));
-                task.setTaskId(cursor.getString(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_TASK_ID)));
-                task.setName(cursor.getString(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_TASK_NAME)));
-                task.setDescription(cursor.getString(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_TASK_DESCRIPTION)));
-                task.setCategoryId(cursor.getString(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_TASK_CATEGORY_ID)));
-                task.setFrequency(FrequencyType.valueOf(cursor.getString(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_FREQUENCY))));
-                task.setStartMillis(cursor.getLong(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_START_MILLIS)));
-                task.setEndMillis(cursor.getLong(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_END_MILLIS)));
-                task.setInterval(cursor.getInt(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_INTERVAL)));
-                int unitIndex = cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_UNIT);
-                String unitStr = cursor.getString(unitIndex);
-
-                if (unitStr != null) {
-                    task.setUnit(UnitType.valueOf(unitStr));
-                } else {
-                    task.setUnit(null);
-                }
-                task.setDifficulty(DifficultyType.valueOf(cursor.getString(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_DIFFICULTY))));
-                task.setImportance(ImportanceType.valueOf(cursor.getString(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_IMPORTANCE))));
-                task.setStatus(StatusType.valueOf(cursor.getString(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_STATUS))));
-                tasks.add(task);
-            } while (cursor.moveToNext());
-        }
-
-        cursor.close();
-        db.close();
-        return tasks;
-    }
-
+    
     public void updateRepeatingTaskStatus(String taskId, long now, StatusType oldStatus, StatusType newStatus) {
         SQLiteDatabase db = dbHelper.getWritableDatabase();
         ContentValues values = new ContentValues();
