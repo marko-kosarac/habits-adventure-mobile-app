@@ -285,7 +285,7 @@ public class TaskService {
         return null;
     }
 
-    public String isTimeValid(Long start, Long end) {
+    public String isTimeValid(Long start, Long end, boolean isRepeating) {
         Long now = System.currentTimeMillis();
         if (start <= now) {
             return "Početak mora biti u budućnosti.";
@@ -297,6 +297,23 @@ public class TaskService {
 
         if (end <= start) {
             return "Kraj mora biti nakon početka.";
+        }
+
+        if (isRepeating) {
+            Calendar calStart = Calendar.getInstance();
+            calStart.setTimeInMillis(start);
+
+            Calendar calEnd = Calendar.getInstance();
+            calEnd.setTimeInMillis(end);
+
+            int startHour = calStart.get(Calendar.HOUR_OF_DAY);
+            int startMinute = calStart.get(Calendar.MINUTE);
+            int endHour = calEnd.get(Calendar.HOUR_OF_DAY);
+            int endMinute = calEnd.get(Calendar.MINUTE);
+
+            if (endHour < startHour || (endHour == startHour && endMinute <= startMinute)) {
+                return "Kraj mora biti nakon početka unutar istog dana.";
+            }
         }
         return null;
     }

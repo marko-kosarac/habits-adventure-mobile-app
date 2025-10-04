@@ -111,23 +111,6 @@ public class AddEditTaskFragment extends DialogFragment {
             binding.spinnerDifficulty.setSelection((DifficultyType.valueOf(taskToUpdate.getDifficulty().name()).ordinal()));
             binding.spinnerImportance.setSelection((ImportanceType.valueOf(taskToUpdate.getImportance().name()).ordinal()));
             setupStatusSpinner(taskToUpdate);
-            if (taskToUpdate.getStatus() == StatusType.URAĐEN || taskService.isInPast(taskToUpdate)) {
-                Toast.makeText(getContext(), "Ne mogu se menjati završeni ili urađeni zadaci.", Toast.LENGTH_LONG).show();
-                binding.tvAddTaskTitle.setText(R.string.task_cannot_edit_title);
-                binding.tvAddTaskTitle.setTextColor(ContextCompat.getColor(requireContext(), com.github.dhaval2404.colorpicker.R.color.grey_500));
-                binding.etTaskName.setEnabled(false);
-                binding.etTaskDescription.setEnabled(false);
-                binding.etTaskOccurringDate.setVisibility(View.VISIBLE);
-                binding.etTaskOccurringDate.setEnabled(false);
-                binding.etStartDate.setEnabled(false);
-                binding.etEndDate.setEnabled(false);
-                binding.etStartTime.setEnabled(false);
-                binding.etEndTime.setEnabled(false);
-                binding.etRecurringNumber.setEnabled(false);
-                binding.spinnerRecurringUnit.setEnabled(false);
-                binding.spinnerDifficulty.setEnabled(false);
-                binding.spinnerImportance.setEnabled(false);
-            }
         }
         else {
             binding.spinnerStatus.setVisibility(View.GONE);
@@ -415,11 +398,6 @@ public class AddEditTaskFragment extends DialogFragment {
         binding.btnSaveTask.setOnClickListener(view -> {
             Task task = new Task();
 
-            if (isEditing && (taskService.isInPast(taskToUpdate) || taskToUpdate.getStatus() == StatusType.URAĐEN)) {
-                Toast.makeText(requireContext(), "Ne mogu se menjati završeni ili urađeni zadaci.", Toast.LENGTH_SHORT).show();
-                return;
-            }
-
             //Polja novog/izmijenjenog zadatka
             String name = binding.etTaskName.getText().toString();
             String description = binding.etTaskDescription.getText().toString();
@@ -462,7 +440,7 @@ public class AddEditTaskFragment extends DialogFragment {
                 }
             }
 
-            String isTimeValid = taskService.isTimeValid(startMillis, endMillis);
+            String isTimeValid = taskService.isTimeValid(startMillis, endMillis, isRepeating);
             if (isTimeValid != null) {
                 showError(isTimeValid);
                 return;

@@ -70,13 +70,24 @@ public class DetailTaskFragment extends DialogFragment {
             binding.tvTaskRecurringUnit.setText(selectedTask.getUnit() == null ? "" : selectedTask.getUnit().getDisplayName());
             binding.tvTaskDifficulty.setText(selectedTask.getDifficulty().getDisplayName());
             binding.tvTaskImportance.setText(selectedTask.getImportance().getDisplayName());
-
-            if (selectedTask.getStatus() == StatusType.OTKAZAN || selectedTask.getStatus() == StatusType.NEURAĐEN)
-                binding.btnEditTask.setVisibility(View.GONE);
             setupRemoveTaskButton();
         }
 
         binding.btnEditTask.setOnClickListener(v -> {
+            if (selectedTask.getStatus() == StatusType.NEURAĐEN) {
+                Toast.makeText(requireContext(), "Ne mogu se menjati neurađeni zadaci.", Toast.LENGTH_SHORT).show();
+                return;
+            } else if (selectedTask.getStatus() == StatusType.OTKAZAN) {
+                Toast.makeText(requireContext(), "Ne mogu se menjati otkazani zadaci.", Toast.LENGTH_SHORT).show();
+                return;
+            } else if (selectedTask.getStatus() == StatusType.URAĐEN) {
+                Toast.makeText(requireContext(), "Ne mogu se menjati urađeni zadaci.", Toast.LENGTH_SHORT).show();
+                return;
+            } else if (taskService.isInPast(selectedTask)) {
+                Toast.makeText(requireContext(), "Ne mogu se menjati završeni zadaci.", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
             Bundle args = new Bundle();
             args.putParcelable("Task to edit", selectedTask);
             AddEditTaskFragment fragment = new AddEditTaskFragment();
@@ -132,7 +143,7 @@ public class DetailTaskFragment extends DialogFragment {
                 Toast.makeText(requireContext(), "Nije moguće obrisati urađene zadatke.", Toast.LENGTH_SHORT).show();
                 return;
             }
-            
+
             if (selectedTask.getFrequency() == FrequencyType.JEDNOKRATAN){
                 removed = taskService.deleteById(selectedTask.getId());
             } else {

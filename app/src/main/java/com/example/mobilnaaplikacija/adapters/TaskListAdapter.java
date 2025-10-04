@@ -158,7 +158,7 @@ public class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapter.TasksV
 
             if (editButton != null) {
                 editButton.setVisibility(
-                        (task.getStatus() == StatusType.NEURAĐEN || task.getStatus() == StatusType.OTKAZAN)
+                        (task.getStatus() == StatusType.NEURAĐEN || task.getStatus() == StatusType.OTKAZAN || task.getStatus() == StatusType.URAĐEN)
                                 ? View.INVISIBLE : View.VISIBLE
                 );
             }
