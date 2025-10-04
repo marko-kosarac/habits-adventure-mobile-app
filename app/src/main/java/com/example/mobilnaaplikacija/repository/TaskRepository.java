@@ -153,7 +153,7 @@ public class TaskRepository {
         cursor.close();
         return new Pair<>(minStart, maxEnd);
     }
-    
+
     public void updateRepeatingTaskStatus(String taskId, long now, StatusType oldStatus, StatusType newStatus) {
         SQLiteDatabase db = dbHelper.getWritableDatabase();
         ContentValues values = new ContentValues();

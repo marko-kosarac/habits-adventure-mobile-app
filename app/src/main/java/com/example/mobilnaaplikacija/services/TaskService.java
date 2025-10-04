@@ -1,6 +1,7 @@
 package com.example.mobilnaaplikacija.services;
 
 import android.content.Context;
+import android.util.Log;
 import android.util.Pair;
 
 import androidx.annotation.Nullable;
@@ -11,6 +12,11 @@ import com.example.mobilnaaplikacija.model.enums.StatusType;
 import com.example.mobilnaaplikacija.model.enums.UnitType;
 import com.example.mobilnaaplikacija.repository.TaskRepository;
 import com.example.mobilnaaplikacija.model.*;
+import com.example.mobilnaaplikacija.utils.XpCalculator;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -416,4 +422,26 @@ public class TaskService {
     public void updateRepeatingTaskStatus(String taskId, StatusType oldStatus, StatusType newStatus) {
         taskRepository.updateRepeatingTaskStatus(taskId, System.currentTimeMillis(), oldStatus, newStatus);
     }
+
+    public void awardXP(Task task, FirebaseUser firebaseUser) {
+        if (task == null || firebaseUser == null) return;
+        if (task.getStatus() != StatusType.URAĐEN) return; //nije uradjen
+        long now = System.currentTimeMillis();
+        if (task.getStartMillis() > now) return; //nije ni pocao
+
+        int xpToAward = XpCalculator.getTotalXP(task.getDifficulty(), task.getImportance());
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        DocumentReference userRef = db.collection("users").document(firebaseUser.getUid());
+
+        db.runTransaction(transaction -> {
+                    DocumentSnapshot snapshot = transaction.get(userRef);
+                    long currentXP = snapshot.getLong("experiencePoints") != null ? snapshot.getLong("experiencePoints") : 0;
+                    long newXP = currentXP + xpToAward;
+                    transaction.update(userRef, "experiencePoints", newXP);
+                    Log.d("XP", "Dodeljeno: " + xpToAward + " XP. Novi ukupni XP: " + newXP);
+                    return null;
+                }).addOnSuccessListener(aVoid -> Log.d("XP", "XP uspešno ažuriran u Firestore"))
+                .addOnFailureListener(e -> Log.e("XP", "Greška pri dodeli XP: ", e));
+    }
+
 }

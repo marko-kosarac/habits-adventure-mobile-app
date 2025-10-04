@@ -139,7 +139,7 @@ public class TaskListFragment extends Fragment implements RecyclerViewInterface 
                     binding.tvNoTasks.setVisibility(View.GONE);
                     binding.ivNoTasks.setVisibility(View.GONE);
                 }
-                adapter.notifyDataSetChanged(); //TODO
+                adapter.notifyDataSetChanged();
             }
             @Override
             public void onTabUnselected(TabLayout.Tab tab) {}
@@ -317,9 +317,7 @@ public class TaskListFragment extends Fragment implements RecyclerViewInterface 
         StatusType currentStatus = task.getStatus();
 
         for (StatusType status : StatusType.values()) {
-            if (status == currentStatus) {
-                continue;
-            }
+            if (status == currentStatus) continue;
 
             if (taskService.canChangeStatus(task, status)) {
                 popup.getMenu().add(status.getDisplayName());
@@ -329,16 +327,16 @@ public class TaskListFragment extends Fragment implements RecyclerViewInterface 
 
         popup.setOnMenuItemClickListener(item -> {
             String chosen = item.getTitle().toString();
+
             for (StatusType status : possibleStatuses) {
                 if (status.getDisplayName().equals(chosen)) {
                     StatusType oldStatus = task.getStatus();
-
                     long now = System.currentTimeMillis();
 
                     //Samo AKTIVAN <-> PAUZIRAN
                     if (task.getFrequency() == FrequencyType.PONAVLJAJUCI &&
                             ((oldStatus == StatusType.AKTIVAN && status == StatusType.PAUZIRAN) ||
-                                    (oldStatus == StatusType.PAUZIRAN && status == StatusType.AKTIVAN))) {
+                             (oldStatus == StatusType.PAUZIRAN && status == StatusType.AKTIVAN))) {
 
                         if (task.getEndMillis() > now) {
                             taskService.updateRepeatingTaskStatus(task.getTaskId(), oldStatus, status);
@@ -359,7 +357,11 @@ public class TaskListFragment extends Fragment implements RecyclerViewInterface 
                         task.setStatus(status);
                         taskService.update(task);
                     }
-
+                    if(status == StatusType.URAĐEN) {
+                        FirebaseUser user = userService.getCurrentUser();
+                        if (user != null)
+                            taskService.awardXP(task, userService.getCurrentUser());
+                    }
                     getTasks();
                     break;
                 }
