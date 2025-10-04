@@ -313,8 +313,14 @@ public class TaskListFragment extends Fragment implements RecyclerViewInterface 
         PopupMenu popup = new PopupMenu(requireContext(), anchor);
         ArrayList<StatusType> possibleStatuses = new ArrayList<>();
 
+        StatusType currentStatus = task.getStatus();
+
         for (StatusType status : StatusType.values()) {
-            if (taskService.canChangeStatus(task, status) || status == task.getStatus()) {
+            if (status == currentStatus) {
+                continue;
+            }
+
+            if (taskService.canChangeStatus(task, status)) {
                 popup.getMenu().add(status.getDisplayName());
                 possibleStatuses.add(status);
             }
@@ -335,6 +341,7 @@ public class TaskListFragment extends Fragment implements RecyclerViewInterface 
 
         popup.show();
     }
+
 
     @Override
     public void onItemClick(int position) {
