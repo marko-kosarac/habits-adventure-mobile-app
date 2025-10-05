@@ -44,16 +44,11 @@ import java.util.UUID;
 
 public class TaskService {
 
-    private final Context context;
     private final TaskRepository taskRepository;
-    private final CategoryRepository categoryRepository;
-
     private XPAwardListener xpAwardListener;
     private FirebaseFirestore db;
     public TaskService(Context context) {
-        this.context = context;
         this.taskRepository = new TaskRepository(new SQLiteHelper(context));
-        this.categoryRepository = new CategoryRepository(new SQLiteHelper(context));
         taskRepository.updateStatus("17", StatusType.URAĐEN);
         taskRepository.updateStatus("18", StatusType.OTKAZAN);
         taskRepository.updateStatus("20", StatusType.URAĐEN);
@@ -310,18 +305,6 @@ public class TaskService {
         return null;
     }
 
-    public String changeStatus (Task task, StatusType newStatus) {
-        autoUpdateStatus(task);
-
-        if (!canChangeStatus(task, newStatus)) {
-            return "Nevažeća promena statusa.";
-        }
-
-        task.setStatus(newStatus);
-        taskRepository.update(task);
-        return null;
-    }
-
     public Task autoUpdateStatus (Task task) {
         long now = System.currentTimeMillis();
         long threeDaysMills = 3L * 24 * 60 * 60 * 1000;
@@ -534,7 +517,7 @@ public class TaskService {
 
                     if (totalAwardedXp == 0) {
                         if (xpAwardListener != null) xpAwardListener.onXPAwarded(0, allowDiff, allowImp);
-                        logCurrentQuotas(db, userId); //TODO
+                        logCurrentQuotas(db, userId);
                         return;
                     }
                     updateXPAndLog(db, userId, task, totalAwardedXp, allowDiff, allowImp, dayRef, weekRef, monthRef);
@@ -597,7 +580,7 @@ public class TaskService {
             DocumentSnapshot weekSnap = transaction.get(weekRef);
             DocumentSnapshot monthSnap = transaction.get(monthRef);
 
-            transaction.update(userRef, "experiencePoints", FieldValue.increment(totalXp)); //TODO
+            transaction.update(userRef, "experiencePoints", FieldValue.increment(totalXp));
 
             if (allowDiff || allowImp) {
                 if (task.getDifficulty() == DifficultyType.VEOMA_LAK || task.getDifficulty() == DifficultyType.LAK ||
@@ -629,11 +612,11 @@ public class TaskService {
         }).addOnSuccessListener(aVoid -> {
             Log.d("XP", "User awarded " + totalXp + " XP");
             if (xpAwardListener != null) xpAwardListener.onXPAwarded(totalXp, allowDiff, allowImp);
-            logCurrentQuotas(db, userId); //TODO
+            logCurrentQuotas(db, userId);
         }).addOnFailureListener(e -> {
             Log.e("XP", "XP transaction failed", e);
             if (xpAwardListener != null) xpAwardListener.onXPAwardFailed("Greška pri dodeli XP.");
-            logCurrentQuotas(db, userId); //TODO
+            logCurrentQuotas(db, userId);
         });
     }
 

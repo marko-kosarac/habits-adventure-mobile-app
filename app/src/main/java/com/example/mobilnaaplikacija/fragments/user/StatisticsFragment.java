@@ -11,8 +11,8 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.example.mobilnaaplikacija.R;
-import com.example.mobilnaaplikacija.model.DifficultyType;
-import com.example.mobilnaaplikacija.model.StatusType;
+import com.example.mobilnaaplikacija.model.enums.DifficultyType;
+import com.example.mobilnaaplikacija.model.enums.StatusType;
 import com.example.mobilnaaplikacija.model.Task;
 import com.example.mobilnaaplikacija.services.TaskService;
 import com.github.mikephil.charting.charts.BarChart;

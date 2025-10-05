@@ -415,6 +415,10 @@ public class TaskListFragment extends Fragment implements RecyclerViewInterface 
     public void onEditClick(int position) {
         Bundle args = new Bundle();
         Task selectedTask = tasks.get(position);
+        if (selectedTask.getEndMillis() < System.currentTimeMillis()) {
+            Toast.makeText(getContext(), "Ne mogu se menjati vremenski završeni zadaci.", Toast.LENGTH_SHORT).show();
+            return;
+        }
         args.putParcelable("Task to edit", selectedTask);
         AddEditTaskFragment fragment = new AddEditTaskFragment();
         fragment.setArguments(args);
