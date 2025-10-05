@@ -440,6 +440,10 @@ public class TaskService {
         taskRepository.updateRepeatingTaskStatus(taskId, System.currentTimeMillis(), oldStatus, newStatus);
     }
 
+    public int getXP(Task task){
+        return XpCalculator.getTotalXP(task.getDifficulty(), task.getImportance());
+    }
+
     public void awardXP(Task task, FirebaseUser firebaseUser) {
         if (task == null || firebaseUser == null) return;
         if (task.getStatus() != StatusType.URAĐEN) return; //mora biti: uradjen

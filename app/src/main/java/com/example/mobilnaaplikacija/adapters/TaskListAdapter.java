@@ -47,7 +47,7 @@ public class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapter.TasksV
     public TasksViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         int layout = calendarMode ? R.layout.card_task_calendar : R.layout.card_task;
         View view = LayoutInflater.from(parent.getContext()).inflate(layout, parent, false);
-        return new TasksViewHolder(view, recyclerViewInterface);
+        return new TasksViewHolder(view, recyclerViewInterface, this.taskService);
     }
 
     @Override
@@ -72,18 +72,21 @@ public class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapter.TasksV
     }
 
     public static class TasksViewHolder extends RecyclerView.ViewHolder {
-        TextView name, category, status;
+        TextView name, category, status, experiencePoints;
         ImageButton editButton;
         View cardColor;
+        private final TaskService taskService;
 
-        public TasksViewHolder(@NonNull View view, RecyclerViewInterface recyclerViewInterface) {
+        public TasksViewHolder(@NonNull View view, RecyclerViewInterface recyclerViewInterface, TaskService taskService) {
             super(view);
+            this.taskService = taskService;
 
             name = view.findViewById(R.id.tvTaskName);
             category = view.findViewById(R.id.tvTaskCategory);
             status = view.findViewById(R.id.tvTaskStatus);
             editButton = view.findViewById(R.id.btnEditTask);
             cardColor = view.findViewById(R.id.vCardColor);
+            experiencePoints = view.findViewById(R.id.tvTaskXP);
 
             if (editButton != null) {
                 editButton.setOnClickListener(v -> {
@@ -157,6 +160,10 @@ public class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapter.TasksV
                 }
             }
 
+            if (experiencePoints != null) {
+                int xp = this.taskService.getXP(task);
+                experiencePoints.setText(xp + " XP");
+            }
             if (editButton != null) {
                 editButton.setVisibility(
                         (task.getStatus() == StatusType.NEURAĐEN || task.getStatus() == StatusType.OTKAZAN || task.getStatus() == StatusType.URAĐEN || (task.getFrequency() == FrequencyType.PONAVLJAJUCI && task.getEndMillis() < System.currentTimeMillis()))
