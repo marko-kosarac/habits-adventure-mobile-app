@@ -143,23 +143,6 @@ public class TaskRepository {
         return deleted > 0;
     }
 
-//    public Pair<Long, Long> getTaskGroupBounds(String taskId) {
-//        SQLiteDatabase db = dbHelper.getReadableDatabase();
-//        Cursor cursor = db.rawQuery(
-//                "SELECT MIN(" + SQLiteHelper.COLUMN_START_MILLIS + "), MAX(" + SQLiteHelper.COLUMN_END_MILLIS + ") FROM tasks WHERE " + SQLiteHelper.COLUMN_TASK_ID + " = ?",
-//                new String[]{taskId}
-//        );
-//
-//        Long minStart = null;
-//        Long maxEnd = null;
-//        if (cursor.moveToFirst()) {
-//            if (!cursor.isNull(0)) minStart = cursor.getLong(0);
-//            if (!cursor.isNull(1)) maxEnd = cursor.getLong(1);
-//        }
-//        cursor.close();
-//        return new Pair<>(minStart, maxEnd);
-//    }
-
     public void updateRepeatingTaskStatus(String taskId, long now, StatusType oldStatus, StatusType newStatus) {
         SQLiteDatabase db = dbHelper.getWritableDatabase();
         ContentValues values = new ContentValues();

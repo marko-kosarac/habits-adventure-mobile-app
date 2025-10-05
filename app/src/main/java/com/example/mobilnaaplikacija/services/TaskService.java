@@ -432,10 +432,6 @@ public class TaskService {
         return null;
     }
 
-//    public Pair<Long, Long> getTaskGroupBounds(String taskId) {
-//        return taskRepository.getTaskGroupBounds(taskId);
-//    }
-
     public boolean isInPast(Task task) {
         return task.getEndMillis() < System.currentTimeMillis();
     }
