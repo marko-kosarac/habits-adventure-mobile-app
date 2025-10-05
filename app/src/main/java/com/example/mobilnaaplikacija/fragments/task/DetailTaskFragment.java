@@ -118,12 +118,8 @@ public class DetailTaskFragment extends DialogFragment {
         }
 
         if (task.getFrequency() == FrequencyType.PONAVLJAJUCI) {
-            Pair<Long, Long> bounds = taskService.getTaskGroupBounds(task.getTaskId());
-            if (bounds.first != null && bounds.second != null) {
-                String period = dateFormat.format(new Date(bounds.first))
-                        + " - " + dateFormat.format(new Date(bounds.second));
-                binding.tvTaskPeriod.setText(period);
-            }
+            String period = dateFormat.format(task.getGroupStartMillis()) + " - " + dateFormat.format(task.getGroupEndMillis());
+            binding.tvTaskPeriod.setText(period);
         }
     }
 

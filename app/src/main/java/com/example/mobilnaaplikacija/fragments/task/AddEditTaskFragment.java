@@ -169,11 +169,8 @@ public class AddEditTaskFragment extends DialogFragment {
         }
 
         if (task.getFrequency() == FrequencyType.PONAVLJAJUCI) {
-            Pair<Long, Long> bounds = taskService.getTaskGroupBounds(task.getTaskId());
-            if (bounds.first != null && bounds.second != null) {
-                binding.etStartDate.setText(dateFormat.format(new Date(bounds.first)));
-                binding.etEndDate.setText(dateFormat.format(new Date(bounds.second)));
-            }
+            binding.etStartDate.setText(dateFormat.format(task.getGroupStartMillis()));
+            binding.etEndDate.setText(dateFormat.format(task.getGroupEndMillis()));
         }
     }
 
@@ -465,6 +462,8 @@ public class AddEditTaskFragment extends DialogFragment {
                 task.setStatus(StatusType.AKTIVAN);
             task.setStartMillis(startMillis);
             task.setEndMillis(endMillis);
+            task.setGroupStartMillis(startMillis);
+            task.setGroupEndMillis(endMillis);
             task.setDifficulty((DifficultyType)binding.spinnerDifficulty.getSelectedItem());
             task.setImportance((ImportanceType)binding.spinnerImportance.getSelectedItem());
             if (isOneTime) {

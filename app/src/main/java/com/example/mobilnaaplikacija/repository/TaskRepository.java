@@ -34,6 +34,8 @@ public class TaskRepository {
         values.put(SQLiteHelper.COLUMN_FREQUENCY, task.getFrequency().name());
         values.put(SQLiteHelper.COLUMN_START_MILLIS, task.getStartMillis());
         values.put(SQLiteHelper.COLUMN_END_MILLIS, task.getEndMillis());
+        values.put(SQLiteHelper.COLUMN_GROUP_START_MILLIS, task.getGroupStartMillis());
+        values.put(SQLiteHelper.COLUMN_GROUP_END_MILLIS, task.getGroupEndMillis());
         values.put(SQLiteHelper.COLUMN_INTERVAL, task.getInterval());
         values.put(SQLiteHelper.COLUMN_UNIT, task.getUnit() != null ? task.getUnit().name() : null);
         values.put(SQLiteHelper.COLUMN_DIFFICULTY, task.getDifficulty().name());
@@ -61,6 +63,8 @@ public class TaskRepository {
         values.put(SQLiteHelper.COLUMN_FREQUENCY, task.getFrequency().name());
         values.put(SQLiteHelper.COLUMN_START_MILLIS, task.getStartMillis());
         values.put(SQLiteHelper.COLUMN_END_MILLIS, task.getEndMillis());
+        values.put(SQLiteHelper.COLUMN_GROUP_START_MILLIS, task.getGroupStartMillis());
+        values.put(SQLiteHelper.COLUMN_GROUP_END_MILLIS, task.getGroupEndMillis());
         values.put(SQLiteHelper.COLUMN_INTERVAL, task.getInterval());
         values.put(SQLiteHelper.COLUMN_UNIT, task.getUnit() != null ? task.getUnit().name() : null);
         values.put(SQLiteHelper.COLUMN_DIFFICULTY, task.getDifficulty().name());
@@ -95,6 +99,8 @@ public class TaskRepository {
                 task.setFrequency(FrequencyType.valueOf(cursor.getString(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_FREQUENCY))));
                 task.setStartMillis(cursor.getLong(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_START_MILLIS)));
                 task.setEndMillis(cursor.getLong(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_END_MILLIS)));
+                task.setGroupStartMillis(cursor.getLong(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_GROUP_START_MILLIS)));
+                task.setGroupEndMillis(cursor.getLong(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_GROUP_END_MILLIS)));
                 task.setInterval(cursor.getInt(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_INTERVAL)));
                 int unitIndex = cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_UNIT);
                 String unitStr = cursor.getString(unitIndex);
@@ -137,22 +143,22 @@ public class TaskRepository {
         return deleted > 0;
     }
 
-    public Pair<Long, Long> getTaskGroupBounds(String taskId) {
-        SQLiteDatabase db = dbHelper.getReadableDatabase();
-        Cursor cursor = db.rawQuery(
-                "SELECT MIN(" + SQLiteHelper.COLUMN_START_MILLIS + "), MAX(" + SQLiteHelper.COLUMN_END_MILLIS + ") FROM tasks WHERE " + SQLiteHelper.COLUMN_TASK_ID + " = ?",
-                new String[]{taskId}
-        );
-
-        Long minStart = null;
-        Long maxEnd = null;
-        if (cursor.moveToFirst()) {
-            if (!cursor.isNull(0)) minStart = cursor.getLong(0);
-            if (!cursor.isNull(1)) maxEnd = cursor.getLong(1);
-        }
-        cursor.close();
-        return new Pair<>(minStart, maxEnd);
-    }
+//    public Pair<Long, Long> getTaskGroupBounds(String taskId) {
+//        SQLiteDatabase db = dbHelper.getReadableDatabase();
+//        Cursor cursor = db.rawQuery(
+//                "SELECT MIN(" + SQLiteHelper.COLUMN_START_MILLIS + "), MAX(" + SQLiteHelper.COLUMN_END_MILLIS + ") FROM tasks WHERE " + SQLiteHelper.COLUMN_TASK_ID + " = ?",
+//                new String[]{taskId}
+//        );
+//
+//        Long minStart = null;
+//        Long maxEnd = null;
+//        if (cursor.moveToFirst()) {
+//            if (!cursor.isNull(0)) minStart = cursor.getLong(0);
+//            if (!cursor.isNull(1)) maxEnd = cursor.getLong(1);
+//        }
+//        cursor.close();
+//        return new Pair<>(minStart, maxEnd);
+//    }
 
     public void updateRepeatingTaskStatus(String taskId, long now, StatusType oldStatus, StatusType newStatus) {
         SQLiteDatabase db = dbHelper.getWritableDatabase();

@@ -27,6 +27,8 @@ public class SQLiteHelper extends SQLiteOpenHelper {
     public static final String COLUMN_FREQUENCY = "frequency";
     public static final String COLUMN_START_MILLIS = "start_millis";
     public static final String COLUMN_END_MILLIS = "end_millis";
+    public static final String COLUMN_GROUP_START_MILLIS = "group_start_millis";
+    public static final String COLUMN_GROUP_END_MILLIS = "group_end_millis";
     public static final String COLUMN_INTERVAL = "interval";
     public static final String COLUMN_UNIT = "unit";
     public static final String COLUMN_DIFFICULTY = "difficulty";
@@ -38,7 +40,7 @@ public class SQLiteHelper extends SQLiteOpenHelper {
     public static final String COLUMN_CATEGORY_ID = "id";
     public static final String COLUMN_CATEGORY_NAME = "name";
     public static final String COLUMN_CATEGORY_COLOR = "color";
-    private static final int DATABASE_VERSION = 9;
+    private static final int DATABASE_VERSION = 10;
     private static final String DATABASE_NAME = "appdata.db";
 
     private static final String DB_CREATE_EQUIPMENT = "CREATE TABLE " + TABLE_EQUIPMENT + " ("
@@ -62,6 +64,8 @@ public class SQLiteHelper extends SQLiteOpenHelper {
                     COLUMN_FREQUENCY + " TEXT, " +
                     COLUMN_START_MILLIS + " INTEGER, " +
                     COLUMN_END_MILLIS + " INTEGER, " +
+                    COLUMN_GROUP_START_MILLIS + " INTEGER, " +
+                    COLUMN_GROUP_END_MILLIS + " INTEGER, " +
                     COLUMN_INTERVAL + " INTEGER, " +
                     COLUMN_UNIT + " TEXT, " +
                     COLUMN_DIFFICULTY + " TEXT, " +

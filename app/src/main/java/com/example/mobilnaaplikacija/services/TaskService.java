@@ -104,6 +104,8 @@ public class TaskService {
                 taskOccurrence.setFrequency(task.getFrequency());
                 taskOccurrence.setStartMillis(startCal.getTimeInMillis());
                 taskOccurrence.setEndMillis(endCal.getTimeInMillis());
+                taskOccurrence.setGroupStartMillis(task.getGroupStartMillis());
+                taskOccurrence.setGroupEndMillis(task.getGroupEndMillis());
                 taskOccurrence.setInterval(task.getInterval());
                 taskOccurrence.setUnit(task.getUnit());
                 taskOccurrence.setDifficulty(task.getDifficulty());
@@ -208,6 +210,8 @@ public class TaskService {
                 taskOccurrence.setFrequency(task.getFrequency());
                 taskOccurrence.setStartMillis(startCal.getTimeInMillis());
                 taskOccurrence.setEndMillis(endCal.getTimeInMillis());
+                taskOccurrence.setGroupStartMillis(taskOccurrence.getGroupStartMillis());
+                taskOccurrence.setGroupEndMillis(task.getGroupEndMillis());
                 taskOccurrence.setInterval(task.getInterval());
                 taskOccurrence.setUnit(task.getUnit());
                 taskOccurrence.setDifficulty(task.getDifficulty());
@@ -428,9 +432,9 @@ public class TaskService {
         return null;
     }
 
-    public Pair<Long, Long> getTaskGroupBounds(String taskId) {
-        return taskRepository.getTaskGroupBounds(taskId);
-    }
+//    public Pair<Long, Long> getTaskGroupBounds(String taskId) {
+//        return taskRepository.getTaskGroupBounds(taskId);
+//    }
 
     public boolean isInPast(Task task) {
         return task.getEndMillis() < System.currentTimeMillis();
@@ -530,9 +534,7 @@ public class TaskService {
         return (val instanceof Number) ? ((Number) val).intValue() : 0;
     }
 
-    private void updateXPAndLog(FirebaseFirestore db, String userId, Task task, int totalXp,
-                                boolean allowDiff, boolean allowImp,
-                                DocumentReference dayRef, DocumentReference weekRef, DocumentReference monthRef) {
+    private void updateXPAndLog(FirebaseFirestore db, String userId, Task task, int totalXp, boolean allowDiff, boolean allowImp, DocumentReference dayRef, DocumentReference weekRef, DocumentReference monthRef) {
 
         DocumentReference userRef = db.collection("users").document(userId);
 
