@@ -31,6 +31,7 @@ import com.example.mobilnaaplikacija.model.enums.UnitType;
 import com.example.mobilnaaplikacija.services.CategoryService;
 import com.example.mobilnaaplikacija.services.TaskService;
 import com.example.mobilnaaplikacija.services.UserService;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;

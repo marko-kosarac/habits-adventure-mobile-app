@@ -7,6 +7,7 @@ import com.example.mobilnaaplikacija.model.Category;
 import com.example.mobilnaaplikacija.model.enums.StatusType;
 import com.example.mobilnaaplikacija.model.Task;
 import com.example.mobilnaaplikacija.repository.CategoryRepository;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
 import java.util.List;

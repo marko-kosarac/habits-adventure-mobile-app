@@ -7,34 +7,51 @@ import android.util.Pair;
 import androidx.annotation.Nullable;
 
 import com.example.mobilnaaplikacija.database.SQLiteHelper;
+import com.example.mobilnaaplikacija.model.enums.DifficultyType;
 import com.example.mobilnaaplikacija.model.enums.FrequencyType;
+import com.example.mobilnaaplikacija.model.enums.ImportanceType;
 import com.example.mobilnaaplikacija.model.enums.StatusType;
 import com.example.mobilnaaplikacija.model.enums.UnitType;
 import com.example.mobilnaaplikacija.repository.TaskRepository;
 import com.example.mobilnaaplikacija.model.*;
 import com.example.mobilnaaplikacija.utils.XpCalculator;
+import com.google.android.gms.tasks.Tasks;
+import com.google.firebase.Timestamp;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.SetOptions;
+import com.google.firebase.firestore.Transaction;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.UUID;
 
 public class TaskService {
 
     private final Context context;
     private final TaskRepository taskRepository;
-
+    private XPAwardListener xpAwardListener;
+    private FirebaseFirestore db;
     public TaskService(Context context) {
         this.context = context;
         this.taskRepository = new TaskRepository(new SQLiteHelper(context));
+        this.db = FirebaseFirestore.getInstance();
+    }
+
+    public void setXPAwardListener(XPAwardListener listener) {
+        this.xpAwardListener = listener;
     }
 
     public Task add(Task task) {
@@ -425,23 +442,223 @@ public class TaskService {
 
     public void awardXP(Task task, FirebaseUser firebaseUser) {
         if (task == null || firebaseUser == null) return;
-        if (task.getStatus() != StatusType.URAĐEN) return; //nije uradjen
+        if (task.getStatus() != StatusType.URAĐEN) return; //mora biti: uradjen
         long now = System.currentTimeMillis();
-        if (task.getStartMillis() > now) return; //nije ni pocao
+        if (task.getStartMillis() > now) return; //mora biti: u toku/zavrsen
 
-        int xpToAward = XpCalculator.getTotalXP(task.getDifficulty(), task.getImportance());
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
-        DocumentReference userRef = db.collection("users").document(firebaseUser.getUid());
+        final int diffXp = XpCalculator.getDifficultyXP(task.getDifficulty());
+        final int impXp  = XpCalculator.getImportanceXP(task.getImportance());
+        String userId = firebaseUser.getUid();
 
-        db.runTransaction(transaction -> {
-                    DocumentSnapshot snapshot = transaction.get(userRef);
-                    long currentXP = snapshot.getLong("experiencePoints") != null ? snapshot.getLong("experiencePoints") : 0;
-                    long newXP = currentXP + xpToAward;
-                    transaction.update(userRef, "experiencePoints", newXP);
-                    Log.d("XP", "Dodeljeno: " + xpToAward + " XP. Novi ukupni XP: " + newXP);
-                    return null;
-                }).addOnSuccessListener(aVoid -> Log.d("XP", "XP uspešno ažuriran u Firestore"))
-                .addOnFailureListener(e -> Log.e("XP", "Greška pri dodeli XP: ", e));
+        checkQuotaAndUpdateXP(this.db, userId, task, diffXp, impXp);
+    }
+
+    private void checkQuotaAndUpdateXP(FirebaseFirestore db, String userId, Task task, int diffXp, int impXp) {
+        String dayId = getPeriodId("daily");
+        String weekId = getPeriodId("weekly");
+        String monthId = getPeriodId("monthly");
+
+        DocumentReference dayRef = db.collection("users").document(userId).collection("xpLogs").document(dayId);
+        DocumentReference weekRef = db.collection("users").document(userId).collection("xpLogs").document(weekId);
+        DocumentReference monthRef = db.collection("users").document(userId).collection("xpLogs").document(monthId);
+
+
+        Tasks.whenAllSuccess(dayRef.get(), weekRef.get(), monthRef.get())
+                .addOnSuccessListener(results -> {
+                    DocumentSnapshot daySnap = (DocumentSnapshot) results.get(0);
+                    DocumentSnapshot weekSnap = (DocumentSnapshot) results.get(1);
+                    DocumentSnapshot monthSnap = (DocumentSnapshot) results.get(2);
+
+                    boolean allowDiff = isDifficultyWithinQuota(daySnap, weekSnap, task.getDifficulty());
+                    boolean allowImp  = isImportanceWithinQuota(daySnap, monthSnap, task.getImportance());
+                    int awardedDiffXp = allowDiff ? diffXp : 0;
+                    int awardedImpXp  = allowImp ? impXp : 0;
+                    int totalAwardedXp = awardedDiffXp + awardedImpXp;
+
+                    if (totalAwardedXp == 0) {
+                        if (xpAwardListener != null) xpAwardListener.onXPAwarded(0, allowDiff, allowImp);
+                        logCurrentQuotas(db, userId); //TODO
+                        return;
+                    }
+                    updateXPAndLog(db, userId, task, totalAwardedXp, allowDiff, allowImp, dayRef, weekRef, monthRef);
+                })
+                .addOnFailureListener(e -> {
+                    Log.e("XP", "Error fetching quota docs", e);
+                    if (xpAwardListener != null) xpAwardListener.onXPAwardFailed("Greška pri proveri kvote.");
+                });
+    }
+
+    private boolean isDifficultyWithinQuota(DocumentSnapshot day, DocumentSnapshot week, DifficultyType difficulty) {
+        int dailyDifficultyCount = getCount(day, "difficultyCounts", difficulty.name());
+        int weeklyDifficultyCount = getCount(week, "difficultyCounts", difficulty.name());
+
+        switch (difficulty) {
+            case VEOMA_LAK:
+            case LAK:
+                return dailyDifficultyCount < 5;
+            case TEŽAK:
+                return dailyDifficultyCount < 2;
+            case EKSTREMNO_TEŽAK:
+                return weeklyDifficultyCount < 1;
+            default:
+                return true;
+        }
+    }
+
+    private boolean isImportanceWithinQuota(DocumentSnapshot day, DocumentSnapshot month, ImportanceType importance) {
+        int dailyImportanceCount = getCount(day, "importanceCounts", importance.name());
+        int monthlyImportanceCount = getCount(month, "importanceCounts", importance.name());
+
+        switch (importance) {
+            case NORMALAN:
+            case VAŽAN:
+                return dailyImportanceCount < 5;
+            case EKSTREMNO_VAŽAN:
+                return dailyImportanceCount < 2;
+            case SPECIJALAN:
+                return monthlyImportanceCount < 1;
+            default:
+                return true;
+        }
+    }
+
+    private int getCount(DocumentSnapshot snapshot, String mapName, String key) {
+        if (snapshot == null || !snapshot.exists()) return 0;
+        Map<String, Object> map = (Map<String, Object>) snapshot.get(mapName);
+        if (map == null) return 0;
+        Object val = map.get(key);
+        return (val instanceof Number) ? ((Number) val).intValue() : 0;
+    }
+
+    private void updateXPAndLog(FirebaseFirestore db, String userId, Task task, int totalXp,
+                                boolean allowDiff, boolean allowImp,
+                                DocumentReference dayRef, DocumentReference weekRef, DocumentReference monthRef) {
+
+        DocumentReference userRef = db.collection("users").document(userId);
+
+        db.runTransaction((Transaction.Function<Void>) transaction -> {
+            DocumentSnapshot userSnap = transaction.get(userRef);
+            DocumentSnapshot daySnap = transaction.get(dayRef);
+            DocumentSnapshot weekSnap = transaction.get(weekRef);
+            DocumentSnapshot monthSnap = transaction.get(monthRef);
+
+            transaction.update(userRef, "experiencePoints", FieldValue.increment(totalXp)); //TODO
+
+            if (allowDiff || allowImp) {
+                if (task.getDifficulty() == DifficultyType.VEOMA_LAK || task.getDifficulty() == DifficultyType.LAK ||
+                        task.getDifficulty() == DifficultyType.TEŽAK || task.getImportance() == ImportanceType.NORMALAN || task.getImportance() == ImportanceType.VAŽAN ||
+                        task.getImportance() == ImportanceType.EKSTREMNO_VAŽAN) {
+                    updateQuotaDocInTransaction(transaction, dayRef, daySnap, task, allowDiff, allowImp);
+                }
+
+                if (task.getDifficulty() == DifficultyType.EKSTREMNO_TEŽAK) {
+                    updateQuotaDocInTransaction(transaction, weekRef, weekSnap, task, allowDiff, allowImp);
+                }
+
+                if (task.getImportance() == ImportanceType.SPECIJALAN) {
+                    updateQuotaDocInTransaction(transaction, monthRef, monthSnap, task, allowDiff, allowImp);
+                }
+            }
+
+            Map<String, Object> historyEntry = new HashMap<>();
+            historyEntry.put("taskId", task.getTaskId());
+            historyEntry.put("at", new Timestamp(new Date()));
+            historyEntry.put("xp", totalXp);
+            historyEntry.put("difficulty", task.getDifficulty().name());
+            historyEntry.put("importance", task.getImportance().name());
+            transaction.update(userRef, "xpHistory", FieldValue.arrayUnion(historyEntry));
+
+            transaction.update(userRef, "lastAwardedXP", totalXp);
+            transaction.update(userRef, "lastAwardedAt", FieldValue.serverTimestamp());
+            return null;
+        }).addOnSuccessListener(aVoid -> {
+            Log.d("XP", "User awarded " + totalXp + " XP");
+            if (xpAwardListener != null) xpAwardListener.onXPAwarded(totalXp, allowDiff, allowImp);
+            logCurrentQuotas(db, userId); //TODO
+        }).addOnFailureListener(e -> {
+            Log.e("XP", "XP transaction failed", e);
+            if (xpAwardListener != null) xpAwardListener.onXPAwardFailed("Greška pri dodeli XP.");
+            logCurrentQuotas(db, userId); //TODO
+        });
+    }
+
+    private void updateQuotaDocInTransaction(Transaction transaction, DocumentReference ref, DocumentSnapshot snapshot, Task task, boolean incDiff, boolean incImp) throws FirebaseFirestoreException {
+        String diffKey = task.getDifficulty().name();
+        String impKey = task.getImportance().name();
+
+        if (snapshot != null && snapshot.exists()) {
+            if (incDiff) {
+                transaction.update(ref, "difficultyCounts." + diffKey, FieldValue.increment(1));
+            }
+            if (incImp) {
+                transaction.update(ref, "importanceCounts." + impKey, FieldValue.increment(1));
+            }
+        } else {
+            Map<String, Object> diffMap = new HashMap<>();
+            Map<String, Object> impMap = new HashMap<>();
+            if (incDiff) diffMap.put(diffKey, 1);
+            if (incImp) impMap.put(impKey, 1);
+
+            Map<String, Object> doc = new HashMap<>();
+            doc.put("difficultyCounts", diffMap);
+            doc.put("importanceCounts", impMap);
+            doc.put("updatedAt", FieldValue.serverTimestamp());
+
+            transaction.set(ref, doc, SetOptions.merge());
+        }
+    }
+
+    private String getPeriodId(String periodType) {
+        Calendar cal = Calendar.getInstance();
+
+        switch (periodType) {
+            case "daily":
+                return String.format(Locale.US, "%04d-%02d-%02d",
+                        cal.get(Calendar.YEAR),
+                        cal.get(Calendar.MONTH) + 1,
+                        cal.get(Calendar.DAY_OF_MONTH));
+            case "weekly":
+                int week = cal.get(Calendar.WEEK_OF_YEAR);
+                return String.format(Locale.US, "%04d-W%02d", cal.get(Calendar.YEAR), week);
+            case "monthly":
+                return String.format(Locale.US, "%04d-%02d",
+                        cal.get(Calendar.YEAR),
+                        cal.get(Calendar.MONTH) + 1);
+            default:
+                return "";
+        }
+    }
+
+    public interface XPAwardListener {
+        void onXPAwarded(int xp, boolean diffAwarded, boolean impAwarded);
+        void onXPAwardFailed(String error);
+    }
+
+    public void logCurrentQuotas(FirebaseFirestore db, String userId) {
+        String dayId = getPeriodId("daily");
+        String weekId = getPeriodId("weekly");
+        String monthId = getPeriodId("monthly");
+
+        DocumentReference dayRef = db.collection("users").document(userId)
+                .collection("xpLogs").document(dayId);
+        DocumentReference weekRef = db.collection("users").document(userId)
+                .collection("xpLogs").document(weekId);
+        DocumentReference monthRef = db.collection("users").document(userId)
+                .collection("xpLogs").document(monthId);
+
+        Tasks.whenAllSuccess(dayRef.get(), weekRef.get(), monthRef.get())
+                .addOnSuccessListener(results -> {
+                    DocumentSnapshot daySnap = (DocumentSnapshot) results.get(0);
+                    DocumentSnapshot weekSnap = (DocumentSnapshot) results.get(1);
+                    DocumentSnapshot monthSnap = (DocumentSnapshot) results.get(2);
+
+                    Log.d("XP_LOG", "=== Current Quotas ===");
+                    Log.d("XP_LOG", "Daily: " + (daySnap.exists() ? daySnap.getData() : "empty"));
+                    Log.d("XP_LOG", "Weekly: " + (weekSnap.exists() ? weekSnap.getData() : "empty"));
+                    Log.d("XP_LOG", "Monthly: " + (monthSnap.exists() ? monthSnap.getData() : "empty"));
+                    Log.d("XP_LOG", "=====================");
+                })
+                .addOnFailureListener(e -> Log.e("XP_LOG", "Failed to fetch quota docs", e));
     }
 
 }

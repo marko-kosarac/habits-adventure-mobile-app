@@ -1,5 +1,6 @@
 package com.example.mobilnaaplikacija.fragments.task;
 
+import android.content.Context;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -29,8 +30,10 @@ import com.example.mobilnaaplikacija.model.Task;
 import com.example.mobilnaaplikacija.services.CategoryService;
 import com.example.mobilnaaplikacija.services.TaskService;
 import com.example.mobilnaaplikacija.services.UserService;
+import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.tabs.TabLayout;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -62,6 +65,17 @@ public class TaskListFragment extends Fragment implements RecyclerViewInterface 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState){
         this.taskService = new TaskService(getContext());
+        taskService.setXPAwardListener(new TaskService.XPAwardListener() {
+            @Override
+            public void onXPAwarded(int xp, boolean diffAwarded, boolean impAwarded) {
+                showXpToast(getContext(), xp, diffAwarded, impAwarded);
+            }
+
+            @Override
+            public void onXPAwardFailed(String error) {
+                Toast.makeText(requireContext(), "Greška: " + error, Toast.LENGTH_LONG).show();
+            }
+        });
         this.userService = new UserService();
         this.categoryService = new CategoryService(getContext());
         this.tasks = new ArrayList<>();
@@ -369,6 +383,22 @@ public class TaskListFragment extends Fragment implements RecyclerViewInterface 
             return true;
         });
         popup.show();
+    }
+
+    private void showXpToast(Context context, int xp, boolean diffAwarded, boolean impAwarded) {
+        String message;
+
+        if (!diffAwarded && !impAwarded) {
+            message = "Premašene kvote za težinu i bitnost. 0 XP.";
+        } else if (!diffAwarded) {
+            message = "Osvojio si +" + xp + " XP! Premašena kvota za težinu.";
+        } else if (!impAwarded) {
+            message = "Osvojio si +" + xp + " XP! Premašena kvota za bitnost.";
+        } else {
+            message = "Osvojio si +" + xp + " XP!";
+        }
+
+        Toast.makeText(context, message, Toast.LENGTH_LONG).show();
     }
 
     @Override
