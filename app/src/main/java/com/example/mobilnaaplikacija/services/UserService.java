@@ -14,6 +14,9 @@ import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.messaging.FirebaseMessaging;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class UserService {
 
     private final FirebaseAuth auth;
@@ -117,13 +120,31 @@ public class UserService {
                 });
     }
 
+    public void updateActiveDaysOnTaskAction(String currentUserId) {
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
 
-    /**
-     * Logout
-     */
-    public void logout() {
-        auth.signOut();
+        db.collection("users").document(currentUserId).get().addOnSuccessListener(userDoc -> {
+            if (!userDoc.exists()) return;
+
+            long now = System.currentTimeMillis();
+            long lastActive = userDoc.contains("lastActive") ? userDoc.getLong("lastActive") : 0L;
+            int activeDays = userDoc.contains("activeDays") ? userDoc.getLong("activeDays").intValue() : 0;
+
+            long THIRTY_SECONDS = 30 * 1000; // 30 sekundi
+            long TWO_THIRTY_SECONDS = 2 * THIRTY_SECONDS;
+
+            if (now - lastActive >= THIRTY_SECONDS && now - lastActive < TWO_THIRTY_SECONDS) {
+                activeDays += 1; // nastavlja streak
+            } else if (now - lastActive >= TWO_THIRTY_SECONDS) {
+                activeDays = 1; // resetuje streak
+            } // else -> još uvek isti "dan", ne povećava se
+
+            db.collection("users").document(currentUserId)
+                    .update("activeDays", activeDays, "lastActive", now);
+        });
     }
+
+
 
     /**
      * Trenutni korisnik

@@ -238,6 +238,40 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    @Override
+    protected void onStart() {
+        super.onStart();
+
+        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+        if (currentUser == null) return;
+
+        String currentUserId = currentUser.getUid();
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+
+        db.collection("users").document(currentUserId).get()
+                .addOnSuccessListener(userDoc -> {
+                    if (userDoc.exists()) {
+                        long now = System.currentTimeMillis();
+                        long lastActive = userDoc.contains("lastActive") ? userDoc.getLong("lastActive") : 0;
+                        int activeDays = userDoc.contains("activeDays") ? userDoc.getLong("activeDays").intValue() : 0;
+
+                        long DAY_MILLIS = 30 * 1000; // simulacija: 30 sekundi = 1 dan
+
+                        if (now - lastActive >= DAY_MILLIS && now - lastActive < 2 * DAY_MILLIS) {
+                            activeDays += 1; // streak++
+                        } else if (now - lastActive >= 2 * DAY_MILLIS) {
+                            activeDays = 0; // reset streak
+                        } else if (activeDays == 0) {
+                            activeDays = 0; // prvi login
+                        }
+
+                        db.collection("users").document(currentUserId)
+                                .update("activeDays", activeDays, "lastActive", now);
+                    }
+                });
+    }
+
+
     private void createAllNotificationChannels() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             createNotificationChannel(FRIEND_REQUEST_CHANNEL_ID, "Friend Requests", "Zahtevi za prijateljstvo");

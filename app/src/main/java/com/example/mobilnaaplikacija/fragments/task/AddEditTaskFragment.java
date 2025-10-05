@@ -9,7 +9,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
 
-import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -31,7 +30,6 @@ import com.example.mobilnaaplikacija.model.enums.UnitType;
 import com.example.mobilnaaplikacija.services.CategoryService;
 import com.example.mobilnaaplikacija.services.TaskService;
 import com.example.mobilnaaplikacija.services.UserService;
-import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -490,6 +488,7 @@ public class AddEditTaskFragment extends DialogFragment {
                                                 "Zadatak izmenjen!",
                                                 Toast.LENGTH_SHORT).show();
                                         sendBackToTaskList(task);
+                                        updateStreak();
                                         dismiss();
                                     } else {
                                         Toast.makeText(requireContext(),
@@ -504,6 +503,7 @@ public class AddEditTaskFragment extends DialogFragment {
                         if (updated != null) {
                             Toast.makeText(requireContext(), "Zadatak izmenjen!", Toast.LENGTH_SHORT).show();
                             sendBackToTaskList(task);
+                            updateStreak();
                             dismiss();
                         } else {
                             Toast.makeText(requireContext(), "Greška pri izmeni zadatka!", Toast.LENGTH_SHORT).show();
@@ -517,6 +517,7 @@ public class AddEditTaskFragment extends DialogFragment {
 
                     Toast.makeText(requireContext(), "Zadatak dodan!", Toast.LENGTH_SHORT).show();
                     sendBackToTaskList(task);
+                    updateStreak();
                     dismiss();
                 }
             } else {
@@ -567,5 +568,10 @@ public class AddEditTaskFragment extends DialogFragment {
     public void onDestroyView() {
         super.onDestroyView();
         binding = null;
+    }
+
+    private void updateStreak() {
+        String currentUserId = userService.getCurrentUser().getUid();
+        userService.updateActiveDaysOnTaskAction(currentUserId);
     }
 }

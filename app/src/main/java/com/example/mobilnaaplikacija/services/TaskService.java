@@ -2,7 +2,7 @@ package com.example.mobilnaaplikacija.services;
 
 import android.content.Context;
 import android.util.Log;
-import android.util.Pair;
+import android.graphics.Color;
 
 import androidx.annotation.Nullable;
 
@@ -12,6 +12,7 @@ import com.example.mobilnaaplikacija.model.enums.FrequencyType;
 import com.example.mobilnaaplikacija.model.enums.ImportanceType;
 import com.example.mobilnaaplikacija.model.enums.StatusType;
 import com.example.mobilnaaplikacija.model.enums.UnitType;
+import com.example.mobilnaaplikacija.repository.CategoryRepository;
 import com.example.mobilnaaplikacija.repository.TaskRepository;
 import com.example.mobilnaaplikacija.model.*;
 import com.example.mobilnaaplikacija.utils.XpCalculator;
@@ -25,15 +26,18 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.SetOptions;
 import com.google.firebase.firestore.Transaction;
+import com.example.mobilnaaplikacija.utils.XpCalculator;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
@@ -42,11 +46,18 @@ public class TaskService {
 
     private final Context context;
     private final TaskRepository taskRepository;
+    private final CategoryRepository categoryRepository;
+
     private XPAwardListener xpAwardListener;
     private FirebaseFirestore db;
     public TaskService(Context context) {
         this.context = context;
         this.taskRepository = new TaskRepository(new SQLiteHelper(context));
+        this.categoryRepository = new CategoryRepository(new SQLiteHelper(context));
+        taskRepository.updateStatus("17", StatusType.URAĐEN);
+        taskRepository.updateStatus("18", StatusType.OTKAZAN);
+        taskRepository.updateStatus("20", StatusType.URAĐEN);
+        taskRepository.updateStatus("21", StatusType.URAĐEN);
         this.db = FirebaseFirestore.getInstance();
     }
 
@@ -232,6 +243,36 @@ public class TaskService {
         return taskRepository.getTasksByUser(userId);
     }
 
+    public Map<String, Integer> getTaskCounts(String userId) {
+        return taskRepository.getTaskCountsByStatus(userId);
+    }
+
+    public int getLongestStreak() {
+        return taskRepository.getLongestStreak();
+    }
+
+    public Map<String, Integer> getCompletedTasksWithColors(String userId) {
+        return taskRepository.getCompletedTasksWithColors(userId);
+    }
+
+
+    public List<Task> getCompletedTasks(String userId) {
+        return taskRepository.getCompletedTasks(userId);
+    }
+
+    public float getAverageXPOfCompletedTasks(String userId) {
+        return taskRepository.getAverageXPOfCompletedTasks(userId);
+    }
+
+    public int getXPFromDifficulty(DifficultyType difficulty) {
+        return taskRepository.getXPFromDifficulty(difficulty);
+    }
+
+    public DifficultyType getDifficultyFromXP(float xp) {
+        return taskRepository.getDifficultyFromXP(xp);
+    }
+
+
     public Boolean deleteById(String id){
         return taskRepository.delete(id) > 0;
     }
@@ -266,6 +307,18 @@ public class TaskService {
             return "Jednokratan zadatak zahteva isti početni i krajnji datum!";
         }
 
+        return null;
+    }
+
+    public String changeStatus (Task task, StatusType newStatus) {
+        autoUpdateStatus(task);
+
+        if (!canChangeStatus(task, newStatus)) {
+            return "Nevažeća promena statusa.";
+        }
+
+        task.setStatus(newStatus);
+        taskRepository.update(task);
         return null;
     }
 

@@ -3,7 +3,6 @@ package com.example.mobilnaaplikacija.repository;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.util.Pair;
 
 import com.example.mobilnaaplikacija.database.SQLiteHelper;
 import com.example.mobilnaaplikacija.model.enums.DifficultyType;
@@ -14,7 +13,11 @@ import com.example.mobilnaaplikacija.model.Task;
 import com.example.mobilnaaplikacija.model.enums.UnitType;
 
 import java.util.ArrayList;
+import java.util.EnumMap;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 public class TaskRepository {
     private final SQLiteHelper dbHelper;
@@ -127,6 +130,248 @@ public class TaskRepository {
         int rows = db.delete(SQLiteHelper.TABLE_TASKS, SQLiteHelper.COLUMN_TASK_OCCURRENCE_ID + " = ?", new String[]{String.valueOf(id)});
         db.close();
         return rows;
+    }
+
+    public Map<String, Integer> getTaskCountsByStatus(String userId) {
+        Map<String, Integer> counts = new HashMap<>();
+        counts.put("AKTIVNI", 0);
+        counts.put("URAĐENI", 0);
+        counts.put("NEURAĐENI", 0);
+        counts.put("OTKAZANI", 0);
+
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+        Cursor cursor = db.rawQuery(
+                "SELECT status, COUNT(*) as count FROM " + SQLiteHelper.TABLE_TASKS +
+                        " WHERE " + SQLiteHelper.COLUMN_USER_ID + " = ? GROUP BY status",
+                new String[]{userId}
+        );
+
+        if (cursor.moveToFirst()) {
+            do {
+                String status = cursor.getString(cursor.getColumnIndexOrThrow("status"));
+                int count = cursor.getInt(cursor.getColumnIndexOrThrow("count"));
+
+                switch (status) {
+                    case "URAĐEN":
+                        counts.put("URAĐENI", count);
+                        break;
+                    case "NEURAĐEN":
+                        counts.put("NEURAĐENI", count);
+                        break;
+                    case "OTKAZAN":
+                        counts.put("OTKAZANI", count);
+                        break;
+                    case "AKTIVAN":
+                        counts.put("AKTIVNI", count);
+                        break;
+                }
+            } while (cursor.moveToNext());
+        }
+
+        cursor.close();
+        db.close();
+        return counts;
+    }
+
+    public void updateStatus(String taskId, StatusType newStatus) {
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(SQLiteHelper.COLUMN_STATUS, newStatus.name());
+
+        db.update(SQLiteHelper.TABLE_TASKS,
+                values,
+                SQLiteHelper.COLUMN_TASK_ID + " = ?",
+                new String[]{taskId});
+
+        db.close();
+    }
+
+    public int getLongestStreak() {
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
+
+        Cursor cursor = db.rawQuery("SELECT start_millis FROM "
+                + SQLiteHelper.TABLE_TASKS +
+                " WHERE " + SQLiteHelper.COLUMN_STATUS + " = 'URAĐEN' " +
+                "ORDER BY " + SQLiteHelper.COLUMN_START_MILLIS + " ASC", null);
+
+        int longestStreak = 0;
+        int currentStreak = 0;
+        long lastDay = -1;
+
+        if (cursor.moveToFirst()) {
+            do {
+                long millis = cursor.getLong(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_START_MILLIS));
+                long fakeDay = millis / 30000; // 30 sekundi = jedan dan
+
+                if (lastDay == -1) {
+                    currentStreak = 1;
+                    longestStreak = 1;
+                } else if (fakeDay == lastDay) {
+                    // isti "dan" → ne povećava streak
+                } else if (fakeDay == lastDay + 1) {
+                    // sledeći dan
+                    currentStreak++;
+                    if (currentStreak > longestStreak) {
+                        longestStreak = currentStreak;
+                    }
+                } else {
+                    // preskočen dan
+                    currentStreak = 1;
+                }
+
+                lastDay = fakeDay;
+            } while (cursor.moveToNext());
+        }
+
+        cursor.close();
+        db.close();
+
+        return longestStreak;
+    }
+
+    public Map<String, Integer> getCompletedTasksWithColors(String userId) {
+        Map<String, Integer> result = new LinkedHashMap<>();
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
+
+        String query = "SELECT c." + SQLiteHelper.COLUMN_CATEGORY_NAME + " as category_name, " +
+                "c." + SQLiteHelper.COLUMN_CATEGORY_COLOR + " as color, COUNT(*) as count " +
+                "FROM " + SQLiteHelper.TABLE_TASKS + " t " +
+                "JOIN " + SQLiteHelper.TABLE_CATEGORIES + " c " +
+                "ON t." + SQLiteHelper.COLUMN_TASK_CATEGORY_ID + " = c." + SQLiteHelper.COLUMN_CATEGORY_ID + " " +
+                "WHERE t." + SQLiteHelper.COLUMN_USER_ID + " = ? AND t." + SQLiteHelper.COLUMN_STATUS + " = ? " +
+                "GROUP BY c." + SQLiteHelper.COLUMN_CATEGORY_NAME;
+
+        Cursor cursor = db.rawQuery(query, new String[]{userId, StatusType.URAĐEN.name()});
+
+        if (cursor.moveToFirst()) {
+            do {
+                String categoryName = cursor.getString(cursor.getColumnIndexOrThrow("category_name"));
+                int color = cursor.getInt(cursor.getColumnIndexOrThrow("color"));
+                int count = cursor.getInt(cursor.getColumnIndexOrThrow("count"));
+                result.put(categoryName + ":" + color, count);
+            } while (cursor.moveToNext());
+        }
+
+        cursor.close();
+        db.close();
+        return result;
+    }
+
+    public Map<String, Integer> getCompletedTasksByCategory(String userId) {
+        Map<String, Integer> result = new HashMap<>();
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+
+        String query = "SELECT c." + SQLiteHelper.COLUMN_CATEGORY_NAME + " as category_name, COUNT(*) as count " +
+                "FROM " + SQLiteHelper.TABLE_TASKS + " t " +
+                "JOIN " + SQLiteHelper.TABLE_CATEGORIES + " c " +
+                "ON t." + SQLiteHelper.COLUMN_TASK_CATEGORY_ID + " = c." + SQLiteHelper.COLUMN_CATEGORY_ID + " " +
+                "WHERE t." + SQLiteHelper.COLUMN_USER_ID + " = ? AND t." + SQLiteHelper.COLUMN_STATUS + " = ? " +
+                "GROUP BY c." + SQLiteHelper.COLUMN_CATEGORY_NAME;
+
+        Cursor cursor = db.rawQuery(query, new String[]{userId, StatusType.URAĐEN.name()});
+
+        if (cursor.moveToFirst()) {
+            do {
+                String categoryName = cursor.getString(cursor.getColumnIndexOrThrow("category_name"));
+                int count = cursor.getInt(cursor.getColumnIndexOrThrow("count"));
+                result.put(categoryName, count);
+            } while (cursor.moveToNext());
+        }
+
+        cursor.close();
+        db.close();
+        return result;
+    }
+
+    // Prosečan XP završenih zadataka
+//    public float getAverageXPOfCompletedTasks(String userId) {
+//        SQLiteDatabase db = dbHelper.getReadableDatabase();
+//
+//        Cursor cursor = db.rawQuery(
+//                "SELECT difficulty FROM " + SQLiteHelper.TABLE_TASKS +
+//                        " WHERE user_id = ? AND status = ?",
+//                new String[]{userId, StatusType.URAĐEN.name()}
+//        );
+//
+//        int totalXP = 0;
+//        int count = 0;
+//
+//        if (cursor.moveToFirst()) {
+//            do {
+//                String difficultyStr = cursor.getString(cursor.getColumnIndexOrThrow("difficulty"));
+//                DifficultyType difficulty = DifficultyType.valueOf(difficultyStr);
+//                totalXP += getXPFromDifficulty(difficulty);
+//                count++;
+//            } while (cursor.moveToNext());
+//        }
+//
+//        cursor.close();
+//        db.close();
+//
+//        return count > 0 ? (float) totalXP / count : 0f;
+//    }
+//
+//    private int getXPFromDifficulty(DifficultyType difficulty) {
+//        switch (difficulty) {
+//            case VEOMA_LAK: return 1;
+//            case LAK: return 3;
+//            case TEŽAK: return 7;
+//            case EKSTREMNO_TEŽAK: return 20;
+//            default: return 0;
+//        }
+//    }
+
+    public List<Task> getCompletedTasks(String userId) {
+        List<Task> tasks = new ArrayList<>();
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+
+        Cursor cursor = db.query(SQLiteHelper.TABLE_TASKS, null,
+                SQLiteHelper.COLUMN_USER_ID + " = ? AND " + SQLiteHelper.COLUMN_STATUS + " = ?",
+                new String[]{userId, StatusType.URAĐEN.name()},
+                null, null, null);
+
+        if (cursor.moveToFirst()) {
+            do {
+                Task task = new Task();
+                task.setId(cursor.getString(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_TASK_ID)));
+                task.setUserId(cursor.getString(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_USER_ID)));
+                task.setName(cursor.getString(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_TASK_NAME)));
+                task.setDifficulty(DifficultyType.valueOf(cursor.getString(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_DIFFICULTY))));
+                tasks.add(task);
+            } while (cursor.moveToNext());
+        }
+
+        cursor.close();
+        db.close();
+        return tasks;
+    }
+
+    public float getAverageXPOfCompletedTasks(String userId) {
+        List<Task> tasks = getCompletedTasks(userId);
+        int totalXP = 0;
+
+        for (Task t : tasks) {
+            totalXP += getXPFromDifficulty(t.getDifficulty());
+        }
+
+        return tasks.size() > 0 ? (float) totalXP / tasks.size() : 0f;
+    }
+
+    public int getXPFromDifficulty(DifficultyType difficulty) {
+        switch (difficulty) {
+            case VEOMA_LAK: return 1;
+            case LAK: return 3;
+            case TEŽAK: return 7;
+            case EKSTREMNO_TEŽAK: return 20;
+            default: return 0;
+        }
+    }
+
+    public DifficultyType getDifficultyFromXP(float xp) {
+        if (xp <= 2) return DifficultyType.VEOMA_LAK;
+        if (xp <= 5) return DifficultyType.LAK;
+        if (xp <= 13) return DifficultyType.TEŽAK;
+        return DifficultyType.EKSTREMNO_TEŽAK;
     }
 
     public boolean deleteFutureOccurrences(String taskId, long now) {
