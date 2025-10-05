@@ -559,6 +559,8 @@ public class AddEditTaskFragment extends DialogFragment {
 
         task.setStartMillis(startMillis);
         task.setEndMillis(endMillis);
+        task.setGroupStartMillis(startMillis);
+        task.setGroupEndMillis(endMillis);
     }
 
     @Override

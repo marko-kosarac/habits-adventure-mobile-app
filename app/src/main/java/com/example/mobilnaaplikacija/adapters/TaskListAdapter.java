@@ -13,6 +13,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.mobilnaaplikacija.R;
 import com.example.mobilnaaplikacija.RecyclerViewInterface;
 import com.example.mobilnaaplikacija.model.Category;
+import com.example.mobilnaaplikacija.model.enums.FrequencyType;
 import com.example.mobilnaaplikacija.model.enums.StatusType;
 import com.example.mobilnaaplikacija.model.Task;
 import com.example.mobilnaaplikacija.services.TaskService;
@@ -158,7 +159,7 @@ public class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapter.TasksV
 
             if (editButton != null) {
                 editButton.setVisibility(
-                        (task.getStatus() == StatusType.NEURAĐEN || task.getStatus() == StatusType.OTKAZAN || task.getStatus() == StatusType.URAĐEN)
+                        (task.getStatus() == StatusType.NEURAĐEN || task.getStatus() == StatusType.OTKAZAN || task.getStatus() == StatusType.URAĐEN || (task.getFrequency() == FrequencyType.PONAVLJAJUCI && task.getEndMillis() < System.currentTimeMillis()))
                                 ? View.INVISIBLE : View.VISIBLE
                 );
             }

@@ -210,7 +210,7 @@ public class TaskService {
                 taskOccurrence.setFrequency(task.getFrequency());
                 taskOccurrence.setStartMillis(startCal.getTimeInMillis());
                 taskOccurrence.setEndMillis(endCal.getTimeInMillis());
-                taskOccurrence.setGroupStartMillis(taskOccurrence.getGroupStartMillis());
+                taskOccurrence.setGroupStartMillis(task.getGroupStartMillis());
                 taskOccurrence.setGroupEndMillis(task.getGroupEndMillis());
                 taskOccurrence.setInterval(task.getInterval());
                 taskOccurrence.setUnit(task.getUnit());
