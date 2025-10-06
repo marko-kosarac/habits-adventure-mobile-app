@@ -18,6 +18,7 @@ import com.example.mobilnaaplikacija.model.*;
 import com.example.mobilnaaplikacija.utils.XpCalculator;
 import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.Timestamp;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -47,6 +48,8 @@ public class TaskService {
     private final TaskRepository taskRepository;
     private XPAwardListener xpAwardListener;
     private FirebaseFirestore db;
+    private UserService userService;
+
     public TaskService(Context context) {
         this.taskRepository = new TaskRepository(new SQLiteHelper(context));
         taskRepository.updateStatus("17", StatusType.URAĐEN);
@@ -54,6 +57,7 @@ public class TaskService {
         taskRepository.updateStatus("20", StatusType.URAĐEN);
         taskRepository.updateStatus("21", StatusType.URAĐEN);
         this.db = FirebaseFirestore.getInstance();
+        this.userService = new UserService();
     }
 
     public void setXPAwardListener(XPAwardListener listener) {
@@ -476,8 +480,32 @@ public class TaskService {
         taskRepository.updateRepeatingTaskStatus(taskId, System.currentTimeMillis(), oldStatus, newStatus);
     }
 
-    public int getXP(Task task){
-        return XpCalculator.getTotalXP(task.getDifficulty(), task.getImportance());
+    //XP na osnovu nivoa korisnika
+    public void getXP(Task task, OnXPComputedListener listener) {
+        FirebaseUser currentUser = userService.getCurrentUser();
+        if (currentUser == null) {
+            listener.onXPComputed(0);
+            return;
+        }
+
+        String userId = currentUser.getUid();
+        DocumentReference userDoc = userService.getUserDoc(userId);
+
+        userDoc.get().addOnSuccessListener(document -> {
+                    int level = 1;
+                    if (document.exists()) {
+                        Long lvl = document.getLong("level");
+                        if (lvl != null) level = lvl.intValue();
+                    }
+
+                    int totalXP = XpCalculator.getTotalXP(task.getDifficulty(), task.getImportance(), level);
+                    listener.onXPComputed(totalXP);
+                })
+                .addOnFailureListener(e -> listener.onXPComputed(0));
+    }
+
+    public interface OnXPComputedListener {
+        void onXPComputed(int xp);
     }
 
     public void awardXP(Task task, FirebaseUser firebaseUser) {
@@ -486,11 +514,26 @@ public class TaskService {
         long now = System.currentTimeMillis();
         if (task.getStartMillis() > now) return; //mora biti: u toku/zavrsen
 
-        final int diffXp = XpCalculator.getDifficultyXP(task.getDifficulty());
-        final int impXp  = XpCalculator.getImportanceXP(task.getImportance());
         String userId = firebaseUser.getUid();
+        DocumentReference userDoc = userService.getUserDoc(userId);
+        userDoc.get().addOnSuccessListener(document -> { //XP nagrada na osnovu nivoa
+                    int level = 1;
+                    if (document.exists()) {
+                        Long lvl = document.getLong("level");
+                        if (lvl != null) level = lvl.intValue();
+                    }
 
-        checkQuotaAndUpdateXP(this.db, userId, task, diffXp, impXp);
+                    int diffXp = XpCalculator.getDifficultyXP(task.getDifficulty(), level);
+                    int impXp = XpCalculator.getImportanceXP(task.getImportance(), level);
+
+                    checkQuotaAndUpdateXP(this.db, userId, task, diffXp, impXp);
+                })
+                .addOnFailureListener(e -> {
+                    int diffXp = XpCalculator.getDifficultyXP(task.getDifficulty(), 1);
+                    int impXp = XpCalculator.getImportanceXP(task.getImportance(), 1);
+
+                    checkQuotaAndUpdateXP(this.db, userId, task, diffXp, impXp);
+                });
     }
 
     private void checkQuotaAndUpdateXP(FirebaseFirestore db, String userId, Task task, int diffXp, int impXp) {
