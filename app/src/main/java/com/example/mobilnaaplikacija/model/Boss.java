@@ -2,15 +2,17 @@ package com.example.mobilnaaplikacija.model;
 
 public class Boss {
     private String id;
-    private double maxHp;
     private double currentHp;
+    private double maxHp;
+    private int level; //currently fighting boss (1st, 2nd...)
     private boolean defeated;
 
-    public Boss (String id) {
+    public Boss (String id, int maxHp, boolean defeated) {
         this.id = id;
-        this.maxHp = 200;
-        this.currentHp = 200;
-        this.defeated = false;
+        this.currentHp = maxHp;
+        this.maxHp = maxHp;
+        this.level = 1;
+        this.defeated = defeated;
     }
 
     public void takeDamage(double damage) { //TODO into service
@@ -25,6 +27,14 @@ public class Boss {
 
     public void setId(String id) {
         this.id = id;
+    }
+
+    public int getLevel() {
+        return level;
+    }
+
+    public void setLevel(int level) {
+        this.level = level;
     }
 
     public double getMaxHp() {
@@ -42,12 +52,11 @@ public class Boss {
     public void setCurrentHp(double currentHp) {
         this.currentHp = currentHp;
     }
-
-    public boolean isDefeated() {
-        return defeated;
-    }
+    public boolean getDefeated() { return defeated; }
 
     public void setDefeated(boolean defeated) {
         this.defeated = defeated;
     }
+
+
 }
