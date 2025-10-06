@@ -6,10 +6,10 @@ public class Boss {
     private double currentHp;
     private boolean defeated;
 
-    public Boss(String id, double maxHp) {
+    public Boss (String id) {
         this.id = id;
-        this.maxHp = maxHp;
-        this.currentHp = maxHp;
+        this.maxHp = 200;
+        this.currentHp = 200;
         this.defeated = false;
     }
 
