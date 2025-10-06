@@ -516,7 +516,7 @@ public class TaskService {
 
         String userId = firebaseUser.getUid();
         DocumentReference userDoc = userService.getUserDoc(userId);
-        userDoc.get().addOnSuccessListener(document -> {
+        userDoc.get().addOnSuccessListener(document -> { //XP nagrada na osnovu nivoa
                     int level = 1;
                     if (document.exists()) {
                         Long lvl = document.getLong("level");
