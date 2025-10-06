@@ -121,6 +121,8 @@ public class TaskService {
                 taskOccurrence.setDifficulty(task.getDifficulty());
                 taskOccurrence.setImportance(task.getImportance());
                 taskOccurrence.setStatus(task.getStatus());
+                taskOccurrence.setCreatedAtLevel(task.getCreatedAtLevel());
+                taskOccurrence.setQuotaReached(task.isQuotaReached());
 
                 taskRepository.add(taskOccurrence);
                 taskOccurrences.add(taskOccurrence);
@@ -227,6 +229,8 @@ public class TaskService {
                 taskOccurrence.setDifficulty(task.getDifficulty());
                 taskOccurrence.setImportance(task.getImportance());
                 taskOccurrence.setStatus(task.getStatus());
+                taskOccurrence.setCreatedAtLevel(task.getCreatedAtLevel());
+                taskOccurrence.setQuotaReached(task.isQuotaReached());
 
                 taskRepository.add(taskOccurrence);
                 taskOccurrences.add(taskOccurrence);
@@ -545,7 +549,6 @@ public class TaskService {
         DocumentReference weekRef = db.collection("users").document(userId).collection("xpLogs").document(weekId);
         DocumentReference monthRef = db.collection("users").document(userId).collection("xpLogs").document(monthId);
 
-
         Tasks.whenAllSuccess(dayRef.get(), weekRef.get(), monthRef.get())
                 .addOnSuccessListener(results -> {
                     DocumentSnapshot daySnap = (DocumentSnapshot) results.get(0);
@@ -557,6 +560,11 @@ public class TaskService {
                     int awardedDiffXp = allowDiff ? diffXp : 0;
                     int awardedImpXp  = allowImp ? impXp : 0;
                     int totalAwardedXp = awardedDiffXp + awardedImpXp;
+
+                    if (!allowDiff || !allowImp) {
+                        task.setQuotaReached(true);
+                        update(task);
+                    }
 
                     if (totalAwardedXp == 0) {
                         if (xpAwardListener != null) xpAwardListener.onXPAwarded(0, allowDiff, allowImp);
