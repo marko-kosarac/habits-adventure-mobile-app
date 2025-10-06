@@ -165,6 +165,7 @@ public class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapter.TasksV
                     experiencePoints.setText(xp + " XP");
                 });
             }
+
             if (editButton != null) {
                 editButton.setVisibility(
                         (task.getStatus() == StatusType.NEURAĐEN || task.getStatus() == StatusType.OTKAZAN || task.getStatus() == StatusType.URAĐEN || (task.getFrequency() == FrequencyType.PONAVLJAJUCI && task.getEndMillis() < System.currentTimeMillis()))

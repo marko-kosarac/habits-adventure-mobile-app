@@ -13,7 +13,6 @@ import com.example.mobilnaaplikacija.model.Task;
 import com.example.mobilnaaplikacija.model.enums.UnitType;
 
 import java.util.ArrayList;
-import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;

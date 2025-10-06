@@ -187,8 +187,7 @@ public class UserService {
     }
 
     public interface OnLevelRetrievedCallback {
-        void onSuccess(int xp);
+        void onSuccess(int level);
         void onFailure(String errorMessage);
     }
-
 }
