@@ -161,8 +161,9 @@ public class TaskListAdapter extends RecyclerView.Adapter<TaskListAdapter.TasksV
             }
 
             if (experiencePoints != null) {
-                int xp = this.taskService.getXP(task);
-                experiencePoints.setText(xp + " XP");
+                this.taskService.getXP(task, xp -> {
+                    experiencePoints.setText(xp + " XP");
+                });
             }
             if (editButton != null) {
                 editButton.setVisibility(
