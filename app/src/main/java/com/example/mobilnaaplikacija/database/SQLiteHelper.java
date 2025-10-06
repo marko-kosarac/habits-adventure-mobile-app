@@ -36,6 +36,8 @@ public class SQLiteHelper extends SQLiteOpenHelper {
     public static final String COLUMN_DIFFICULTY = "difficulty";
     public static final String COLUMN_IMPORTANCE = "importance";
     public static final String COLUMN_STATUS = "status";
+    public static final String COLUMN_CREATED_AT_LEVEL = "created_at_level";
+    public static final String COLUMN_QUOTA_REACHED = "quota_reached";
 
     // Categories table
     public static final String TABLE_CATEGORIES = "CATEGORIES";
@@ -49,7 +51,7 @@ public class SQLiteHelper extends SQLiteOpenHelper {
     public static final String COLUMN_BOSS_CURRENT_HP = "current_hp";
     public static final String COLUMN_BOSS_MAX_HP = "max_hp";
     public static final String COLUMN_BOSS_LEVEL = "level";
-    public static final String COLUMN_BOSS_DEFEATED = "boss_defeated";
+    public static final String COLUMN_BOSS_DEFEATED = "defeated";
 
     // Battle table
     public static final String TABLE_BATTLES = "BATTLES";
@@ -62,7 +64,7 @@ public class SQLiteHelper extends SQLiteOpenHelper {
     public static final String TABLE_ATTACKS = "ATTACKS";
     public static final String COLUMN_ATTACK_ID = "id";
     public static final String COLUMN_ATTACK_USER_ID = "user_id";
-    public static final String COLUMN_ATTACK_BATTLE_ID = "battle_id";
+    public static final String COLUMN_ATTACK_BOSS_ID = "boss_id";
     public static final String COLUMN_ATTACK_ATTEMPTS_NUMBER = "attempts";
     public static final String COLUMN_ATTACK_HIT = "hit";
     public static final String COLUMN_ATTACK_DAMAGE_DEALT = "damage_dealt";
@@ -97,8 +99,10 @@ public class SQLiteHelper extends SQLiteOpenHelper {
                     COLUMN_UNIT + " TEXT, " +
                     COLUMN_DIFFICULTY + " TEXT, " +
                     COLUMN_IMPORTANCE + " TEXT, " +
-                    COLUMN_STATUS + " TEXT" +
-                    ");";
+                    COLUMN_STATUS + " TEXT, " +
+                    COLUMN_CREATED_AT_LEVEL + " TEXT, " +
+                    COLUMN_QUOTA_REACHED + " TEXT" +
+        ");";
 
     private static final String DB_CREATE_CATEGORIES = "CREATE TABLE " + TABLE_CATEGORIES + " ("
             + COLUMN_CATEGORY_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
@@ -124,7 +128,7 @@ public class SQLiteHelper extends SQLiteOpenHelper {
     private static final String DB_CREATE_ATTACKS = "CREATE TABLE " + TABLE_ATTACKS + " ("
             + COLUMN_ATTACK_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
             + COLUMN_ATTACK_USER_ID + " TEXT, "
-            + COLUMN_ATTACK_BATTLE_ID + " TEXT, "
+            + COLUMN_ATTACK_BOSS_ID + " TEXT, "
             + COLUMN_ATTACK_ATTEMPTS_NUMBER + " INTEGER, "
             + COLUMN_ATTACK_HIT + " INTEGER, "
             + COLUMN_ATTACK_DAMAGE_DEALT + " INTEGER"
