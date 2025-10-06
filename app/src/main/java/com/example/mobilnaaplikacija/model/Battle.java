@@ -9,6 +9,8 @@ public class Battle {
     private int coinsEarned;
     private List<Attack> attacks;
 
+    public Battle() {}
+
     public Battle(String id, String userId, String bossId, int coinsEarned, List<Attack> attacks) {
         this.id = id;
         this.userId = userId;

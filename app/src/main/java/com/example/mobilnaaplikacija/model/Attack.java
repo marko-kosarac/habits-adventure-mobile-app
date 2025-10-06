@@ -3,15 +3,16 @@ package com.example.mobilnaaplikacija.model;
 public class Attack {
     private String id;
     private String userId;
-    private String battleId;
+    private String bossId;
     private int attemptNumber;
     private boolean hit;
-    private double damageDealt;
+    private int damageDealt;
 
-    public Attack(String id, String userId, String battleId, int attemptNumber, boolean hit, double damageDealt) {
+    public Attack(){}
+    public Attack(String id, String userId, String bossId, int attemptNumber, boolean hit, int damageDealt) {
         this.id = id;
         this.userId = userId;
-        this.battleId = battleId;
+        this.bossId = bossId;
         this.attemptNumber = attemptNumber;
         this.hit = hit;
         this.damageDealt = damageDealt;
@@ -33,12 +34,12 @@ public class Attack {
         this.userId = userId;
     }
 
-    public String getBattleId() {
-        return battleId;
+    public String getBossId() {
+        return bossId;
     }
 
-    public void setBattleId(String battleId) {
-        this.battleId = battleId;
+    public void setBossId(String bossId) {
+        this.bossId = bossId;
     }
 
     public int getAttemptNumber() {
@@ -57,11 +58,11 @@ public class Attack {
         this.hit = hit;
     }
 
-    public double getDamageDealt() {
+    public int getDamageDealt() {
         return damageDealt;
     }
 
-    public void setDamageDealt(double damageDealt) {
+    public void setDamageDealt(int damageDealt) {
         this.damageDealt = damageDealt;
     }
 }
