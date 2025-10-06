@@ -159,4 +159,36 @@ public class UserService {
     public DocumentReference getUserDoc(String userId) {
         return db.collection("users").document(userId);
     }
+
+    public void getUserLevel(String userId, OnLevelRetrievedCallback callback) {
+        if (userId == null || userId.isEmpty()) {
+            callback.onFailure("Neispravan ID korisnika.");
+            return;
+        }
+
+        db.collection("users").document(userId)
+                .get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    if (documentSnapshot.exists()) {
+                        Long levelValue = documentSnapshot.getLong("level");
+                        if (levelValue != null) {
+                            callback.onSuccess(levelValue.intValue());
+                        } else {
+                            callback.onFailure("Polje 'level' nije pronađeno.");
+                        }
+                    } else {
+                        callback.onFailure("Korisnik ne postoji u bazi.");
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    Log.e("UserService", "Greška pri dohvatanju levela", e);
+                    callback.onFailure("Greška pri dohvatanju levela: " + e.getMessage());
+                });
+    }
+
+    public interface OnLevelRetrievedCallback {
+        void onSuccess(int xp);
+        void onFailure(String errorMessage);
+    }
+
 }
