@@ -242,7 +242,7 @@ public class TaskService {
         return taskOccurrences;
     }
 
-    public List<Task> getTasksByUser(String userId){
+    public List<Task> getTasksByUser(String userId) {
         return taskRepository.getTasksByUser(userId);
     }
 
@@ -276,11 +276,11 @@ public class TaskService {
     }
 
 
-    public Boolean deleteById(String id){
+    public Boolean deleteById(String id) {
         return taskRepository.delete(id) > 0;
     }
 
-    public Boolean deleteFutureOccurrences(String id){
+    public Boolean deleteFutureOccurrences(String id) {
         long now = System.currentTimeMillis();
         return taskRepository.deleteFutureOccurrences(id, now);
     }
@@ -313,7 +313,7 @@ public class TaskService {
         return null;
     }
 
-    public Task autoUpdateStatus (Task task) {
+    public Task autoUpdateStatus(Task task) {
         long now = System.currentTimeMillis();
         long threeDaysMills = 3L * 24 * 60 * 60 * 1000;
         if (now - threeDaysMills > task.getEndMillis()) {
@@ -347,7 +347,7 @@ public class TaskService {
         }
     }
 
-    public String isStatusValid (String status, Long start, Long end) {
+    public String isStatusValid(String status, Long start, Long end) {
         if (status.isEmpty()) return "Izaberite status zadatka!";
 
         if (status.equals(StatusType.URAĐEN.getDisplayName())) {
@@ -405,7 +405,7 @@ public class TaskService {
         return filteredTasks;
     }
 
-    public ArrayList<Task> filterCurrentFutureTasks (ArrayList<Task> tasks) {
+    public ArrayList<Task> filterCurrentFutureTasks(ArrayList<Task> tasks) {
         ArrayList<Task> filtered = new ArrayList<>();
         long now = System.currentTimeMillis();
 
@@ -431,10 +431,10 @@ public class TaskService {
         fmt.setLenient(false);
         Calendar cal = Calendar.getInstance();
 
-        if(task.getFrequency() == FrequencyType.JEDNOKRATAN) {
+        if (task.getFrequency() == FrequencyType.JEDNOKRATAN) {
             try {
                 Date date = parseMillisToDate(task.getStartMillis());
-                if(date != null) {
+                if (date != null) {
                     cal.setTime(date);
                     dates.add(fmt.format(cal.getTime()));
                 }
@@ -556,9 +556,9 @@ public class TaskService {
                     DocumentSnapshot monthSnap = (DocumentSnapshot) results.get(2);
 
                     boolean allowDiff = isDifficultyWithinQuota(daySnap, weekSnap, task.getDifficulty());
-                    boolean allowImp  = isImportanceWithinQuota(daySnap, monthSnap, task.getImportance());
+                    boolean allowImp = isImportanceWithinQuota(daySnap, monthSnap, task.getImportance());
                     int awardedDiffXp = allowDiff ? diffXp : 0;
-                    int awardedImpXp  = allowImp ? impXp : 0;
+                    int awardedImpXp = allowImp ? impXp : 0;
                     int totalAwardedXp = awardedDiffXp + awardedImpXp;
 
                     if (!allowDiff || !allowImp) {
@@ -567,7 +567,8 @@ public class TaskService {
                     }
 
                     if (totalAwardedXp == 0) {
-                        if (xpAwardListener != null) xpAwardListener.onXPAwarded(0, allowDiff, allowImp);
+                        if (xpAwardListener != null)
+                            xpAwardListener.onXPAwarded(0, allowDiff, allowImp);
                         logCurrentQuotas(db, userId);
                         return;
                     }
@@ -575,7 +576,8 @@ public class TaskService {
                 })
                 .addOnFailureListener(e -> {
                     Log.e("XP", "Error fetching quota docs", e);
-                    if (xpAwardListener != null) xpAwardListener.onXPAwardFailed("Greška pri proveri kvote.");
+                    if (xpAwardListener != null)
+                        xpAwardListener.onXPAwardFailed("Greška pri proveri kvote.");
                 });
     }
 
@@ -720,6 +722,7 @@ public class TaskService {
 
     public interface XPAwardListener {
         void onXPAwarded(int xp, boolean diffAwarded, boolean impAwarded);
+
         void onXPAwardFailed(String error);
     }
 
@@ -750,4 +753,72 @@ public class TaskService {
                 .addOnFailureListener(e -> Log.e("XP_LOG", "Failed to fetch quota docs", e));
     }
 
+    public interface OnSuccessRateCalculated {
+        void OnCalculated(double successRate);
+    }
+
+    public double getSuccessRate(String userId, OnSuccessRateCalculated callback) {
+        userService.getUserLevel(userId, new UserService.OnLevelRetrievedCallback() {
+            @Override
+            public void onSuccess(int level) {
+                List<Task> tasksAtLvl = getTasksAtLevel(userId, level);
+
+                List<Task> validTasks = getTasksForSuccessRate(tasksAtLvl); //bez otkazanih, pauziranih, dostinugita kvota
+                List<Task> doneTasks = getDoneTasks(validTasks);
+                List<Task> createdTasks = getCreatedTasks(validTasks);
+
+                double successRate = calculateSuccessRate(doneTasks, createdTasks);
+                callback.OnCalculated(successRate);
+            }
+
+            @Override
+            public void onFailure(String errorMessage) {
+                callback.OnCalculated(0.0);
+            }
+        });
+        return 0;
+    }
+
+    public List<Task> getTasksAtLevel(String userId, int level) {
+        return taskRepository.getTasksAtLevel(userId, level);
+    }
+
+    public List<Task> getTasksForSuccessRate(List<Task> tasks) {
+        List<Task> valid = new ArrayList<>();
+        for (Task t : tasks) {
+            if (t.getStatus() != StatusType.PAUZIRAN &&
+                    t.getStatus() != StatusType.OTKAZAN &&
+                    !t.isQuotaReached()) {
+                valid.add(t);
+            }
+        }
+        return valid;
+    }
+
+    public List<Task> getDoneTasks(List<Task> tasks) {
+        List<Task> done = new ArrayList<>();
+        for (Task t : tasks) {
+            if (t.getStatus() == StatusType.URAĐEN) {
+                done.add(t);
+            }
+        }
+        return done;
+    }
+
+    public List<Task> getCreatedTasks (List<Task> tasks) {
+        List<Task> created = new ArrayList<>();
+        for (Task t : tasks) {
+            if (t.getStatus() != StatusType.PAUZIRAN &&
+                    t.getStatus() != StatusType.OTKAZAN) {
+                created.add(t);
+            }
+        }
+        return created;
+    }
+
+    private double calculateSuccessRate(List<Task> doneTasks, List<Task> createdTasks) {
+        if (createdTasks.isEmpty()) return 0.0;
+        double rate = (double) doneTasks.size() / createdTasks.size();
+        return Math.round(rate * 10000.0) / 100.0; // npr 67.35%
+    }
 }
