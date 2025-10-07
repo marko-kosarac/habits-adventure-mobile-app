@@ -8,6 +8,7 @@ import com.example.mobilnaaplikacija.model.Equipment;
 import com.example.mobilnaaplikacija.model.User;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
@@ -210,4 +211,37 @@ public class UserService {
             if (onFailure != null) onFailure.onFailure(e);
         });
     }
+
+    public void addEquipmentToUser(String userId, Equipment equipment, OnSuccessListener<Void> onSuccess, OnFailureListener onFailure) {
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+
+        DocumentReference equipmentRef = db
+                .collection("users")
+                .document(userId)
+                .collection("inventory")
+                .document(String.valueOf(equipment.getId()));
+
+        equipmentRef.get().addOnSuccessListener(documentSnapshot -> {
+            if (documentSnapshot.exists()) {
+                //Vec posjeduje
+            } else {
+                //Ne posjeduje - dodaj
+                Map<String, Object> data = new HashMap<>();
+                data.put("id", equipment.getId());
+                data.put("name", equipment.getName());
+                data.put("description", equipment.getDescription());
+                data.put("type", equipment.getType().name());
+                data.put("bonus", equipment.getBonus());
+                data.put("duration", equipment.getDuration());
+                data.put("price", equipment.getPrice());
+                data.put("quantity", 1);
+                data.put("isActivated", false);
+
+                equipmentRef.set(data)
+                        .addOnSuccessListener(onSuccess)
+                        .addOnFailureListener(onFailure);
+            }
+        }).addOnFailureListener(onFailure);
+    }
+
 }

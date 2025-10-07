@@ -8,6 +8,7 @@ import com.example.mobilnaaplikacija.database.SQLiteHelper;
 import com.example.mobilnaaplikacija.model.Attack;
 import com.example.mobilnaaplikacija.model.Battle;
 import com.example.mobilnaaplikacija.model.Boss;
+import com.example.mobilnaaplikacija.model.Equipment;
 import com.example.mobilnaaplikacija.repository.BattleRepository;
 import com.google.firebase.firestore.DocumentReference;
 
@@ -84,7 +85,7 @@ public class BattleService {
 
                         //boss defeated check
                         if (bossRef.get().isDefeated()) {
-                            int coins = bossService.calculateCoins(bossRef.get().getLevel()); // or define logic, e.g. random or level-based
+                            int coins = bossService.calculateCoins(bossRef.get().getLevel());
                             battleRef.get().setCoinsEarned(coins);
 
                             userService.addCoinsToUser(userId, coins, () -> {
@@ -97,7 +98,7 @@ public class BattleService {
                                     }
                             );
                         } else if (attacks.size() >= 5) {
-                            int coins = bossService.calculateCoins(bossRef.get().getLevel()); // or define logic, e.g. random or level-based
+                            int coins = bossService.calculateCoins(bossRef.get().getLevel());
                             battleRef.get().setCoinsEarned(coins);
 
                             userService.addCoinsToUser(userId, coins, () -> {
@@ -115,7 +116,7 @@ public class BattleService {
                             battleRef.get().setBossId(bossId);
                             battleRef.get().setAttacks(attacks);
                             battleRef.get().setUserWon(false);
-                            battleRepository.add(battleRef.get()); //add only if do not exist in db, else update if defeated
+                            battleRepository.add(battleRef.get()); //TODO add only if does not exist in db, else update if defeated
                             callback.onBattleFinished(battleRef.get());
                         }
 
@@ -138,8 +139,9 @@ public class BattleService {
 
         //šansa od 20% da se dobije komad opreme (95% šanse za odeću, 5% šanse za oružje)
         double chance = 0.20;
-        equipmentService.getEquipmentReward(userId, chance);
-        //TODO oprema dobijena? pohraniti ili ne?
+        Equipment equipment = equipmentService.getEquipmentReward(userId, chance);
+        //TODO user's lvl++?
+        //TODO xp/pp?
 
         callback.onBattleFinished(battle);
     }
@@ -153,8 +155,9 @@ public class BattleService {
             //pola HP → slabija nagrada
             coins = baseCoins / 2;
             double chance = 0.10;
-            equipmentService.getEquipmentReward(userId, chance);
-            //TODO oprema dobijena? pohraniti ili ne?
+            Equipment equipment = equipmentService.getEquipmentReward(userId, chance);
+            //TODO user's lvl++?
+            //TODO xp/pp?
         } else {
             coins = 0;
         }
