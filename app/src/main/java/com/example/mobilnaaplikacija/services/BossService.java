@@ -1,14 +1,38 @@
 package com.example.mobilnaaplikacija.services;
 
+import android.content.Context;
+
+import com.example.mobilnaaplikacija.database.SQLiteHelper;
+import com.example.mobilnaaplikacija.model.Boss;
 import com.example.mobilnaaplikacija.repository.*;
 
 public class BossService {
     private final BossRepository bossRepository;
 
-    public BossService(BossRepository bossRepository) {
-        this.bossRepository = bossRepository;
+    public BossService(Context context) {
+        this.bossRepository = new BossRepository(new SQLiteHelper(context));
     }
 
+    public Boss getBossById (String id) {
+        return  bossRepository.getBossById(id);
+    }
+
+   public Boss takeDamage(Boss boss, int damage) {
+        boss.setCurrentHp(boss.getCurrentHp() - damage);
+        if (boss.getCurrentHp() < 0) {
+            boss.setCurrentHp(0);
+            boss.setDefeated(true);
+        } else {
+            boss.setDefeated(false);
+            // if next time clicks battle,
+            // check if last one got defeated:
+            // false->take him,
+            // true->create new one, boss.level++
+        }
+    return boss;
+    }
+
+    //When new boss is created, last one is defeated or this is 1st time fighting with it
     public int calculateHp (int level) {
         if (level == 1) return 200;
         int hp = 200;
@@ -26,36 +50,7 @@ public class BossService {
         return (int) coins;
     }
 
-
-//    public Battle fightBoss(String userId, String bossId) {
-//        //UserStats user = userRepository.findById(userId);
-//        //Boss boss = bossRepository.findById(bossId);
-//        //if (user == null || boss == null) return null;
-//
-//        List<Attack> attacks = new ArrayList<>();
-//
-//        for (int i = 1; i <= 5; i++) {
-//            //boolean hit = BattleUtils.attackHits(user.getSuccessRate());
-//            //double damage = hit ? user.getPp() : 0;
-//            //if (hit) boss.takeDamage(damage);
-//
-//            //attacks.add(new Attack(i, hit, damage));
-//            //if (boss.isDefeated()) break;
-//        }
-//
-//        //int coins = calculateCoinsEarned(boss.isDefeated(), boss.getCurrentHp(), boss.getMaxHp());
-//        //user.addCoins(coins);
-//
-//        // persist state
-//        //bossRepository.save(boss);
-//        //userRepository.save(user);
-//
-//        //return new Battle(boss.isDefeated(), boss.getCurrentHp(), coins, attacks);
-//    }
-//
-//    private int calculateCoinsEarned(boolean defeated, double currentHp, double maxHp) {
-//        if (defeated) return 200;
-//        else if (currentHp <= maxHp / 2) return 100;
-//        return 0;
-//    }
+    public Boss update (Boss boss) {
+        return bossRepository.update(boss);
+    }
 }
