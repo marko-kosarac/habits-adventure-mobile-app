@@ -6,17 +6,18 @@ public class Battle {
     private String id;
     private String userId;
     private String bossId;
+    private boolean userWon;
     private int coinsEarned;
     private List<Attack> attacks;
 
     public Battle() {}
 
-    public Battle(String id, String userId, String bossId, int coinsEarned, List<Attack> attacks) {
+    public Battle(String id, String userId, String bossId, boolean userWon, int coinsEarned) {
         this.id = id;
         this.userId = userId;
         this.bossId = bossId;
+        this.userWon = userWon;
         this.coinsEarned = coinsEarned;
-        this.attacks = attacks;
     }
 
     public String getId() {
@@ -41,6 +42,14 @@ public class Battle {
 
     public void setBossId(String bossId) {
         this.bossId = bossId;
+    }
+
+    public boolean hasUserWon() {
+        return userWon;
+    }
+
+    public void setUserWon(boolean userWon) {
+        this.userWon = userWon;
     }
 
     public int getCoinsEarned() {

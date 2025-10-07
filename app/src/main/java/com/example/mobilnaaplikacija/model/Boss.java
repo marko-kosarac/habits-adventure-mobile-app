@@ -23,12 +23,6 @@ public class Boss {
         this.defeated = defeated;
     }
 
-    public void takeDamage(int damage) { //TODO into service
-        currentHp -= damage;
-        if (currentHp < 0) currentHp = 0;
-        if (currentHp == 0) defeated = true;
-    }
-
     public String getId() {
         return id;
     }
@@ -45,7 +39,7 @@ public class Boss {
         this.level = level;
     }
 
-    public double getMaxHp() {
+    public int getMaxHp() {
         return maxHp;
     }
 
@@ -53,14 +47,14 @@ public class Boss {
         this.maxHp = maxHp;
     }
 
-    public double getCurrentHp() {
+    public int getCurrentHp() {
         return currentHp;
     }
 
     public void setCurrentHp(int currentHp) {
         this.currentHp = currentHp;
     }
-    public boolean getDefeated() { return defeated; }
+    public boolean isDefeated() { return defeated; }
 
     public void setDefeated(boolean defeated) {
         this.defeated = defeated;

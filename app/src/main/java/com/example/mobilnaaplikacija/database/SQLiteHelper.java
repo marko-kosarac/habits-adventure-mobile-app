@@ -58,6 +58,7 @@ public class SQLiteHelper extends SQLiteOpenHelper {
     public static final String COLUMN_BATTLE_ID = "id";
     public static final String COLUMN_BATTLE_USER_ID = "user_id";
     public static final String COLUMN_BATTLE_BOSS_ID = "boss_id";
+    public static final String COLUMN_BATTLE_USER_WON = "user_won";
     public static final String COLUMN_BATTLE_COINS_EARNED = "coins_earned";
 
     // Attack table
@@ -122,6 +123,7 @@ public class SQLiteHelper extends SQLiteOpenHelper {
             + COLUMN_BATTLE_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
             + COLUMN_BATTLE_USER_ID + " TEXT, "
             + COLUMN_BATTLE_BOSS_ID + " TEXT, "
+            + COLUMN_BATTLE_USER_WON + " INTEGER,"
             + COLUMN_BATTLE_COINS_EARNED + " INTEGER"
             + ");";
 
