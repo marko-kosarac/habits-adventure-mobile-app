@@ -4,13 +4,16 @@ import android.util.Log;
 
 import androidx.annotation.NonNull;
 
+import com.example.mobilnaaplikacija.model.Equipment;
 import com.example.mobilnaaplikacija.model.User;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.messaging.FirebaseMessaging;
 
@@ -189,5 +192,22 @@ public class UserService {
     public interface OnLevelRetrievedCallback {
         void onSuccess(int level);
         void onFailure(String errorMessage);
+    }
+
+    public void addCoinsToUser(String userId, int coins, Runnable onSuccess, OnFailureListener onFailure) {
+        DocumentReference userRef = db.collection("users").document(userId);
+
+        db.runTransaction(transaction -> {
+            DocumentReference docRef = db.collection("users").document(userId);
+            DocumentSnapshot snapshot = transaction.get(docRef);
+            Long currentCoins = snapshot.getLong("coins");
+            if (currentCoins == null) currentCoins = 0L;
+            transaction.update(docRef, "coins", currentCoins + coins);
+            return null;
+        }).addOnSuccessListener(aVoid -> {
+            if (onSuccess != null) onSuccess.run();
+        }).addOnFailureListener(e -> {
+            if (onFailure != null) onFailure.onFailure(e);
+        });
     }
 }
