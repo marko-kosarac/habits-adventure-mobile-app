@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".fragments.battle.BattleFragment">
+
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:padding="16dp"
+        android:background="@color/cardview_dark_background"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+
+        <!-- Boss HP Bar -->
+        <ProgressBar
+            android:id="@+id/bossHpBar"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="250dp"
+            android:layout_height="20dp"
+            android:max="100"
+            android:progress="100"
+            android:progressTint="@color/red"
+            android:layout_marginTop="8dp" />
+
+        <!-- Player PP Bar -->
+        <ProgressBar
+            android:id="@+id/playerPpBar"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="250dp"
+            android:layout_height="20dp"
+            android:max="100"
+            android:progress="75"
+            android:progressTint="@color/colorAccent"
+            android:layout_marginTop="4dp" />
+
+        <!-- Attack info -->
+        <TextView
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:id="@+id/chanceText"
+            android:text="Šansa za uspeh: 67%"
+            android:textColor="@android:color/white"
+            android:textSize="16sp"
+            android:layout_marginTop="10dp" />
+
+        <TextView
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:id="@+id/attackCountText"
+            android:text="Pokušaji: 5/5"
+            android:textColor="@android:color/white"
+            android:layout_marginTop="4dp"/>
+
+        <!-- Active equipment icons -->
+        <LinearLayout
+            android:id="@+id/activeEquipmentContainer"
+            android:orientation="horizontal"
+            android:layout_marginTop="8dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+        <!-- Attack button -->
+        <Button
+            android:id="@+id/attackButton"
+            android:text="Napadni!"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:backgroundTint="@color/orange_600" />
+
+    </LinearLayout>
+
+
+</FrameLayout>
