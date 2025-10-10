@@ -108,6 +108,10 @@
     <string name="category_edit">Izmeni kategoriju</string>
     <string name="category_edit_color">Promeni boju</string>
 
+    <string name="boss">Boss</string>
+    <string name="attack">Napad</string>
+    <string name="attack_chance">Šansa za napad: %d%%</string>
+
     <string name="lorem_ipsum">
         Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam in scelerisque sem. Mauris
         volutpat, dolor id interdum ullamcorper, risus dolor egestas lectus, sit amet mattis purus

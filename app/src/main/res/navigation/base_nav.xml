@@ -26,7 +26,11 @@
         android:id="@+id/profile_page"
         android:name="com.example.mobilnaaplikacija.fragments.user.UserProfileFragment"
         android:label="Profil"
-        tools:layout="@layout/fragment_user_profile"/>
+        tools:layout="@layout/fragment_user_profile">
+        <action
+            android:id="@+id/action_userProfileFragment_to_battleFragment"
+            app:destination="@id/battleFragment" />
+    </fragment>
     <fragment
         android:id="@+id/nav_register"
         android:name="com.example.mobilnaaplikacija.fragments.registration.RegisterFragment"
@@ -79,5 +83,8 @@
         android:id="@+id/categoriesFragment"
         android:name="com.example.mobilnaaplikacija.fragments.category.CategoryListFragment"
         android:label="Kategorije" />
-
+    <fragment
+        android:id="@+id/battleFragment"
+        android:name="com.example.mobilnaaplikacija.fragments.battle.BattleFragment"
+        android:label="Borba sa bosom" />
 </navigation>

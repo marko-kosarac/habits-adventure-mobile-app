@@ -6,6 +6,7 @@ public class Boss {
     private int maxHp;
     private int level; //currently fighting boss (1st, 2nd...)
     private boolean defeated;
+    public Boss () {}
 
     public Boss (String id, int maxHp, boolean defeated) {
         this.id = id;
@@ -59,6 +60,4 @@ public class Boss {
     public void setDefeated(boolean defeated) {
         this.defeated = defeated;
     }
-
-
 }

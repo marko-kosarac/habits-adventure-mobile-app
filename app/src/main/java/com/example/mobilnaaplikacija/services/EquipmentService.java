@@ -31,7 +31,6 @@ public class EquipmentService {
         Equipment.Type rewardType = typeRoll <= 0.95 ? Equipment.Type.ODECA : Equipment.Type.ORUZJE;
 
         ArrayList<Equipment> allEquipment = equipmentRepository.getAllEquipment();
-        //TODO da li treba dodati u bazu?
         allEquipment.add(new Equipment(0, "Mač Snage +5%", "Trajno povećava snagu za 5%",
                 Equipment.Type.ORUZJE, "+5% Snage", -1, 500));
         allEquipment.add(new Equipment(0, "Luk i strela +5%",

@@ -17,6 +17,10 @@ public class BossService {
         return  bossRepository.getBossById(id);
     }
 
+    public Boss add (Boss boss) {
+        return bossRepository.add(boss);
+    }
+
    public Boss takeDamage(Boss boss, int damage) {
         boss.setCurrentHp(boss.getCurrentHp() - damage);
         if (boss.getCurrentHp() < 0) {
@@ -33,8 +37,7 @@ public class BossService {
     }
 
     //When new boss is created, last one is defeated or this is 1st time fighting with it
-    public int calculateHp (int level) {
-        if (level == 1) return 200;
+    public int calculateMaxHp (int level) {
         int hp = 200;
         for (int i = 2; i <= level; i ++) {
             hp = Math.round(hp * 2 + hp / 2); //HP prethodnog bosa * 2 + HP prethodnog bosa / 2

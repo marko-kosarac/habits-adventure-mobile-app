@@ -5,73 +5,89 @@
     android:layout_height="match_parent"
     tools:context=".fragments.battle.BattleFragment">
 
-    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    <LinearLayout
         android:orientation="vertical"
         android:gravity="center"
         android:padding="16dp"
-        android:background="@color/cardview_dark_background"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
-
-
+        <!-- Boss idle animacija -->
+        <ImageView
+            android:id="@+id/ivBossSpriteIdle"
+            android:layout_width="125dp"
+            android:layout_height="220dp"
+            android:layout_gravity="center"
+            android:background="@drawable/boss_idle"
+            android:contentDescription="@string/boss"
+            android:scaleType="center" />
+        <!-- Boss hit animacija -->
+        <ImageView
+            android:id="@+id/ivBossSpriteHit"
+            android:layout_width="125dp"
+            android:layout_height="220dp"
+            android:layout_gravity="center"
+            android:background="@drawable/boss_hit"
+            android:scaleType="center"
+            android:contentDescription="@string/boss"
+            android:visibility="gone"/>
         <!-- Boss HP Bar -->
+        <TextView
+            android:id="@+id/tvBossHP"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:textSize="18sp"
+            android:layout_marginTop="8dp"/>
         <ProgressBar
-            android:id="@+id/bossHpBar"
+            android:id="@+id/pbHPBar"
             style="?android:attr/progressBarStyleHorizontal"
             android:layout_width="250dp"
             android:layout_height="20dp"
-            android:max="100"
-            android:progress="100"
             android:progressTint="@color/red"
             android:layout_marginTop="8dp" />
-
-        <!-- Player PP Bar -->
+        <!-- Korisnik PP Bar -->
+        <TextView
+            android:id="@+id/tvUserPP"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:layout_marginTop="24dp"
+            android:textSize="18sp"/>
         <ProgressBar
-            android:id="@+id/playerPpBar"
+            android:id="@+id/pbPPBar"
             style="?android:attr/progressBarStyleHorizontal"
             android:layout_width="250dp"
             android:layout_height="20dp"
-            android:max="100"
-            android:progress="75"
             android:progressTint="@color/colorAccent"
             android:layout_marginTop="4dp" />
-
-        <!-- Attack info -->
+        <!-- Pokušaji -->
         <TextView
+            android:id="@+id/tvAttackCount"
             android:layout_height="wrap_content"
             android:layout_width="wrap_content"
-            android:id="@+id/chanceText"
-            android:text="Šansa za uspeh: 67%"
-            android:textColor="@android:color/white"
-            android:textSize="16sp"
-            android:layout_marginTop="10dp" />
-
-        <TextView
-            android:layout_height="wrap_content"
-            android:layout_width="wrap_content"
-            android:id="@+id/attackCountText"
-            android:text="Pokušaji: 5/5"
-            android:textColor="@android:color/white"
+            android:text="Pokušaji: .../5"
+            android:textColor="@android:color/black"
             android:layout_marginTop="4dp"/>
-
-        <!-- Active equipment icons -->
+        <!-- Šansa za napad -->
+        <TextView
+            android:id="@+id/tvAttackChance"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:textColor="@android:color/black"
+            android:layout_marginTop="4dp"/>
+        <!-- Aktivna oprema -->
         <LinearLayout
             android:id="@+id/activeEquipmentContainer"
             android:orientation="horizontal"
             android:layout_marginTop="8dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
-
-        <!-- Attack button -->
+        <!-- Napad dugme -->
         <Button
-            android:id="@+id/attackButton"
-            android:text="Napadni!"
+            android:id="@+id/btnAttackBoss"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
-            android:backgroundTint="@color/orange_600" />
+            android:layout_gravity="center"
+            android:layout_marginTop="16dp"
+            android:text="@string/attack"/>
 
     </LinearLayout>
-
-
 </FrameLayout>
