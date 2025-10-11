@@ -2,6 +2,7 @@ package com.example.mobilnaaplikacija.fragments.battle;
 
 import android.animation.ObjectAnimator;
 import android.graphics.drawable.AnimationDrawable;
+import android.media.audiofx.DynamicsProcessing;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -25,6 +26,7 @@ import com.example.mobilnaaplikacija.databinding.FragmentTaskListBinding;
 import com.example.mobilnaaplikacija.model.Attack;
 import com.example.mobilnaaplikacija.model.Battle;
 import com.example.mobilnaaplikacija.model.Boss;
+import com.example.mobilnaaplikacija.model.Equipment;
 import com.example.mobilnaaplikacija.model.User;
 import com.example.mobilnaaplikacija.services.AttackService;
 import com.example.mobilnaaplikacija.services.BattleService;
@@ -52,8 +54,9 @@ public class BattleFragment extends Fragment {
     private BattleService battleService;
     private TaskService taskService;
     private AttackService attackService;
-    private int PP = 0;
-    private int remainingAttacks;
+    private int PP = 0, PP_MAX;
+    private int HP = 0, HP_MAX;
+    private int numberOfAttacks = 0;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -84,6 +87,7 @@ public class BattleFragment extends Fragment {
             binding.tvAttackChance.setText(text);
             setupAttackButton(battle, (int)successRate);
         });
+        setupRemainingAttacks();
     }
 
     private User fetchUserDataFromFirebase() {
@@ -91,8 +95,8 @@ public class BattleFragment extends Fragment {
         db.collection("users").document(uid).get().addOnSuccessListener(doc -> {
             if (doc.exists()) {
                 int xp = doc.getLong("experiencePoints") != null ? doc.getLong("experiencePoints").intValue() : 0;
-                int maxPP = doc.getLong("powerPoints") != null ? doc.getLong("powerPoints").intValue() : 0;
-                PP = maxPP; //PP se mijenja kako korisnik trosi snagu
+                PP_MAX = doc.getLong("powerPoints") != null ? doc.getLong("powerPoints").intValue() : 0;
+                PP = PP_MAX; //PP se mijenja kako korisnik trosi snagu
                 long coins = doc.getLong("coins") != null ? doc.getLong("coins") : 0;
                 int level = doc.getLong("level") != null ? doc.getLong("level").intValue() : 1;
                 String title = doc.getString("title");
@@ -100,13 +104,11 @@ public class BattleFragment extends Fragment {
                 user.setExperiencePoints(xp);
                 //currentUser.setCoins();
                 //currentUser.setEquipment();
-                user.setPowerPoints(maxPP);
+                user.setPowerPoints(PP_MAX);
                 user.setLevel(level);
-
-                setupProgressBars(PP, maxPP);
-                //TODO coins azuriraj ako dobije i obavijesti
                 //TODO titulu azuriraj ako dobije
                 //TODO level azuriraj ako predje
+                setupProgressBars();
             }
         });
         return null;
@@ -125,75 +127,123 @@ public class BattleFragment extends Fragment {
         idleAnimation.start();
     }
 
-    private void setupProgressBars(int pp, int ppMax){
-        binding.pbHPBar.setMax(boss.getMaxHp());
-        binding.pbHPBar.setProgress(boss.getCurrentHp());
-        binding.pbPPBar.setMax(ppMax);
-        binding.pbPPBar.setProgress(pp);
-        //TODO
+    private void setupProgressBars(){
+        HP = boss.getCurrentHp();
+        HP_MAX = boss.getMaxHp();
+        binding.pbHPBar.setMax(HP_MAX);
+        binding.pbHPBar.setProgress(HP);
+        binding.pbPPBar.setMax(PP_MAX);
+        binding.pbPPBar.setProgress(PP);
         ObjectAnimator.ofInt(binding.pbHPBar, "progress", boss.getCurrentHp()).setDuration(600).start();
-        binding.tvUserPP.setText("PP: " + pp + "/" + ppMax);
-        binding.tvBossHP.setText("HP: " + boss.getCurrentHp() + "/" + boss.getMaxHp());
+        ObjectAnimator.ofInt(binding.pbPPBar, "progress", PP).setDuration(600).start();
+        binding.tvUserPP.setText("PP: " + PP + "/" + PP_MAX);
+        binding.tvBossHP.setText("HP: " + HP + "/" + HP_MAX);
+    }
+
+    private void setupRemainingAttacks () {
+        List<Attack> attacks = attackService.getAttacksByUserAndBoss(firebaseUser.getUid(), boss.getId());
+        numberOfAttacks = attacks.size();
+        String text = String.format(getString(R.string.attack_number), numberOfAttacks);
+        binding.tvAttackCount.setText(text);
+    }
+
+    private void updateNumberOfAttacks () {
+        numberOfAttacks++;
+        String text = String.format(getString(R.string.attack_number), numberOfAttacks);
+        binding.tvAttackCount.setText(text);
     }
 
     private void setupAttackButton(Battle battle, int successRate) {
         binding.btnAttackBoss.setOnClickListener(v-> {
+            updateNumberOfAttacks();
             double luck = Math.random() * 100;
             boolean userHit = luck < successRate;
             if (!userHit) {
-                    //battleService.missBoss();
-                    Toast.makeText(getContext(), "Promašaj! Bos se izmakao! Sreca: " + luck + ".", Toast.LENGTH_SHORT).show();
-                    Log.i("ATTACK", "Missed. Luck: " + luck + ". Success rate: " + successRate + ".");
-                    return;
-                } else {
-                    if (firebaseUser == null || battle == null || boss == null) return;
-
-                    Toast.makeText(getContext(), "Pogodak! Napad je uspeo! Sreca: " + luck + ".", Toast.LENGTH_SHORT).show();
-                    Log.i("ATTACK", "Hit. Luck: " + luck + ". Success rate: " + successRate + ".");
-
-                    //animacija udarca
-                    idleAnimation.stop();
-                    binding.ivBossSpriteIdle.setVisibility(View.GONE);
-                    binding.ivBossSpriteHit.setVisibility(View.VISIBLE);
-                    hitAnimation.stop();
-                    hitAnimation.start();
-
-                    int totalDuration = 0;
-                    for (int i = 0; i < hitAnimation.getNumberOfFrames(); i++) {
-                        totalDuration += hitAnimation.getDuration(i);
+                //user missed
+                Log.i("ATTACK", "Missed. Luck: " + luck + ". Success rate: " + successRate + ".");
+                battleService.attackBoss(firebaseUser, boss, battle, luck, successRate, numberOfAttacks, new BattleService.OnBattleCompleted() {
+                    @Override
+                    public void onBattleFinished(Battle battle, Equipment equipment, int coins) {
+                        if (numberOfAttacks <= 5 && battle.hasUserWon()) {
+                            Toast.makeText(getContext(), "Pobedio si! Bravo!", Toast.LENGTH_SHORT).show();
+                            //goToVictoryScreen(equipment, coins);
+                            //show rewards if any
+                        } else if (numberOfAttacks >= 5 && !battle.hasUserWon()) {
+                            Toast.makeText(getContext(), "Više sreće drugi put, bos nije poražen.", Toast.LENGTH_SHORT).show();
+                            //goToVictoryScreen(equipment, coins);
+                            //show rewards if any
+                        } else Toast.makeText(getContext(), "Promašaj! Bos se izmakao!", Toast.LENGTH_SHORT).show();
                     }
 
-                    binding.ivBossSpriteHit.postDelayed(() -> {
-                        hitAnimation.stop();
-                        binding.ivBossSpriteHit.setVisibility(View.GONE);
-                        binding.ivBossSpriteIdle.setVisibility(View.VISIBLE);
-                        idleAnimation.start();
-                    }, totalDuration);
+                    @Override
+                    public void onError(String message) {
+                        Toast.makeText(getContext(), message, Toast.LENGTH_SHORT);
+                    }
+                });
+            } else {
+                //user hit
+                Log.i("ATTACK", "Hit. Luck: " + luck + ". Success rate: " + successRate + ".");
+                if (firebaseUser == null || battle == null || boss == null) return;
 
-                    //napad
-                    boss.setCurrentHp(boss.getCurrentHp() - PP);
-                    PP
-                    battleService.attackBoss(firebaseUser.getUid(), boss.getId(), battle, luck, successRate, new BattleService.OnBattleCompleted() {
-                        @Override
-                        public void onBattleFinished(Battle battle) {
-                            //TODO update/add battle?
-                        }
+                //animacija udarca
+                animateAttack();
 
-                        @Override
-                        public void onError(String message) {
-                            Toast.makeText(getContext(), message, Toast.LENGTH_SHORT);
-                        }
-                    });
+                //napad
+                boss = bossService.takeDamage(boss, PP);
+                PP = 0;
+                //azuriraj progress bar-ove
+                setupProgressBars();
+                battleService.attackBoss(firebaseUser, boss, battle, luck, successRate, numberOfAttacks, new BattleService.OnBattleCompleted() {
+                    @Override
+                    public void onBattleFinished(Battle battle, Equipment equipment, int coins) {
+                        if (battle.hasUserWon()) {
+                            Toast.makeText(getContext(), "Pobedio si, bravo!", Toast.LENGTH_SHORT).show();
+                            //goToVictoryScreen(equipment, coins);
+                            //show rewards if any
+                            //TODO if won, show him reward if equipment!=null, and coins !=0
+                        } else if (numberOfAttacks >= 5 && !battle.hasUserWon()) {
+                            Toast.makeText(getContext(), "Više sreće drugi put, bos nije poražen.", Toast.LENGTH_SHORT).show();
+                            //goToVictoryScreen(equipment, coins);
+                            //show rewards if any
+                        } else
+                            Toast.makeText(getContext(), "Pogodak! Napad je uspeo!", Toast.LENGTH_SHORT).show();
+                    }
+                    
+                    @Override
+                    public void onError(String message) {
+                        Toast.makeText(getContext(), message, Toast.LENGTH_SHORT);
+                    }
+                });
 
-                    /*
-                    // Ažuriranje baze level-xp-pp-title
-                    db.collection("users").document(userId)
-                            .update("level", level, "title", title, "powerPoints", pp)
-                            .addOnSuccessListener(aVoid -> Log.d("UserProfile", "Level, titula i PP ažurirani"))
-                            .addOnFailureListener(e -> Log.e("UserProfile", "Greška pri ažuriranju levela i PP-a", e));
-                    */
-                }
+                /*
+                // Ažuriranje baze level-xp-pp-title
+                db.collection("users").document(userId)
+                        .update("level", level, "title", title, "powerPoints", pp)
+                        .addOnSuccessListener(aVoid -> Log.d("UserProfile", "Level, titula i PP ažurirani"))
+                        .addOnFailureListener(e -> Log.e("UserProfile", "Greška pri ažuriranju levela i PP-a", e));
+                */
+            }
         });
+    }
+
+    private void animateAttack () {
+        idleAnimation.stop();
+        binding.ivBossSpriteIdle.setVisibility(View.GONE);
+        binding.ivBossSpriteHit.setVisibility(View.VISIBLE);
+        hitAnimation.stop();
+        hitAnimation.start();
+
+        int totalDuration = 0;
+        for (int i = 0; i < hitAnimation.getNumberOfFrames(); i++) {
+            totalDuration += hitAnimation.getDuration(i);
+        }
+
+        binding.ivBossSpriteHit.postDelayed(() -> {
+            hitAnimation.stop();
+            binding.ivBossSpriteHit.setVisibility(View.GONE);
+            binding.ivBossSpriteIdle.setVisibility(View.VISIBLE);
+            idleAnimation.start();
+        }, totalDuration);
     }
 
     private void goToVictoryScreen(boolean won) {

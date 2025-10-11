@@ -111,6 +111,7 @@
     <string name="boss">Boss</string>
     <string name="attack">Napad</string>
     <string name="attack_chance">Šansa za napad: %d%%</string>
+    <string name="attack_number">Pokušaji napada: %d/5</string>
 
     <string name="lorem_ipsum">
         Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam in scelerisque sem. Mauris

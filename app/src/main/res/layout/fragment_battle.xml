@@ -63,7 +63,6 @@
             android:id="@+id/tvAttackCount"
             android:layout_height="wrap_content"
             android:layout_width="wrap_content"
-            android:text="Pokušaji: .../5"
             android:textColor="@android:color/black"
             android:layout_marginTop="4dp"/>
         <!-- Šansa za napad -->

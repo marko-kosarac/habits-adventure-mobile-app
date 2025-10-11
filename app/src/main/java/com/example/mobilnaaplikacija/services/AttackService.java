@@ -25,12 +25,7 @@ public class AttackService {
         return attackRepository.getAttacksByUserAndBoss(userId, bossId);
     }
 
-    public List<Attack> getAttacksByUser (String userId) {
-        return attackRepository.getAttacksByUser(userId);
-    }
-
     public Attack add (Attack attack) {
         return attackRepository.add(attack);
     }
-
 }

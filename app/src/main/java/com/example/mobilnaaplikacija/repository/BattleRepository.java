@@ -6,6 +6,8 @@ import android.database.sqlite.SQLiteDatabase;
 
 import com.example.mobilnaaplikacija.database.SQLiteHelper;
 import com.example.mobilnaaplikacija.model.Battle;
+import com.example.mobilnaaplikacija.model.Boss;
+
 public class BattleRepository {
     private final SQLiteHelper dbHelper;
 
@@ -27,6 +29,24 @@ public class BattleRepository {
 
         if (rowId == -1) return null;
         battle.setId(String.valueOf(rowId));
+        return battle;
+    }
+
+
+    public Battle update(Battle battle) {
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(SQLiteHelper.COLUMN_BATTLE_ID, battle.getId());
+        values.put(SQLiteHelper.COLUMN_BATTLE_USER_ID, battle.getUserId());
+        values.put(SQLiteHelper.COLUMN_BATTLE_BOSS_ID, battle.getBossId());
+        values.put(SQLiteHelper.COLUMN_BATTLE_USER_WON, battle.hasUserWon());
+        values.put(SQLiteHelper.COLUMN_BATTLE_COINS_EARNED, battle.getCoinsEarned());
+
+        db.update(SQLiteHelper.TABLE_BATTLES, values,
+                SQLiteHelper.COLUMN_BOSS_ID + " = ? AND " + SQLiteHelper.COLUMN_BATTLE_USER_ID + " = ?",
+                new String[]{battle.getBossId(), battle.getUserId()});
+        db.close();
+
         return battle;
     }
 
