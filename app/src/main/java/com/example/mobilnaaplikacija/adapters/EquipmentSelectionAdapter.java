@@ -18,13 +18,13 @@ import com.example.mobilnaaplikacija.model.Equipment;
 import java.util.ArrayList;
 import java.util.List;
 
-public class EquipmentActivateAdapter extends RecyclerView.Adapter<EquipmentActivateAdapter.ViewHolder> {
+public class EquipmentSelectionAdapter extends RecyclerView.Adapter<EquipmentSelectionAdapter.ViewHolder> {
 
     private Context context;
     private List<Equipment> equipmentList;
     private List<Equipment> selectedEquipment = new ArrayList<>();
 
-    public EquipmentActivateAdapter(Context context, List<Equipment> equipmentList) {
+    public EquipmentSelectionAdapter(Context context, List<Equipment> equipmentList) {
         this.context = context;
         this.equipmentList = equipmentList;
     }
