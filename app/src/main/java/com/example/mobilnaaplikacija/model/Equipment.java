@@ -1,9 +1,6 @@
 package com.example.mobilnaaplikacija.model;
 
 public class Equipment {
-
-
-
     public enum Type {
         NAPITAK,
         ODECA,
@@ -73,4 +70,5 @@ public class Equipment {
     public void setActive(boolean active) {
         isActivated = active;
     }
+
 }

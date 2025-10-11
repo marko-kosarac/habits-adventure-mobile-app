@@ -65,7 +65,7 @@ public class BattleService {
         void onError(String message);
     }
 
-    public void attackBoss (FirebaseUser user, Boss boss, Battle battle, double luck, int successRate, int numberOfAttacks, OnBattleCompleted callback) {
+    public void attackBoss (FirebaseUser user, Boss boss, Battle battle, double luck, int successRate, int numberOfAttacks, int bonusCoins, OnBattleCompleted callback) {
         if (numberOfAttacks >= 5) {
             callback.onError("Svi pokušaji za napad su iskorišteni.");
             return;
@@ -109,21 +109,10 @@ public class BattleService {
 
                     if (bossRef.get().isDefeated()) { //TODO Nakon 5 napada, ukoliko je bos poražen, uslov nakon 5 napada?
                         //boss porazen
-                        int coins = bossService.calculateCoins(bossRef.get().getLevel());
-                        battleRef.get().setCoinsEarned(coins);
-
-                        userService.addCoinsToUser(userId, coins, () -> {
-                                    Log.d("Battle", "Victory: Coins added successfully: " + coins);
-                                    handleVictory(userId, boss, battleRef.get(), attacks, callback);
-                                },
-                                e -> {
-                                    Log.e("Battle", "Victory: Failed to add coins: " + e.getMessage());
-                                    handleVictory(userId, boss, battleRef.get(), attacks, callback);
-                                }
-                        );
+                        handleVictory(userId, boss, battle, attacks, bonusCoins, callback);
                     } else if (attacks.size() >= 5) {
                         //boss neporazen, ali je 5x napao
-                        handleDefeat(userId, boss, battleRef.get(), attacks, callback);
+                        handleDefeat(userId, boss, battleRef.get(), attacks, bonusCoins, callback);
                     }
 
                     updateBattleAndBoss(battle, false, boss, userId, 0, attacks); //TODO update?
@@ -132,8 +121,16 @@ public class BattleService {
                 .addOnFailureListener(e -> callback.onError("Failed to load user PP: " + e.getMessage()));
     }
 
-    private void handleVictory(String userId, Boss boss, Battle battle, List<Attack> attacks, OnBattleCompleted callback) {
+    private void handleVictory(String userId, Boss boss, Battle battle, List<Attack> attacks, int bonusCoins, OnBattleCompleted callback) {
         int coins = bossService.calculateCoins(boss.getLevel());
+        if (bonusCoins != 0) {
+            coins = coins * (1 + bonusCoins/100); //TODO bonus coins 5%
+        }
+
+        int finalCoins = coins;
+        userService.addCoinsToUser(userId, coins, () ->
+                    Log.d("Battle", "Victory: Coins added successfully: " + finalCoins),
+                e -> Log.e("Battle", "Victory: Failed to add coins: " + e.getMessage()));
 
         //šansa od 20% da se dobije komad opreme (95% šanse za odeću, 5% šanse za oružje)
         double chance = 0.20;
@@ -145,7 +142,7 @@ public class BattleService {
         callback.onBattleFinished(battle, equipment, coins);
     }
 
-    private void handleDefeat(String userId, Boss boss, Battle battle, List<Attack> attacks, OnBattleCompleted callback) {
+    private void handleDefeat(String userId, Boss boss, Battle battle, List<Attack> attacks, int bonusCoins,  OnBattleCompleted callback) {
         double bossHpPercent = (boss.getCurrentHp() * 100.0) / boss.getMaxHp();
         int baseCoins = bossService.calculateCoins(boss.getLevel());
         int coins;
@@ -155,13 +152,17 @@ public class BattleService {
         if (bossHpPercent <= 50) {
             //umanjeno 50% HP boss-a
             coins = baseCoins / 2;
+            if (bonusCoins != 0) {
+                coins = coins * (1 + bonusCoins/100); //TODO bonus coins 5%
+            }
             battle.setCoinsEarned(coins);
 
-            userService.addCoinsToUser(userId, coins,
-                    () -> Log.d("Battle", "Defeat: Added " + coins + " coins, boss HP: " + boss.getCurrentHp()),
+            int finalCoins = coins;
+            userService.addCoinsToUser(userId, coins, () ->
+                            Log.d("Battle", "Defeat: Added " + finalCoins + " coins, boss HP: " + boss.getCurrentHp()),
                     e -> Log.e("Battle", "Defeat: Failed to add coins", e)
-
             );
+
             equipment = equipmentService.getEquipmentReward(userId, chance);
             //TODO user's xp/pp?
         } else coins = 0;

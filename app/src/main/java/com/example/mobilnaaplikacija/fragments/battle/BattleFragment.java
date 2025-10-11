@@ -56,7 +56,8 @@ public class BattleFragment extends Fragment {
     private AttackService attackService;
     private int PP = 0, PP_MAX;
     private int HP = 0, HP_MAX;
-    private int numberOfAttacks = 0;
+    private int numberOfAttacks = 0, calculatedSuccessRate = 0;
+    private int bonusCoins = 0, bonusAttack = 0, bonusAttackSuccessChance = 0;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -78,17 +79,19 @@ public class BattleFragment extends Fragment {
         firebaseUser = userService.getCurrentUser();
         battle = battleService.startOrGetBattle(firebaseUser);
         boss = bossService.getBossById(battle.getBossId());
-
-        //TODO bring chosen equipment
-        //List<Equipment> activatedEquipment = getArguments() != null && getArguments().getParcelable("equipment", );
-        //if (activateEquipment) {
-        //        activateUserEquipment();
-        //    }
-
         fetchUserDataFromFirebase();
+
+        List<Equipment> selectedEquipment =
+                (List<Equipment>) getArguments().getSerializable("selectedEquipmentList");
+        applyEquipmentEffects(selectedEquipment); //TODO bring chosen equipment
+
         setupAnimations(view);
         taskService.getSuccessRate(firebaseUser.getUid(), successRate -> {
             //success rate napada
+            if (bonusAttackSuccessChance != 0) { //TODO
+                successRate += bonusAttackSuccessChance;
+                bonusAttackSuccessChance = 0;
+            }
             String text = String.format(getString(R.string.attack_chance), (int)successRate);
             binding.tvAttackChance.setText(text);
             setupAttackButton(battle, (int)successRate);
@@ -96,11 +99,62 @@ public class BattleFragment extends Fragment {
         setupRemainingAttacks();
     }
 
-    /*private void activateUserEquipment() {
-        // Example: boost user PP, defense, or success rate
-        PP += 10;
-        Toast.makeText(getContext(), "Oprema aktivirana! Dobijaš bonus PP.", Toast.LENGTH_SHORT).show();
-    }*/
+    private void applyEquipmentEffects(List<Equipment> equipment) {
+        for (Equipment eq : equipment) {
+            switch (eq.getType()) {
+                case NAPITAK:
+                    applyPotionEffect(eq);
+                    break;
+                case ORUZJE:
+                    applyWeaponEffect(eq);
+                    break;
+                case ODECA:
+                    applyArmorEffect(eq);
+                    break;
+                default:
+                    return;
+            }
+        }
+        Toast.makeText(getContext(), "Aktivirana oprema!", Toast.LENGTH_SHORT).show();
+        setupProgressBars();
+    }
+
+    private void applyPotionEffect(Equipment eq) {
+        if (eq.getName().contains("PP +20%")) {
+            PP_MAX *= 1.20; //TODO
+        } else if (eq.getName().contains("PP +40%")) {
+            PP_MAX *= 1.40;
+        } else if (eq.getName().contains("PP +15%")) {
+            PP_MAX *= 1.15;
+        } else if (eq.getName().contains("Snage +5%")) {
+            PP_MAX *= 1.05; //trajno
+        } else if (eq.getName().contains("Snage +8%")) {
+            PP_MAX *= 1.08; //trajno
+        } else if (eq.getName().contains("Snage +10%")) {
+            PP_MAX *= 1.10; //trajno
+        }
+        PP = PP_MAX;
+    }
+
+    private void applyWeaponEffect(Equipment eq) {
+        if (eq.getName().contains("Mač")) {
+            PP_MAX *= 1.05; // PP +5% trajno TODO
+        } else if (eq.getName().contains("Luk")) {
+            bonusCoins += 5; //TODO Increases coin gain (%)
+        }
+        PP = PP_MAX;
+    }
+
+    private void applyArmorEffect(Equipment eq) {
+        if (eq.getName().contains("Čizme")) {
+            //+40% chance for one extra attack (like 6th one)
+            if (Math.random() < 0.4) {
+                bonusAttack += 1; //TODO
+            }
+        } else if (eq.getName().contains("Štit")) {
+            bonusAttackSuccessChance += 10; // +10% chance to hit
+        }
+    }
 
     private User fetchUserDataFromFirebase() {
         String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
@@ -155,6 +209,10 @@ public class BattleFragment extends Fragment {
     private void setupRemainingAttacks () {
         List<Attack> attacks = attackService.getAttacksByUserAndBoss(firebaseUser.getUid(), boss.getId());
         numberOfAttacks = attacks.size();
+        if (bonusAttack != 0) {
+            bonusAttack--;
+            numberOfAttacks += bonusAttack; //TODO
+        }
         String text = String.format(getString(R.string.attack_number), numberOfAttacks);
         binding.tvAttackCount.setText(text);
     }
@@ -173,14 +231,16 @@ public class BattleFragment extends Fragment {
             if (!userHit) {
                 //user missed
                 Log.i("ATTACK", "Missed. Luck: " + luck + ". Success rate: " + successRate + ".");
-                battleService.attackBoss(firebaseUser, boss, battle, luck, successRate, numberOfAttacks, new BattleService.OnBattleCompleted() {
+                battleService.attackBoss(firebaseUser, boss, battle, luck, successRate, numberOfAttacks, bonusCoins, new BattleService.OnBattleCompleted() {
                     @Override
                     public void onBattleFinished(Battle battle, Equipment equipment, int coins) {
                         if (numberOfAttacks <= 5 && battle.hasUserWon()) {
+                            bonusCoins = 0;
                             Toast.makeText(getContext(), "Pobedio si! Bravo!", Toast.LENGTH_SHORT).show();
                             //goToFinishedBattleScreen(equipment, coins);
                             //show rewards if any
                         } else if (numberOfAttacks >= 5 && !battle.hasUserWon()) {
+                            bonusCoins = 0;
                             Toast.makeText(getContext(), "Više sreće drugi put, bos nije poražen.", Toast.LENGTH_SHORT).show();
                             //goToFinishedBattleScreen(equipment, coins);
                             //show rewards if any
@@ -205,15 +265,17 @@ public class BattleFragment extends Fragment {
                 PP = 0;
                 //azuriraj progress bar-ove
                 setupProgressBars();
-                battleService.attackBoss(firebaseUser, boss, battle, luck, successRate, numberOfAttacks, new BattleService.OnBattleCompleted() {
+                battleService.attackBoss(firebaseUser, boss, battle, luck, successRate, numberOfAttacks, bonusCoins, new BattleService.OnBattleCompleted() {
                     @Override
                     public void onBattleFinished(Battle battle, Equipment equipment, int coins) {
                         if (battle.hasUserWon()) {
-                            Toast.makeText(getContext(), "Pobedio si, bravo!", Toast.LENGTH_SHORT).show();
+                            bonusCoins = 0;
+                            Toast.makeText(getContext(), "POBEDIO si, bravo!", Toast.LENGTH_SHORT).show();
                             //goToFinishedBattleScreen(equipment, coins);
                             //show rewards if any
                             //TODO if won, show him reward if equipment!=null, and coins !=0
                         } else if (numberOfAttacks >= 5 && !battle.hasUserWon()) {
+                            bonusCoins = 0;
                             Toast.makeText(getContext(), "Više sreće drugi put, bos nije poražen.", Toast.LENGTH_SHORT).show();
                             //goToFinishedBattleScreen(equipment, coins);
                             //show rewards if any
