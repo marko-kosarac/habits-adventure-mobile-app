@@ -81,9 +81,9 @@ public class BattleFragment extends Fragment {
         boss = bossService.getBossById(battle.getBossId());
         fetchUserDataFromFirebase();
 
-        List<Equipment> selectedEquipment =
-                (List<Equipment>) getArguments().getSerializable("selectedEquipmentList");
-        applyEquipmentEffects(selectedEquipment); //TODO bring chosen equipment
+        List<Equipment> activeEquipment =
+                (List<Equipment>) getArguments().getSerializable("activatedEquipmentList");
+        applyEquipmentEffects(activeEquipment); //TODO bring chosen equipment
 
         setupAnimations(view);
         taskService.getSuccessRate(firebaseUser.getUid(), successRate -> {

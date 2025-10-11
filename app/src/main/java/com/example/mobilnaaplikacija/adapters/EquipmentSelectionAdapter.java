@@ -23,6 +23,15 @@ public class EquipmentSelectionAdapter extends RecyclerView.Adapter<EquipmentSel
     private Context context;
     private List<Equipment> equipmentList;
     private List<Equipment> selectedEquipment = new ArrayList<>();
+    private OnActivateListener onActivateListener;
+
+    public interface OnActivateListener {
+        void onActivate(Equipment equipment);
+    }
+
+    public void setOnActivateListener(OnActivateListener listener) {
+        this.onActivateListener = listener;
+    }
 
     public EquipmentSelectionAdapter(Context context, List<Equipment> equipmentList) {
         this.context = context;
@@ -61,6 +70,9 @@ public class EquipmentSelectionAdapter extends RecyclerView.Adapter<EquipmentSel
                 selectedEquipment.add(eq);
                 holder.cardView.setCardBackgroundColor(Color.parseColor("#CCE5FF"));
                 holder.btnActivate.setText("Poništi");
+            }
+            if (onActivateListener != null) {
+                onActivateListener.onActivate(eq);
             }
         });
     }
