@@ -79,6 +79,12 @@ public class BattleFragment extends Fragment {
         battle = battleService.startOrGetBattle(firebaseUser);
         boss = bossService.getBossById(battle.getBossId());
 
+        //TODO bring chosen equipment
+        //List<Equipment> activatedEquipment = getArguments() != null && getArguments().getParcelable("equipment", );
+        //if (activateEquipment) {
+        //        activateUserEquipment();
+        //    }
+
         fetchUserDataFromFirebase();
         setupAnimations(view);
         taskService.getSuccessRate(firebaseUser.getUid(), successRate -> {
@@ -89,6 +95,12 @@ public class BattleFragment extends Fragment {
         });
         setupRemainingAttacks();
     }
+
+    /*private void activateUserEquipment() {
+        // Example: boost user PP, defense, or success rate
+        PP += 10;
+        Toast.makeText(getContext(), "Oprema aktivirana! Dobijaš bonus PP.", Toast.LENGTH_SHORT).show();
+    }*/
 
     private User fetchUserDataFromFirebase() {
         String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
@@ -166,11 +178,11 @@ public class BattleFragment extends Fragment {
                     public void onBattleFinished(Battle battle, Equipment equipment, int coins) {
                         if (numberOfAttacks <= 5 && battle.hasUserWon()) {
                             Toast.makeText(getContext(), "Pobedio si! Bravo!", Toast.LENGTH_SHORT).show();
-                            //goToVictoryScreen(equipment, coins);
+                            //goToFinishedBattleScreen(equipment, coins);
                             //show rewards if any
                         } else if (numberOfAttacks >= 5 && !battle.hasUserWon()) {
                             Toast.makeText(getContext(), "Više sreće drugi put, bos nije poražen.", Toast.LENGTH_SHORT).show();
-                            //goToVictoryScreen(equipment, coins);
+                            //goToFinishedBattleScreen(equipment, coins);
                             //show rewards if any
                         } else Toast.makeText(getContext(), "Promašaj! Bos se izmakao!", Toast.LENGTH_SHORT).show();
                     }
@@ -198,12 +210,12 @@ public class BattleFragment extends Fragment {
                     public void onBattleFinished(Battle battle, Equipment equipment, int coins) {
                         if (battle.hasUserWon()) {
                             Toast.makeText(getContext(), "Pobedio si, bravo!", Toast.LENGTH_SHORT).show();
-                            //goToVictoryScreen(equipment, coins);
+                            //goToFinishedBattleScreen(equipment, coins);
                             //show rewards if any
                             //TODO if won, show him reward if equipment!=null, and coins !=0
                         } else if (numberOfAttacks >= 5 && !battle.hasUserWon()) {
                             Toast.makeText(getContext(), "Više sreće drugi put, bos nije poražen.", Toast.LENGTH_SHORT).show();
-                            //goToVictoryScreen(equipment, coins);
+                            //goToFinishedBattleScreen(equipment, coins);
                             //show rewards if any
                         } else
                             Toast.makeText(getContext(), "Pogodak! Napad je uspeo!", Toast.LENGTH_SHORT).show();

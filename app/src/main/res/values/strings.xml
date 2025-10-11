@@ -112,6 +112,9 @@
     <string name="attack">Napad</string>
     <string name="attack_chance">Šansa za napad: %d%%</string>
     <string name="attack_number">Pokušaji napada: %d/5</string>
+    <string name="equipment_activation">Aktiviraj opremu</string>
+    <string name="prepare_message">Pre borbe možeš aktivirati opremu za jači napad!</string>
+    <string name="start_battle">Započni borbu</string>
 
     <string name="lorem_ipsum">
         Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam in scelerisque sem. Mauris
