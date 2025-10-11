@@ -35,7 +35,7 @@
             android:paddingBottom="12dp"/>
         <!-- Oprema za aktivaciju -->
         <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/rvUserEquipment"
+            android:id="@+id/rvEquipment"
             android:layout_width="wrap_content"
             android:layout_height="0dp"
             android:layout_weight="1"
@@ -44,7 +44,30 @@
             android:scrollbars="vertical"
             tools:listitem="@layout/card_user_equipment"/>
         <!-- Aktivirana oprema -->
-
+        <LinearLayout
+            android:id="@+id/layoutActivatedEquipment"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:paddingVertical="8dp"
+            android:background="@drawable/activated_equipment_bg"
+            android:layout_marginBottom="12dp"
+            android:layout_marginTop="4dp">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Aktivirana oprema:"
+                android:textStyle="bold"
+                android:textColor="@color/black"
+                android:layout_marginEnd="8dp" />
+            <LinearLayout
+                android:id="@+id/activatedIconsContainer"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical" />
+        </LinearLayout>
         <!-- Borba -->
         <Button
             android:id="@+id/btnStartBattle"
