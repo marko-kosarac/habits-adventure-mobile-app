@@ -8,21 +8,16 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.navigation.Navigation;
 
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.ProgressBar;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.mobilnaaplikacija.R;
 import com.example.mobilnaaplikacija.databinding.FragmentBattleBinding;
-import com.example.mobilnaaplikacija.databinding.FragmentTaskListBinding;
 import com.example.mobilnaaplikacija.model.Attack;
 import com.example.mobilnaaplikacija.model.Battle;
 import com.example.mobilnaaplikacija.model.Boss;
@@ -36,9 +31,7 @@ import com.example.mobilnaaplikacija.services.UserService;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.ktx.Firebase;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class BattleFragment extends Fragment {
@@ -58,6 +51,7 @@ public class BattleFragment extends Fragment {
     private int HP = 0, HP_MAX;
     private int numberOfAttacks = 0, calculatedSuccessRate = 0;
     private int bonusCoins = 0, bonusAttack = 0, bonusAttackSuccessChance = 0;
+    private List<Equipment> activeEquipment;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -81,17 +75,15 @@ public class BattleFragment extends Fragment {
         boss = bossService.getBossById(battle.getBossId());
         fetchUserDataFromFirebase();
 
-        List<Equipment> activeEquipment =
-                (List<Equipment>) getArguments().getSerializable("activatedEquipmentList");
-        applyEquipmentEffects(activeEquipment); //TODO bring chosen equipment
-
         setupAnimations(view);
         taskService.getSuccessRate(firebaseUser.getUid(), successRate -> {
+            if (!isAdded() || binding == null) return;
             //success rate napada
             if (bonusAttackSuccessChance != 0) { //TODO
                 successRate += bonusAttackSuccessChance;
                 bonusAttackSuccessChance = 0;
             }
+
             String text = String.format(getString(R.string.attack_chance), (int)successRate);
             binding.tvAttackChance.setText(text);
             setupAttackButton(battle, (int)successRate);
@@ -100,6 +92,8 @@ public class BattleFragment extends Fragment {
     }
 
     private void applyEquipmentEffects(List<Equipment> equipment) {
+        if (!isAdded() || binding == null) return;
+        if (equipment.isEmpty()) return;
         for (Equipment eq : equipment) {
             switch (eq.getType()) {
                 case NAPITAK:
@@ -158,6 +152,8 @@ public class BattleFragment extends Fragment {
     private User fetchUserDataFromFirebase() {
         String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
         db.collection("users").document(uid).get().addOnSuccessListener(doc -> {
+            if (!isAdded() || binding == null) return;
+
             if (doc.exists()) {
                 int xp = doc.getLong("experiencePoints") != null ? doc.getLong("experiencePoints").intValue() : 0;
                 PP_MAX = doc.getLong("powerPoints") != null ? doc.getLong("powerPoints").intValue() : 0;
@@ -173,7 +169,9 @@ public class BattleFragment extends Fragment {
                 user.setLevel(level);
                 //TODO titulu azuriraj ako dobije
                 //TODO level azuriraj ako predje
+
                 setupProgressBars();
+                setupEquipment();
             }
         });
         return null;
@@ -205,7 +203,14 @@ public class BattleFragment extends Fragment {
         binding.tvBossHP.setText("HP: " + HP + "/" + HP_MAX);
     }
 
+    private void setupEquipment() {
+        activeEquipment = (List<Equipment>) getArguments().getSerializable("activatedEquipmentList");
+        applyEquipmentEffects(activeEquipment); //TODO bring chosen equipment
+    }
+
     private void setupRemainingAttacks () {
+        if (!isAdded() || binding == null) return;
+
         List<Attack> attacks = attackService.getAttacksByUserAndBoss(firebaseUser.getUid(), boss.getId());
         numberOfAttacks = attacks.size();
         if (bonusAttack != 0) {
@@ -220,9 +225,11 @@ public class BattleFragment extends Fragment {
         numberOfAttacks++;
         String text = String.format(getString(R.string.attack_number), numberOfAttacks);
         binding.tvAttackCount.setText(text);
+        //update UI
     }
 
     private void setupAttackButton(Battle battle, int successRate) {
+        if (!isAdded() || binding == null) return;
         binding.btnAttackBoss.setOnClickListener(v-> {
             updateNumberOfAttacks();
             double luck = Math.random() * 100;
@@ -300,6 +307,8 @@ public class BattleFragment extends Fragment {
     }
 
     private void animateAttack () {
+        if (!isAdded() || binding == null) return;
+
         idleAnimation.stop();
         binding.ivBossSpriteIdle.setVisibility(View.GONE);
         binding.ivBossSpriteHit.setVisibility(View.VISIBLE);

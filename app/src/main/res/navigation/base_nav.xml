@@ -84,15 +84,15 @@
         android:name="com.example.mobilnaaplikacija.fragments.category.CategoryListFragment"
         android:label="Kategorije" />
     <fragment
+        android:id="@+id/battleFragment"
+        android:name="com.example.mobilnaaplikacija.fragments.battle.BattleFragment"
+        android:label="Borba sa bosom" />
+    <fragment
         android:id="@+id/prepareBattleFragment"
         android:name="com.example.mobilnaaplikacija.fragments.battle.PrepareBattleFragment"
         android:label="Priprema za borbu">
         <action
             android:id="@+id/action_prepareBattleFragment_to_battleFragment"
             app:destination="@id/battleFragment" />
-    <fragment
-        android:id="@+id/battleFragment"
-        android:name="com.example.mobilnaaplikacija.fragments.battle.BattleFragment"
-        android:label="Borba sa bosom" />
     </fragment>
 </navigation>

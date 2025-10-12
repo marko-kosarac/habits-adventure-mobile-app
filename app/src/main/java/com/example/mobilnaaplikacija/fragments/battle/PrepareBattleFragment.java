@@ -1,11 +1,14 @@
 package com.example.mobilnaaplikacija.fragments.battle;
 
 import android.os.Bundle;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -19,7 +22,9 @@ import com.example.mobilnaaplikacija.databinding.DialogPrepareBattleBinding;
 import com.example.mobilnaaplikacija.model.Equipment;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class PrepareBattleFragment extends DialogFragment {
 
@@ -41,15 +46,16 @@ public class PrepareBattleFragment extends DialogFragment {
         binding.rvEquipment.setAdapter(adapter);
 
         adapter.setOnActivateListener((eq, activated) -> {
-//            if (!activatedEquipment.contains(eq)) {
-//                activatedEquipment.add(eq);
-//            } else {
-//                activatedEquipment.remove(eq);
-//            }
             if (activated) {
                 activatedEquipment.add(eq);
-            } else {
-                activatedEquipment.remove(eq);
+            }
+            else {
+                for (int i = 0; i < activatedEquipment.size(); i++) {
+                    if (activatedEquipment.get(i).getId() == eq.getId()) {
+                        activatedEquipment.remove(i);
+                        break;
+                    }
+                }
             }
             updateActivatedEquipmentUI();
         });
@@ -69,25 +75,38 @@ public class PrepareBattleFragment extends DialogFragment {
         LinearLayout container = binding.activatedIconsContainer;
         container.removeAllViews();
 
-        for (Equipment eq : activatedEquipment) {
-            ImageView icon = new ImageView(getContext());
-            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(80, 80);
+        Map<String, Integer> countsByKey = new HashMap<>(); // use name or type+id key
+        for (Equipment e : activatedEquipment) {
+            String key = e.getType().name(); // group by type; or use e.getId() for per-item
+            countsByKey.put(key, countsByKey.getOrDefault(key, 0) + 1);
+        }
+
+        for (Map.Entry<String, Integer> entry : countsByKey.entrySet()) {
+            Equipment.Type type = Equipment.Type.valueOf(entry.getKey());
+            int count = entry.getValue();
+
+            LinearLayout item = new LinearLayout(getContext());
+            item.setOrientation(LinearLayout.VERTICAL);
+            item.setGravity(Gravity.CENTER);
+            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(140, ViewGroup.LayoutParams.WRAP_CONTENT);
             params.setMargins(8, 0, 8, 0);
-            icon.setLayoutParams(params);
+            item.setLayoutParams(params);
 
-            switch (eq.getType()) {
-                case ORUZJE:
-                    icon.setImageResource(R.drawable.ic_swords);
-                    break;
-                case ODECA:
-                    icon.setImageResource(R.drawable.ic_shield);
-                    break;
-                case NAPITAK:
-                    icon.setImageResource(R.drawable.ic_potion);
-                    break;
+            ImageView icon = new ImageView(getContext());
+            icon.setLayoutParams(new LinearLayout.LayoutParams(80, 80));
+            switch (type) {
+                case ORUZJE: icon.setImageResource(R.drawable.ic_swords); break;
+                case ODECA: icon.setImageResource(R.drawable.ic_shield); break;
+                case NAPITAK: icon.setImageResource(R.drawable.ic_potion); break;
             }
+            item.addView(icon);
 
-            container.addView(icon);
+            TextView qty = new TextView(getContext());
+            qty.setText(String.valueOf(count));
+            qty.setGravity(Gravity.CENTER);
+            item.addView(qty);
+
+            container.addView(item);
         }
     }
 }
