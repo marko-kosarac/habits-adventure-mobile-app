@@ -121,38 +121,37 @@ public class BattleFragment extends Fragment {
 
     private void applyPotionEffect(Equipment eq) {
         if (eq.getName().contains("PP +20%")) {
-            PP_MAX *= 1.20; //TODO
+            PP_MAX *= 1.20;
         } else if (eq.getName().contains("PP +40%")) {
             PP_MAX *= 1.40;
         } else if (eq.getName().contains("PP +15%")) {
             PP_MAX *= 1.15;
         } else if (eq.getName().contains("Snage +5%")) {
-            PP_MAX *= 1.05; //trajno
+            PP_MAX *= 1.05; //TODO trajno
         } else if (eq.getName().contains("Snage +8%")) {
-            PP_MAX *= 1.08; //trajno
+            PP_MAX *= 1.08; //TODO trajno
         } else if (eq.getName().contains("Snage +10%")) {
-            PP_MAX *= 1.10; //trajno
+            PP_MAX *= 1.10; //TODO trajno
         }
         PP = PP_MAX;
     }
 
     private void applyWeaponEffect(Equipment eq) {
         if (eq.getName().contains("Mač")) {
-            PP_MAX *= 1.05; // PP +5% trajno TODO
+            PP_MAX *= 1.05; //TODO trajno
         } else if (eq.getName().contains("Luk")) {
-            bonusCoins += 5; //TODO Increases coin gain (%)
+            bonusCoins += 5;
         }
         PP = PP_MAX;
     }
 
     private void applyArmorEffect(Equipment eq) {
         if (eq.getName().contains("Čizme")) {
-            //+40% chance for one extra attack (like 6th one)
             if (Math.random() < 0.4) {
-                bonusAttack += 1; //TODO
+                bonusAttack += 1;
             }
         } else if (eq.getName().contains("Štit")) {
-            bonusAttackSuccessChance += 10; // +10% chance to hit
+            bonusAttackSuccessChance += 10;
         }
     }
 

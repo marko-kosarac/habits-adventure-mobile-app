@@ -12,10 +12,9 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
 import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.mobilnaaplikacija.R;
-import com.example.mobilnaaplikacija.adapters.EquipmentSelectionAdapter;
+import com.example.mobilnaaplikacija.adapters.PrepareBattleAdapter;
 import com.example.mobilnaaplikacija.databinding.DialogPrepareBattleBinding;
 import com.example.mobilnaaplikacija.model.Equipment;
 
@@ -25,7 +24,7 @@ import java.util.List;
 public class PrepareBattleFragment extends DialogFragment {
 
     private DialogPrepareBattleBinding binding;
-    private EquipmentSelectionAdapter adapter;
+    private PrepareBattleAdapter adapter;
     private final List<Equipment> activatedEquipment = new ArrayList<>();
 
     @Nullable
@@ -37,12 +36,17 @@ public class PrepareBattleFragment extends DialogFragment {
         List<Equipment> userEquipment = (List<Equipment>) getArguments().getSerializable("userEquipmentList");
         if (userEquipment == null) userEquipment = new ArrayList<>();
 
-        adapter = new EquipmentSelectionAdapter(requireContext(), userEquipment);
+        adapter = new PrepareBattleAdapter(userEquipment);
         binding.rvEquipment.setLayoutManager(new LinearLayoutManager(requireContext()));
         binding.rvEquipment.setAdapter(adapter);
 
-        adapter.setOnActivateListener(eq -> {
-            if (!activatedEquipment.contains(eq)) {
+        adapter.setOnActivateListener((eq, activated) -> {
+//            if (!activatedEquipment.contains(eq)) {
+//                activatedEquipment.add(eq);
+//            } else {
+//                activatedEquipment.remove(eq);
+//            }
+            if (activated) {
                 activatedEquipment.add(eq);
             } else {
                 activatedEquipment.remove(eq);
