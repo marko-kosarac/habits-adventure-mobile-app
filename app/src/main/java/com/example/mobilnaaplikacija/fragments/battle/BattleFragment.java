@@ -212,7 +212,7 @@ public class BattleFragment extends Fragment {
     private void setupEquipment() {
         activeEquipment = (List<Equipment>) getArguments().getSerializable("activeEquipmentList");
         if (activeEquipment == null) activeEquipment = new ArrayList<>();
-        applyEquipmentEffects(activeEquipment); //TODO bring chosen equipment
+        applyEquipmentEffects(activeEquipment);
         updateActiveEquipmentUI();
     }
 
@@ -285,7 +285,7 @@ public class BattleFragment extends Fragment {
         numberOfAttacks++;
         String text = String.format(getString(R.string.attack_number), numberOfAttacks);
         binding.tvAttackCount.setText(text);
-        //update UI
+        //TODO update UI
     }
 
     private void setupAttackButton(Battle battle, int successRate) {
@@ -296,21 +296,21 @@ public class BattleFragment extends Fragment {
             boolean userHit = luck < successRate;
             if (!userHit) {
                 //user missed
-                Log.i("ATTACK", "Missed. Luck: " + luck + ". Success rate: " + successRate + ".");
-                battleService.attackBoss(firebaseUser, boss, battle, luck, successRate, numberOfAttacks, bonusCoins, new BattleService.OnBattleCompleted() {
+                Log.i("ATTACK", "Missed. Luck: " + Math.round(luck) + ". Success rate: " + successRate + ".");
                     @Override
                     public void onBattleFinished(Battle battle, Equipment equipment, int coins) {
+                        double roundedLuck = Math.round(luck * 10.0) / 10.0; //npr 73.4%
                         if (numberOfAttacks <= 5 && battle.hasUserWon()) {
                             bonusCoins = 0;
-                            Toast.makeText(getContext(), "Pobedio si! Bravo!", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(getContext(), "Pobedio si, bravo! \nSreća tokom napada: " + roundedLuck + "%", Toast.LENGTH_SHORT).show();
                             //goToFinishedBattleScreen(equipment, coins);
                             //show rewards if any
                         } else if (numberOfAttacks >= 5 && !battle.hasUserWon()) {
                             bonusCoins = 0;
-                            Toast.makeText(getContext(), "Više sreće drugi put, bos nije poražen.", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(getContext(), "Više sreće drugi put, bos nije poražen.\nSreća u poslednjem napadu: " + roundedLuck + "%", Toast.LENGTH_SHORT).show();
                             //goToFinishedBattleScreen(equipment, coins);
                             //show rewards if any
-                        } else Toast.makeText(getContext(), "Promašaj! Bos se izmakao!", Toast.LENGTH_SHORT).show();
+                        } else Toast.makeText(getContext(), "Promašaj! Bos se izmakao! \nSreća: " + roundedLuck + "%", Toast.LENGTH_SHORT).show();
                     }
 
                     @Override
@@ -328,25 +328,24 @@ public class BattleFragment extends Fragment {
 
                 //napad
                 boss = bossService.takeDamage(boss, PP);
-                PP = 0;
                 //azuriraj progress bar-ove
                 setupProgressBars();
-                battleService.attackBoss(firebaseUser, boss, battle, luck, successRate, numberOfAttacks, bonusCoins, new BattleService.OnBattleCompleted() {
                     @Override
                     public void onBattleFinished(Battle battle, Equipment equipment, int coins) {
+                        double roundedLuck = Math.round(luck * 10.0) / 10.0; //npr 73.4%
                         if (battle.hasUserWon()) {
                             bonusCoins = 0;
-                            Toast.makeText(getContext(), "POBEDIO si, bravo!", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(getContext(), "Pobeda, bravo! \nSreća tokom napada: " + roundedLuck + "%", Toast.LENGTH_SHORT).show();
                             //goToFinishedBattleScreen(equipment, coins);
                             //show rewards if any
                             //TODO if won, show him reward if equipment!=null, and coins !=0
                         } else if (numberOfAttacks >= 5 && !battle.hasUserWon()) {
                             bonusCoins = 0;
-                            Toast.makeText(getContext(), "Više sreće drugi put, bos nije poražen.", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(getContext(), "Više sreće drugi put, bos nije poražen.\nSreća u poslednjem napadu: " + roundedLuck + "%", Toast.LENGTH_SHORT).show();
                             //goToFinishedBattleScreen(equipment, coins);
                             //show rewards if any
                         } else
-                            Toast.makeText(getContext(), "Pogodak! Napad je uspeo!", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(getContext(), "Pogodak! Sreća: " + roundedLuck + "%", Toast.LENGTH_SHORT).show();
                     }
                     
                     @Override
@@ -355,13 +354,14 @@ public class BattleFragment extends Fragment {
                     }
                 });
 
-                /*
+                PP = 0;
+                //TODO level title when
                 // Ažuriranje baze level-xp-pp-title
-                db.collection("users").document(userId)
-                        .update("level", level, "title", title, "powerPoints", pp)
-                        .addOnSuccessListener(aVoid -> Log.d("UserProfile", "Level, titula i PP ažurirani"))
-                        .addOnFailureListener(e -> Log.e("UserProfile", "Greška pri ažuriranju levela i PP-a", e));
-                */
+                db.collection("users").document(firebaseUser.getUid())
+                        .update( "powerPoints", PP)
+                        .addOnSuccessListener(aVoid -> Log.d("UserProfile", "PP ažurirani"))
+                        .addOnFailureListener(e -> Log.e("UserProfile", "Greška pri ažuriranju PP-a", e));
+
             }
         });
     }
