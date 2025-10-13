@@ -18,18 +18,20 @@ public class EquipmentSeeder {
     public void seedData() {
         SQLiteDatabase db = dbHelper.getWritableDatabase();
 
+        db.delete(SQLiteHelper.TABLE_EQUIPMENT, null, null);
+
         // Napitci
-        insertEquipment(db, new Equipment(0, "Napitak PP +20%", "Jednokratni napitak koji povećava PP za 20%", Equipment.Type.NAPITAK, "+20% PP", 0, 50));
-        insertEquipment(db, new Equipment(0, "Napitak PP +40%", "Jednokratni napitak koji povećava PP za 40%", Equipment.Type.NAPITAK, "+40% PP", 0, 70));
-        insertEquipment(db, new Equipment(0, "Napitak Snage +5%", "Trajno povećava snagu za 5%", Equipment.Type.NAPITAK, "+5% Snage", -1, 200));
-        insertEquipment(db, new Equipment(0, "Napitak Snage +10%", "Trajno povećava snagu za 10%", Equipment.Type.NAPITAK, "+10% Snage", -1, 1000));
-        insertEquipment(db, new Equipment(0, "Napitak PP +15%", "Jednokratni napitak koji povećava PP za 15%", Equipment.Type.NAPITAK, "+15% PP", 0, 40));
-        insertEquipment(db, new Equipment(0, "Napitak Snage +8%", "Trajno povećava snagu za 8%", Equipment.Type.NAPITAK, "+8% Snage", -1, 300));
+        insertEquipment(db, new Equipment(0, "Snaga u flašici", "Jednokratni napitak koji povećava snagu", Equipment.Type.NAPITAK, "+20%", 0, 50));
+        insertEquipment(db, new Equipment(0, "Turbo eliksir", "Jednokratni napitak koji povećava snagu", Equipment.Type.NAPITAK, "+40%", 0, 70));
+        insertEquipment(db, new Equipment(0, "Merlinov napitak", "Napitak za trajno povećavanje snage", Equipment.Type.NAPITAK, "+5%", -1, 200));
+        insertEquipment(db, new Equipment(0, "Gargamelov zub", "Napitak za trajno povećavanje snage", Equipment.Type.NAPITAK, "+10%", -1, 1000));
+        insertEquipment(db, new Equipment(0, "Moćni miks", "Jednokratni napitak koji povećava snagu", Equipment.Type.NAPITAK, "+15%", 0, 40));
+        insertEquipment(db, new Equipment(0, "Napitak Snage +8%", "Napitak za trajno povećavanje snage", Equipment.Type.NAPITAK, "+8%", -1, 300));
 
 // Odeća
-        insertEquipment(db, new Equipment(0, "Rukavice Snage +10%", "Povećavaju snagu za 10%", Equipment.Type.ODECA, "+10% Snage", -1, 60));
-        insertEquipment(db, new Equipment(0, "Štit Uspeh +10%", "Povećava šansu uspešnog napada za 10%", Equipment.Type.ODECA, "+10% Uspeh", -1, 60));
-        insertEquipment(db, new Equipment(0, "Čizme Napadi +40%", "Povećavaju broj napada za 40%", Equipment.Type.ODECA, "+40% Napadi", -1, 80));
+        insertEquipment(db, new Equipment(0, "Rukavice", "Povećavaju snagu", Equipment.Type.ODECA, "+10%", -1, 60));
+        insertEquipment(db, new Equipment(0, "Štit", "Povećava šansu uspešnog napada", Equipment.Type.ODECA, "+10%", -1, 60));
+        insertEquipment(db, new Equipment(0, "Čizme", "Povećavaju broj napada", Equipment.Type.ODECA, "+40%", -1, 80));
 
 
         db.close();
