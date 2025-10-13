@@ -10,10 +10,13 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.mobilnaaplikacija.R;
@@ -32,7 +35,10 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class BattleFragment extends Fragment {
 
@@ -204,8 +210,62 @@ public class BattleFragment extends Fragment {
     }
 
     private void setupEquipment() {
-        activeEquipment = (List<Equipment>) getArguments().getSerializable("activatedEquipmentList");
+        activeEquipment = (List<Equipment>) getArguments().getSerializable("activeEquipmentList");
+        if (activeEquipment == null) activeEquipment = new ArrayList<>();
         applyEquipmentEffects(activeEquipment); //TODO bring chosen equipment
+        updateActiveEquipmentUI();
+    }
+
+    private void updateActiveEquipmentUI() {
+        if (!isAdded() || binding == null) return;
+        LinearLayout container = binding.activatedIconsContainer;
+        container.removeAllViews();
+
+        if (activeEquipment == null || activeEquipment.isEmpty()) return;
+
+        //grupisano name+bonus
+        Map<String, List<Equipment>> grouped = new HashMap<>();
+        for (Equipment eq : activeEquipment) {
+            String key = eq.getName() + "_" + eq.getBonus();
+            grouped.computeIfAbsent(key, k -> new ArrayList<>()).add(eq);
+        }
+
+        for (Map.Entry<String, List<Equipment>> entry : grouped.entrySet()) {
+            List<Equipment> items = entry.getValue();
+            Equipment first = items.get(0);
+            int totalQty = items.stream().mapToInt(Equipment::getQuantity).sum();
+
+            LinearLayout itemLayout = new LinearLayout(getContext());
+            itemLayout.setOrientation(LinearLayout.VERTICAL);
+            itemLayout.setGravity(Gravity.CENTER);
+            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(140, ViewGroup.LayoutParams.WRAP_CONTENT);
+            params.setMargins(8, 0, 8, 0);
+            itemLayout.setLayoutParams(params);
+
+            //ikonice
+            ImageView icon = new ImageView(getContext());
+            icon.setLayoutParams(new LinearLayout.LayoutParams(80, 80));
+            switch (first.getType()) {
+                case ORUZJE: icon.setImageResource(R.drawable.ic_swords); break;
+                case ODECA: icon.setImageResource(R.drawable.ic_shield); break;
+                case NAPITAK: icon.setImageResource(R.drawable.ic_potion); break;
+            }
+            itemLayout.addView(icon);
+
+            //kolicine aktivne opreme
+            TextView qty = new TextView(getContext());
+            qty.setText(String.valueOf(totalQty));
+            qty.setGravity(Gravity.CENTER);
+            itemLayout.addView(qty);
+
+            //tooltip
+            itemLayout.setOnClickListener(v -> {
+                String msg = first.getName() + " x" + totalQty;
+                Toast.makeText(getContext(), msg, Toast.LENGTH_SHORT).show();
+            });
+
+            container.addView(itemLayout);
+        }
     }
 
     private void setupRemainingAttacks () {
