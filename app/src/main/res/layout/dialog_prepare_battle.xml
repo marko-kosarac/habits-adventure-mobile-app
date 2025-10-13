@@ -20,7 +20,7 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="16dp"/>
+        android:layout_marginTop="35dp"/>
     <!-- Neaktivna oprema -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvUnactiveEquipment"
@@ -34,7 +34,7 @@
         app:layout_constraintBottom_toTopOf="@id/layoutActivatedEquipment"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="30dp"
         android:layout_marginBottom="8dp" />
     <!-- Nema neaktivne opreme -->
     <LinearLayout
@@ -78,6 +78,7 @@
         android:orientation="horizontal"
         android:gravity="center_vertical"
         android:paddingVertical="8dp"
+        android:paddingHorizontal="8dp"
         android:layout_marginBottom="8dp"
         app:layout_constraintBottom_toTopOf="@id/btnStartBattle"
         app:layout_constraintStart_toStartOf="parent"
@@ -92,12 +93,19 @@
             android:layout_marginStart="8dp"
             android:layout_marginEnd="4dp"
             android:gravity="center_vertical"/>
-        <LinearLayout
-            android:id="@+id/activatedIconsContainer"
-            android:layout_width="wrap_content"
+        <HorizontalScrollView
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical" />
+            android:fillViewport="true"
+            android:scrollbars="horizontal">
+            <LinearLayout
+                android:id="@+id/activatedIconsContainer"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginEnd="16dp" />
+        </HorizontalScrollView>
     </LinearLayout>
     <!-- Dugme za borbu -->
     <Button

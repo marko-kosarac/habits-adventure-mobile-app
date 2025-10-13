@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class PrepareBattleAdapter extends RecyclerView.Adapter<PrepareBattleAdapter.ViewHolder> {
 
@@ -26,7 +27,7 @@ public class PrepareBattleAdapter extends RecyclerView.Adapter<PrepareBattleAdap
     private Set<Long> activatedIds = new HashSet<>();
 
     public interface OnActivateListener {
-        void onActivate(Equipment eq, boolean activated);
+        void onActivate(Equipment eq);
     }
 
     public PrepareBattleAdapter(List<Equipment> equipmentList) {
@@ -37,10 +38,10 @@ public class PrepareBattleAdapter extends RecyclerView.Adapter<PrepareBattleAdap
         this.onActivateListener = listener;
     }
 
-    public List<Equipment> getActivatedEquipment() { //TODO useful or not?
+    public List<Equipment> getUnactivatedEquipment(long id) { //TODO useful or not?
         List<Equipment> res = new ArrayList<>();
-        for (Equipment eq : equipmentList) {
-            if (activatedIds.contains(eq.getId())) {
+        for (Equipment eq : this.equipmentList) {
+            if (!eq.isActive() && eq.getId() == id) {
                 res.add(eq);
             }
         }
@@ -57,15 +58,10 @@ public class PrepareBattleAdapter extends RecyclerView.Adapter<PrepareBattleAdap
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         Equipment eq = equipmentList.get(position);
+
         holder.name.setText(eq.getName());
         holder.desc.setText(eq.getDescription());
-        holder.qty.setText("Količina: " + eq.getQuantity());
-
-        switch (eq.getType()) {
-            case NAPITAK: holder.icon.setImageResource(R.drawable.ic_potion); break;
-            case ORUZJE: holder.icon.setImageResource(R.drawable.ic_swords); break;
-            case ODECA: holder.icon.setImageResource(R.drawable.ic_shield); break;
-        }
+        holder.qty.setText("Preostalo: " + eq.getQuantity());
 
         switch (eq.getType()) {
             case NAPITAK: holder.icon.setImageResource(R.drawable.ic_potion); break;
@@ -75,22 +71,15 @@ public class PrepareBattleAdapter extends RecyclerView.Adapter<PrepareBattleAdap
         }
 
         holder.btnActivateEquipment.setOnClickListener(v -> {
-            boolean isActivated = activatedIds.contains(eq.getId());
-            if (isActivated) {
-                activatedIds.remove(eq.getId());
-                eq.setQuantity(eq.getQuantity() + 1);
-            } else {
-                if (eq.getQuantity() <= 0) {
-                    Toast.makeText(v.getContext(), "Nema više komada ove opreme", Toast.LENGTH_SHORT).show();
-                    return;
-                }
-                activatedIds.add(eq.getId());
-                eq.setQuantity(eq.getQuantity() - 1);
+            if (eq.getQuantity() <= 0) {
+                Toast.makeText(v.getContext(), "Nema više komada ove opreme!", Toast.LENGTH_SHORT).show();
+                return;
             }
-            notifyItemChanged(position);
+
+            holder.qty.setText("Preostalo: " + eq.getQuantity());
 
             if (onActivateListener != null)
-                onActivateListener.onActivate(eq, !isActivated);
+                onActivateListener.onActivate(eq);
         });
     }
 
