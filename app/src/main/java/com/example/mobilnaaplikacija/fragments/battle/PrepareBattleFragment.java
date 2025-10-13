@@ -127,7 +127,7 @@ public class PrepareBattleFragment extends DialogFragment {
         String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
         DocumentReference userRef = db.collection("users").document(userId);
 
-        // Smanji quantity u objektu
+        //smanji quantity u objektu neaktivnom
         eq.setQuantity(eq.getQuantity() - 1);
 
         // Proveri da li ista oprema već postoji u aktivnim
@@ -139,10 +139,7 @@ public class PrepareBattleFragment extends DialogFragment {
             }
         }
 
-        if (activeEq != null) {
-            // Ako postoji, samo povećaj quantity
-            activeEq.setQuantity(activeEq.getQuantity() + 1);
-        } else {
+        if (activeEq == null) {
             // Ako ne postoji, kreiraj novu aktivnu instancu
             activeEq = new Equipment();
             activeEq.setId(eq.getId());

@@ -78,7 +78,6 @@ public class Equipment implements Parcelable {
         id = in.readLong();
         name = in.readString();
         description = in.readString();
-        // Enums are written as strings
         String typeName = in.readString();
         type = typeName != null ? Type.valueOf(typeName) : null;
         bonus = in.readString();

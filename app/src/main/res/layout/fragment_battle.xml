@@ -30,7 +30,8 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:gravity="center"
-        android:background="@drawable/reward_bg"
+        android:background="@drawable/equipment_rewards_bg"
+        android:elevation="3dp"
         android:paddingVertical="8dp"
         android:paddingHorizontal="12dp"
         android:layout_marginTop="8dp"
@@ -124,7 +125,7 @@
         app:layout_constraintTop_toBottomOf="@id/tvBossHP"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="4dp" />
+        android:layout_marginTop="2dp" />
 
     <!-- Korisnik PP -->
     <TextView
@@ -146,7 +147,7 @@
         app:layout_constraintTop_toBottomOf="@id/tvUserPP"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="4dp" />
+        android:layout_marginTop="2dp" />
 
     <!-- Pokusaji -->
     <TextView
@@ -175,7 +176,8 @@
         android:id="@+id/layoutActivatedEquipment"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:background="@drawable/reward_bg"
+        android:background="@drawable/equipment_rewards_bg"
+        android:elevation="3dp"
         android:orientation="horizontal"
         android:gravity="center_vertical"
         android:paddingVertical="8dp"
