@@ -762,12 +762,10 @@ public class TaskService {
             @Override
             public void onSuccess(int level) {
                 List<Task> tasksAtLvl = getTasksAtLevel(userId, level);
-
                 List<Task> validTasks = getTasksForSuccessRate(tasksAtLvl); //bez otkazanih, pauziranih, dostinugita kvota
                 List<Task> doneTasks = getDoneTasks(validTasks);
-                List<Task> createdTasks = getCreatedTasks(validTasks);
 
-                double successRate = calculateSuccessRate(doneTasks, createdTasks);
+                double successRate = calculateSuccessRate(doneTasks, validTasks);
                 callback.OnCalculated(successRate);
             }
 
@@ -803,17 +801,6 @@ public class TaskService {
             }
         }
         return done;
-    }
-
-    public List<Task> getCreatedTasks (List<Task> tasks) {
-        List<Task> created = new ArrayList<>();
-        for (Task t : tasks) {
-            if (t.getStatus() != StatusType.PAUZIRAN &&
-                    t.getStatus() != StatusType.OTKAZAN) {
-                created.add(t);
-            }
-        }
-        return created;
     }
 
     private double calculateSuccessRate(List<Task> doneTasks, List<Task> createdTasks) {
