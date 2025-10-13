@@ -20,6 +20,9 @@ import com.example.mobilnaaplikacija.R;
 import com.example.mobilnaaplikacija.adapters.PrepareBattleAdapter;
 import com.example.mobilnaaplikacija.databinding.DialogPrepareBattleBinding;
 import com.example.mobilnaaplikacija.model.Equipment;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -30,29 +33,52 @@ public class PrepareBattleFragment extends DialogFragment {
 
     private DialogPrepareBattleBinding binding;
     private PrepareBattleAdapter adapter;
-    private final List<Equipment> activatedEquipment = new ArrayList<>();
+    private final List<Equipment> activeEquipment = new ArrayList<>();
+    private final List<Equipment> unactiveEquipment = new ArrayList<>();
+    private FirebaseFirestore db;
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         binding = DialogPrepareBattleBinding.inflate(inflater, container, false);
+        db = FirebaseFirestore.getInstance();
 
         List<Equipment> userEquipment = (List<Equipment>) getArguments().getSerializable("userEquipmentList");
         if (userEquipment == null) userEquipment = new ArrayList<>();
 
-        adapter = new PrepareBattleAdapter(userEquipment);
-        binding.rvEquipment.setLayoutManager(new LinearLayoutManager(requireContext()));
-        binding.rvEquipment.setAdapter(adapter);
+        for (Equipment e : userEquipment) {
+            if (e.isActive()) {
+                activeEquipment.add(e);
+            } else unactiveEquipment.add(e);
+        }
+
+        updateActivatedEquipmentUI();
+        if (unactiveEquipment.isEmpty()) {
+            binding.rvUnactiveEquipment.setVisibility(View.GONE);
+            binding.tvTitle.setVisibility(View.GONE);
+            binding.emptyStateLayout.setVisibility(View.VISIBLE);
+        } else {
+            binding.rvUnactiveEquipment.setVisibility(View.VISIBLE);
+            binding.tvTitle.setVisibility(View.VISIBLE);
+            binding.emptyStateLayout.setVisibility(View.GONE);
+        }
+
+        adapter = new PrepareBattleAdapter(unactiveEquipment);
+        binding.rvUnactiveEquipment.setLayoutManager(new LinearLayoutManager(requireContext()));
+        binding.rvUnactiveEquipment.setAdapter(adapter);
 
         adapter.setOnActivateListener((eq, activated) -> {
             if (activated) {
-                activatedEquipment.add(eq);
+                //aktivacija opreme
+                eq.setActive(true);
+                activeEquipment.add(eq);
+                updateUserEquipment(eq);
             }
             else {
-                for (int i = 0; i < activatedEquipment.size(); i++) {
-                    if (activatedEquipment.get(i).getId() == eq.getId()) {
-                        activatedEquipment.remove(i);
+                for (int i = 0; i < activeEquipment.size(); i++) {
+                    if (activeEquipment.get(i).getId() == eq.getId()) {
+                        activeEquipment.remove(i);
                         break;
                     }
                 }
@@ -62,7 +88,7 @@ public class PrepareBattleFragment extends DialogFragment {
 
         binding.btnStartBattle.setOnClickListener(v -> {
             Bundle bundle = new Bundle();
-            bundle.putSerializable("activatedEquipmentList", new ArrayList<>(activatedEquipment));
+            bundle.putSerializable("activeEquipmentList", new ArrayList<>(activeEquipment));
             Navigation.findNavController(requireView())
                     .navigate(R.id.action_prepareBattleFragment_to_battleFragment, bundle);
             dismiss();
@@ -71,12 +97,32 @@ public class PrepareBattleFragment extends DialogFragment {
         return binding.getRoot();
     }
 
+    private void updateUserEquipment (Equipment eq) {
+        String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        db.collection("users").document(uid).get().addOnSuccessListener(doc -> {
+            if (doc.exists()) {
+                List<Map<String, Object>> equipmentData = (List<Map<String, Object>>) doc.get("equipment");
+                if (equipmentData != null) {
+                    for (Map<String, Object> data : equipmentData) {
+                        long id = ((Number)data.get("id")).longValue();
+                        if (id == eq.getId()) {
+                            data.put("quantity", eq.getQuantity());
+                            break;
+                        }
+                    }
+                    db.collection("users").document(uid)
+                            .update("equipment", equipmentData);
+                }
+            }
+        });
+    }
+
     private void updateActivatedEquipmentUI() {
         LinearLayout container = binding.activatedIconsContainer;
         container.removeAllViews();
 
         Map<String, Integer> countsByKey = new HashMap<>(); // use name or type+id key
-        for (Equipment e : activatedEquipment) {
+        for (Equipment e : activeEquipment) {
             String key = e.getType().name(); // group by type; or use e.getId() for per-item
             countsByKey.put(key, countsByKey.getOrDefault(key, 0) + 1);
         }
