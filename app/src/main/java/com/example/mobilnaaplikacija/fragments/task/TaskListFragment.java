@@ -232,6 +232,17 @@ public class TaskListFragment extends Fragment implements RecyclerViewInterface 
         }
         ArrayList<Task> currentTasks = new ArrayList<>(taskService.getTasksByUser(user.getUid()));
 
+
+        for (int i = 0; i < currentTasks.size(); i++) {
+            Task t = currentTasks.get(i);
+            Task updatedTask = taskService.autoUpdateStatus(t);
+
+            if (!updatedTask.getStatus().equals(t.getStatus())) {
+                taskService.update(updatedTask);
+                currentTasks.set(i, updatedTask);
+            }
+        }
+
         if (isListTab)
             currentTasks = taskService.filterCurrentFutureTasks(currentTasks);
 
