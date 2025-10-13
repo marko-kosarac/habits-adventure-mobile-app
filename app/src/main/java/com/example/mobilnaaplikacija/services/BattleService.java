@@ -65,7 +65,7 @@ public class BattleService {
         void onError(String message);
     }
 
-    public void attackBoss (FirebaseUser user, Boss boss, Battle battle, double luck, int successRate, int numberOfAttacks, int bonusCoins, OnBattleCompleted callback) {
+    public void attackBoss (FirebaseUser user, Boss boss, Battle battle, double luck, int successRate, int damage, int numberOfAttacks, int bonusCoins, OnBattleCompleted callback) {
         if (numberOfAttacks >= 5) {
             callback.onError("Svi pokušaji za napad su iskorišteni.");
             return;
@@ -86,39 +86,24 @@ public class BattleService {
         attack.setBossId(boss.getId());
         attack.setHit(hit);
         attack.setAttemptNumber(numberOfAttacks);
+        attack.setDamageDealt(damage);
+
         //prethodni napadi
         List<Attack> attacks = attackService.getAttacksByUserAndBoss(userId, boss.getId());
+        attacks.add(attack);
+        attackService.add(attack);
 
-        //PP
-        userService.getUserDoc(userId).get()
-                .addOnSuccessListener(document -> {
-                    int pp = 0;
-                    if (document.exists()) {
-                        Long powerPoints = document.getLong("powerPoints");
-                        if (powerPoints != null) pp = powerPoints.intValue();
-                    }
+        if (bossRef.get().isDefeated()) { //TODO Nakon 5 napada, ukoliko je bos poražen, uslov nakon 5 napada?
+            //boss porazen
+            handleVictory(userId, boss, battle, attacks, bonusCoins, callback);
+        } else if (attacks.size() >= 5) {
+            //boss neporazen, ali je 5x napao
+            handleDefeat(userId, boss, battleRef.get(), attacks, bonusCoins, callback);
+        }
 
-                    if (hit) {
-                        attack.setDamageDealt(pp); //TODO should I pass powerPoints?
-                    } else {
-                        attack.setDamageDealt(0);
-                    }
+        updateBattleAndBoss(battle, false, boss, userId, 0, attacks); //TODO update?
+        callback.onBattleFinished(battleRef.get(), null, 0);
 
-                    attackService.add(attack);
-                    attacks.add(attack);
-
-                    if (bossRef.get().isDefeated()) { //TODO Nakon 5 napada, ukoliko je bos poražen, uslov nakon 5 napada?
-                        //boss porazen
-                        handleVictory(userId, boss, battle, attacks, bonusCoins, callback);
-                    } else if (attacks.size() >= 5) {
-                        //boss neporazen, ali je 5x napao
-                        handleDefeat(userId, boss, battleRef.get(), attacks, bonusCoins, callback);
-                    }
-
-                    updateBattleAndBoss(battle, false, boss, userId, 0, attacks); //TODO update?
-                    callback.onBattleFinished(battleRef.get(), null, 0);
-                })
-                .addOnFailureListener(e -> callback.onError("Failed to load user PP: " + e.getMessage()));
     }
 
     private void handleVictory(String userId, Boss boss, Battle battle, List<Attack> attacks, int bonusCoins, OnBattleCompleted callback) {
