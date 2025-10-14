@@ -25,6 +25,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -46,6 +47,8 @@ public class PrepareBattleFragment extends DialogFragment {
 
         List<Equipment> userEquipment = (List<Equipment>) getArguments().getSerializable("userEquipmentList");
         if (userEquipment == null) userEquipment = new ArrayList<>();
+
+        Map<String, Object> previousEtapa = (Map<String, Object>) getArguments().getSerializable("previousEtapa");
 
         for (Equipment e : userEquipment) {
             if (e.isActive()) {
@@ -69,7 +72,7 @@ public class PrepareBattleFragment extends DialogFragment {
         for (Equipment eq : unactiveEquipment) {
             if (!eq.isActive()) {
                 groupedMap.compute(eq.getId(), (id, existing) -> {
-                    if (existing == null) return new Equipment(eq); // copy constructor or clone
+                    if (existing == null) return new Equipment(eq);
                     existing.setQuantity(existing.getQuantity() + eq.getQuantity());
                     return existing;
                 });
@@ -93,10 +96,10 @@ public class PrepareBattleFragment extends DialogFragment {
             }
 
             if (existingActive != null) {
-                // Increase active count
+                //broj aktivne
                 existingActive.setQuantity(existingActive.getQuantity() + 1);
             } else {
-                // Create new active item
+                //nova aktivna
                 Equipment newActive = new Equipment(eq);
                 newActive.setActive(true);
                 newActive.setQuantity(1);
@@ -115,6 +118,7 @@ public class PrepareBattleFragment extends DialogFragment {
         binding.btnStartBattle.setOnClickListener(v -> {
             Bundle bundle = new Bundle();
             bundle.putSerializable("activeEquipmentList", new ArrayList<>(activeEquipment));
+            if (previousEtapa != null) bundle.putSerializable("previousEtapa", (Serializable) previousEtapa);
             Navigation.findNavController(requireView())
                     .navigate(R.id.action_prepareBattleFragment_to_battleFragment, bundle);
             dismiss();
@@ -130,7 +134,7 @@ public class PrepareBattleFragment extends DialogFragment {
         //smanji quantity u objektu neaktivnom
         eq.setQuantity(eq.getQuantity() - 1);
 
-        // Proveri da li ista oprema već postoji u aktivnim
+        //provjeri da li ista oprema već postoji u aktivnim
         Equipment activeEq = null;
         for (Equipment e : userEquipment) {
             if (e.isActive() && e.getId() == eq.getId()) {
@@ -140,7 +144,7 @@ public class PrepareBattleFragment extends DialogFragment {
         }
 
         if (activeEq == null) {
-            // Ako ne postoji, kreiraj novu aktivnu instancu
+            //ako ne postoji, kreiraj novu aktivnu instancu
             activeEq = new Equipment();
             activeEq.setId(eq.getId());
             activeEq.setName(eq.getName());
@@ -154,20 +158,20 @@ public class PrepareBattleFragment extends DialogFragment {
             userEquipment.add(activeEq);
         }
 
-        // Ažuriraj Firestore
+        //ažuriraj bazu
         Equipment finalActiveEq = activeEq;
         userRef.get().addOnSuccessListener(doc -> {
             List<Map<String, Object>> equipmentData = (List<Map<String, Object>>) doc.get("equipment");
             if (equipmentData == null) equipmentData = new ArrayList<>();
             List<Map<String, Object>> updatedList = new ArrayList<>();
 
-            // Update quantity u inventaru i dodaj aktivne
+            //update quantity u inventaru i dodaj aktivne
             for (Map<String, Object> e : equipmentData) {
                 long id = ((Number) e.get("id")).longValue();
                 int qty = ((Number) e.get("quantity")).intValue();
 
                 if (id == eq.getId()) {
-                    qty = qty - 1; // smanji quantity u inventaru
+                    qty = qty - 1; //smanji quantity u inventaru
                 }
 
                 if (qty > 0) {
@@ -209,7 +213,7 @@ public class PrepareBattleFragment extends DialogFragment {
         LinearLayout container = binding.activatedIconsContainer;
         container.removeAllViews();
 
-        //grupacija po name+bonus
+        //grupacija po name + bonus
         Map<String, List<Equipment>> equipmentByIdentity = new HashMap<>();
         for (Equipment e : activeEquipment) {
             String key = e.getName() + "_" + e.getBonus();

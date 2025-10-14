@@ -58,6 +58,7 @@ public class BattleFragment extends Fragment {
     private int numberOfAttacks = 0, calculatedSuccessRate = 0;
     private int bonusCoins = 0, bonusAttack = 0, bonusAttackSuccessChance = 0;
     private List<Equipment> activeEquipment;
+    private Map<String, Object> previousEtapa;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -75,6 +76,8 @@ public class BattleFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+        previousEtapa = (Map<String, Object>) getArguments().getSerializable("previousEtapa");
 
         firebaseUser = userService.getCurrentUser();
         battle = battleService.startOrGetBattle(firebaseUser);
