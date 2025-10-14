@@ -6,7 +6,7 @@ public class Battle {
     private String id;
     private String userId;
     private String bossId;
-    private boolean userWon;
+    private Boolean userWon;
     private int coinsEarned;
     private List<Attack> attacks;
 
@@ -44,11 +44,11 @@ public class Battle {
         this.bossId = bossId;
     }
 
-    public boolean hasUserWon() {
+    public Boolean hasUserWon() {
         return userWon;
     }
 
-    public void setUserWon(boolean userWon) {
+    public void setUserWon(Boolean userWon) {
         this.userWon = userWon;
     }
 
