@@ -98,6 +98,8 @@ public class BattleFragment extends Fragment {
     }
 
     private void applyEquipmentEffects(List<Equipment> equipment) {
+        //TODO ukoliko je vise opreme, ne sprovede se efekat vise puta npr. PP +20% x3, samo 1 ce uvecati +20%
+        //TODO zaokruzuje na nize npr. 26.8 PP -> 26 PP
         if (!isAdded() || binding == null) return;
         if (equipment.isEmpty()) return;
         for (Equipment eq : equipment) {
@@ -122,36 +124,44 @@ public class BattleFragment extends Fragment {
     private void applyPotionEffect(Equipment eq) {
         if (eq.getName().contains("PP +20%")) {
             PP_MAX *= 1.20;
+            PP *= 1.20;
         } else if (eq.getName().contains("PP +40%")) {
             PP_MAX *= 1.40;
+            PP *= 1.40;
         } else if (eq.getName().contains("PP +15%")) {
             PP_MAX *= 1.15;
+            PP *= 1.15;
         } else if (eq.getName().contains("Snage +5%")) {
             PP_MAX *= 1.05; //TODO trajno
+            PP *= 1.05;
         } else if (eq.getName().contains("Snage +8%")) {
             PP_MAX *= 1.08; //TODO trajno
+            PP *= 1.08;
         } else if (eq.getName().contains("Snage +10%")) {
             PP_MAX *= 1.10; //TODO trajno
+            PP *= 1.10;
         }
-        PP = PP_MAX;
     }
 
     private void applyWeaponEffect(Equipment eq) {
         if (eq.getName().contains("Mač")) {
             PP_MAX *= 1.05; //TODO trajno
+            PP *= 1.05;
         } else if (eq.getName().contains("Luk")) {
-            bonusCoins += 5;
+            bonusCoins += 5; //TODO provjeri
         }
-        PP = PP_MAX;
     }
 
     private void applyArmorEffect(Equipment eq) {
         if (eq.getName().contains("Čizme")) {
             if (Math.random() < 0.4) {
-                bonusAttack += 1;
+                bonusAttack += 1; //TODO poveca se numberOfAttacks za 1 ili za 40%?
             }
         } else if (eq.getName().contains("Štit")) {
-            bonusAttackSuccessChance += 10;
+            bonusAttackSuccessChance += 10; //poveca se successRate
+        } else if (eq.getName().contains("Rukavice")) {
+            PP_MAX *= 1.10; //+10% snage
+            PP *= 1.10;
         }
     }
 
@@ -205,8 +215,8 @@ public class BattleFragment extends Fragment {
         binding.pbPPBar.setProgress(PP);
         ObjectAnimator.ofInt(binding.pbHPBar, "progress", boss.getCurrentHp()).setDuration(600).start();
         ObjectAnimator.ofInt(binding.pbPPBar, "progress", PP).setDuration(600).start();
-        binding.tvUserPP.setText("PP: " + PP + "/" + PP_MAX);
-        binding.tvBossHP.setText("HP: " + HP + "/" + HP_MAX);
+        binding.tvUserPP.setText("Snaga korisnika: " + PP + "/" + PP_MAX);
+        binding.tvBossHP.setText("Energija bosa: " + HP + "/" + HP_MAX);
     }
 
     private void setupEquipment() {
@@ -285,7 +295,6 @@ public class BattleFragment extends Fragment {
         numberOfAttacks++;
         String text = String.format(getString(R.string.attack_number), numberOfAttacks);
         binding.tvAttackCount.setText(text);
-        //TODO update UI
     }
 
     private void setupAttackButton(Battle battle, int successRate) {
@@ -351,7 +360,7 @@ public class BattleFragment extends Fragment {
                             //goToFinishedBattleScreen(equipment, coins);
                             //show rewards if any
                         } else
-                            Toast.makeText(getContext(), "Pogodak! Sreća: " + roundedLuck + "%", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(getContext(), "Pogodak! Sreća: " + roundedLuck + "%", Toast.LENGTH_LONG).show();
                     }
                     
                     @Override
