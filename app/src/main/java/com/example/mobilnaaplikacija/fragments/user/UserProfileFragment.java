@@ -6,6 +6,7 @@ import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
+import androidx.navigation.fragment.NavHostFragment;
 
 import android.text.InputType;
 import android.util.Log;
@@ -34,10 +35,12 @@ import com.google.zxing.MultiFormatWriter;
 import com.google.zxing.common.BitMatrix;
 import com.journeyapps.barcodescanner.BarcodeEncoder;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class UserProfileFragment extends Fragment {
 
@@ -290,60 +293,77 @@ public class UserProfileFragment extends Fragment {
     }
 
     private void updateLevelUI(long currentXP, String userId) {
-        int level = 1;
-        long xpForNextLevel = 200;
-        long prevXpForNext = 0;
+        //dobavi trenutni level
+        db.collection("users").document(userId).get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    if (!documentSnapshot.exists()) return;
 
-        while (currentXP >= xpForNextLevel) {
-            level++;
-            prevXpForNext = xpForNextLevel;
-            long next = xpForNextLevel * 2 + xpForNextLevel / 2;
-            xpForNextLevel = ((next + 99) / 100) * 100;
-        }
+                    Map<String, Object> etapa = (Map<String, Object>) documentSnapshot.get("etapa");
+                    //ako korisnik nema aktivnu etapu
+                    if (etapa == null) {
+                        Log.d("EtapaCheck", "No etapa found — creating initial etapa...");
+                        ensureInitialEtapa(userId, 1);
+                    } else {
+                        Log.d("EtapaCheck", "Active etapa exists for level: " + etapa.get("level"));
+                    }
 
-        textCurrentLevel.setText(String.valueOf(level));
-        textNextLevel.setText(String.valueOf(level + 1));
+                    long oldLevel = documentSnapshot.contains("level") ? documentSnapshot.getLong("level") : 1;
 
-        // Dodela titula za prvih 3 nivoa
-        String title;
-        switch (level) {
-            case 1:
-                title = "Početnik";
-                break;
-            case 2:
-                title = "Učenik";
-                break;
-            case 3:
-                title = "Iskusni";
-                break;
-            default:
-                title = "Veteran";
-                break;
-        }
-        textLevelTitle.setText("Level " + level + " - " + title);
+                    //racunanje XP i level-a
+                    int level = 1;
+                    long xpForNextLevel = 200;
 
-        int progress = (int) ((currentXP * 100) / xpForNextLevel);
-        levelProgressBar.setMax(100);
-        levelProgressBar.setProgress(progress);
-        textXP.setText("XP: " + currentXP + " / " + xpForNextLevel);
+                    while (currentXP >= xpForNextLevel) {
+                        level++;
+                        long next = xpForNextLevel * 2 + xpForNextLevel / 2;
+                        xpForNextLevel = ((next + 99) / 100) * 100;
+                    }
 
-        // Izračunavanje PP-a
-        long pp = 0;
-        if (level > 1) {
-            pp = 40; // nakon prvog nivoa
-            for (int i = 2; i < level; i++) {
-                pp = pp + (pp * 3 / 4);
-            }
-        }
-        textPP.setText("Snaga: " + pp);
+                    //update UI
+                    textCurrentLevel.setText(String.valueOf(level));
+                    textNextLevel.setText(String.valueOf(level + 1));
 
-        // Ažuriranje baze
-        db.collection("users").document(userId)
-                .update("level", level, "title", title, "powerPoints", pp)
-                .addOnSuccessListener(aVoid -> Log.d("UserProfile", "Level, titula i PP ažurirani"))
-                .addOnFailureListener(e -> Log.e("UserProfile", "Greška pri ažuriranju levela i PP-a", e));
+                    //dodela titula za prva 3 nivoa
+                    String title;
+                    switch (level) {
+                        case 1: title = "Početnik"; break;
+                        case 2: title = "Učenik"; break;
+                        case 3: title = "Iskusni"; break;
+                        default: title = "Veteran"; break;
+                    }
+                    textLevelTitle.setText("Level " + level + " - " + title);
+
+                    int progress = (int) ((currentXP * 100) / xpForNextLevel);
+                    levelProgressBar.setMax(100);
+                    levelProgressBar.setProgress(progress);
+                    textXP.setText("XP: " + currentXP + " / " + xpForNextLevel);
+
+                    //racunanje PP-a
+                    long pp = 20; //pre nego predje prvi nivo
+                    if (level > 1) {
+                        pp = 40; //nakon prvog nivoa
+                        for (int i = 2; i < level; i++) {
+                            pp = pp + (pp * 3 / 4);
+                        }
+                    }
+                    textPP.setText("Snaga: " + pp);
+
+                    //ažuriranje baze: level, title, PP
+                    db.collection("users").document(userId)
+                            .update("level", level, "title", title, "powerPoints", pp)
+                            .addOnSuccessListener(aVoid ->
+                                    Log.d("UserProfile", "Level, titula i PP ažurirani"))
+                            .addOnFailureListener(e ->
+                                    Log.e("UserProfile", "Greška pri ažuriranju levela i PP-a", e));
+
+                    //level up
+                    if (level > oldLevel) {
+                        onLevelUp((int)oldLevel, level, userId); //nova etapa, borba sa bosom
+                    }
+                })
+                .addOnFailureListener(e ->
+                        Log.e("UserProfile", "Greška pri dobavljanju korisnika", e));
     }
-
 
 
     private void generateQRCode(String userId) {
@@ -423,5 +443,89 @@ public class UserProfileFragment extends Fragment {
                             Toast.makeText(getContext(), "Pogrešna stara lozinka.", Toast.LENGTH_SHORT).show());
         }
     }
+
+    private void onLevelUp(int oldLevel, int newLevel, String userId) {
+        long now = System.currentTimeMillis();
+        DocumentReference userRef = db.collection("users").document(userId);
+        AtomicReference<Map<String, Object>> previousEtapa = null;
+
+        db.runTransaction(transaction -> {
+            DocumentSnapshot snapshot = transaction.get(userRef);
+
+            //end stare etape
+            previousEtapa.set((Map<String, Object>) snapshot.get("etapa"));
+            if (previousEtapa != null) {
+                previousEtapa.get().put("end", now);
+                previousEtapa.get().put("level", oldLevel);
+
+                //prethodna etapa u istoriju etapa
+                String etapaId = "etapa_" + oldLevel;
+                DocumentReference historyRef = userRef.collection("etapaHistory").document(etapaId);
+                transaction.set(historyRef, previousEtapa.get());
+            }
+
+            //nova etapa
+            Map<String, Object> newEtapa = new HashMap<>();
+            newEtapa.put("level", newLevel);
+            newEtapa.put("start", now);
+            newEtapa.put("end", null);
+            newEtapa.put("bossDefeated", false);
+            newEtapa.put("successRate", 0.0);
+
+            //update korisnikov level i etapu
+            Map<String, Object> updates = new HashMap<>();
+            updates.put("level", newLevel);
+            updates.put("etapa", newEtapa);
+
+            transaction.update(userRef, updates);
+
+            return null;
+        }).addOnSuccessListener(aVoid -> {
+            Log.d("LevelUp", "Etapa " + newLevel + " started successfully!");
+            showPrepareBattleDialog(newLevel, previousEtapa.get()); //borba sa bosom
+        }).addOnFailureListener(e -> {
+            Log.e("LevelUp", "Failed to start new etapa", e);
+        });
+    }
+
+    private void showPrepareBattleDialog(int level, Object previousEtapa) {
+        new AlertDialog.Builder(requireContext())
+                .setTitle("Novi nivo: " + level)
+                .setMessage("Spreman/na za borbu sa bosom?")
+                .setPositiveButton("Kreni", (d, w) -> {
+                    Bundle bundle = new Bundle();
+                    bundle.putParcelableArrayList("userEquipmentList", new ArrayList<>(userEquipmentList));
+                    if (previousEtapa != null) bundle.putSerializable("previousEtapa", (Serializable) previousEtapa);
+                    NavHostFragment.findNavController(this)
+                            .navigate(R.id.action_userProfileFragment_to_prepareBattleFragment, bundle);
+                })
+                .show();
+    }
+
+    private void ensureInitialEtapa(String userId, long currentLevel) {
+        DocumentReference userRef = db.collection("users").document(userId);
+
+        userRef.get().addOnSuccessListener(snapshot -> {
+            if (snapshot.exists()) {
+                Map<String, Object> etapa = (Map<String, Object>) snapshot.get("etapa");
+
+                //ako korisnik još nema etapu — kreiraj prvu
+                if (etapa == null) {
+                    long now = System.currentTimeMillis();
+                    Map<String, Object> newEtapa = new HashMap<>();
+                    newEtapa.put("level", currentLevel);
+                    newEtapa.put("start", now);
+                    newEtapa.put("end", null);
+                    newEtapa.put("bossDefeated", false);
+                    newEtapa.put("successRate", 0.0);
+
+                    userRef.update("etapa", newEtapa)
+                            .addOnSuccessListener(aVoid -> Log.d("EtapaInit", "Initial etapa created for level " + currentLevel))
+                            .addOnFailureListener(e -> Log.e("EtapaInit", "Failed to create initial etapa", e));
+                }
+            }
+        }).addOnFailureListener(e -> Log.e("EtapaInit", "Error fetching user", e));
+    }
+
 
 }
