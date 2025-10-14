@@ -66,7 +66,7 @@ public class BattleService {
     }
 
     public void attackBoss (FirebaseUser user, Boss boss, Battle battle, double luck, int successRate, int damage, int numberOfAttacks, int bonusCoins, OnBattleCompleted callback) {
-        if (numberOfAttacks >= 5) {
+        if (numberOfAttacks > 5) {
             callback.onError("Svi pokušaji za napad su iskorišteni.");
             return;
         }
@@ -81,7 +81,8 @@ public class BattleService {
         final AtomicReference<Boss> bossRef = new AtomicReference<>(boss);
 
         //success rate napada
-        boolean hit = luck * 100 < successRate;Attack attack = new Attack();
+        boolean hit = luck * 100 < successRate;
+        Attack attack = new Attack();
         attack.setUserId(userId);
         attack.setBossId(boss.getId());
         attack.setHit(hit);

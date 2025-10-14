@@ -290,8 +290,12 @@ public class BattleFragment extends Fragment {
 
     private void setupAttackButton(Battle battle, int successRate) {
         if (!isAdded() || binding == null) return;
+
         binding.btnAttackBoss.setOnClickListener(v-> {
-            updateNumberOfAttacks();
+            if (numberOfAttacks >= 5) {
+                Toast.makeText(getContext(), "Svi pokušaji za napad su iskorišteni.", Toast.LENGTH_SHORT).show();
+                return;
+            } else if (numberOfAttacks < 5) updateNumberOfAttacks();
             double luck = Math.random() * 100;
             boolean userHit = luck < successRate;
             if (!userHit) {
@@ -316,7 +320,7 @@ public class BattleFragment extends Fragment {
 
                     @Override
                     public void onError(String message) {
-                        Toast.makeText(getContext(), message, Toast.LENGTH_SHORT);
+                        Toast.makeText(getContext(), message, Toast.LENGTH_SHORT).show();
                     }
                 });
             } else {
@@ -352,7 +356,7 @@ public class BattleFragment extends Fragment {
                     
                     @Override
                     public void onError(String message) {
-                        Toast.makeText(getContext(), message, Toast.LENGTH_SHORT);
+                        Toast.makeText(getContext(), message, Toast.LENGTH_SHORT).show();
                     }
                 });
 
