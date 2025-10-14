@@ -447,21 +447,23 @@ public class UserProfileFragment extends Fragment {
     private void onLevelUp(int oldLevel, int newLevel, String userId) {
         long now = System.currentTimeMillis();
         DocumentReference userRef = db.collection("users").document(userId);
-        AtomicReference<Map<String, Object>> previousEtapa = null;
+        AtomicReference<Map<String, Object>> previousEtapaRef = new AtomicReference<>();
 
         db.runTransaction(transaction -> {
             DocumentSnapshot snapshot = transaction.get(userRef);
 
             //end stare etape
-            previousEtapa.set((Map<String, Object>) snapshot.get("etapa"));
+            Map<String, Object> previousEtapa = (Map<String, Object>) snapshot.get("etapa");
             if (previousEtapa != null) {
-                previousEtapa.get().put("end", now);
-                previousEtapa.get().put("level", oldLevel);
+                previousEtapa.put("end", now);
+                previousEtapa.put("level", oldLevel);
+
+                previousEtapaRef.set(previousEtapa);
 
                 //prethodna etapa u istoriju etapa
                 String etapaId = "etapa_" + oldLevel;
                 DocumentReference historyRef = userRef.collection("etapaHistory").document(etapaId);
-                transaction.set(historyRef, previousEtapa.get());
+                transaction.set(historyRef, previousEtapa);
             }
 
             //nova etapa
@@ -482,8 +484,10 @@ public class UserProfileFragment extends Fragment {
             return null;
         }).addOnSuccessListener(aVoid -> {
             Log.d("LevelUp", "Etapa " + newLevel + " started successfully!");
-            showPrepareBattleDialog(newLevel, previousEtapa.get()); //borba sa bosom
-        }).addOnFailureListener(e -> {
+            Map<String, Object> previousEtapa = previousEtapaRef.get();
+            if (previousEtapa != null) showPrepareBattleDialog(newLevel, previousEtapa);
+            else showPrepareBattleDialog(newLevel, null);
+            }).addOnFailureListener(e -> {
             Log.e("LevelUp", "Failed to start new etapa", e);
         });
     }

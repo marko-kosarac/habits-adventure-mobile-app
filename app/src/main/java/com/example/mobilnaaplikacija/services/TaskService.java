@@ -757,12 +757,12 @@ public class TaskService {
         void OnCalculated(double successRate);
     }
 
-    public double getSuccessRate(String userId, OnSuccessRateCalculated callback) {
+    public double getSuccessRate(String userId, Map<String, Object> etapa, OnSuccessRateCalculated callback) {
         userService.getUserLevel(userId, new UserService.OnLevelRetrievedCallback() {
             @Override
             public void onSuccess(int level) {
-                List<Task> tasksAtLvl = getTasksAtLevel(userId, level);
-                List<Task> validTasks = getTasksForSuccessRate(tasksAtLvl); //bez otkazanih, pauziranih, dostinugita kvota
+                List<Task> tasksByUser = getTasksByUser(userId);
+                List<Task> validTasks = getTasksForSuccessRate(tasksByUser, etapa); //bez otkazanih, pauziranih, dostinugita kvota
                 List<Task> doneTasks = getDoneTasks(validTasks);
 
                 double successRate = calculateSuccessRate(doneTasks, validTasks);
@@ -777,14 +777,32 @@ public class TaskService {
         return 0;
     }
 
-    public List<Task> getTasksAtLevel(String userId, int level) { //TODO tasks
-        return taskRepository.getTasksAtLevel(userId, level);
-    }
-
-    public List<Task> getTasksForSuccessRate(List<Task> tasks) {
+    public List<Task> getTasksForSuccessRate(List<Task> tasks, Map<String, Object> etapa) {
         List<Task> valid = new ArrayList<>();
+        if (etapa == null) return null;
+
+        long start = 0L;
+        long end = System.currentTimeMillis();
+
+        if (etapa.get("start") instanceof Long) {
+            start = (Long) etapa.get("start");
+        } else if (etapa.get("start") instanceof Timestamp) {
+            start = ((Timestamp) etapa.get("start")).toDate().getTime();
+        }
+
+        if (etapa.get("end") instanceof Long) {
+            end = (Long) etapa.get("end");
+        } else if (etapa.get("end") instanceof Timestamp) {
+            end = ((Timestamp) etapa.get("end")).toDate().getTime();
+        }
+
         for (Task t : tasks) {
-            if (t.getStatus() != StatusType.PAUZIRAN &&
+            boolean withinEtapa = t.getStartMillis() <= end &&
+                    start <= t.getEndMillis() &&
+                    t.getEndMillis() <= end;
+
+            if (withinEtapa &&
+                    t.getStatus() != StatusType.PAUZIRAN &&
                     t.getStatus() != StatusType.OTKAZAN &&
                     !t.isQuotaReached()) {
                 valid.add(t);

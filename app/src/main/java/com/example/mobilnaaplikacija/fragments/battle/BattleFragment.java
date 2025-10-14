@@ -33,6 +33,7 @@ import com.example.mobilnaaplikacija.services.TaskService;
 import com.example.mobilnaaplikacija.services.UserService;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
@@ -85,9 +86,10 @@ public class BattleFragment extends Fragment {
         fetchUserDataFromFirebase();
 
         setupAnimations(view);
-        taskService.getSuccessRate(firebaseUser.getUid(), successRate -> {
+        taskService.getSuccessRate(firebaseUser.getUid(), previousEtapa, successRate -> {
             if (!isAdded() || binding == null) return;
-            //success rate napada
+
+            //success rate napada završene etape
             if (bonusAttackSuccessChance != 0) { //TODO
                 successRate += bonusAttackSuccessChance;
                 bonusAttackSuccessChance = 0;
@@ -96,6 +98,21 @@ public class BattleFragment extends Fragment {
             String text = String.format(getString(R.string.attack_chance), (int)successRate);
             binding.tvAttackChance.setText(text);
             setupAttackButton(battle, (int)successRate);
+
+            //update u bazi: etapaHistory
+            FirebaseFirestore db = FirebaseFirestore.getInstance();
+            String etapaId = "etapa_" + previousEtapa.get("level");
+            DocumentReference etapaHistoryRef = db.collection("users")
+                    .document(firebaseUser.getUid())
+                    .collection("etapaHistory")
+                    .document(etapaId);
+
+            etapaHistoryRef.update("successRate", Math.round(successRate))
+                    .addOnSuccessListener(aVoid ->
+                            Log.d("EtapaHistoryUpdate", "Success rate updated for " + etapaId))
+                    .addOnFailureListener(e ->
+                            Log.e("EtapaHistoryUpdate", "Failed to update success rate for " + etapaId, e));
+
         });
         setupRemainingAttacks();
     }
@@ -104,6 +121,7 @@ public class BattleFragment extends Fragment {
         //TODO ukoliko je vise opreme, ne sprovede se efekat vise puta npr. PP +20% x3, samo 1 ce uvecati +20%
         //TODO zaokruzuje na nize npr. 26.8 PP -> 26 PP
         if (!isAdded() || binding == null) return;
+
         if (equipment.isEmpty()) return;
         for (Equipment eq : equipment) {
             switch (eq.getType()) {
@@ -120,6 +138,7 @@ public class BattleFragment extends Fragment {
                     return;
             }
         }
+
         Toast.makeText(getContext(), "Aktivirana oprema!", Toast.LENGTH_SHORT).show();
         setupProgressBars();
     }
