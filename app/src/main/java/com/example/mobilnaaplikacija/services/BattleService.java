@@ -121,8 +121,6 @@ public class BattleService {
         //šansa od 20% da se dobije komad opreme (95% šanse za odeću, 5% šanse za oružje)
         double chance = 0.20;
         Equipment equipment = equipmentService.getEquipmentReward(userId, chance);
-        //TODO user's lvl++?
-        //TODO user's xp/pp?
 
         updateBattleAndBoss(battle, true, boss, userId, coins, attacks);
         callback.onBattleFinished(battle, equipment, coins);
@@ -150,14 +148,13 @@ public class BattleService {
             );
 
             equipment = equipmentService.getEquipmentReward(userId, chance);
-            //TODO user's xp/pp?
         } else coins = 0;
 
         updateBattleAndBoss(battle, false, boss, userId, coins, attacks);
         callback.onBattleFinished(battle, equipment, coins);
     }
 
-    private void updateBattleAndBoss (Battle battle,boolean win, Boss boss, String userId, int coins, List<Attack> attacks) {
+    private void updateBattleAndBoss (Battle battle, boolean win, Boss boss, String userId, int coins, List<Attack> attacks) {
         battle.setUserId(userId);
         battle.setBossId(boss.getId());
         battle.setAttacks(attacks);
