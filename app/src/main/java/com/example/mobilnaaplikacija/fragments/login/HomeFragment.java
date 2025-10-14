@@ -23,8 +23,14 @@ import com.example.mobilnaaplikacija.databinding.FragmentHomeBinding;
 import com.example.mobilnaaplikacija.services.UserService;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.SetOptions;
 import com.google.firebase.messaging.FirebaseMessaging;
+
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 public class HomeFragment extends Fragment {
 
@@ -77,6 +83,8 @@ public class HomeFragment extends Fragment {
                                                 .update("fcmToken", token)
                                                 .addOnSuccessListener(aVoid -> {
                                                     Log.d("FCM", "Token sačuvan: " + token);
+                                                    //Inicijalizacija etape ako ne postoji
+                                                    ensureEtapaExists(fbUser);
                                                 })
                                                 .addOnFailureListener(e -> {
                                                     Log.e("FCM", "Greška pri čuvanju tokena", e);
@@ -115,6 +123,38 @@ public class HomeFragment extends Fragment {
         });
 
         return binding.getRoot();
+    }
+
+    private void ensureEtapaExists(FirebaseUser user) {
+        if (user == null) return;
+
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        DocumentReference userRef = db.collection("users").document(user.getUid());
+
+        userRef.get().addOnSuccessListener(snapshot -> {
+            if (!snapshot.exists()) {
+                Log.w("EtapaInit", "User doc missing — creating one");
+                userRef.set(new HashMap<>());
+            }
+
+            if (!snapshot.contains("etapa") || snapshot.get("etapa") == null) {
+                long now = System.currentTimeMillis();
+                long level = snapshot.contains("level") ? snapshot.getLong("level") : 1;
+
+                Map<String, Object> etapa = new HashMap<>();
+                etapa.put("level", level);
+                etapa.put("start", now);
+                etapa.put("end", null);
+                etapa.put("bossDefeated", false);
+                etapa.put("successRate", 0.0);
+
+                userRef.set(Collections.singletonMap("etapa", etapa), SetOptions.merge())
+                        .addOnSuccessListener(a -> Log.d("EtapaInit", "Etapa added for old user"))
+                        .addOnFailureListener(e -> Log.e("EtapaInit", "Failed to add etapa", e));
+            } else {
+                Log.d("EtapaInit", "Etapa already exists for user");
+            }
+        });
     }
 
     @Override

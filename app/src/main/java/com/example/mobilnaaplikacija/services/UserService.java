@@ -16,8 +16,10 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.SetOptions;
 import com.google.firebase.messaging.FirebaseMessaging;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -71,6 +73,9 @@ public class UserService {
                                                 // opcionalno odmah izloguj
                                                 auth.signOut();
                                             });
+
+                                    //Inicijalizacija etape za buduće zadatke
+                                    createNewEtapa(uid);
                                 })
                                 .addOnFailureListener(e -> {
                                     Log.e("Firestore", "Greška pri snimanju u bazu", e);
@@ -243,5 +248,24 @@ public class UserService {
             }
         }).addOnFailureListener(onFailure);
     }
+
+    private void createNewEtapa(String userId) {
+        long now = System.currentTimeMillis();
+
+        Map<String, Object> initialEtapa = new HashMap<>();
+        initialEtapa.put("level", 1);
+        initialEtapa.put("start", now);
+        initialEtapa.put("end", null);
+        initialEtapa.put("bossDefeated", false);
+        initialEtapa.put("successRate", 0.0);
+
+        FirebaseFirestore.getInstance()
+                .collection("users")
+                .document(userId)
+                .set(Collections.singletonMap("etapa", initialEtapa), SetOptions.merge())
+                .addOnSuccessListener(x -> Log.d("EtapaInit", "Initial etapa created for new user"))
+                .addOnFailureListener(e -> Log.e("EtapaInit", "Failed to create etapa", e));
+    }
+
 
 }
