@@ -275,7 +275,6 @@ public class TaskService {
         return taskRepository.getDifficultyFromXP(xp);
     }
 
-
     public Boolean deleteById(String id) {
         return taskRepository.delete(id) > 0;
     }

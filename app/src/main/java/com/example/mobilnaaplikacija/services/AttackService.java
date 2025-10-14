@@ -25,6 +25,10 @@ public class AttackService {
         return attackRepository.getAttacksByUserAndBoss(userId, bossId);
     }
 
+    public boolean deleteById (String id) {
+        return attackRepository.delete(id) > 0;
+    }
+
     public Attack add (Attack attack) {
         return attackRepository.add(attack);
     }

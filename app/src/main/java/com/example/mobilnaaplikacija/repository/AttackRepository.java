@@ -81,4 +81,11 @@ public class AttackRepository {
         attack.setId(String.valueOf(rowId));
         return attack;
     }
+
+    public int delete(String id){
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
+        int rows = db.delete(SQLiteHelper.TABLE_ATTACKS, SQLiteHelper.COLUMN_ATTACK_ID + " = ?", new String[]{String.valueOf(id)});
+        db.close();
+        return rows;
+    }
 }
