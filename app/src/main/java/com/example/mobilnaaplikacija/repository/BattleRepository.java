@@ -3,10 +3,14 @@ package com.example.mobilnaaplikacija.repository;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.util.Log;
 
 import com.example.mobilnaaplikacija.database.SQLiteHelper;
 import com.example.mobilnaaplikacija.model.Battle;
 import com.example.mobilnaaplikacija.model.Boss;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class BattleRepository {
     private final SQLiteHelper dbHelper;
@@ -50,29 +54,38 @@ public class BattleRepository {
         return battle;
     }
 
-    public Battle getBattleByUserAndBoss(String userId, String bossId) {
+    public List<Battle> getBattlesByUser(String userId) {
         SQLiteDatabase db = dbHelper.getReadableDatabase();
-        Battle battle = null;
+        List<Battle> battles = new ArrayList<>();
 
-        Cursor cursor = db.query(
-                SQLiteHelper.TABLE_BATTLES,
-                new String[]{"id", "user_id", "boss_id", "user_won", "coins_earned"}, "user_id = ? AND boss_id = ?",
-                new String[]{userId, bossId},
-                null, null, null);
+        Cursor cursor = null;
+        try {
+            cursor = db.query(SQLiteHelper.TABLE_BATTLES,null, "userId = ?", new String[]{ userId }, null, null, null);
+            if (cursor != null && cursor.moveToFirst()) {
+                do {
+                    Battle battle = new Battle();
+                    battle.setId(cursor.getString(cursor.getColumnIndexOrThrow("id")));
+                    battle.setUserId(cursor.getString(cursor.getColumnIndexOrThrow("userId")));
+                    battle.setBossId(cursor.getString(cursor.getColumnIndexOrThrow("bossId")));
+                    battle.setCoinsEarned(cursor.getInt(cursor.getColumnIndexOrThrow("coinsEarned")));
 
-        if (cursor != null && cursor.moveToFirst()) {
-            battle = new Battle(
-                    cursor.getString(cursor.getColumnIndexOrThrow("id")),
-                    cursor.getString(cursor.getColumnIndexOrThrow("user_id")),
-                    cursor.getString(cursor.getColumnIndexOrThrow("boss_id")),
-                    cursor.getInt(cursor.getColumnIndexOrThrow("user_won")) == 1,
-                    cursor.getInt(cursor.getColumnIndexOrThrow("coins_earned"))
-            );
-            cursor.close();
+                    if (!cursor.isNull(cursor.getColumnIndexOrThrow("userWon"))) {
+                        battle.setUserWon(cursor.getInt(cursor.getColumnIndexOrThrow("userWon")) == 1);
+                    } else {
+                        battle.setUserWon(null);
+                    }
+
+                    battles.add(battle);
+                } while (cursor.moveToNext());
+            }
+
+        } catch (Exception e) {
+            Log.e("BattleRepository", "Error fetching battles", e);
+        } finally {
+            if (cursor != null) cursor.close();
         }
 
-        db.close();
-        return battle;
+        return battles;
     }
 
     public Battle getBattleByUser(String userId) {
