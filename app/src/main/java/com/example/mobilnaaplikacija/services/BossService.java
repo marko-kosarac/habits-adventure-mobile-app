@@ -36,7 +36,6 @@ public class BossService {
     return boss;
     }
 
-    //When new boss is created, last one is defeated or this is 1st time fighting with it
     public int calculateMaxHp (int level) {
         int hp = 200;
         for (int i = 2; i <= level; i ++) {
@@ -51,6 +50,19 @@ public class BossService {
             coins = coins * 1.2; //20% više novca nego kod prethodnog
         }
         return (int) coins;
+    }
+
+    public Boss addUpgradedBoss (Boss oldBoss) {
+        Boss newBoss = new Boss();
+
+        int level = oldBoss.getLevel() + 1;
+        newBoss.setLevel(level);
+        int maxHP = calculateMaxHp(level);
+        newBoss.setMaxHp(maxHP);
+        newBoss.setCurrentHp(maxHP);
+        newBoss.setDefeated(false);
+
+        return add(newBoss);
     }
 
     public Boss update (Boss boss) {
