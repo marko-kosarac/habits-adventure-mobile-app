@@ -152,11 +152,13 @@ public class UserProfileFragment extends Fragment {
         for (Equipment eq : userEquipmentList) {
             View card = LayoutInflater.from(getContext()).inflate(R.layout.card_user_equipment, null);
             TextView name = card.findViewById(R.id.textEquipmentName);
+            TextView bonus = card.findViewById(R.id.textEquipmentBonus);
             TextView desc = card.findViewById(R.id.textEquipmentDescription);
             TextView quantity = card.findViewById(R.id.textEquipmentQuantity);
             Button activateButton = card.findViewById(R.id.buttonActivateEquipment);
 
             name.setText(eq.getName());
+            bonus.setText(eq.getBonus() + " PP");
             desc.setText(eq.getDescription());
             quantity.setText("Količina: " + eq.getQuantity());
 
