@@ -60,6 +60,7 @@ public class PrepareBattleAdapter extends RecyclerView.Adapter<PrepareBattleAdap
         Equipment eq = equipmentList.get(position);
 
         holder.name.setText(eq.getName());
+        holder.bonus.setText(eq.getBonus() + " PP");
         holder.desc.setText(eq.getDescription());
         holder.qty.setText("Preostalo: " + eq.getQuantity());
 
@@ -90,13 +91,14 @@ public class PrepareBattleAdapter extends RecyclerView.Adapter<PrepareBattleAdap
 
     static class ViewHolder extends RecyclerView.ViewHolder {
         ImageView icon;
-        TextView name, desc, qty;
+        TextView name, desc, qty, bonus;
         Button btnActivateEquipment;
 
         ViewHolder(View view) {
             super(view);
             icon = view.findViewById(R.id.ivIcon);
             name = view.findViewById(R.id.tvName);
+            bonus = view.findViewById(R.id.tvBonus);
             desc = view.findViewById(R.id.tvDescription);
             qty = view.findViewById(R.id.tvQuantity);
             btnActivateEquipment = view.findViewById(R.id.btnActivateEquipment);
