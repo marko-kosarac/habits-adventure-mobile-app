@@ -136,67 +136,58 @@ public class BattleFragment extends Fragment {
     }
 
     private void applyEquipmentEffects(List<Equipment> equipment) {
-        if (!isAdded() || binding == null) return;
-        if (equipment.isEmpty()) return;
+        if (!isAdded() || binding == null || equipment == null || equipment.isEmpty()) return;
 
-        double tempPP = PP;
+        double totalPPMultiplier = 1.0;
+        double totalAttackMultiplier = 1.0;
+        int totalBonusCoins = 0;
+        int totalBonusAttackChance = 0;
 
         for (Equipment eq : equipment) {
             switch (eq.getType()) {
                 case NAPITAK:
-                    tempPP = applyPotionEffect(eq, tempPP);
+                    totalPPMultiplier *= getPotionMultiplier(eq);
                     break;
+
                 case ORUZJE:
-                    tempPP = applyWeaponEffect(eq, tempPP);
+                    if (eq.getName().contains("Mač")) {
+                        totalPPMultiplier *= Math.pow(1.05, eq.getQuantity());  //jaci napad trajno TODO
+                    } else if (eq.getName().contains("Luk")) {
+                        totalBonusCoins += 5 * eq.getQuantity(); //novicic TODO
+                    }
                     break;
+
                 case ODECA:
-                    tempPP = applyArmorEffect(eq, tempPP);
+                    if (eq.getName().contains("Čizme")) {
+                        totalAttackMultiplier *= Math.pow(1.40, eq.getQuantity()); //vise napada TODO
+                    } else if (eq.getName().contains("Štit")) {
+                        totalBonusAttackChance += 10 * eq.getQuantity(); //success chance poveca TODO
+                    } else if (eq.getName().contains("Rukavice")) {
+                        totalPPMultiplier *= Math.pow(1.10, eq.getQuantity()); //jaci napad trajno TODO
+                    }
                     break;
             }
         }
 
-        PP = (int) Math.ceil(tempPP);
+        PP = (int) Math.ceil(PP * totalPPMultiplier);
+        numberOfAttacks = (int) Math.ceil(numberOfAttacks * totalAttackMultiplier);
+        bonusCoins += totalBonusCoins;
+        bonusAttackSuccessChance += totalBonusAttackChance;
+
         setupProgressBars();
     }
 
-    private double applyPotionEffect(Equipment eq, double tempPP) {
-        int qty = eq.getQuantity();
-        for (int i = 0; i < qty; i++) {
-            if (eq.getBonus().contains("+20%")) tempPP *= 1.20;
-            else if (eq.getBonus().contains("+40%")) tempPP *= 1.40;
-            else if (eq.getBonus().contains("+5%")) tempPP *= 1.05;
-            else if (eq.getBonus().contains("+10%")) tempPP *= 1.10;
-            else if (eq.getBonus().contains("+15%")) tempPP *= 1.15;
-            else if (eq.getBonus().contains("+8%")) tempPP *= 1.08;
-        }
-        return tempPP;
-    }
+    private double getPotionMultiplier(Equipment eq) {
+        double multiplier = 1.0;
 
-    private double applyWeaponEffect(Equipment eq, double tempPP) {
-        int qty = eq.getQuantity();
-        for (int i = 0; i < qty; i++) {
-            if (eq.getName().contains("Mač")) {
-                tempPP *= 1.05; //TODO trajno
-            } else if (eq.getName().contains("Luk")) {
-                bonusCoins += 5; //TODO provjeri
-            }
-        }
-        return tempPP;
-    }
+        if (eq.getBonus().contains("+20%")) multiplier = 1.20;
+        else if (eq.getBonus().contains("+40%")) multiplier = 1.40;
+        else if (eq.getBonus().contains("+5%")) multiplier = 1.05;
+        else if (eq.getBonus().contains("+10%")) multiplier = 1.10;
+        else if (eq.getBonus().contains("+15%")) multiplier = 1.15;
+        else if (eq.getBonus().contains("+8%")) multiplier = 1.08;
 
-    private double applyArmorEffect(Equipment eq, double tempPP) {
-        int qty = eq.getQuantity();
-        for (int i = 0; i < qty; i++) {
-            if (eq.getName().contains("Čizme")) {
-                numberOfAttacks *= 1.40;
-                numberOfAttacks = (int) Math.ceil(numberOfAttacks);//TODO Povećavaju broj napada
-            } else if (eq.getName().contains("Štit")) {
-                bonusAttackSuccessChance += 10;        //Povećava šansu uspešnog napada
-            } else if (eq.getName().contains("Rukavice")) {
-                tempPP *= 1.10;                        //TODO trajno Povećavaju snagu
-            }
-        }
-        return tempPP;
+        return Math.pow(multiplier, eq.getQuantity());
     }
 
     private User fetchUserDataFromFirebase() {
