@@ -51,7 +51,9 @@ public class ShopFragment extends Fragment {
         long count = android.database.DatabaseUtils.queryNumEntries(db, SQLiteHelper.TABLE_EQUIPMENT);
         db.close();
 
-        seedEquipment();
+        if(count == 0) {
+            seedEquipment();
+        }
 
         // Prvo učitaj nivo korisnika, pa tek onda listu opreme
         fetchUserLevel();

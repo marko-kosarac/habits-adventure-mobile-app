@@ -50,7 +50,7 @@ public class EquipmentListAdapter extends RecyclerView.Adapter<EquipmentListAdap
 
         holder.textName.setText(item.getName());
         holder.textDescription.setText(item.getDescription());
-        holder.textBonus.setText("Bonus: " + item.getBonus());
+        holder.textBonus.setText("Bonus: " + item.getBonus() + " snage");
         holder.textPrice.setText("Cena: " + item.getPrice());
 
         holder.buttonBuy.setOnClickListener(v -> {
