@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="24dp"
+    android:gravity="center"
+    android:backgroundTint="@color/white">
+
+    <TextView
+        android:id="@+id/tvResultTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Rezultat"
+        android:textSize="22sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="12dp"/>
+
+    <ImageView
+        android:id="@+id/ivClosedChest"
+        android:layout_width="200dp"
+        android:layout_height="200dp"
+        android:src="@drawable/chest_closed"
+        android:contentDescription="Treasure chest"/>
+
+    <ImageView
+        android:id="@+id/ivOpenedChest"
+        android:layout_width="200dp"
+        android:layout_height="200dp"
+        android:src="@drawable/chest_opened"
+        android:contentDescription="Treasure chest"
+        android:visibility="gone" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_horizontal">
+        <TextView
+            android:id="@+id/tvCoinsReward"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="30dp"
+            android:text="+ 0"
+            android:textSize="20sp"
+            android:textColor="@color/gold"
+            android:layout_marginTop="8dp"/>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+            <LinearLayout
+                android:id="@+id/equipmentContainer"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="8dp"
+                android:gravity="center"/>
+            <TextView
+                android:id="@+id/tvEquipmentNames"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Oprema"
+                android:textSize="16sp"
+                android:gravity="center"
+                android:layout_marginTop="6dp"
+                android:textColor="@android:color/black"/>
+        </LinearLayout>
+
+    </LinearLayout>
+
+</LinearLayout>
