@@ -143,7 +143,12 @@ public class BattleFragment extends Fragment {
 
         });
         setupRemainingAttacks();
+        setupCoinReward();
+    }
 
+    private void setupCoinReward () {
+        int coins = bossService.calculateCoins(boss.getLevel());
+        binding.tvCoinReward.setText("+ " + String.valueOf(coins));
     }
 
     private void applyEquipmentEffects(List<Equipment> equipment) {
@@ -350,7 +355,7 @@ public class BattleFragment extends Fragment {
                         double roundedLuck = Math.round(luck * 10.0) / 10.0; //npr 73.4%
 
                         if (Boolean.TRUE.equals(battle.hasUserWon())) {
-                            bonusCoins = 0;
+                            bonusCoins = 0; //TODO
                             Toast.makeText(getContext(), "Pobedio si, bravo! Sreća u napadu: " + roundedLuck + "%", Toast.LENGTH_LONG).show();
                             //ucitaj narednu borbu ako je ima
                             loadNextBattle(true, coins, equipment, luck);
@@ -388,11 +393,10 @@ public class BattleFragment extends Fragment {
                         double roundedLuck = Math.round(luck * 10.0) / 10.0; //npr 73.4%
 
                         if (Boolean.TRUE.equals(battle.hasUserWon())) {
-                            bonusCoins = 0;
+                            bonusCoins = 0; //TODO
                             Toast.makeText(getContext(), "Pobeda, bravo! Sreća u napadu: " + roundedLuck + "%", Toast.LENGTH_LONG).show();
                             //ucitaj narednu borbu ako je ima
                             loadNextBattle(true, coins, equipment, luck);
-                            //TODO if won, show him reward if equipment!=null, and coins !=0
                         } else if (numberOfAttacks >= 5 && !Boolean.TRUE.equals(battle.hasUserWon())) {
                             bonusCoins = 0;
                             Toast.makeText(getContext(), "Bos nije poražen. Sreća u napadu: " + roundedLuck + "%", Toast.LENGTH_LONG).show();
@@ -453,7 +457,7 @@ public class BattleFragment extends Fragment {
                 boss = bossService.getBossById(b.getBossId());
                 battle = b;
 
-                // reset stats for new boss
+                //resetuj fragment za novog boss-a
                 setupProgressBars();
                 setupRemainingAttacks();
                 setupAttackButton(battle, calculatedSuccessRate);
@@ -463,7 +467,7 @@ public class BattleFragment extends Fragment {
             }
         }
 
-        // if no more battles
+        //sve pobijedio
         Toast.makeText(getContext(), "Sve borbe su završene! Sjajan posao!", Toast.LENGTH_LONG).show();
     }
 
