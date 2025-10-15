@@ -497,6 +497,7 @@ public class UserProfileFragment extends Fragment {
                 .setMessage("Spreman/na za borbu sa bosom?")
                 .setPositiveButton("Kreni", (d, w) -> {
                     Bundle bundle = new Bundle();
+                    bundle.putInt("oldLevel", level - 1);
                     bundle.putParcelableArrayList("userEquipmentList", new ArrayList<>(userEquipmentList));
                     if (previousEtapa != null) bundle.putSerializable("previousEtapa", (Serializable) previousEtapa);
                     NavHostFragment.findNavController(this)

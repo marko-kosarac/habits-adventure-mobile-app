@@ -38,6 +38,7 @@ public class PrepareBattleFragment extends DialogFragment {
     private final List<Equipment> activeEquipment = new ArrayList<>();
     private final List<Equipment> unactiveEquipment = new ArrayList<>();
     private FirebaseFirestore db;
+    private int oldLevel = 1;
 
     @Nullable
     @Override
@@ -49,6 +50,8 @@ public class PrepareBattleFragment extends DialogFragment {
         if (userEquipment == null) userEquipment = new ArrayList<>();
 
         Map<String, Object> previousEtapa = (Map<String, Object>) getArguments().getSerializable("previousEtapa");
+
+        oldLevel = getArguments().getInt("oldLevel");
 
         for (Equipment e : userEquipment) {
             if (e.isActive()) {
@@ -119,6 +122,7 @@ public class PrepareBattleFragment extends DialogFragment {
             Bundle bundle = new Bundle();
             bundle.putSerializable("activeEquipmentList", new ArrayList<>(activeEquipment));
             if (previousEtapa != null) bundle.putSerializable("previousEtapa", (Serializable) previousEtapa);
+            bundle.putInt("oldLevel", oldLevel);
             Navigation.findNavController(requireView())
                     .navigate(R.id.action_prepareBattleFragment_to_battleFragment, bundle);
             dismiss();

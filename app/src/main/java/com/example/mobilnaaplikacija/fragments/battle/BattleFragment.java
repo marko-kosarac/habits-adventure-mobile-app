@@ -60,6 +60,7 @@ public class BattleFragment extends Fragment {
     private int bonusCoins = 0, bonusAttack = 0, bonusAttackSuccessChance = 0;
     private List<Equipment> activeEquipment;
     private Map<String, Object> previousEtapa;
+    private int oldLevel = 1;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -79,6 +80,16 @@ public class BattleFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         previousEtapa = (Map<String, Object>) getArguments().getSerializable("previousEtapa");
+
+        oldLevel = getArguments().getInt("oldLevel");
+
+        PP = 20; //prvi nivo
+        if (oldLevel > 1) {
+            PP = 40; //nakon prvog nivoa
+            for (int i = 2; i < oldLevel; i++) {
+                PP = PP + (PP * 3 / 4);
+            }
+        }
 
         firebaseUser = userService.getCurrentUser();
         battle = battleService.startOrGetBattle(firebaseUser);
@@ -144,18 +155,21 @@ public class BattleFragment extends Fragment {
     }
 
     private void applyPotionEffect(Equipment eq) {
-        if (eq.getName().contains("PP +20%")) {
-            PP *= 1.20;
-        } else if (eq.getName().contains("PP +40%")) {
-            PP *= 1.40;
-        } else if (eq.getName().contains("PP +15%")) {
-            PP *= 1.15;
-        } else if (eq.getName().contains("Snage +5%")) {
-            PP *= 1.05; //TODO trajno
-        } else if (eq.getName().contains("Snage +8%")) {
-            PP *= 1.08; //TODO trajno
-        } else if (eq.getName().contains("Snage +10%")) {
-            PP *= 1.10; //TODO trajno
+        int qty = eq.getQuantity();
+        for (int i=0; i<qty; i++) {
+            if (eq.getBonus().contains("+20%")) {
+                PP *= 1.20;
+            } else if (eq.getBonus().contains("+40%")) {
+                PP *= 1.40;
+            } else if (eq.getBonus().contains("+5%")) {
+                PP *= 1.05; //TODO trajno
+            } else if (eq.getBonus().contains("+10%")) {
+                PP *= 1.10; //TODO trajno
+            } else if (eq.getBonus().contains("+15%")) {
+                PP *= 1.15;
+            } else if (eq.getBonus().contains("+8%")) {
+                PP *= 1.08; //TODO trajno
+            }
         }
     }
 
@@ -169,13 +183,11 @@ public class BattleFragment extends Fragment {
 
     private void applyArmorEffect(Equipment eq) {
         if (eq.getName().contains("Čizme")) {
-            if (Math.random() < 0.4) {
-                bonusAttack += 1; //TODO poveca se numberOfAttacks za 1 ili za 40%?
-            }
+            bonusAttack *= 1.40; //TODO numberOfAttacks Povećavaju broj napada
         } else if (eq.getName().contains("Štit")) {
-            bonusAttackSuccessChance += 10; //poveca se successRate
+            bonusAttackSuccessChance += 10; //Povećava šansu uspešnog napada
         } else if (eq.getName().contains("Rukavice")) {
-            PP *= 1.10; //TODO trajno? +10% snage
+            PP *= 1.10; //TODO trajno Povećavaju snagu
         }
     }
 
@@ -186,16 +198,16 @@ public class BattleFragment extends Fragment {
 
             if (doc.exists()) {
                 int xp = doc.getLong("experiencePoints") != null ? doc.getLong("experiencePoints").intValue() : 0;
-                PP = doc.getLong("powerPoints") != null ? doc.getLong("powerPoints").intValue() : 0;
+                //PP = doc.getLong("powerPoints") != null ? doc.getLong("powerPoints").intValue() : 0;
                 long coins = doc.getLong("coins") != null ? doc.getLong("coins") : 0;
-                int level = doc.getLong("level") != null ? doc.getLong("level").intValue() : 1;
+                //int level = doc.getLong("level") != null ? doc.getLong("level").intValue() : 1;
                 String title = doc.getString("title");
                 User user = new User();
-                user.setExperiencePoints(xp);
+                //user.setExperiencePoints(xp);
                 //currentUser.setCoins();
                 //currentUser.setEquipment();
-                user.setPowerPoints(PP);
-                user.setLevel(level);
+                //user.setPowerPoints(PP);
+                //user.setLevel(level);
 
                 setupProgressBars();
                 setupEquipment();
@@ -372,7 +384,7 @@ public class BattleFragment extends Fragment {
                             //TODO if won, show him reward if equipment!=null, and coins !=0
                         } else if (numberOfAttacks >= 5 && !battle.hasUserWon()) {
                             bonusCoins = 0;
-                            Toast.makeText(getContext(), "Više sreće drugi put, bos nije poražen.\nSreća u poslednjem napadu: " + roundedLuck + "%", Toast.LENGTH_LONG).show();
+                            Toast.makeText(getContext(), "Bos nije poražen. Sreća u napadu: " + roundedLuck + "%", Toast.LENGTH_LONG).show();
                             //goToFinishedBattleScreen(equipment, coins);
                             //show rewards if any
                         } else
