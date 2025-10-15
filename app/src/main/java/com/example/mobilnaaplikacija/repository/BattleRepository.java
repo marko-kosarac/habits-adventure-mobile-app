@@ -60,17 +60,17 @@ public class BattleRepository {
 
         Cursor cursor = null;
         try {
-            cursor = db.query(SQLiteHelper.TABLE_BATTLES,null, "userId = ?", new String[]{ userId }, null, null, null);
+            cursor = db.query(SQLiteHelper.TABLE_BATTLES,null, SQLiteHelper.COLUMN_BATTLE_USER_ID + " = ?", new String[]{ userId }, null, null, null);
             if (cursor != null && cursor.moveToFirst()) {
                 do {
                     Battle battle = new Battle();
-                    battle.setId(cursor.getString(cursor.getColumnIndexOrThrow("id")));
-                    battle.setUserId(cursor.getString(cursor.getColumnIndexOrThrow("userId")));
-                    battle.setBossId(cursor.getString(cursor.getColumnIndexOrThrow("bossId")));
-                    battle.setCoinsEarned(cursor.getInt(cursor.getColumnIndexOrThrow("coinsEarned")));
+                    battle.setId(cursor.getString(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_BATTLE_ID)));
+                    battle.setUserId(cursor.getString(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_BATTLE_USER_ID)));
+                    battle.setBossId(cursor.getString(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_BATTLE_BOSS_ID)));
+                    battle.setCoinsEarned(cursor.getInt(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_BATTLE_COINS_EARNED)));
 
-                    if (!cursor.isNull(cursor.getColumnIndexOrThrow("userWon"))) {
-                        battle.setUserWon(cursor.getInt(cursor.getColumnIndexOrThrow("userWon")) == 1);
+                    if (!cursor.isNull(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_BATTLE_USER_WON))) {
+                        battle.setUserWon(cursor.getInt(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_BATTLE_USER_WON)) == 1);
                     } else {
                         battle.setUserWon(null);
                     }

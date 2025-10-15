@@ -29,7 +29,7 @@ public class AttackRepository {
             do {
                 Attack attack = new Attack();
                 attack.setId(cursor.getString(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_ATTACK_ID)));
-                attack.setUserId(cursor.getString(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_USER_ID)));
+                attack.setUserId(cursor.getString(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_ATTACK_USER_ID)));
                 attack.setBossId(cursor.getString(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_ATTACK_BOSS_ID)));
                 attack.setHit(cursor.getInt(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_ATTACK_HIT)) == 1);
                 attack.setDamageDealt(cursor.getInt(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_ATTACK_DAMAGE_DEALT)));

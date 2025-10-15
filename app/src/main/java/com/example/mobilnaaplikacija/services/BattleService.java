@@ -1,7 +1,6 @@
 package com.example.mobilnaaplikacija.services;
 
 import android.content.Context;
-import android.media.audiofx.DynamicsProcessing;
 import android.util.Log;
 
 import com.example.mobilnaaplikacija.database.SQLiteHelper;
@@ -10,20 +9,16 @@ import com.example.mobilnaaplikacija.model.Battle;
 import com.example.mobilnaaplikacija.model.Boss;
 import com.example.mobilnaaplikacija.model.Equipment;
 import com.example.mobilnaaplikacija.repository.BattleRepository;
-import com.google.firebase.Firebase;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.firestore.DocumentReference;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
 
 public class BattleService {
     private BattleRepository battleRepository;
     private BossService bossService;
     private UserService userService;
     private AttackService attackService;
-    private TaskService taskService;
     private EquipmentService equipmentService;
 
     public BattleService(Context context) {
@@ -31,33 +26,55 @@ public class BattleService {
         this.bossService = new BossService(context);
         this.userService = new UserService();
         this.attackService = new AttackService(context);
-        this.taskService = new TaskService(context);
         this.equipmentService = new EquipmentService(context);
     }
 
-    public Battle startOrGetBattle(FirebaseUser user) {
-        Battle battle = battleRepository.getBattleByUser(user.getUid());
-        if (battle != null) {
-            battle.setAttacks(attackService.getAttacksByUserAndBoss(battle.getUserId(), battle.getBossId()));
-            return battle;
+    public List<Battle> startOrGetBattle(FirebaseUser user) {
+        List<Battle> battles = battleRepository.getBattlesByUser(user.getUid());
+
+        if(battles.isEmpty()) {
+            //prvi boss
+            Boss boss = new Boss();
+            boss.setMaxHp(200);
+            boss.setCurrentHp(200);
+            boss.setLevel(1);
+            boss.setDefeated(false);
+            bossService.add(boss);
+
+            //prva borba
+            Battle battle = new Battle();
+            battle.setUserId(user.getUid());
+            battle.setBossId(boss.getId());
+            battle.setAttacks(new ArrayList<>());
+            battle.setUserWon(null);
+            battle.setCoinsEarned(0);
+            battleRepository.add(battle);
+
+            battles.add(battle);
+            return battles;
         }
 
-        //prvi boss
-        Boss boss = new Boss();
-        boss.setMaxHp(200);
-        boss.setCurrentHp(200);
-        boss.setLevel(1);
-        boss.setDefeated(false);
-        bossService.add(boss);
-        //prva borba
-        battle = new Battle();
-        battle.setUserId(user.getUid());
-        battle.setBossId(boss.getId());
-        battle.setAttacks(new ArrayList<>());
-        battle.setUserWon(false);
-        battle.setCoinsEarned(0);
-        battleRepository.add(battle);
-        return battle;
+        List<Battle> battlesToWin = new ArrayList<>();
+        for (Battle existing : battles) {
+            Boss boss = bossService.getBossById(existing.getBossId());
+            if (!Boolean.TRUE.equals(existing.hasUserWon()) && boss.getCurrentHp() > 0) {
+                //slucajno izasao iz borbe - nastavi gdje je stao ili...
+                List<Attack> attacks = attackService.getAttacksByUserAndBoss(user.getUid(), boss.getId());
+                //...ima >5 (bonus) napada - friska attack lista
+                if (attacks.size() >= 5) {
+                    //obrisi prethodne napade iz attacks
+                    for (Attack a : attacks) {
+                        attackService.deleteById(a.getId());
+                    }
+                    attacks = new ArrayList<>();
+                }
+                existing.setAttacks(attacks);
+
+                battlesToWin.add(existing);
+            }
+        }
+
+       return battlesToWin;
     }
 
     public interface OnBattleCompleted {
@@ -71,17 +88,15 @@ public class BattleService {
             return;
         }
 
-        final AtomicReference<Battle> battleRef = new AtomicReference<>(battle);
         String userId = user.getUid();
 
         if (boss == null) {
             callback.onError("Bos nije pronađen.");
             return;
         }
-        final AtomicReference<Boss> bossRef = new AtomicReference<>(boss);
 
         //success rate napada
-        boolean hit = luck * 100 < successRate;
+        boolean hit = luck <= successRate;
         Attack attack = new Attack();
         attack.setUserId(userId);
         attack.setBossId(boss.getId());
@@ -94,17 +109,36 @@ public class BattleService {
         attacks.add(attack);
         attackService.add(attack);
 
-        if (bossRef.get().isDefeated()) { //TODO Nakon 5 napada, ukoliko je bos poražen, uslov nakon 5 napada?
-            //boss porazen
+        if (boss.isDefeated()) { //TODO Nakon 5 napada, ukoliko je bos poražen, uslov nakon 5 napada?
+            //boss porazen i dodan novi
+            Boss newBoss = bossService.addUpgradedBoss(boss);
+
+            //naredna borba spremna
+            Battle newBattle = new Battle();
+            newBattle.setUserId(userId);
+            newBattle.setBossId(newBoss.getId());
+            newBattle.setCoinsEarned(0);
+            newBattle.setUserWon(null);
+            battleRepository.add(newBattle);
+
             handleVictory(userId, boss, battle, attacks, bonusCoins, callback);
-        } else if (attacks.size() >= 5) {
-            //boss neporazen, ali je 5x napao
-            handleDefeat(userId, boss, battleRef.get(), attacks, bonusCoins, callback);
+        } else if (!boss.isDefeated() && attacks.size() >= 5) {
+            //boss neporazen, dodan novi
+            Boss newBoss = bossService.addUpgradedBoss(boss);
+
+            //naredna borba spremna
+            Battle newBattle = new Battle();
+            newBattle.setUserId(userId);
+            newBattle.setBossId(newBoss.getId());
+            newBattle.setCoinsEarned(0);
+            newBattle.setUserWon(null);
+            battleRepository.add(newBattle);
+
+            handleDefeat(userId, boss, battle, attacks, bonusCoins, callback);
+        } else {
+            updateBattleAndBoss(battle, null, boss, userId, 0, attacks); //TODO update?
+            callback.onBattleFinished(battle, null, 0);
         }
-
-        updateBattleAndBoss(battle, false, boss, userId, 0, attacks); //TODO update?
-        callback.onBattleFinished(battleRef.get(), null, 0);
-
     }
 
     private void handleVictory(String userId, Boss boss, Battle battle, List<Attack> attacks, int bonusCoins, OnBattleCompleted callback) {
@@ -150,11 +184,14 @@ public class BattleService {
             equipment = equipmentService.getEquipmentReward(userId, chance);
         } else coins = 0;
 
-        updateBattleAndBoss(battle, false, boss, userId, coins, attacks);
+        //reset boss HP
+        boss.setCurrentHp(bossService.calculateMaxHp(boss.getLevel()));
+
+        updateBattleAndBoss(battle, null, boss, userId, coins, attacks);
         callback.onBattleFinished(battle, equipment, coins);
     }
 
-    private void updateBattleAndBoss (Battle battle, boolean win, Boss boss, String userId, int coins, List<Attack> attacks) {
+    private void updateBattleAndBoss (Battle battle, Boolean win, Boss boss, String userId, int coins, List<Attack> attacks) {
         battle.setUserId(userId);
         battle.setBossId(boss.getId());
         battle.setAttacks(attacks);

@@ -47,8 +47,9 @@ public class BattleFragment extends Fragment {
     private AnimationDrawable idleAnimation, hitAnimation;
     private FirebaseFirestore db;
     private FirebaseUser firebaseUser;
-    private Battle battle;
+    private List<Battle> battles;
     private Boss boss;
+    private Battle battle;
     private UserService userService;
     private BossService bossService;
     private BattleService battleService;
@@ -82,7 +83,6 @@ public class BattleFragment extends Fragment {
         previousEtapa = (Map<String, Object>) getArguments().getSerializable("previousEtapa");
 
         oldLevel = getArguments().getInt("oldLevel");
-
         PP = 20; //prvi nivo
         if (oldLevel > 1) {
             PP = 40; //nakon prvog nivoa
@@ -92,8 +92,14 @@ public class BattleFragment extends Fragment {
         }
 
         firebaseUser = userService.getCurrentUser();
-        battle = battleService.startOrGetBattle(firebaseUser);
-        boss = bossService.getBossById(battle.getBossId());
+
+        battles = battleService.startOrGetBattle(firebaseUser);
+        //TODO for loop battles expose each boss in fight
+        for (Battle b : battles) {
+            //TODO expose each boss in fight in order
+            boss = bossService.getBossById(b.getBossId());
+            battle = b;
+        }
         fetchUserDataFromFirebase();
 
         setupAnimations(view);
@@ -126,6 +132,7 @@ public class BattleFragment extends Fragment {
 
         });
         setupRemainingAttacks();
+
     }
 
     private void applyEquipmentEffects(List<Equipment> equipment) {
