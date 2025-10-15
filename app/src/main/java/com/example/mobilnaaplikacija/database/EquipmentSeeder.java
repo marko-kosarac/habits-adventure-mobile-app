@@ -26,7 +26,7 @@ public class EquipmentSeeder {
         insertEquipment(db, new Equipment(0, "Merlinov napitak", "Napitak za trajno povećavanje snage", Equipment.Type.NAPITAK, "+5%", -1, 200));
         insertEquipment(db, new Equipment(0, "Gargamelov zub", "Napitak za trajno povećavanje snage", Equipment.Type.NAPITAK, "+10%", -1, 1000));
         insertEquipment(db, new Equipment(0, "Moćni miks", "Jednokratni napitak koji povećava snagu", Equipment.Type.NAPITAK, "+15%", 0, 40));
-        insertEquipment(db, new Equipment(0, "Napitak Snage +8%", "Napitak za trajno povećavanje snage", Equipment.Type.NAPITAK, "+8%", -1, 300));
+        insertEquipment(db, new Equipment(0, "Čarobni nektar", "Napitak za trajno povećavanje snage", Equipment.Type.NAPITAK, "+8%", -1, 300));
 
 // Odeća
         insertEquipment(db, new Equipment(0, "Rukavice", "Povećavaju snagu", Equipment.Type.ODECA, "+10%", -1, 60));
