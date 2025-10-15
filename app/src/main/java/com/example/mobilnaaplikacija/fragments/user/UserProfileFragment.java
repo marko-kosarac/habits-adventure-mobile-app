@@ -271,7 +271,6 @@ public class UserProfileFragment extends Fragment {
         long level = document.getLong("level") != null ? document.getLong("level") : 1;
         String title = document.getString("title");
         Long avatarId = document.getLong("avatarId");
-        String email = document.getString("email");
 
         textUsername.setText(username);
         textLevelTitle.setText("Level " + level + " - " + (title != null ? title : "Početnik"));

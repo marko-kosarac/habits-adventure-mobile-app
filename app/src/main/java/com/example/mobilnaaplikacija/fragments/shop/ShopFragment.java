@@ -17,6 +17,10 @@ import com.example.mobilnaaplikacija.adapters.EquipmentListAdapter;
 import com.example.mobilnaaplikacija.database.EquipmentSeeder;
 import com.example.mobilnaaplikacija.database.SQLiteHelper;
 import com.example.mobilnaaplikacija.model.Equipment;
+import com.example.mobilnaaplikacija.utils.PriceCalculator;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
 
@@ -24,6 +28,9 @@ public class ShopFragment extends Fragment {
 
     private RecyclerView recyclerView;
     private EquipmentListAdapter adapter;
+    private FirebaseFirestore firestore;
+
+    private int currentUserLevel = 1;
 
     public ShopFragment() { }
 
@@ -36,6 +43,8 @@ public class ShopFragment extends Fragment {
         recyclerView = view.findViewById(R.id.recyclerViewEquipment);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
+        firestore = FirebaseFirestore.getInstance();
+
         // Seedovanje baze ako je prazna
         SQLiteHelper dbHelper = new SQLiteHelper(getContext());
         SQLiteDatabase db = dbHelper.getReadableDatabase();
@@ -46,28 +55,36 @@ public class ShopFragment extends Fragment {
             seedEquipment();
         }
 
-        // Povlačenje opreme iz baze
-        ArrayList<Equipment> equipmentList = getAllEquipment();
-
-        // Postavljanje adaptera
-        adapter = new EquipmentListAdapter(getContext(), equipmentList);
-        recyclerView.setAdapter(adapter);
+        // Prvo učitaj nivo korisnika, pa tek onda listu opreme
+        fetchUserLevel();
 
         return view;
     }
 
-    // Seedovanje baze sa nekoliko stavki
+    private void fetchUserLevel() {
+        String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        DocumentReference userRef = firestore.collection("users").document(userId);
+
+        userRef.get().addOnSuccessListener(documentSnapshot -> {
+            if (documentSnapshot.exists()) {
+                Long levelValue = documentSnapshot.getLong("level");
+                if (levelValue != null) currentUserLevel = levelValue.intValue();
+            }
+            // Tek sada učitaj opremu sa pravim nivoom
+            loadEquipmentList();
+        }).addOnFailureListener(e -> loadEquipmentList());
+    }
+
     private void seedEquipment() {
         SQLiteHelper dbHelper = new SQLiteHelper(getContext());
         SQLiteDatabase db = dbHelper.getWritableDatabase();
 
         EquipmentSeeder seeder = new EquipmentSeeder(getContext(), db);
-        seeder.seedData(); // ovde ubacuje 2-3 stavke
+        seeder.seedData(); // ubacuje stavke
         db.close();
     }
 
-    // Povlačenje svih stavki iz baze
-    private ArrayList<Equipment> getAllEquipment() {
+    private void loadEquipmentList() {
         ArrayList<Equipment> equipmentList = new ArrayList<>();
         SQLiteHelper dbHelper = new SQLiteHelper(getContext());
         SQLiteDatabase db = dbHelper.getReadableDatabase();
@@ -78,8 +95,7 @@ public class ShopFragment extends Fragment {
                 SQLiteHelper.COLUMN_DESCRIPTION,
                 SQLiteHelper.COLUMN_TYPE,
                 SQLiteHelper.COLUMN_BONUS,
-                SQLiteHelper.COLUMN_DURATION,
-                SQLiteHelper.COLUMN_PRICE
+                SQLiteHelper.COLUMN_DURATION
         };
 
         try (android.database.Cursor cursor = db.query(
@@ -91,17 +107,24 @@ public class ShopFragment extends Fragment {
                 long id = cursor.getLong(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_ID));
                 String name = cursor.getString(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_NAME));
                 String description = cursor.getString(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_DESCRIPTION));
-                String typeStr = cursor.getString(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_TYPE));
+                Equipment.Type type = Equipment.Type.valueOf(cursor.getString(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_TYPE)));
                 String bonus = cursor.getString(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_BONUS));
                 int duration = cursor.getInt(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_DURATION));
-                int price = cursor.getInt(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_PRICE));
 
-                Equipment.Type type = Equipment.Type.valueOf(typeStr);
+                // Dinamičko računanje cene na osnovu nivoa korisnika
+                int price = PriceCalculator.calculatePrice(currentUserLevel, type, bonus);
+
                 equipmentList.add(new Equipment(id, name, description, type, bonus, duration, price));
             }
         }
 
         db.close();
-        return equipmentList;
+
+        if (adapter == null) {
+            adapter = new EquipmentListAdapter(getContext(), equipmentList);
+            recyclerView.setAdapter(adapter);
+        } else {
+            adapter.updateList(equipmentList); // metoda u adapteru za osvežavanje liste
+        }
     }
 }

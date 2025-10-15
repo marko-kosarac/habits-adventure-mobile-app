@@ -40,6 +40,16 @@
             android:maxLines="2"
             android:ellipsize="end"/>
 
+
+        <TextView
+            android:id="@+id/shop_item_bonus"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Bonus:"
+            android:textSize="16sp"
+            android:textColor="@color/black"
+            android:layout_marginTop="6dp"
+            android:textStyle="bold"/>
         <!-- Cena opreme -->
         <TextView
             android:id="@+id/shop_item_price"
@@ -50,6 +60,7 @@
             android:textColor="@color/colorAccent"
             android:layout_marginTop="6dp"
             android:textStyle="bold"/>
+
 
         <!-- LinearLayout za količinu i dugme -->
         <LinearLayout

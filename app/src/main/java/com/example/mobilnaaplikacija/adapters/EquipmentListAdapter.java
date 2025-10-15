@@ -50,6 +50,7 @@ public class EquipmentListAdapter extends RecyclerView.Adapter<EquipmentListAdap
 
         holder.textName.setText(item.getName());
         holder.textDescription.setText(item.getDescription());
+        holder.textBonus.setText("Bonus: " + item.getBonus() + " snage");
         holder.textPrice.setText("Cena: " + item.getPrice());
 
         holder.buttonBuy.setOnClickListener(v -> {
@@ -129,6 +130,12 @@ public class EquipmentListAdapter extends RecyclerView.Adapter<EquipmentListAdap
         });
     }
 
+    public void updateList(ArrayList<Equipment> newList) {
+        shopItems.clear();
+        shopItems.addAll(newList);
+        notifyDataSetChanged();
+    }
+
 
 
     @Override
@@ -137,7 +144,7 @@ public class EquipmentListAdapter extends RecyclerView.Adapter<EquipmentListAdap
     }
 
     public static class ShopViewHolder extends RecyclerView.ViewHolder {
-        TextView textName, textDescription, textPrice;
+        TextView textName, textDescription, textPrice, textBonus;
         EditText editQuantity;
         Button buttonBuy;
 
@@ -147,6 +154,7 @@ public class EquipmentListAdapter extends RecyclerView.Adapter<EquipmentListAdap
             textDescription = itemView.findViewById(R.id.shop_item_description);
             textPrice = itemView.findViewById(R.id.shop_item_price);
             editQuantity = itemView.findViewById(R.id.shop_item_quantity);
+            textBonus = itemView.findViewById(R.id.shop_item_bonus);
             buttonBuy = itemView.findViewById(R.id.shop_item_buy);
             editQuantity.setInputType(InputType.TYPE_CLASS_NUMBER);
 
