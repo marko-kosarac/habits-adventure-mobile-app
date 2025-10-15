@@ -21,7 +21,8 @@ public class EquipmentService {
     }
 
     public Equipment getEquipmentReward(String userId, double totalChance) {
-        double roll = Math.random();
+        //double roll = Math.random();
+        double roll = 0; //TODO FIX LATER
         if (roll > totalChance) {
             Log.d("Nagrada", "Nema nagrade u vidu opreme.");
             return null;
@@ -31,11 +32,11 @@ public class EquipmentService {
         Equipment.Type rewardType = typeRoll <= 0.95 ? Equipment.Type.ODECA : Equipment.Type.ORUZJE;
 
         ArrayList<Equipment> allEquipment = equipmentRepository.getAllEquipment();
-        allEquipment.add(new Equipment(0, "Mač snage", "Trajno povećava snagu za 5%",
-                Equipment.Type.ORUZJE, "+5% Snage", -1, 500));
+        allEquipment.add(new Equipment(0, "Čelični mač", "Trajno povećava snagu za 5%",
+                Equipment.Type.ORUZJE, "+5%", -1, 500));
         allEquipment.add(new Equipment(0, "Luk i strela",
                 "Trajno povećava procenat dobijenog novca za 5%",
-                Equipment.Type.ORUZJE, "+5% Novca", -1, 700));
+                Equipment.Type.ORUZJE, "+5%", -1, 700));
 
         List<Equipment> filtered = allEquipment.stream()
                 .filter(eq -> eq.getType() == rewardType)
