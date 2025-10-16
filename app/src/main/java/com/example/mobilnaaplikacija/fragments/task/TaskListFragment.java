@@ -127,6 +127,9 @@ public class TaskListFragment extends Fragment implements RecyclerViewInterface 
         if (tasks.isEmpty() && isListTab) {
             binding.tvNoTasks.setVisibility(View.VISIBLE);
             binding.ivNoTasks.setVisibility(View.VISIBLE);
+        } else {
+            binding.tvNoTasks.setVisibility(View.GONE);
+            binding.ivNoTasks.setVisibility(View.GONE);
         }
 
         //Mijenjanje lista-kalendar
@@ -144,6 +147,9 @@ public class TaskListFragment extends Fragment implements RecyclerViewInterface 
                     if (tasks.isEmpty() && isListTab) {
                         binding.tvNoTasks.setVisibility(View.VISIBLE);
                         binding.ivNoTasks.setVisibility(View.VISIBLE);
+                    }else {
+                        binding.tvNoTasks.setVisibility(View.GONE);
+                        binding.ivNoTasks.setVisibility(View.GONE);
                     }
                 } else {
                     isListTab = false;
@@ -230,6 +236,14 @@ public class TaskListFragment extends Fragment implements RecyclerViewInterface 
     }
 
     private ArrayList<Task> applyFilters () {
+        if (tasks.isEmpty() && isListTab) {
+            binding.tvNoTasks.setVisibility(View.VISIBLE);
+            binding.ivNoTasks.setVisibility(View.VISIBLE);
+        } else {
+            binding.tvNoTasks.setVisibility(View.GONE);
+            binding.ivNoTasks.setVisibility(View.GONE);
+        }
+
         FirebaseUser user = userService.getCurrentUser();
         if(user == null) {
             return tasks;

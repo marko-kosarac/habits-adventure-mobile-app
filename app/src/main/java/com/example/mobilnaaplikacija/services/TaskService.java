@@ -321,7 +321,7 @@ public class TaskService {
     public Task autoUpdateStatus(Task task) {
         long now = System.currentTimeMillis();
         long threeDaysMills = 3L * 24 * 60 * 60 * 1000;
-        if (now - threeDaysMills > task.getEndMillis()) {
+        if (now - threeDaysMills > task.getEndMillis() && task.getStatus() != StatusType.URAĐEN && task.getStatus() != StatusType.OTKAZAN) {
             task.setStatus(StatusType.NEURAĐEN);
             task.setStatusTimestamp(System.currentTimeMillis());
             taskRepository.update(task);
