@@ -125,7 +125,7 @@ public class TaskService {
                 taskOccurrence.setDifficulty(task.getDifficulty());
                 taskOccurrence.setImportance(task.getImportance());
                 taskOccurrence.setStatus(task.getStatus());
-                taskOccurrence.setCreatedAtLevel(task.getCreatedAtLevel());
+                taskOccurrence.setStatusTimestamp(task.getStatusTimestamp());
                 taskOccurrence.setQuotaReached(task.isQuotaReached());
 
                 taskRepository.add(taskOccurrence);
@@ -138,6 +138,7 @@ public class TaskService {
     }
 
     public Task update(Task task) {
+        if (task.getStatus() == StatusType.URAĐEN) task.setStatusTimestamp(System.currentTimeMillis());
         return taskRepository.update(task);
     }
 
@@ -233,7 +234,7 @@ public class TaskService {
                 taskOccurrence.setDifficulty(task.getDifficulty());
                 taskOccurrence.setImportance(task.getImportance());
                 taskOccurrence.setStatus(task.getStatus());
-                taskOccurrence.setCreatedAtLevel(task.getCreatedAtLevel());
+                taskOccurrence.setStatusTimestamp(task.getStatusTimestamp()); //TODO ostaje isto?
                 taskOccurrence.setQuotaReached(task.isQuotaReached());
 
                 taskRepository.add(taskOccurrence);
@@ -321,6 +322,7 @@ public class TaskService {
         long threeDaysMills = 3L * 24 * 60 * 60 * 1000;
         if (now - threeDaysMills > task.getEndMillis()) {
             task.setStatus(StatusType.NEURAĐEN);
+            task.setStatusTimestamp(System.currentTimeMillis());
             taskRepository.update(task);
         }
         return task;
@@ -765,58 +767,25 @@ public class TaskService {
         void OnCalculated(double successRate);
     }
 
-    public double getSuccessRate(String userId, Map<String, Object> etapa, OnSuccessRateCalculated callback) {
-        userService.getUserLevel(userId, new UserService.OnLevelRetrievedCallback() {
-            @Override
-            public void onSuccess(int level) {
-                List<Task> tasksByUser = getTasksByUser(userId);
-                List<Task> validTasks = getTasksForSuccessRate(tasksByUser, etapa); //bez otkazanih, pauziranih, dostinugita kvota
-                List<Task> doneTasks = getDoneTasks(validTasks);
+    public void getSuccessRate(String userId, Map<String, Object> etapa, OnSuccessRateCalculated callback) {
+        try {
+            Long etapaStart = (etapa.get("start") instanceof Long)
+                    ? (Long) etapa.get("start")
+                    : ((Number) etapa.get("start")).longValue();
 
-                double successRate = calculateSuccessRate(doneTasks, validTasks);
-                callback.OnCalculated(successRate);
-            }
+            Long etapaEnd = (etapa.get("end") instanceof Long)
+                    ? (Long) etapa.get("end")
+                    : ((Number) etapa.get("end")).longValue();
 
-            @Override
-            public void onFailure(String errorMessage) {
-                callback.OnCalculated(0.0);
-            }
-        });
-        return 0;
-    }
+            List<Task> tasks = taskRepository.getTasksForEtapa(userId, etapaStart, etapaEnd);
+            List<Task> doneTasks = getDoneTasks(tasks);
+            double successRate = calculateSuccessRate(doneTasks, tasks);
 
-    public List<Task> getTasksForSuccessRate(List<Task> tasks, Map<String, Object> etapa) {
-        List<Task> valid = new ArrayList<>();
-        if (tasks == null || etapa == null) return valid;
-
-        long start = 0L;
-        long end = System.currentTimeMillis();
-
-        if (etapa.get("start") instanceof Long) {
-            start = (Long) etapa.get("start");
-        } else if (etapa.get("start") instanceof Timestamp) {
-            start = ((Timestamp) etapa.get("start")).toDate().getTime();
+            callback.OnCalculated(successRate);
+        } catch (Exception e) {
+            e.printStackTrace();
+            callback.OnCalculated(0.0);
         }
-
-        if (etapa.get("end") instanceof Long) {
-            end = (Long) etapa.get("end");
-        } else if (etapa.get("end") instanceof Timestamp) {
-            end = ((Timestamp) etapa.get("end")).toDate().getTime();
-        }
-
-        for (Task t : tasks) {
-            boolean withinEtapa = t.getStartMillis() <= end &&
-                    start <= t.getEndMillis() &&
-                    t.getEndMillis() <= end;
-
-            if (withinEtapa &&
-                    t.getStatus() != StatusType.PAUZIRAN &&
-                    t.getStatus() != StatusType.OTKAZAN &&
-                    !t.isQuotaReached()) {
-                valid.add(t);
-            }
-        }
-        return valid;
     }
 
     public List<Task> getDoneTasks(List<Task> tasks) {

@@ -449,6 +449,7 @@ public class AddEditTaskFragment extends DialogFragment {
             } else {
                 task.setUserId(userService.getCurrentUser().getUid());
                 task.setQuotaReached(false);
+                task.setStatusTimestamp(System.currentTimeMillis()); //timestamp kreacije zadatka
             }
             if(isOneTime && !isEditing){
                 task.setTaskId(UUID.randomUUID().toString());
@@ -474,21 +475,7 @@ public class AddEditTaskFragment extends DialogFragment {
                 task.setUnit((UnitType) binding.spinnerRecurringUnit.getSelectedItem());
                 task.setInterval(Integer.parseInt(recurringNumber));
             }
-            userService.getUserLevel(task.getUserId(), new UserService.OnLevelRetrievedCallback() {
-                @Override
-                public void onSuccess(int level) {
-                    Log.d("UserLevel", "Trenutni level korisnika: " + level);
-                    task.setCreatedAtLevel(level);
-                    save(task);
-                }
-
-                @Override
-                public void onFailure(String errorMessage) {
-                    Log.e("UserLevel", "Greška: " + errorMessage);
-                    task.setCreatedAtLevel(1);
-                    save(task);
-                }
-            });
+            save(task);
         });
     }
 
@@ -505,16 +492,12 @@ public class AddEditTaskFragment extends DialogFragment {
                                 updateStartEndMillis(task);
                                 List<Task> list = taskService.updateFutureOccurrences(task);
                                 if (!list.isEmpty()) {
-                                    Toast.makeText(requireContext(),
-                                            "Zadatak izmenjen!",
-                                            Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(requireContext(), "Zadatak izmenjen!", Toast.LENGTH_SHORT).show();
                                     sendBackToTaskList(task);
                                     updateStreak();
                                     dismiss();
                                 } else {
-                                    Toast.makeText(requireContext(),
-                                            "Greška pri izmeni zadatka!",
-                                            Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(requireContext(), "Greška pri izmeni zadatka!", Toast.LENGTH_SHORT).show();
                                 }
                             })
                             .setNegativeButton("Ne", (dialog, which) -> dialog.dismiss())

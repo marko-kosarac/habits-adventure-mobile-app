@@ -154,11 +154,11 @@ public class Task implements Parcelable {
     public StatusType getStatus() { return status; }
     public void setStatus(StatusType status) { this.status = status; }
 
-    public Long getCreatedAtLevel() {
+    public Long getStatusTimestamp() {
         return statusTimestamp;
     }
 
-    public void setCreatedAtLevel(Long statusTimestamp) {
+    public void setStatusTimestamp(Long statusTimestamp) {
         this.statusTimestamp = statusTimestamp;
     }
 

@@ -131,7 +131,7 @@ public class BattleFragment extends Fragment {
             binding.tvAttackChance.setText(text);
             setupAttackButton(battle, (int)successRate);
 
-            //update u bazi: etapaHistory
+            //update u bazi: etapaHistory (dodat successRate prethodne etape)
             FirebaseFirestore db = FirebaseFirestore.getInstance();
             String etapaId = "etapa_" + previousEtapa.get("level");
             DocumentReference etapaHistoryRef = db.collection("users")
