@@ -22,6 +22,7 @@ import com.example.mobilnaaplikacija.services.UserService;
 import com.github.dhaval2404.colorpicker.ColorPickerDialog;
 import com.github.dhaval2404.colorpicker.listener.ColorListener;
 import com.github.dhaval2404.colorpicker.model.ColorShape;
+import com.google.firebase.auth.FirebaseUser;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -33,6 +34,8 @@ public class AddEditCategoryFragment extends DialogFragment {
     private boolean isEditing;
     private Category categoryToUpdate;
     private UserService userService;
+    private FirebaseUser user;
+
 
     public AddEditCategoryFragment() {}
 
@@ -58,6 +61,10 @@ public class AddEditCategoryFragment extends DialogFragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+        user = userService.getCurrentUser();
+        if (user == null) return;
+
         isEditing = false;
         categoryToUpdate = null;
 
@@ -99,7 +106,7 @@ public class AddEditCategoryFragment extends DialogFragment {
             String name = binding.etCategoryName.getText().toString();
 
             //Validacija
-            String error = categoryService.validate(name, pickedColor);
+            String error = categoryService.validate(name, pickedColor, user.getUid());
             if (error != null) {
                 Toast.makeText(getContext(), error, Toast.LENGTH_SHORT).show();
                 return;
@@ -109,6 +116,7 @@ public class AddEditCategoryFragment extends DialogFragment {
             Category category = new Category();
             if(isEditing)
                 category.setId(categoryToUpdate.getId());
+            category.setUserId(user.getUid());
             category.setColor(pickedColor);
             category.setName(name);
 

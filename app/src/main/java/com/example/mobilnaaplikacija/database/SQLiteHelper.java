@@ -43,6 +43,7 @@ public class SQLiteHelper extends SQLiteOpenHelper {
     // Categories table
     public static final String TABLE_CATEGORIES = "CATEGORIES";
     public static final String COLUMN_CATEGORY_ID = "id";
+    public static final String COLUMN_CATEGORY_USER_ID = "user_id";
     public static final String COLUMN_CATEGORY_NAME = "name";
     public static final String COLUMN_CATEGORY_COLOR = "color";
 
@@ -73,7 +74,7 @@ public class SQLiteHelper extends SQLiteOpenHelper {
     public static final String COLUMN_ATTACK_HIT = "hit";
     public static final String COLUMN_ATTACK_DAMAGE_DEALT = "damage_dealt";
 
-    private static final int DATABASE_VERSION = 12;
+    private static final int DATABASE_VERSION = 13;
     private static final String DATABASE_NAME = "appdata.db";
 
     private static final String DB_CREATE_EQUIPMENT = "CREATE TABLE " + TABLE_EQUIPMENT + " ("
@@ -111,6 +112,7 @@ public class SQLiteHelper extends SQLiteOpenHelper {
 
     private static final String DB_CREATE_CATEGORIES = "CREATE TABLE " + TABLE_CATEGORIES + " ("
             + COLUMN_CATEGORY_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
+            + COLUMN_CATEGORY_USER_ID + " TEXT, "
             + COLUMN_CATEGORY_NAME + " TEXT, "
             + COLUMN_CATEGORY_COLOR + " INTEGER"
             + ");";

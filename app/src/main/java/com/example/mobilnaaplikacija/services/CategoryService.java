@@ -21,8 +21,8 @@ public class CategoryService {
         this.taskService = new TaskService(context);
     }
 
-    public List<Category> getCategories() {
-        return categoryRepository.getCategories();
+    public List<Category> getCategoriesByUser(String userId) {
+        return categoryRepository.getCategories(userId);
     }
 
     public Category add(Category category) {
@@ -34,15 +34,15 @@ public class CategoryService {
         categoryRepository.update(category);
         return category;
     }
-    public String validate(String name, int color) {
+    public String validate(String name, int color, String userId) {
         if (name.isEmpty()) return  "Unesi naziv kategorije!";
         if (color == -1) return "Izaberi boju!";
-        if (isColorTaken(color)) return "Boja je vec zauzeta!";
+        if (isColorTaken(color, userId)) return "Boja je vec zauzeta!";
         return null;
     }
 
-    public boolean isColorTaken(int pickedColor) {
-        ArrayList<Category> categories = new ArrayList<>(getCategories());
+    public boolean isColorTaken(int pickedColor, String userId) {
+        ArrayList<Category> categories = new ArrayList<>(getCategoriesByUser(userId));
         for (Category c: categories) {
             if (c.getColor()!= null && c.getColor() == pickedColor)
                 return true;

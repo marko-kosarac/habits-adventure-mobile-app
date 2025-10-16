@@ -31,6 +31,7 @@ import com.example.mobilnaaplikacija.model.enums.UnitType;
 import com.example.mobilnaaplikacija.services.CategoryService;
 import com.example.mobilnaaplikacija.services.TaskService;
 import com.example.mobilnaaplikacija.services.UserService;
+import com.google.firebase.auth.FirebaseUser;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -53,6 +54,7 @@ public class AddEditTaskFragment extends DialogFragment {
     private ArrayList<String> categoryIds;
     private ArrayAdapter<String> categoryAdapter;
     private Category newCategory;
+    private FirebaseUser user;
 
     @Override
     public void onStart() {
@@ -80,6 +82,9 @@ public class AddEditTaskFragment extends DialogFragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+        user = userService.getCurrentUser();
+        if (user == null) return;
 
         isEditing = false;
         areDatesValid = true;
@@ -174,7 +179,7 @@ public class AddEditTaskFragment extends DialogFragment {
     }
 
     private void setupSpinners(){
-        ArrayList<Category> categories = new ArrayList<>(categoryService.getCategories());
+        ArrayList<Category> categories = new ArrayList<>(categoryService.getCategoriesByUser(user.getUid()));
 
         if (categories.isEmpty()) {
             categoryNames.add("Kategorija");

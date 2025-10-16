@@ -56,6 +56,7 @@ public class TaskListFragment extends Fragment implements RecyclerViewInterface 
     private TaskService taskService;
     private UserService userService;
     private CategoryService categoryService;
+    private FirebaseUser user;
 
     public TaskListFragment(){}
 
@@ -86,6 +87,9 @@ public class TaskListFragment extends Fragment implements RecyclerViewInterface 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+        user = userService.getCurrentUser();
+        if(user == null) return;
 
         isListTab = true;
 
@@ -219,7 +223,7 @@ public class TaskListFragment extends Fragment implements RecyclerViewInterface 
     }
 
     public void getCategories(){
-        categories = new ArrayList<>(categoryService.getCategories());
+        categories = new ArrayList<>(categoryService.getCategoriesByUser(user.getUid()));
         for (Category c : categories) {
             categoryMap.put(c.getId(), c);
         }

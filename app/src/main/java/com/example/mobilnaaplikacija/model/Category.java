@@ -8,14 +8,16 @@ import androidx.annotation.NonNull;
 
 public class Category implements Parcelable {
     private String id;
+    private String userId;
     private String name;
     private Integer color;
 
     public Category() {
     }
 
-    public Category(String id, Integer color, String name) {
+    public Category(String id, String userId, Integer color, String name) {
         this.id = id;
+        this.userId = userId;
         this.color = color;
         this.name = name;
     }
@@ -26,6 +28,14 @@ public class Category implements Parcelable {
 
     public void setId(String id) {
         this.id = id;
+    }
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 
     public String getName() {

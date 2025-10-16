@@ -7,6 +7,7 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,7 +16,10 @@ import com.example.mobilnaaplikacija.RecyclerViewInterface;
 import com.example.mobilnaaplikacija.adapters.CategoryListAdapter;
 import com.example.mobilnaaplikacija.databinding.FragmentCategoryListBinding;
 import com.example.mobilnaaplikacija.model.Category;
+import com.example.mobilnaaplikacija.model.Task;
 import com.example.mobilnaaplikacija.services.CategoryService;
+import com.example.mobilnaaplikacija.services.UserService;
+import com.google.firebase.auth.FirebaseUser;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,6 +29,8 @@ public class CategoryListFragment extends Fragment implements RecyclerViewInterf
     private CategoryService categoryService;
     private CategoryListAdapter adapter;
     private ArrayList<Category> categories;
+    private UserService userService;
+
 
     public CategoryListFragment() {}
 
@@ -32,6 +38,7 @@ public class CategoryListFragment extends Fragment implements RecyclerViewInterf
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         binding = FragmentCategoryListBinding.inflate(inflater, container,false);
         this.categoryService = new CategoryService(getContext());
+        this.userService = new UserService();
         return binding.getRoot();
     }
 
@@ -40,7 +47,15 @@ public class CategoryListFragment extends Fragment implements RecyclerViewInterf
         super.onCreate(savedInstanceState);
 
         binding.rvCategories.setLayoutManager(new LinearLayoutManager(getActivity()));
-        categories = new ArrayList<>(categoryService.getCategories());
+
+        FirebaseUser user = userService.getCurrentUser();
+        if(user == null) {
+            categories = new ArrayList<>();
+        } else {
+            categories = new ArrayList<>(categoryService.getCategoriesByUser(user.getUid()));
+            Log.d("CategoryListFragment1", "Categories loaded: " + categories.size());
+        }
+
         adapter = new CategoryListAdapter(categories, this);
         adapter.notifyDataSetChanged();
         binding.rvCategories.setAdapter(adapter);
@@ -56,7 +71,8 @@ public class CategoryListFragment extends Fragment implements RecyclerViewInterf
             Category newCategory = result.getParcelable("category");
             if (newCategory != null) {
                 categories.clear();
-                categories.addAll(categoryService.getCategories());
+                categories.addAll(categoryService.getCategoriesByUser(user.getUid()));
+                Log.d("CategoryListFragment2", "Categories loaded: " + categories.size());
                 adapter.notifyDataSetChanged();
             }
         });
