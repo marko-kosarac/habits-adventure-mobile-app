@@ -28,10 +28,6 @@ public class BossService {
             boss.setDefeated(true);
         } else {
             boss.setDefeated(false);
-            // if next time clicks battle,
-            // check if last one got defeated:
-            // false->take him,
-            // true->create new one, boss.level++
         }
     return boss;
     }

@@ -16,11 +16,15 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.SetOptions;
+import com.google.firebase.firestore.Transaction;
 import com.google.firebase.messaging.FirebaseMessaging;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class UserService {
@@ -217,37 +221,64 @@ public class UserService {
         });
     }
 
-    public void addEquipmentToUser(String userId, Equipment equipment, OnSuccessListener<Void> onSuccess, OnFailureListener onFailure) {
+    public void addEquipmentToUser(String userId, Equipment equipment,
+                                   OnSuccessListener<Void> onSuccess,
+                                   OnFailureListener onFailure) {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
+        DocumentReference userRef = db.collection("users").document(userId);
 
-        DocumentReference equipmentRef = db
-                .collection("users")
-                .document(userId)
-                .collection("inventory")
-                .document(String.valueOf(equipment.getId()));
+        db.runTransaction((Transaction.Function<Void>) transaction -> {
+            DocumentSnapshot snapshot = transaction.get(userRef);
+            List<Map<String, Object>> equipmentList =
+                    (List<Map<String, Object>>) snapshot.get("equipment");
 
-        equipmentRef.get().addOnSuccessListener(documentSnapshot -> {
-            if (documentSnapshot.exists()) {
-                //Vec posjeduje
-            } else {
-                //Ne posjeduje - dodaj
-                Map<String, Object> data = new HashMap<>();
-                data.put("id", equipment.getId());
-                data.put("name", equipment.getName());
-                data.put("description", equipment.getDescription());
-                data.put("type", equipment.getType().name());
-                data.put("bonus", equipment.getBonus());
-                data.put("duration", equipment.getDuration());
-                data.put("price", equipment.getPrice());
-                data.put("quantity", 1);
-                data.put("isActivated", false);
-
-                equipmentRef.set(data)
-                        .addOnSuccessListener(onSuccess)
-                        .addOnFailureListener(onFailure);
+            if (equipmentList == null) {
+                equipmentList = new ArrayList<>();
             }
-        }).addOnFailureListener(onFailure);
+
+            long eqId = equipment.getId();
+            Map<String, Object> inactiveItem = null;
+
+            //nadji postojecu opremu
+            for (Map<String, Object> item : equipmentList) {
+                Number idNum = (Number) item.get("id");
+                if (idNum != null && idNum.longValue() == eqId) {
+                    Boolean active = (Boolean) item.get("active");
+                    if (active != null && !active) {
+                        inactiveItem = item;
+                        break;
+                    }
+                }
+            }
+
+            if (inactiveItem != null) {
+                //povecaj qty
+                int qty = ((Number) inactiveItem.get("quantity")).intValue();
+                inactiveItem.put("quantity", qty + 1);
+            } else {
+                //dodaj neaktivnu
+                Map<String, Object> newItem = new HashMap<>();
+                newItem.put("id", eqId);
+                newItem.put("name", equipment.getName());
+                newItem.put("description", equipment.getDescription());
+                newItem.put("type", equipment.getType().name());
+                newItem.put("bonus", equipment.getBonus());
+                newItem.put("duration", equipment.getDuration());
+                newItem.put("price", equipment.getPrice());
+                newItem.put("quantity", 1);
+                newItem.put("active", false);
+                equipmentList.add(newItem);
+            }
+
+            transaction.update(userRef, "equipment", equipmentList);
+            return null;
+        }).addOnSuccessListener(aVoid -> {
+            if (onSuccess != null) onSuccess.onSuccess(null);
+        }).addOnFailureListener(e -> {
+            if (onFailure != null) onFailure.onFailure(e);
+        });
     }
+
 
     private void createNewEtapa(String userId) {
         long now = System.currentTimeMillis();

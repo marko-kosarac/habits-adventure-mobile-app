@@ -148,11 +148,12 @@ public class BattleFragment extends Fragment {
         });
         setupRemainingAttacks();
         setupCoinReward();
+        binding.tvBossLevel.setText("Nivo bosa: " + boss.getLevel());
     }
 
     private void setupCoinReward () {
         int coins = bossService.calculateCoins(boss.getLevel());
-        binding.tvCoinReward.setText("+ " + String.valueOf(coins));
+        binding.tvCoinReward.setText("+ " + coins);
     }
 
     private void applyEquipmentEffects(List<Equipment> equipment) {
@@ -266,7 +267,7 @@ public class BattleFragment extends Fragment {
         binding.pbPPBar.setProgress(PP);
         ObjectAnimator.ofInt(binding.pbHPBar, "progress", boss.getCurrentHp()).setDuration(600).start();
         binding.tvUserPP.setText("Snaga korisnika: " + PP);
-        binding.tvBossHP.setText("Energija bosa: " + HP + "/" + HP_MAX);
+        binding.tvBossHP.setText("Energija: " + HP + "/" + HP_MAX);
     }
 
     private void setupActiveEquipment() {
@@ -462,9 +463,7 @@ public class BattleFragment extends Fragment {
     private void showBattleResultDialog(boolean victory, int coins, Equipment reward) {
         if (reward == null) return;
 
-        BattleResultFragment.ResultType type = victory
-                ? BattleResultFragment.ResultType.VICTORY
-                : BattleResultFragment.ResultType.DEFEAT;
+        BattleResultFragment.ResultType type = victory ? BattleResultFragment.ResultType.VICTORY : BattleResultFragment.ResultType.DEFEAT;
 
         BattleResultFragment dialog = new BattleResultFragment(requireContext(), type, coins, reward);
 

@@ -58,11 +58,11 @@ public class BattleResultFragment extends Dialog {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        //requestWindowFeature(Window.FEATURE_NO_TITLE);
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
 
         View view = LayoutInflater.from(getContext()).inflate(R.layout.dialog_battle_result, null);
-        setContentView(view);
-        setCancelable(true);
+        setCancelable(false);
+        setCanceledOnTouchOutside(false);
 
         ImageView ivClosedChest = view.findViewById(R.id.ivClosedChest);
         ImageView ivOpenedChest = view.findViewById(R.id.ivOpenedChest);
@@ -76,14 +76,9 @@ public class BattleResultFragment extends Dialog {
         LottieAnimationView confetti = view.findViewById(R.id.confetti);
 
         switch (resultType) {
-            case VICTORY:
-                tvTitle.setText("Pobeda!");
-                break;
-            case DEFEAT:
-                tvTitle.setText("Poraz...");
-                break;
-            default:
-                tvTitle.setText("Borba u toku");
+            case VICTORY: tvTitle.setText("Pobeda!"); break;
+            case DEFEAT: tvTitle.setText("Poraz..."); break;
+            default: tvTitle.setText("Borba u toku");
         }
 
         layoutRewards.setVisibility(View.GONE);
