@@ -114,7 +114,7 @@ public class BattleService {
         if (boss.isDefeated()) { //TODO Nakon 5 napada, ukoliko je bos poražen, uslov nakon 5 napada?
             //boss porazen
             checkAndCreateNextBattleIfNeeded(userBattles, battle, boss, userId);
-            equipmentService.manageEquipmentAfterBattle(equipmentFromBattle);
+            equipmentService.manageEquipmentAfterBattle(equipmentFromBattle); //salje se koristena oprema na cuvanje
             handleVictory(userId, boss, battle, attacks, bonusCoins, equipmentFromBattle, callback);
         } else if (!boss.isDefeated() && attacks.size() >= 5) {
             //boss neporazen
@@ -183,10 +183,12 @@ public class BattleService {
         battle.setAttacks(attacks);
         battle.setUserWon(win);
         battle.setCoinsEarned(coins);
-        //TODO equipment
+        //borba prosla - stavi njenu opremu TODO
         List<String> equipmentIds = new ArrayList<>();
-        for (Equipment eq : equipmentFromBattle) {
-            equipmentIds.add(String.valueOf(eq.getId()));
+        if (!equipmentFromBattle.isEmpty()) {
+            for (Equipment eq : equipmentFromBattle) {
+                equipmentIds.add(String.valueOf(eq.getId()));
+            }
         }
         battle.setEquipmentIds(equipmentIds);
 
@@ -207,9 +209,8 @@ public class BattleService {
                     Battle newBattle = new Battle();
                     newBattle.setUserId(userId);
                     newBattle.setBossId(newBoss.getId());
-                    //TODO u narednu borbu prenesi samo onu opremu koja vazi i dalje!
-                    //newBattle.setEquipmentIds(...);
-                    //repo ce svakako staviti listu na praznu
+                    //nova borba - nema opreme TODO
+                    newBattle.setEquipmentIdsFromString("");
                     newBattle.setCoinsEarned(0);
                     newBattle.setUserWon(null);
 

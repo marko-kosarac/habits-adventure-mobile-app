@@ -45,6 +45,7 @@ public class EquipmentRepository {
         values.put(SQLiteHelper.COLUMN_BONUS, equipment.getBonus());
         values.put(SQLiteHelper.COLUMN_DURATION, equipment.getDuration());
         values.put(SQLiteHelper.COLUMN_PRICE, equipment.getDuration()); // ili druga logika za cenu
+        values.put(SQLiteHelper.COLUMN_COUNT, equipment.getCount());
 
         int rows = db.update(SQLiteHelper.TABLE_EQUIPMENT, values,
                 SQLiteHelper.COLUMN_ID + " = ?", new String[]{String.valueOf(equipment.getId())});
@@ -78,8 +79,9 @@ public class EquipmentRepository {
                 String bonus = cursor.getString(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_BONUS));
                 int duration = cursor.getInt(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_DURATION));
                 int price = cursor.getInt(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_PRICE));
+                int count = cursor.getInt(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_COUNT));
 
-                Equipment equipment = new Equipment(id, name, description, type, bonus, duration, price);
+                Equipment equipment = new Equipment(id, name, description, type, bonus, duration, price, count);
                 equipmentList.add(equipment);
             } while (cursor.moveToNext());
             cursor.close();
@@ -104,10 +106,11 @@ public class EquipmentRepository {
             String bonus = cursor.getString(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_BONUS));
             int duration = cursor.getInt(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_DURATION));
             int price = cursor.getInt(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_PRICE));
+            int count = cursor.getInt(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_COUNT));
 
             cursor.close();
             db.close();
-            return new Equipment(id, name, description, type, bonus, duration, price);
+            return new Equipment(id, name, description, type, bonus, duration, price, count);
         }
 
         if (cursor != null) cursor.close();
