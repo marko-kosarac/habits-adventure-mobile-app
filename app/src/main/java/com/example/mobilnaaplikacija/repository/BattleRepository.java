@@ -68,7 +68,14 @@ public class BattleRepository {
                     battle.setId(cursor.getString(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_BATTLE_ID)));
                     battle.setUserId(cursor.getString(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_BATTLE_USER_ID)));
                     battle.setBossId(cursor.getString(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_BATTLE_BOSS_ID)));
-                    battle.setEquipmentIdsFromString(cursor.getString(cursor.getColumnIndex(SQLiteHelper.COLUMN_BATTLE_EQUIPMENT_IDS)));
+                    int colIndex = cursor.getColumnIndex(SQLiteHelper.COLUMN_BATTLE_EQUIPMENT_IDS);
+                    if (colIndex != -1) {
+                        battle.setEquipmentIdsFromString(cursor.getString(colIndex));
+                    } else {
+                        battle.setEquipmentIds(new ArrayList<>());
+                        Log.w("BattleRepo", "COLUMN_BATTLE_EQUIPMENT_IDS not found in cursor!");
+                    }
+                    //TODO does it work?
                     battle.setCoinsEarned(cursor.getInt(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_BATTLE_COINS_EARNED)));
 
                     if (!cursor.isNull(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_BATTLE_USER_WON))) {

@@ -114,12 +114,12 @@ public class BattleService {
         if (boss.isDefeated()) { //TODO Nakon 5 napada, ukoliko je bos poražen, uslov nakon 5 napada?
             //boss porazen
             checkAndCreateNextBattleIfNeeded(userBattles, battle, boss, userId);
-            equipmentService.manageEquipmentAfterBattle(equipmentFromBattle); //salje se koristena oprema na cuvanje
+            equipmentService.manageEquipmentAfterBattle(userId, equipmentFromBattle); //salje se koristena oprema na cuvanje
             handleVictory(userId, boss, battle, attacks, bonusCoins, equipmentFromBattle, callback);
         } else if (!boss.isDefeated() && attacks.size() >= 5) {
             //boss neporazen
             checkAndCreateNextBattleIfNeeded(userBattles, battle, boss, userId);
-            equipmentService.manageEquipmentAfterBattle(equipmentFromBattle);
+            equipmentService.manageEquipmentAfterBattle(userId, equipmentFromBattle);
             handleDefeat(userId, boss, battle, attacks, bonusCoins, equipmentFromBattle, callback);
         } else {
             updateBattleAndBoss(battle, null, boss, userId, 0, attacks, equipmentFromBattle); //TODO update?
