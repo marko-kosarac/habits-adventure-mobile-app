@@ -201,7 +201,7 @@ public class FriendProfileFragment extends Fragment {
         eq.setPrice(((Number) data.get("price")).intValue());
         eq.setQuantity(((Number) data.get("quantity")).intValue());
         eq.setActive((Boolean) data.get("active"));
-        eq.setCount(((Number) data.get("count")).intValue());
+        eq.setCount(data.get("count") != null ? ((Number) data.get("count")).intValue() : 0);
         eq.setType(Equipment.Type.valueOf((String) data.get("type")));
         return eq;
     }
