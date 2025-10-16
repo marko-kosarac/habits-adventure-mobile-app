@@ -29,7 +29,7 @@ public class EquipmentService {
         }
 
         double typeRoll = Math.random();
-        Equipment.Type rewardType = typeRoll <= 0.95 ? Equipment.Type.ODECA : Equipment.Type.ORUZJE;
+        Equipment.Type rewardType = typeRoll <= 0.95 ? Equipment.Type.ORUZJE : Equipment.Type.ODECA; //TODO FIX LATER
 
         ArrayList<Equipment> allEquipment = equipmentRepository.getAllEquipment();
         allEquipment.add(new Equipment(0, "Čelični mač", "Trajno povećava snagu za 5%",

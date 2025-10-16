@@ -8,6 +8,7 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.navigation.fragment.NavHostFragment;
 
 import android.util.Log;
 import android.view.Gravity;
@@ -59,6 +60,7 @@ public class BattleFragment extends Fragment {
     private int HP = 0, HP_MAX;
     private int numberOfAttacks = 0, calculatedSuccessRate = 0;
     private int bonusCoins = 0, bonusAttack = 0, bonusAttackSuccessChance = 0;
+    private List<Equipment> userEquipment;
     private List<Equipment> activeEquipment;
     private Map<String, Object> previousEtapa;
     private int oldLevel = 1;
@@ -111,7 +113,9 @@ public class BattleFragment extends Fragment {
             return;
         }
 
-        fetchUserDataFromFirebase();
+        fetchUserEquipment(() -> {
+            setupActiveEquipment();
+        });
 
         setupAnimations(view);
         taskService.getSuccessRate(firebaseUser.getUid(), previousEtapa, successRate -> {
@@ -206,29 +210,38 @@ public class BattleFragment extends Fragment {
         return Math.pow(multiplier, eq.getQuantity());
     }
 
-    private User fetchUserDataFromFirebase() {
-        String uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
-        db.collection("users").document(uid).get().addOnSuccessListener(doc -> {
-            if (!isAdded() || binding == null) return;
+    private void fetchUserEquipment(Runnable onComplete) {
+        String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        db.collection("users").document(userId).get()
+                .addOnSuccessListener(document -> {
+                    if (document.exists()) {
+                        List<Map<String, Object>> equipmentData = (List<Map<String, Object>>) document.get("equipment");
 
-            if (doc.exists()) {
-                int xp = doc.getLong("experiencePoints") != null ? doc.getLong("experiencePoints").intValue() : 0;
-                //PP = doc.getLong("powerPoints") != null ? doc.getLong("powerPoints").intValue() : 0;
-                long coins = doc.getLong("coins") != null ? doc.getLong("coins") : 0;
-                //int level = doc.getLong("level") != null ? doc.getLong("level").intValue() : 1;
-                String title = doc.getString("title");
-                User user = new User();
-                //user.setExperiencePoints(xp);
-                //currentUser.setCoins();
-                //currentUser.setEquipment();
-                //user.setPowerPoints(PP);
-                //user.setLevel(level);
+                        userEquipment = new ArrayList<>();
 
-                setupProgressBars();
-                setupEquipment();
-            }
-        });
-        return null;
+                        if (equipmentData != null) {
+                            for (Map<String, Object> data : equipmentData) {
+                                Equipment eq = mapToEquipment(data);
+                                userEquipment.add(eq);
+                            }
+                        }
+                    }
+                    if (onComplete != null) onComplete.run();
+                });
+    }
+
+    private Equipment mapToEquipment(Map<String, Object> data) {
+        Equipment eq = new Equipment();
+        eq.setId(((Number) data.get("id")).longValue());
+        eq.setName((String) data.get("name"));
+        eq.setDescription((String) data.get("description"));
+        eq.setBonus((String) data.get("bonus"));
+        eq.setDuration(((Number) data.get("duration")).intValue());
+        eq.setPrice(((Number) data.get("price")).intValue());
+        eq.setQuantity(((Number) data.get("quantity")).intValue());
+        eq.setActive((Boolean) data.get("active"));
+        eq.setType(Equipment.Type.valueOf((String) data.get("type")));
+        return eq;
     }
 
     private void setupAnimations(View view){
@@ -256,7 +269,7 @@ public class BattleFragment extends Fragment {
         binding.tvBossHP.setText("Energija bosa: " + HP + "/" + HP_MAX);
     }
 
-    private void setupEquipment() {
+    private void setupActiveEquipment() {
         activeEquipment = (List<Equipment>) getArguments().getSerializable("activeEquipmentList");
         if (activeEquipment == null) activeEquipment = new ArrayList<>();
         applyEquipmentEffects(activeEquipment);
@@ -317,7 +330,7 @@ public class BattleFragment extends Fragment {
 
     private void setupRemainingAttacks () {
         if (!isAdded() || binding == null) return;
-//TODO from battle get attacks
+        //TODO from battle get attacks
         List<Attack> attacks = attackService.getAttacksByUserAndBoss(firebaseUser.getUid(), boss.getId());
         numberOfAttacks = attacks.size();
         if (bonusAttack != 0) {
@@ -358,13 +371,17 @@ public class BattleFragment extends Fragment {
                             bonusCoins = 0; //TODO
                             Toast.makeText(getContext(), "Pobedio si, bravo! Sreća u napadu: " + roundedLuck + "%", Toast.LENGTH_LONG).show();
                             //ucitaj narednu borbu ako je ima
-                            loadNextBattle(true, coins, equipment, luck);
+                            loadNextBattle(true, coins, equipment);
                         } else if (numberOfAttacks >= 5 && !Boolean.TRUE.equals(battle.hasUserWon())) {
                             bonusCoins = 0;
                             Toast.makeText(getContext(), "Bos nije poražen! Sreća u napadu: " + roundedLuck + "%", Toast.LENGTH_LONG).show();
-                            showBattleResultDialog(false, coins, equipment);
-                        } else {
-                            Toast.makeText(getContext(), "Promašaj! Sreća: " + roundedLuck + "%", Toast.LENGTH_LONG).show();
+                            if (coins > 0 || equipment != null) {
+                                showBattleResultDialog(false, coins, equipment);
+                            } else {
+                                NavHostFragment.findNavController(BattleFragment.this)
+                                        .navigate(R.id.action_battleFragment_to_userProfileFragment);
+                            }                        } else {
+                            Toast.makeText(getContext(), "Promašaj! Sreća: " + roundedLuck + "%", Toast.LENGTH_SHORT).show();
                         }
                     }
 
@@ -396,13 +413,18 @@ public class BattleFragment extends Fragment {
                             bonusCoins = 0; //TODO
                             Toast.makeText(getContext(), "Pobeda, bravo! Sreća u napadu: " + roundedLuck + "%", Toast.LENGTH_LONG).show();
                             //ucitaj narednu borbu ako je ima
-                            loadNextBattle(true, coins, equipment, luck);
+                            loadNextBattle(true, coins, equipment);
                         } else if (numberOfAttacks >= 5 && !Boolean.TRUE.equals(battle.hasUserWon())) {
                             bonusCoins = 0;
                             Toast.makeText(getContext(), "Bos nije poražen. Sreća u napadu: " + roundedLuck + "%", Toast.LENGTH_LONG).show();
-                            showBattleResultDialog(false, coins, equipment);
+                            if (coins > 0 || equipment != null) {
+                                showBattleResultDialog(false, coins, equipment);
+                            } else {
+                                NavHostFragment.findNavController(BattleFragment.this)
+                                        .navigate(R.id.action_battleFragment_to_userProfileFragment);
+                            }
                         } else {
-                            Toast.makeText(getContext(), "Pogodak! Sreća: " + roundedLuck + "%", Toast.LENGTH_LONG).show();
+                            Toast.makeText(getContext(), "Pogodak! Sreća: " + roundedLuck + "%", Toast.LENGTH_SHORT).show();
                         }
                     }
                     
@@ -437,38 +459,54 @@ public class BattleFragment extends Fragment {
         }, totalDuration);
     }
 
-    private void showBattleResultDialog(boolean victory, int coins, Equipment equipment) {
-        List<Equipment> rewards = new ArrayList<>();
-        if (equipment != null) rewards.add(equipment);
+    private void showBattleResultDialog(boolean victory, int coins, Equipment reward) {
+        if (reward == null) return;
 
         BattleResultFragment.ResultType type = victory
                 ? BattleResultFragment.ResultType.VICTORY
                 : BattleResultFragment.ResultType.DEFEAT;
 
-        BattleResultFragment dialog = new BattleResultFragment(requireContext(), type, coins, rewards);
+        BattleResultFragment dialog = new BattleResultFragment(requireContext(), type, coins, reward);
+
+        dialog.setOnDialogClosedListener(() -> {
+            if (isAdded()) {
+                try {
+                    if (battle != null && boss != null) {
+                        fetchUserEquipment(() -> {
+                            Bundle bundle = new Bundle();
+                            bundle.putInt("bossLevel", boss.getLevel());
+                            bundle.putParcelable("nextBoss", boss);
+                            bundle.putSerializable("userEquipmentList", new ArrayList<>(userEquipment));
+                            NavHostFragment.findNavController(this).navigate(R.id.action_battleFragment_to_prepareBattleFragment, bundle);
+                        });
+                    } else
+                        NavHostFragment.findNavController(this).navigate(R.id.profile_page);
+                } catch (IllegalArgumentException e) {
+                    Log.e("NavigationError", "Cannot navigate to profile_page from current destination", e);
+                }
+            }
+        });
+
         dialog.show();
     }
 
-    private void loadNextBattle(boolean win, int coins, Equipment equipment, double luck) {
+    private void loadNextBattle(boolean win, int coins, Equipment equipment) {
         showBattleResultDialog(win, coins, equipment);
 
         for (Battle b : battles) {
             if (!Boolean.TRUE.equals(b.hasUserWon())) {
+                //ima još nepobijeđenih boseva
                 boss = bossService.getBossById(b.getBossId());
                 battle = b;
-
-                //resetuj fragment za novog boss-a
-                setupProgressBars();
-                setupRemainingAttacks();
-                setupAttackButton(battle, calculatedSuccessRate);
-
-                Toast.makeText(getContext(), "Naredna borba započinje!", Toast.LENGTH_SHORT).show();
                 return;
             }
         }
 
-        //sve pobijedio
-        Toast.makeText(getContext(), "Sve borbe su završene! Sjajan posao!", Toast.LENGTH_LONG).show();
+        //nema više
+        boss = null;
+        battle = null;
+        Toast.makeText(getContext(), "Nema predstojećih borbi!", Toast.LENGTH_LONG).show();
+        NavHostFragment.findNavController(this).navigate(R.id.action_battleFragment_to_userProfileFragment);
     }
 
 }

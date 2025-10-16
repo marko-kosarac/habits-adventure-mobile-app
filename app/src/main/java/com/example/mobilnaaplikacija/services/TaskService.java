@@ -71,9 +71,13 @@ public class TaskService {
     public ArrayList<Task> addRepeatingTask(Task task) {
         ArrayList<Task> taskOccurrences = new ArrayList<>();
         String taskId;
+
         if (task.getTaskId() == null) taskId = UUID.randomUUID().toString();
         else taskId = task.getTaskId();
+
         List<String> dates = getTaskOccurringDates(task);
+        if (dates == null) dates = new ArrayList<>();
+
         SimpleDateFormat fmt = new SimpleDateFormat("d/M/yyyy", Locale.getDefault());
 
         //HH:mm iz start i end millis
@@ -392,40 +396,43 @@ public class TaskService {
     }
 
     public ArrayList<Task> filterByFrequency(ArrayList<Task> tasks, @Nullable FrequencyType type) {
-        if (type == null)
-            return tasks;
+        if (tasks == null) return new ArrayList<>();
+        if (type == null) return new ArrayList<>(tasks);
 
         ArrayList<Task> filteredTasks = new ArrayList<>();
         for (Task t : tasks) {
-            if (t.getFrequency() == type) {
+            if (t != null && t.getFrequency() == type) {
                 filteredTasks.add(t);
             }
         }
         return filteredTasks;
     }
 
+
     public ArrayList<Task> filterCurrentFutureTasks(ArrayList<Task> tasks) {
         ArrayList<Task> filtered = new ArrayList<>();
-        long now = System.currentTimeMillis();
+        if (tasks == null) return filtered;
 
+        long now = System.currentTimeMillis();
         for (Task task : tasks) {
-            if (task.getEndMillis() >= now) {
-                filtered.add(task);
-            }
+            if (task != null && task.getEndMillis() >= now) filtered.add(task);
         }
         return filtered;
     }
 
     public void deleteByCategory(String categoryId, String userId) {
         ArrayList<Task> tasks = new ArrayList<>(getTasksByUser(userId));
+        if (tasks == null) return;
         for (Task task : tasks) {
-            if (task.getCategoryId().equals(categoryId))
+            if (task != null && categoryId != null && task.getCategoryId().equals(categoryId))
                 deleteById(task.getId());
         }
     }
 
     public List<String> getTaskOccurringDates(Task task) {
         List<String> dates = new ArrayList<>();
+        if (task == null) return dates;
+
         SimpleDateFormat fmt = new SimpleDateFormat("d/M/yyyy", Locale.getDefault());
         fmt.setLenient(false);
         Calendar cal = Calendar.getInstance();
@@ -476,7 +483,7 @@ public class TaskService {
     }
 
     public boolean isInPast(Task task) {
-        return task.getEndMillis() < System.currentTimeMillis();
+        return task != null && task.getEndMillis() < System.currentTimeMillis();
     }
 
     public void updateRepeatingTaskStatus(String taskId, StatusType oldStatus, StatusType newStatus) {
@@ -518,6 +525,8 @@ public class TaskService {
         if (task.getStartMillis() > now) return; //mora biti: u toku/zavrsen
 
         String userId = firebaseUser.getUid();
+        if (userId == null) return;
+
         DocumentReference userDoc = userService.getUserDoc(userId);
         userDoc.get().addOnSuccessListener(document -> { //XP nagrada na osnovu nivoa
                     int level = 1;
@@ -550,9 +559,9 @@ public class TaskService {
 
         Tasks.whenAllSuccess(dayRef.get(), weekRef.get(), monthRef.get())
                 .addOnSuccessListener(results -> {
-                    DocumentSnapshot daySnap = (DocumentSnapshot) results.get(0);
-                    DocumentSnapshot weekSnap = (DocumentSnapshot) results.get(1);
-                    DocumentSnapshot monthSnap = (DocumentSnapshot) results.get(2);
+                    DocumentSnapshot daySnap = results.get(0) instanceof DocumentSnapshot ? (DocumentSnapshot) results.get(0) : null;
+                    DocumentSnapshot weekSnap = results.get(1) instanceof DocumentSnapshot ? (DocumentSnapshot) results.get(1) : null;
+                    DocumentSnapshot monthSnap = results.get(2) instanceof DocumentSnapshot ? (DocumentSnapshot) results.get(2) : null;
 
                     boolean allowDiff = isDifficultyWithinQuota(daySnap, weekSnap, task.getDifficulty());
                     boolean allowImp = isImportanceWithinQuota(daySnap, monthSnap, task.getImportance());
@@ -778,7 +787,7 @@ public class TaskService {
 
     public List<Task> getTasksForSuccessRate(List<Task> tasks, Map<String, Object> etapa) {
         List<Task> valid = new ArrayList<>();
-        if (etapa == null) return null;
+        if (tasks == null || etapa == null) return valid;
 
         long start = 0L;
         long end = System.currentTimeMillis();
@@ -812,6 +821,7 @@ public class TaskService {
 
     public List<Task> getDoneTasks(List<Task> tasks) {
         List<Task> done = new ArrayList<>();
+        if (tasks == null) tasks = new ArrayList<>();
         for (Task t : tasks) {
             if (t.getStatus() == StatusType.URAĐEN) {
                 done.add(t);
@@ -821,8 +831,10 @@ public class TaskService {
     }
 
     private double calculateSuccessRate(List<Task> doneTasks, List<Task> createdTasks) {
-        if (createdTasks.isEmpty()) return 0.0;
+        if (createdTasks == null || createdTasks.isEmpty()) return 0.0;
+        if (doneTasks == null) doneTasks = new ArrayList<>();
         double rate = (double) doneTasks.size() / createdTasks.size();
-        return Math.round(rate * 10000.0) / 100.0; // npr 67.35%
+        return Math.round(rate * 10000.0) / 100.0;
     }
+
 }

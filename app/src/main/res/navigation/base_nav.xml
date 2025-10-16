@@ -86,7 +86,14 @@
     <fragment
         android:id="@+id/battleFragment"
         android:name="com.example.mobilnaaplikacija.fragments.battle.BattleFragment"
-        android:label="Borba sa bosom" />
+        android:label="Borba sa bosom">
+        <action
+            android:id="@+id/action_battleFragment_to_prepareBattleFragment"
+            app:destination="@id/prepareBattleFragment" />
+        <action
+            android:id="@+id/action_battleFragment_to_userProfileFragment"
+            app:destination="@id/profile_page" />
+    </fragment>
     <fragment
         android:id="@+id/prepareBattleFragment"
         android:name="com.example.mobilnaaplikacija.fragments.battle.PrepareBattleFragment"

@@ -77,34 +77,6 @@
             android:layout_marginStart="8dp"/>
     </LinearLayout>
 
-    <!-- Boss (idle + hit) -->
-    <FrameLayout
-        android:id="@+id/layoutBoss"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        app:layout_constraintTop_toBottomOf="@id/pbHPBar"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
-
-        <ImageView
-            android:id="@+id/ivBossSpriteIdle"
-            android:layout_width="130dp"
-            android:layout_height="210dp"
-            android:background="@drawable/boss_idle"
-            android:contentDescription="@string/boss"
-            android:scaleType="fitCenter" />
-
-        <ImageView
-            android:id="@+id/ivBossSpriteHit"
-            android:layout_width="130dp"
-            android:layout_height="210dp"
-            android:background="@drawable/boss_hit"
-            android:scaleType="fitCenter"
-            android:contentDescription="@string/boss"
-            android:visibility="gone" />
-    </FrameLayout>
-
     <!-- Boss HP -->
     <TextView
         android:id="@+id/tvBossHP"
@@ -127,6 +99,34 @@
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_marginTop="2dp" />
 
+    <!-- Boss (idle + hit) -->
+    <FrameLayout
+        android:id="@+id/layoutBoss"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        app:layout_constraintTop_toBottomOf="@id/pbHPBar"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <ImageView
+            android:id="@+id/ivBossSpriteIdle"
+            android:layout_width="130dp"
+            android:layout_height="210dp"
+            android:background="@drawable/boss_idle"
+            android:contentDescription="@string/boss"
+            android:scaleType="fitCenter" />
+
+        <ImageView
+            android:id="@+id/ivBossSpriteHit"
+            android:layout_width="130dp"
+            android:layout_height="210dp"
+            android:background="@drawable/boss_hit"
+            android:scaleType="fitCenter"
+            android:contentDescription="@string/boss"
+            android:visibility="gone" />
+    </FrameLayout>
+
     <!-- Korisnik PP -->
     <TextView
         android:id="@+id/tvUserPP"
@@ -136,7 +136,7 @@
         app:layout_constraintTop_toBottomOf="@id/layoutBoss"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="20dp" />
+        android:layout_marginTop="12dp" />
 
     <ProgressBar
         android:id="@+id/pbPPBar"

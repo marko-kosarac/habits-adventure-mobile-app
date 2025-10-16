@@ -1,6 +1,9 @@
 package com.example.mobilnaaplikacija.model;
 
-public class Boss {
+import android.os.Parcel;
+import android.os.Parcelable;
+
+public class Boss implements Parcelable{
     private String id;
     private int currentHp;
     private int maxHp;
@@ -60,4 +63,39 @@ public class Boss {
     public void setDefeated(boolean defeated) {
         this.defeated = defeated;
     }
+
+    protected Boss(Parcel in) {
+        id = in.readString();
+        currentHp = in.readInt();
+        maxHp = in.readInt();
+        level = in.readInt();
+        defeated = in.readByte() != 0;
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(id);
+        dest.writeInt(currentHp);
+        dest.writeInt(maxHp);
+        dest.writeInt(level);
+        dest.writeByte((byte) (defeated ? 1 : 0));
+    }
+
+    public static final Creator<Boss> CREATOR = new Creator<Boss>() {
+        @Override
+        public Boss createFromParcel(Parcel in) {
+            return new Boss(in);
+        }
+
+        @Override
+        public Boss[] newArray(int size) {
+            return new Boss[size];
+        }
+    };
+
 }

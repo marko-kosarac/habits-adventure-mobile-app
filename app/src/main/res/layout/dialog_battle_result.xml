@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:lottie="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
     android:padding="24dp"
     android:gravity="center"
-    android:backgroundTint="@color/white">
+    android:background="@android:color/white">
 
     <TextView
         android:id="@+id/tvResultTitle"
@@ -15,38 +16,51 @@
         android:textSize="22sp"
         android:textStyle="bold"
         android:layout_marginBottom="12dp"/>
-
+    <!-- Kovceg -->
     <ImageView
         android:id="@+id/ivClosedChest"
-        android:layout_width="200dp"
-        android:layout_height="200dp"
+        android:layout_width="170dp"
+        android:layout_height="170dp"
         android:src="@drawable/chest_closed"
-        android:contentDescription="Treasure chest"/>
-
+        android:contentDescription="Treasure chest" />
     <ImageView
         android:id="@+id/ivOpenedChest"
-        android:layout_width="200dp"
-        android:layout_height="200dp"
+        android:layout_width="170dp"
+        android:layout_height="170dp"
         android:src="@drawable/chest_opened"
         android:contentDescription="Treasure chest"
         android:visibility="gone" />
-
+    <!-- Konfete -->
+    <com.airbnb.lottie.LottieAnimationView
+        android:id="@+id/confetti"
+        android:layout_width="200dp"
+        android:layout_height="200dp"
+        android:layout_marginTop="16dp"
+        android:visibility="gone"
+        lottie:layout_constraintTop_toTopOf="parent"
+        lottie:lottie_autoPlay="false"
+        lottie:lottie_loop="false"
+        lottie:lottie_fileName="confetti.json" />
+    <!-- Nagrade -->
     <LinearLayout
+        android:id="@+id/layoutRewards"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:gravity="center_horizontal">
+        android:gravity="center_horizontal"
+        android:layout_marginTop="16dp"
+        >
         <TextView
-            android:id="@+id/tvCoinsReward"
+            android:id="@+id/tvCoins"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="30dp"
-            android:text="+ 0"
-            android:textSize="20sp"
+            android:textSize="18sp"
+            android:textStyle="bold"
             android:textColor="@color/gold"
-            android:layout_marginTop="8dp"/>
-
+            android:layout_marginEnd="30dp"
+            android:text="+ 0" />
         <LinearLayout
+            android:id="@+id/layoutEquipment"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
@@ -56,19 +70,26 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
-                android:layout_marginTop="8dp"
                 android:gravity="center"/>
             <TextView
-                android:id="@+id/tvEquipmentNames"
+                android:id="@+id/tvequipment"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Oprema"
                 android:textSize="16sp"
-                android:gravity="center"
-                android:layout_marginTop="6dp"
-                android:textColor="@android:color/black"/>
+                android:textColor="@android:color/black"
+                android:gravity="center_vertical"
+                android:layout_gravity="center_vertical"
+                android:text="Oprema"/>
         </LinearLayout>
-
     </LinearLayout>
+    <Button
+        android:id="@+id/btnAcceptRewards"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:text="Prihvati nagrade"
+        android:backgroundTint="@color/colorPrimary"
+        android:textColor="@android:color/white"
+        android:layout_marginTop="16dp"/>
 
 </LinearLayout>

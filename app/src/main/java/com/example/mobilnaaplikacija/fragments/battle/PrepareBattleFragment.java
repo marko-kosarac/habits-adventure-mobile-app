@@ -20,6 +20,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import com.example.mobilnaaplikacija.R;
 import com.example.mobilnaaplikacija.adapters.PrepareBattleAdapter;
 import com.example.mobilnaaplikacija.databinding.DialogPrepareBattleBinding;
+import com.example.mobilnaaplikacija.model.Boss;
 import com.example.mobilnaaplikacija.model.Equipment;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentReference;
@@ -35,10 +36,13 @@ public class PrepareBattleFragment extends DialogFragment {
 
     private DialogPrepareBattleBinding binding;
     private PrepareBattleAdapter adapter;
+    private List<Equipment> userEquipment;
     private final List<Equipment> activeEquipment = new ArrayList<>();
     private final List<Equipment> unactiveEquipment = new ArrayList<>();
     private FirebaseFirestore db;
     private int oldLevel = 1;
+    private Boss boss = null;
+    private Map<String, Object> previousEtapa;
 
     @Nullable
     @Override
@@ -46,12 +50,17 @@ public class PrepareBattleFragment extends DialogFragment {
         binding = DialogPrepareBattleBinding.inflate(inflater, container, false);
         db = FirebaseFirestore.getInstance();
 
-        List<Equipment> userEquipment = (List<Equipment>) getArguments().getSerializable("userEquipmentList");
-        if (userEquipment == null) userEquipment = new ArrayList<>();
+        Bundle args = getArguments();
+        if (args != null) {
+            previousEtapa = (Map<String, Object>) args.getSerializable("previousEtapa");
 
-        Map<String, Object> previousEtapa = (Map<String, Object>) getArguments().getSerializable("previousEtapa");
+            oldLevel = args.getInt("oldLevel");
 
-        oldLevel = getArguments().getInt("oldLevel");
+            boss = args.getParcelable("nextBoss");
+
+            userEquipment = (List<Equipment>) args.getSerializable("userEquipmentList");
+            if (userEquipment == null) userEquipment = new ArrayList<>();
+        }
 
         for (Equipment e : userEquipment) {
             if (e.isActive()) {
@@ -123,8 +132,7 @@ public class PrepareBattleFragment extends DialogFragment {
             bundle.putSerializable("activeEquipmentList", new ArrayList<>(activeEquipment));
             if (previousEtapa != null) bundle.putSerializable("previousEtapa", (Serializable) previousEtapa);
             bundle.putInt("oldLevel", oldLevel);
-            Navigation.findNavController(requireView())
-                    .navigate(R.id.action_prepareBattleFragment_to_battleFragment, bundle);
+            Navigation.findNavController(requireView()).navigate(R.id.action_prepareBattleFragment_to_battleFragment, bundle);
             dismiss();
         });
 
