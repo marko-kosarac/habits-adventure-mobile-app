@@ -96,7 +96,7 @@ public class EquipmentService {
                     if (!active || !eq.get("id").equals(battleEq.getId())) continue;
 
                     // NAPITAK logic
-                    if (type == Equipment.Type.NAPITAK && duration == 0 && eqType == Equipment.Type.NAPITAK) {
+                    if (duration == 0 && eqType == Equipment.Type.NAPITAK) {
                         powerPoints = powerPoints / (1 + eqBonus);
                         powerPoints = Math.round(powerPoints);
                         iterator.remove();
@@ -104,7 +104,7 @@ public class EquipmentService {
                     }
 
                     // ODECA logic
-                    if (type == Equipment.Type.ODECA && eqType == Equipment.Type.ODECA) {
+                    if (eqType == Equipment.Type.ODECA) {
                         if (eqCount >= 2) {
                             iterator.remove(); // remove if count >=2
                         } else {

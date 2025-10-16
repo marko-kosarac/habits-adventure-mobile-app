@@ -152,7 +152,7 @@ public class BattleFragment extends Fragment {
     }
 
     private void setupCoinReward () {
-        int coins = bossService.calculateCoins(boss.getLevel());
+        int coins = bossService.calculateCoins(boss.getLevel()); //TODO bonus coins
         binding.tvCoinReward.setText("+ " + coins);
     }
 

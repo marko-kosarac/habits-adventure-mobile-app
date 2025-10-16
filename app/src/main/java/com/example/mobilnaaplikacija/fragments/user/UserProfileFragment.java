@@ -256,6 +256,7 @@ public class UserProfileFragment extends Fragment {
                 activeMap.put("price", finalActiveEq.getPrice());
                 activeMap.put("quantity", finalActiveEq.getQuantity());
                 activeMap.put("type", finalActiveEq.getType().name());
+                activeMap.put("count", finalActiveEq.getCount());
                 activeMap.put("active", true);
                 updatedList.add(activeMap);
             }
@@ -342,18 +343,47 @@ public class UserProfileFragment extends Fragment {
                     textXP.setText("XP: " + currentXP + " / " + xpForNextLevel);
 
                     //racunanje PP-a
-                    long pp = 20; //pre nego predje prvi nivo
+                    long basePP  = 20; //pre nego predje prvi nivo
                     if (level > 1) {
-                        pp = 40; //nakon prvog nivoa
+                        basePP  = 40; //nakon prvog nivoa
                         for (int i = 2; i < level; i++) {
-                            pp = pp + (pp * 3 / 4);
+                            basePP  = basePP  + (basePP  * 3 / 4);
                         }
                     }
-                    textPP.setText("Snaga: " + pp);
+
+                    double finalPP = basePP;
+                    List<Map<String, Object>> equipmentList = (List<Map<String, Object>>) documentSnapshot.get("equipment");
+
+                    if (equipmentList != null) {
+                        for (Map<String, Object> e : equipmentList) {
+                            Boolean active = (Boolean) e.get("active");
+                            String bonus = (String) e.get("bonus");
+                            String description = (String) e.get("description");
+                            Number durationNum = (Number) e.get("duration");
+                            int duration = (durationNum != null) ? durationNum.intValue() : 0;
+
+                            if (active != null && active
+                                    && duration == -1
+                                    && bonus != null && bonus.contains("%")
+                                    && description != null && description.toLowerCase().contains("snag")) {
+                                try {
+                                    double percent = Double.parseDouble(
+                                            bonus.replace("+", "").replace("%", "").trim()
+                                    );
+                                    finalPP *= (1 + percent / 100.0);
+                                } catch (NumberFormatException ex) {
+                                    Log.w("UserProfile", "Invalid bonus format: " + bonus);
+                                }
+                            }
+                        }
+                    }
+
+                    long roundedPP = Math.round(finalPP);
+                    textPP.setText("Snaga: " + roundedPP);
 
                     //ažuriranje baze: level, title, PP
                     db.collection("users").document(userId)
-                            .update("level", level, "title", title, "powerPoints", pp)
+                            .update("level", level, "title", title, "powerPoints", roundedPP)
                             .addOnSuccessListener(aVoid ->
                                     Log.d("UserProfile", "Level, titula i PP ažurirani"))
                             .addOnFailureListener(e ->
