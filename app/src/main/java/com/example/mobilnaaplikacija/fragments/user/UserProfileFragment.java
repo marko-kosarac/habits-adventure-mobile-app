@@ -215,6 +215,42 @@ public class UserProfileFragment extends Fragment {
             userEquipmentList.add(activeEq);
         }
 
+        //primijeni efekat odmah ako je oprema trajna
+        if (activeEq.getDuration() == -1
+                && activeEq.getBonus() != null
+                && activeEq.getBonus().contains("%")
+                && activeEq.getDescription() != null
+                && activeEq.getDescription().toLowerCase().contains("snag")) {
+
+            Equipment finalActiveEq1 = activeEq;
+            userRef.get().addOnSuccessListener(doc -> {
+                if (!doc.exists()) return;
+
+                Number ppNum = (Number) doc.get("powerPoints");
+                double currentPP = ppNum != null ? ppNum.doubleValue() : 0;
+
+                double boostPercent = 0;
+                try {
+                    boostPercent = Double.parseDouble(
+                            finalActiveEq1.getBonus().replace("+", "").replace("%", "").trim()
+                    );
+                } catch (NumberFormatException ignored) {
+                }
+
+                // Accumulate effect based on quantity
+                double newPP = currentPP;
+                for (int i = 0; i < finalActiveEq1.getQuantity(); i++) {
+                    newPP *= (1 + boostPercent / 100.0);
+                }
+
+                final long roundedPP = Math.round(newPP);
+
+                userRef.update("powerPoints", roundedPP)
+                        .addOnSuccessListener(aVoid -> textPP.setText("Snaga: " + roundedPP))
+                        .addOnFailureListener(e -> Log.e("UserProfile", "Error updating PP", e));
+            });
+        }
+
         // Ažuriraj Firestore
         Equipment finalActiveEq = activeEq;
         userRef.get().addOnSuccessListener(doc -> {
@@ -361,6 +397,8 @@ public class UserProfileFragment extends Fragment {
                             String description = (String) e.get("description");
                             Number durationNum = (Number) e.get("duration");
                             int duration = (durationNum != null) ? durationNum.intValue() : 0;
+                            Number countNum = e.containsKey("quantity") ? (Number) e.get("quantity") : 1;
+                            int quantity = (countNum != null) ? countNum.intValue() : 1;
 
                             if (active != null && active
                                     && duration == -1
@@ -370,8 +408,10 @@ public class UserProfileFragment extends Fragment {
                                     double percent = Double.parseDouble(
                                             bonus.replace("+", "").replace("%", "").trim()
                                     );
-                                    finalPP *= (1 + percent / 100.0);
-                                } catch (NumberFormatException ex) {
+
+                                    for (int i = 0; i < quantity; i++) {
+                                        finalPP *= (1 + percent / 100.0);
+                                    }                                } catch (NumberFormatException ex) {
                                     Log.w("UserProfile", "Invalid bonus format: " + bonus);
                                 }
                             }

@@ -89,7 +89,10 @@ public class EquipmentService {
                     Map<String, Object> eq = iterator.next();
                     boolean active = (boolean) eq.get("active");
                     Equipment.Type eqType = Equipment.Type.valueOf(((String) eq.get("type")).toUpperCase());
-                    long eqCount = ((Number) eq.get("count")).longValue();
+                    long eqCount = 0;
+                    if (eq.containsKey("count") && eq.get("count") != null) {
+                        eqCount = ((Number) eq.get("count")).longValue();
+                    }
                     double eqBonus = parseBonus((String) eq.get("bonus"));
 
                     // match by id or name
