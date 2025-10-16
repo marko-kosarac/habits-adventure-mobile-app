@@ -139,6 +139,7 @@ public class UserProfileFragment extends Fragment {
         eq.setPrice(((Number) data.get("price")).intValue());
         eq.setQuantity(((Number) data.get("quantity")).intValue());
         eq.setActive((Boolean) data.get("active"));
+        eq.setCount(data.get("count") != null ? ((Number) data.get("count")).intValue() : 0);
         eq.setType(Equipment.Type.valueOf((String) data.get("type")));
         return eq;
     }
@@ -210,6 +211,7 @@ public class UserProfileFragment extends Fragment {
             activeEq.setQuantity(1);
             activeEq.setType(eq.getType());
             activeEq.setActive(true);
+            activeEq.setCount(0);
             userEquipmentList.add(activeEq);
         }
 

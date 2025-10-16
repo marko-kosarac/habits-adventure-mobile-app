@@ -45,6 +45,7 @@ public class EquipmentSeeder {
         values.put(SQLiteHelper.COLUMN_BONUS, equipment.getBonus());
         values.put(SQLiteHelper.COLUMN_DURATION, equipment.getDuration());
         values.put(SQLiteHelper.COLUMN_PRICE, equipment.getPrice());
+        values.put(SQLiteHelper.COLUMN_COUNT, equipment.getCount());
 
         long id = db.insert(SQLiteHelper.TABLE_EQUIPMENT, null, values);
         Log.i("SEED_SQLITE", "Inserted equipment with ID: " + id);

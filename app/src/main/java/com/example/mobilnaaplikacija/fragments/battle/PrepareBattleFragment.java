@@ -167,6 +167,7 @@ public class PrepareBattleFragment extends DialogFragment {
             activeEq.setQuantity(1);
             activeEq.setType(eq.getType());
             activeEq.setActive(true);
+            activeEq.setCount(0);
             userEquipment.add(activeEq);
         }
 

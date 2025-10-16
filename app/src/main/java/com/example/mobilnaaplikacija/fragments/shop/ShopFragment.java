@@ -95,7 +95,8 @@ public class ShopFragment extends Fragment {
                 SQLiteHelper.COLUMN_DESCRIPTION,
                 SQLiteHelper.COLUMN_TYPE,
                 SQLiteHelper.COLUMN_BONUS,
-                SQLiteHelper.COLUMN_DURATION
+                SQLiteHelper.COLUMN_DURATION,
+                SQLiteHelper.COLUMN_COUNT
         };
 
         try (android.database.Cursor cursor = db.query(
@@ -110,11 +111,12 @@ public class ShopFragment extends Fragment {
                 Equipment.Type type = Equipment.Type.valueOf(cursor.getString(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_TYPE)));
                 String bonus = cursor.getString(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_BONUS));
                 int duration = cursor.getInt(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_DURATION));
+                int count = cursor.getInt(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_COUNT));
 
                 // Dinamičko računanje cene na osnovu nivoa korisnika
                 int price = PriceCalculator.calculatePrice(currentUserLevel, type, bonus);
 
-                equipmentList.add(new Equipment(id, name, description, type, bonus, duration, price));
+                equipmentList.add(new Equipment(id, name, description, type, bonus, duration, price, count));
             }
         }
 
