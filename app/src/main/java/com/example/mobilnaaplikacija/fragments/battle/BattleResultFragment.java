@@ -58,7 +58,7 @@ public class BattleResultFragment extends Dialog {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        requestWindowFeature(Window.FEATURE_NO_TITLE);
+        //requestWindowFeature(Window.FEATURE_NO_TITLE);
 
         View view = LayoutInflater.from(getContext()).inflate(R.layout.dialog_battle_result, null);
         setContentView(view);
@@ -150,6 +150,8 @@ public class BattleResultFragment extends Dialog {
 
         //konfete
         if (resultType == ResultType.VICTORY) {
+            confetti.bringToFront();
+            confetti.setZ(10f);
             confetti.setVisibility(View.VISIBLE);
             confetti.setAnimation("confetti.json");
             confetti.playAnimation();

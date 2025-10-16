@@ -1,95 +1,106 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:lottie="http://schemas.android.com/apk/res-auto"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical"
-    android:padding="24dp"
-    android:gravity="center"
-    android:background="@android:color/white">
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <TextView
-        android:id="@+id/tvResultTitle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Rezultat"
-        android:textSize="22sp"
-        android:textStyle="bold"
-        android:layout_marginBottom="12dp"/>
-    <!-- Kovceg -->
-    <ImageView
-        android:id="@+id/ivClosedChest"
-        android:layout_width="170dp"
-        android:layout_height="170dp"
-        android:src="@drawable/chest_closed"
-        android:contentDescription="Treasure chest" />
-    <ImageView
-        android:id="@+id/ivOpenedChest"
-        android:layout_width="170dp"
-        android:layout_height="170dp"
-        android:src="@drawable/chest_opened"
-        android:contentDescription="Treasure chest"
-        android:visibility="gone" />
-    <!-- Konfete -->
-    <com.airbnb.lottie.LottieAnimationView
-        android:id="@+id/confetti"
-        android:layout_width="200dp"
-        android:layout_height="200dp"
-        android:layout_marginTop="16dp"
-        android:visibility="gone"
-        lottie:layout_constraintTop_toTopOf="parent"
-        lottie:lottie_autoPlay="false"
-        lottie:lottie_loop="false"
-        lottie:lottie_fileName="confetti.json" />
-    <!-- Nagrade -->
-    <LinearLayout
-        android:id="@+id/layoutRewards"
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:lottie="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/mainContent"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center_horizontal"
-        android:layout_marginTop="16dp"
-        >
+        android:orientation="vertical"
+        android:padding="24dp"
+        android:gravity="center"
+        android:background="@android:color/white">
+
         <TextView
-            android:id="@+id/tvCoins"
+            android:id="@+id/tvResultTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="18sp"
+            android:text="Rezultat"
+            android:textSize="22sp"
             android:textStyle="bold"
-            android:textColor="@color/gold"
-            android:layout_marginEnd="30dp"
-            android:text="+ 0" />
+            android:layout_marginBottom="12dp"/>
+        <!-- Kovceg -->
+        <ImageView
+            android:id="@+id/ivClosedChest"
+            android:layout_width="170dp"
+            android:layout_height="170dp"
+            android:src="@drawable/chest_closed"
+            android:contentDescription="Treasure chest" />
+        <ImageView
+            android:id="@+id/ivOpenedChest"
+            android:layout_width="170dp"
+            android:layout_height="170dp"
+            android:src="@drawable/chest_opened"
+            android:contentDescription="Treasure chest"
+            android:visibility="gone" />
+       <!-- Nagrade -->
         <LinearLayout
-            android:id="@+id/layoutEquipment"
-            android:layout_width="wrap_content"
+            android:id="@+id/layoutRewards"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:gravity="center_vertical">
+            android:gravity="center_horizontal"
+            android:layout_marginTop="16dp"
+            >
+            <TextView
+                android:id="@+id/tvCoins"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="17sp"
+                android:textStyle="bold"
+                android:textColor="@color/gold"
+                android:layout_marginEnd="30dp"
+                android:text="+ 0" />
             <LinearLayout
-                android:id="@+id/equipmentContainer"
+                android:id="@+id/layoutEquipment"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
-                android:gravity="center"/>
-            <TextView
-                android:id="@+id/tvequipment"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textSize="16sp"
-                android:textColor="@android:color/black"
-                android:gravity="center_vertical"
-                android:layout_gravity="center_vertical"
-                android:text="Oprema"/>
+                android:gravity="center_vertical">
+                <LinearLayout
+                    android:id="@+id/equipmentContainer"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center"/>
+                <TextView
+                    android:id="@+id/tvequipment"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="17sp"
+                    android:textStyle="bold"
+                    android:textColor="@android:color/black"
+                    android:gravity="center_vertical"
+                    android:layout_gravity="center_vertical"
+                    android:text="Oprema"/>
+            </LinearLayout>
         </LinearLayout>
-    </LinearLayout>
-    <Button
-        android:id="@+id/btnAcceptRewards"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:text="Prihvati nagrade"
-        android:backgroundTint="@color/colorPrimary"
-        android:textColor="@android:color/white"
-        android:layout_marginTop="16dp"/>
+        <Button
+            android:id="@+id/btnAcceptRewards"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:text="Prihvati nagrade"
+            android:backgroundTint="@color/colorPrimary"
+            android:textColor="@android:color/white"
+            android:layout_marginTop="16dp"/>
 
-</LinearLayout>
+    </LinearLayout>
+
+    <com.airbnb.lottie.LottieAnimationView
+        android:id="@+id/confetti"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="center"
+        android:visibility="gone"
+        android:clickable="false"
+        android:focusable="false"
+        android:scaleType="centerCrop"
+
+        app:lottie_repeatCount="1"
+        app:lottie_autoPlay="false"
+        android:elevation="10dp"/>
+</FrameLayout>
