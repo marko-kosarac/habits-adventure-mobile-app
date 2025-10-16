@@ -467,7 +467,7 @@ public class TaskRepository {
         return tasks;
     }
 
-    public int getDifficultyTaskCountSince(String userId, DifficultyType difficulty, long startOfPeriod) {
+    public int getDifficultyTaskCountSince(String userId, DifficultyType difficulty, long startOfPeriod, String id) {
         SQLiteDatabase db = dbHelper.getReadableDatabase();
         Cursor cursor = null;
         int count = 0;
@@ -475,18 +475,25 @@ public class TaskRepository {
         try {
             String query = "SELECT COUNT(*) FROM tasks WHERE " +
                     SQLiteHelper.COLUMN_USER_ID + "=? AND " +
+                    SQLiteHelper.COLUMN_TASK_OCCURRENCE_ID + "!=? AND " +
                     SQLiteHelper.COLUMN_DIFFICULTY + "=? AND " +
+                    SQLiteHelper.COLUMN_STATUS + "=? AND " +
                     SQLiteHelper.COLUMN_STATUS_TIMESTAMP + ">=?";
 
             cursor = db.rawQuery(query, new String[]{
                     userId,
+                    id,
                     difficulty.name(),
+                    StatusType.URAĐEN.name(),
                     String.valueOf(startOfPeriod)
             });
 
             if (cursor.moveToFirst()) {
                 count = cursor.getInt(0);
             }
+
+            Log.d("TaskRepository2", "Cursor count: " + cursor.getCount());
+
         } catch (Exception e) {
             Log.e("TaskRepository", "Error counting difficulty tasks: " + e.getMessage());
         } finally {
@@ -496,7 +503,7 @@ public class TaskRepository {
         return count;
     }
 
-    public int getImportanceTaskCountSince(String userId, ImportanceType importance, long startOfPeriod) {
+    public int getImportanceTaskCountSince(String userId, ImportanceType importance, long startOfPeriod, String id) {
         SQLiteDatabase db = dbHelper.getReadableDatabase();
         Cursor cursor = null;
         int count = 0;
@@ -504,12 +511,16 @@ public class TaskRepository {
         try {
             String query = "SELECT COUNT(*) FROM tasks WHERE " +
                     SQLiteHelper.COLUMN_USER_ID + "=? AND " +
+                    SQLiteHelper.COLUMN_TASK_OCCURRENCE_ID + "!=? AND " +
                     SQLiteHelper.COLUMN_IMPORTANCE + "=? AND " +
+                    SQLiteHelper.COLUMN_STATUS + "=? AND " +
                     SQLiteHelper.COLUMN_STATUS_TIMESTAMP + ">=?";
 
             cursor = db.rawQuery(query, new String[]{
                     userId,
+                    id,
                     importance.name(),
+                    StatusType.URAĐEN.name(),
                     String.valueOf(startOfPeriod)
             });
 

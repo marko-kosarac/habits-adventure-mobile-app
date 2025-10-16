@@ -548,8 +548,8 @@ public class TaskService {
             int diffXp = XpCalculator.getDifficultyXP(task.getDifficulty(), level);
             int impXp = XpCalculator.getImportanceXP(task.getImportance(), level);
 
-            boolean difficultyQuota = hasQuotaForDifficulty(userId, task.getDifficulty());
-            boolean importanceQuota = hasQuotaForImportance(userId, task.getImportance());
+            boolean difficultyQuota = hasQuotaForDifficulty(userId, task.getDifficulty(), task.getId());
+            boolean importanceQuota = hasQuotaForImportance(userId, task.getImportance(), task.getId());
 
             if (difficultyQuota) diffXp = 0;
             if (importanceQuota) impXp = 0;
@@ -585,7 +585,7 @@ public class TaskService {
         });
     }
 
-    public boolean hasQuotaForDifficulty(String userId, DifficultyType difficulty) {
+    public boolean hasQuotaForDifficulty(String userId, DifficultyType difficulty, String id) {
         long startOfPeriod;
         int limit;
 
@@ -614,11 +614,11 @@ public class TaskService {
                 return false;
         }
 
-        int count = taskRepository.getDifficultyTaskCountSince(userId, difficulty, startOfPeriod);
+        int count = taskRepository.getDifficultyTaskCountSince(userId, difficulty, startOfPeriod, id);
         return count >= limit;
     }
 
-    public boolean hasQuotaForImportance(String userId, ImportanceType importance) {
+    public boolean hasQuotaForImportance(String userId, ImportanceType importance, String id) {
         long startOfPeriod;
         int limit;
 
@@ -647,7 +647,7 @@ public class TaskService {
                 return false;
         }
 
-        int count = taskRepository.getImportanceTaskCountSince(userId, importance, startOfPeriod);
+        int count = taskRepository.getImportanceTaskCountSince(userId, importance, startOfPeriod, id);
         return count >= limit;
     }
         private long getStartOfToday() {

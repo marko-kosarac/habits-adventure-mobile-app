@@ -3,13 +3,9 @@ package com.example.mobilnaaplikacija.repository;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.util.Log;
 
 import com.example.mobilnaaplikacija.database.SQLiteHelper;
 import com.example.mobilnaaplikacija.model.Category;
-import com.example.mobilnaaplikacija.model.Task;
-
-import org.checkerframework.checker.units.qual.C;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,11 +17,9 @@ public class CategoryRepository {
     public List<Category> getCategories(String userId){
         List<Category> categories = new ArrayList<>();
         SQLiteDatabase db = dbHelper.getReadableDatabase();
-        Log.d("CategoryRepository", "Fetching categories for userId: " + userId);
 
         Cursor cursor = db.query(SQLiteHelper.TABLE_CATEGORIES, new String[]{"id", "user_id", "name", "color"},
                 SQLiteHelper.COLUMN_CATEGORY_USER_ID + " = ?", new String[]{String.valueOf(userId)}, null, null, null, null);
-        Log.d("CategoryRepository", "Cursor count: " + cursor.getCount());
 
         if (cursor != null && cursor.moveToFirst()) {
             do {
@@ -38,7 +32,6 @@ public class CategoryRepository {
             while (cursor.moveToNext());
             cursor.close();
         }
-        Log.d("CategoryRepository", "Cursor count: " + cursor.getCount());
 
         db.close();
         return categories;
