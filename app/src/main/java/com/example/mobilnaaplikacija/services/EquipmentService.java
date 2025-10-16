@@ -33,10 +33,10 @@ public class EquipmentService {
 
         ArrayList<Equipment> allEquipment = equipmentRepository.getAllEquipment();
         allEquipment.add(new Equipment(0, "Čelični mač", "Trajno povećava snagu za 5%",
-                Equipment.Type.ORUZJE, "+5%", -1, 500));
+                Equipment.Type.ORUZJE, "+5%", -1, 500, 0));
         allEquipment.add(new Equipment(0, "Luk i strela",
                 "Trajno povećava procenat dobijenog novca za 5%",
-                Equipment.Type.ORUZJE, "+5%", -1, 700));
+                Equipment.Type.ORUZJE, "+5%", -1, 700, 0));
 
         List<Equipment> filtered = allEquipment.stream()
                 .filter(eq -> eq.getType() == rewardType)
@@ -55,6 +55,10 @@ public class EquipmentService {
         Log.i("Nagrada", "Korisnik " + userId + " je osvojio opremu: " + rewardItem.getName() + " [" + rewardItem.getType() + "]");
 
         return rewardItem;
+    }
+
+    public void manageEquipmentAfterBattle (List<Equipment> usedEquipment) {
+        //prodji kroz listu opreme, check if
     }
 
 }

@@ -28,6 +28,7 @@ public class EquipmentRepository {
         values.put(SQLiteHelper.COLUMN_BONUS, equipment.getBonus());
         values.put(SQLiteHelper.COLUMN_DURATION, equipment.getDuration());
         values.put(SQLiteHelper.COLUMN_PRICE, equipment.getDuration()); // ili druga logika za cenu
+        values.put(SQLiteHelper.COLUMN_COUNT, equipment.getCount());
 
         long id = db.insert(SQLiteHelper.TABLE_EQUIPMENT, null, values);
         db.close();

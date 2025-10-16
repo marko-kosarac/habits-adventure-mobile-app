@@ -19,6 +19,7 @@ public class Equipment implements Parcelable {
     private int quantity;
     private int price;
     private boolean isActivated;
+    private int count;
 
     public Equipment() {}
     public Equipment(Equipment other) {
@@ -31,9 +32,10 @@ public class Equipment implements Parcelable {
         this.quantity = other.quantity;
         this.isActivated = other.isActivated;
         this.type = other.type;
+        this.count = other.count;
     }
 
-    public Equipment(long id, String name, String description, Type type, String bonus, int duration, int price) {
+    public Equipment(long id, String name, String description, Type type, String bonus, int duration, int price, int count) {
         this.id = id;
         this.name = name;
         this.description = description;
@@ -41,6 +43,7 @@ public class Equipment implements Parcelable {
         this.bonus = bonus;
         this.duration = duration;
         this.price = price;
+        this.count = count;
     }
 
     // Getteri i setteri
@@ -74,6 +77,14 @@ public class Equipment implements Parcelable {
         isActivated = active;
     }
 
+    public int getCount() {
+        return count;
+    }
+
+    public void setCount(int count) {
+        this.count = count;
+    }
+
     protected Equipment(Parcel in) {
         id = in.readLong();
         name = in.readString();
@@ -85,6 +96,7 @@ public class Equipment implements Parcelable {
         quantity = in.readInt();
         price = in.readInt();
         isActivated = in.readByte() != 0;
+        count = in.readInt();
     }
 
     @Override
@@ -98,6 +110,7 @@ public class Equipment implements Parcelable {
         dest.writeInt(quantity);
         dest.writeInt(price);
         dest.writeByte((byte) (isActivated ? 1 : 0));
+        dest.writeInt(count);
     }
 
     @Override

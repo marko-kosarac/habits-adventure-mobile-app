@@ -17,6 +17,7 @@ public class SQLiteHelper extends SQLiteOpenHelper {
     public static final String COLUMN_BONUS = "bonus";
     public static final String COLUMN_DURATION = "duration";
     public static final String COLUMN_PRICE = "price";
+    public static final String COLUMN_COUNT = "count";
 
     // Tasks table
     public static final String TABLE_TASKS = "TASKS";
@@ -36,7 +37,7 @@ public class SQLiteHelper extends SQLiteOpenHelper {
     public static final String COLUMN_DIFFICULTY = "difficulty";
     public static final String COLUMN_IMPORTANCE = "importance";
     public static final String COLUMN_STATUS = "status";
-    public static final String COLUMN_CREATED_AT_LEVEL = "created_at_level";
+    public static final String COLUMN_STATUS_TIMESTAMP = "status_timestamp";
     public static final String COLUMN_QUOTA_REACHED = "quota_reached";
 
     // Categories table
@@ -58,6 +59,8 @@ public class SQLiteHelper extends SQLiteOpenHelper {
     public static final String COLUMN_BATTLE_ID = "id";
     public static final String COLUMN_BATTLE_USER_ID = "user_id";
     public static final String COLUMN_BATTLE_BOSS_ID = "boss_id";
+    public static final String COLUMN_BATTLE_EQUIPMENT_IDS = "equipment";
+
     public static final String COLUMN_BATTLE_USER_WON = "user_won";
     public static final String COLUMN_BATTLE_COINS_EARNED = "coins_earned";
 
@@ -70,7 +73,7 @@ public class SQLiteHelper extends SQLiteOpenHelper {
     public static final String COLUMN_ATTACK_HIT = "hit";
     public static final String COLUMN_ATTACK_DAMAGE_DEALT = "damage_dealt";
 
-    private static final int DATABASE_VERSION = 11;
+    private static final int DATABASE_VERSION = 12;
     private static final String DATABASE_NAME = "appdata.db";
 
     private static final String DB_CREATE_EQUIPMENT = "CREATE TABLE " + TABLE_EQUIPMENT + " ("
@@ -80,7 +83,8 @@ public class SQLiteHelper extends SQLiteOpenHelper {
             + COLUMN_TYPE + " TEXT, "           // enum stored as TEXT
             + COLUMN_BONUS + " TEXT, "
             + COLUMN_DURATION + " INTEGER, "
-            + COLUMN_PRICE + " INTEGER"
+            + COLUMN_PRICE + " INTEGER, "
+            + COLUMN_COUNT + " INTEGER"
             + ");";
 
     private static final String DB_CREATE_TASKS =
@@ -101,7 +105,7 @@ public class SQLiteHelper extends SQLiteOpenHelper {
                     COLUMN_DIFFICULTY + " TEXT, " +
                     COLUMN_IMPORTANCE + " TEXT, " +
                     COLUMN_STATUS + " TEXT, " +
-                    COLUMN_CREATED_AT_LEVEL + " TEXT, " +
+                    COLUMN_STATUS_TIMESTAMP + " INTEGER, " +
                     COLUMN_QUOTA_REACHED + " TEXT" +
         ");";
 
@@ -123,6 +127,7 @@ public class SQLiteHelper extends SQLiteOpenHelper {
             + COLUMN_BATTLE_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
             + COLUMN_BATTLE_USER_ID + " TEXT, "
             + COLUMN_BATTLE_BOSS_ID + " TEXT, "
+            + COLUMN_BATTLE_EQUIPMENT_IDS + " TEXT, "
             + COLUMN_BATTLE_USER_WON + " INTEGER,"
             + COLUMN_BATTLE_COINS_EARNED + " INTEGER"
             + ");";

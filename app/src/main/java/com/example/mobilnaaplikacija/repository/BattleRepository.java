@@ -25,7 +25,8 @@ public class BattleRepository {
         values.put(SQLiteHelper.COLUMN_BATTLE_ID, battle.getId());
         values.put(SQLiteHelper.COLUMN_BATTLE_USER_ID, battle.getUserId());
         values.put(SQLiteHelper.COLUMN_BATTLE_BOSS_ID, battle.getBossId());
-        values.put(SQLiteHelper.COLUMN_BATTLE_COINS_EARNED, battle.hasUserWon());
+        values.put(SQLiteHelper.COLUMN_BATTLE_EQUIPMENT_IDS, battle.getEquipmentIdsAsString());
+        values.put(SQLiteHelper.COLUMN_BATTLE_USER_WON, battle.hasUserWon());
         values.put(SQLiteHelper.COLUMN_BATTLE_COINS_EARNED, battle.getCoinsEarned());
 
         long rowId = db.insert(SQLiteHelper.TABLE_BATTLES, null, values);
@@ -40,14 +41,14 @@ public class BattleRepository {
     public Battle update(Battle battle) {
         SQLiteDatabase db = dbHelper.getWritableDatabase();
         ContentValues values = new ContentValues();
-        values.put(SQLiteHelper.COLUMN_BATTLE_ID, battle.getId());
         values.put(SQLiteHelper.COLUMN_BATTLE_USER_ID, battle.getUserId());
         values.put(SQLiteHelper.COLUMN_BATTLE_BOSS_ID, battle.getBossId());
+        values.put(SQLiteHelper.COLUMN_BATTLE_EQUIPMENT_IDS, battle.getEquipmentIdsAsString());
         values.put(SQLiteHelper.COLUMN_BATTLE_USER_WON, battle.hasUserWon());
         values.put(SQLiteHelper.COLUMN_BATTLE_COINS_EARNED, battle.getCoinsEarned());
 
         db.update(SQLiteHelper.TABLE_BATTLES, values,
-                SQLiteHelper.COLUMN_BOSS_ID + " = ? AND " + SQLiteHelper.COLUMN_BATTLE_USER_ID + " = ?",
+                SQLiteHelper.COLUMN_BATTLE_BOSS_ID + " = ? AND " + SQLiteHelper.COLUMN_BATTLE_USER_ID + " = ?",
                 new String[]{battle.getBossId(), battle.getUserId()});
         db.close();
 
@@ -67,6 +68,7 @@ public class BattleRepository {
                     battle.setId(cursor.getString(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_BATTLE_ID)));
                     battle.setUserId(cursor.getString(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_BATTLE_USER_ID)));
                     battle.setBossId(cursor.getString(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_BATTLE_BOSS_ID)));
+                    battle.setEquipmentIdsFromString(cursor.getString(cursor.getColumnIndex(SQLiteHelper.COLUMN_BATTLE_EQUIPMENT_IDS)));
                     battle.setCoinsEarned(cursor.getInt(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_BATTLE_COINS_EARNED)));
 
                     if (!cursor.isNull(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_BATTLE_USER_WON))) {
@@ -88,29 +90,4 @@ public class BattleRepository {
         return battles;
     }
 
-    public Battle getBattleByUser(String userId) {
-        SQLiteDatabase db = dbHelper.getReadableDatabase();
-        Battle battle = null;
-
-        Cursor cursor = db.query(
-                SQLiteHelper.TABLE_BATTLES, new String[]{SQLiteHelper.COLUMN_BATTLE_ID,
-                        SQLiteHelper.COLUMN_BATTLE_USER_ID, SQLiteHelper.COLUMN_BATTLE_BOSS_ID,
-                        SQLiteHelper.COLUMN_BATTLE_USER_WON, SQLiteHelper.COLUMN_BATTLE_COINS_EARNED},
-                        SQLiteHelper.COLUMN_BATTLE_USER_ID + " = ?", new String[]{userId},
-                        null, null, null);
-
-        if (cursor != null && cursor.moveToFirst()) {
-            battle = new Battle(
-                    cursor.getString(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_BATTLE_ID)),
-                    cursor.getString(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_BATTLE_USER_ID)),
-                    cursor.getString(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_BATTLE_BOSS_ID)),
-                    cursor.getInt(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_BATTLE_USER_WON)) == 1,
-                    cursor.getInt(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_BATTLE_COINS_EARNED))
-            );
-            cursor.close();
-        }
-
-        db.close();
-        return battle;
-    }
 }

@@ -1,24 +1,22 @@
 package com.example.mobilnaaplikacija.model;
 
+import android.media.audiofx.DynamicsProcessing;
+import android.text.TextUtils;
+
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class Battle {
     private String id;
     private String userId;
     private String bossId;
+    private List<String> equipmentIds;
     private Boolean userWon;
     private int coinsEarned;
     private List<Attack> attacks;
 
     public Battle() {}
-
-    public Battle(String id, String userId, String bossId, boolean userWon, int coinsEarned) {
-        this.id = id;
-        this.userId = userId;
-        this.bossId = bossId;
-        this.userWon = userWon;
-        this.coinsEarned = coinsEarned;
-    }
 
     public String getId() {
         return id;
@@ -44,6 +42,14 @@ public class Battle {
         this.bossId = bossId;
     }
 
+    public List<String> getEquipmentIds() {
+        return equipmentIds;
+    }
+
+    public void setEquipmentIds(List<String> equipmentIds) {
+        this.equipmentIds = equipmentIds;
+    }
+
     public Boolean hasUserWon() {
         return userWon;
     }
@@ -67,4 +73,18 @@ public class Battle {
     public void setAttacks(List<Attack> attacks) {
         this.attacks = attacks;
     }
+
+    public String getEquipmentIdsAsString() {
+        if (equipmentIds == null || equipmentIds.isEmpty()) return "";
+        return TextUtils.join(",", equipmentIds);
+    }
+
+    public void setEquipmentIdsFromString(String idsString) {
+        if (idsString == null || idsString.isEmpty()) {
+            equipmentIds = new ArrayList<>();
+        } else {
+            equipmentIds = new ArrayList<>(Arrays.asList(idsString.split(",")));
+        }
+    }
+
 }

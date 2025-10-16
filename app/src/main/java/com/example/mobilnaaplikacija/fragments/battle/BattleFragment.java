@@ -363,7 +363,7 @@ public class BattleFragment extends Fragment {
                 //user missed
                 Log.i("ATTACK", "Missed. Luck: " + Math.round(luck) + ". Success rate: " + successRate + ".");
 
-                battleService.attackBoss(firebaseUser, boss, battle, battles, luck, successRate, 0, numberOfAttacks, bonusCoins, new BattleService.OnBattleCompleted() {
+                battleService.attackBoss(firebaseUser, boss, battle, battles, luck, successRate, 0, numberOfAttacks, bonusCoins, activeEquipment, new BattleService.OnBattleCompleted() {
                     @Override
                     public void onBattleFinished(Battle battle, Equipment equipment, int coins) {
                         double roundedLuck = Math.round(luck * 10.0) / 10.0; //npr 73.4%
@@ -405,7 +405,7 @@ public class BattleFragment extends Fragment {
                 //azuriraj progress bar-ove
                 setupProgressBars();
 
-                battleService.attackBoss(firebaseUser, boss, battle, battles, luck, successRate, PP, numberOfAttacks, bonusCoins, new BattleService.OnBattleCompleted() {
+                battleService.attackBoss(firebaseUser, boss, battle, battles, luck, successRate, PP, numberOfAttacks, bonusCoins, activeEquipment, new BattleService.OnBattleCompleted() {
                     @Override
                     public void onBattleFinished(Battle battle, Equipment equipment, int coins) {
                         double roundedLuck = Math.round(luck * 10.0) / 10.0; //npr 73.4%
