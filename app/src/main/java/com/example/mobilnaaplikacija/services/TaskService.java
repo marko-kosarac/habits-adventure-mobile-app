@@ -1,6 +1,8 @@
 package com.example.mobilnaaplikacija.services;
 
 import android.content.Context;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 import android.graphics.Color;
 
@@ -138,7 +140,6 @@ public class TaskService {
     }
 
     public Task update(Task task) {
-        if (task.getStatus() == StatusType.URAĐEN) task.setStatusTimestamp(System.currentTimeMillis());
         return taskRepository.update(task);
     }
 
@@ -522,34 +523,163 @@ public class TaskService {
 
     public void awardXP(Task task, FirebaseUser firebaseUser) {
         if (task == null || firebaseUser == null) return;
-        if (task.getStatus() != StatusType.URAĐEN) return; //mora biti: uradjen
+        if (task.getStatus() != StatusType.URAĐEN) return; // mora biti: uradjen
         long now = System.currentTimeMillis();
-        if (task.getStartMillis() > now) return; //mora biti: u toku/zavrsen
+        if (task.getStartMillis() > now) return; // mora biti: u toku/zavrsen
 
         String userId = firebaseUser.getUid();
-        if (userId == null) return;
+        if (userId == null || userId.isEmpty()) return;
 
         DocumentReference userDoc = userService.getUserDoc(userId);
-        userDoc.get().addOnSuccessListener(document -> { //XP nagrada na osnovu nivoa
-                    int level = 1;
-                    if (document.exists()) {
-                        Long lvl = document.getLong("level");
-                        if (lvl != null) level = lvl.intValue();
-                    }
 
-                    int diffXp = XpCalculator.getDifficultyXP(task.getDifficulty(), level);
-                    int impXp = XpCalculator.getImportanceXP(task.getImportance(), level);
+        userDoc.get().addOnSuccessListener(document -> {
+            int level = 1;
+            long currentXP = 0L;
 
-                    checkQuotaAndUpdateXP(this.db, userId, task, diffXp, impXp);
-                })
-                .addOnFailureListener(e -> {
-                    int diffXp = XpCalculator.getDifficultyXP(task.getDifficulty(), 1);
-                    int impXp = XpCalculator.getImportanceXP(task.getImportance(), 1);
+            //level i xp korisnika
+            if (document.exists()) {
+                Long lvl = document.getLong("level");
+                if (lvl != null) level = lvl.intValue();
 
-                    checkQuotaAndUpdateXP(this.db, userId, task, diffXp, impXp);
-                });
+                Long xpValue = document.getLong("experiencePoints");
+                if (xpValue != null) currentXP = xpValue;
+            }
+
+            int diffXp = XpCalculator.getDifficultyXP(task.getDifficulty(), level);
+            int impXp = XpCalculator.getImportanceXP(task.getImportance(), level);
+
+            boolean difficultyQuota = hasQuotaForDifficulty(userId, task.getDifficulty());
+            boolean importanceQuota = hasQuotaForImportance(userId, task.getImportance());
+
+            if (difficultyQuota) diffXp = 0;
+            if (importanceQuota) impXp = 0;
+
+            int totalXp = diffXp + impXp;
+
+            if (difficultyQuota || importanceQuota) {
+                task.setQuotaReached(true);
+                update(task);
+            }
+
+            if (xpAwardListener != null) {
+                xpAwardListener.onXPAwarded(totalXp, !difficultyQuota, !importanceQuota);
+            }
+
+            //update XP korisnika
+            if (totalXp > 0) {
+                long newXp = currentXP + totalXp;
+
+                userDoc.update("experiencePoints", newXp)
+                        .addOnSuccessListener(aVoid -> Log.i("XP", "User XP updated to: " + newXp))
+                        .addOnFailureListener(e -> {
+                            Log.e("XP", "Failed to update XP: " + e.getMessage());
+                            if (xpAwardListener != null)
+                                xpAwardListener.onXPAwardFailed(e.getMessage());
+                        });
+            }
+
+        }).addOnFailureListener(e -> {
+            Log.e("XP", "Failed to fetch user: " + e.getMessage());
+            if (xpAwardListener != null)
+                xpAwardListener.onXPAwardFailed(e.getMessage());
+        });
     }
 
+    public boolean hasQuotaForDifficulty(String userId, DifficultyType difficulty) {
+        long startOfPeriod;
+        int limit;
+
+        switch (difficulty.name()) {
+            case "VEOMA_LAK":
+                startOfPeriod = getStartOfToday();
+                limit = 5;
+                break;
+
+            case "LAK":
+                startOfPeriod = getStartOfToday();
+                limit = 5;
+                break;
+
+            case "TEŽAK":
+                startOfPeriod = getStartOfToday();
+                limit = 2;
+                break;
+
+            case "EKSTREMNO_TEŽAK":
+                startOfPeriod = getStartOfThisWeek();
+                limit = 1;
+                break;
+
+            default:
+                return false;
+        }
+
+        int count = taskRepository.getDifficultyTaskCountSince(userId, difficulty, startOfPeriod);
+        return count >= limit;
+    }
+
+    public boolean hasQuotaForImportance(String userId, ImportanceType importance) {
+        long startOfPeriod;
+        int limit;
+
+        switch (importance.name()) {
+            case "NORMALAN":
+                startOfPeriod = getStartOfToday();
+                limit = 5;
+                break;
+
+            case "VAŽAN":
+                startOfPeriod = getStartOfToday();
+                limit = 5;
+                break;
+
+            case "EKSTREMNO_VAŽAN":
+                startOfPeriod = getStartOfToday();
+                limit = 2;
+                break;
+
+            case "SPECIJALAN":
+                startOfPeriod = getStartOfThisMonth();
+                limit = 1;
+                break;
+
+            default:
+                return false;
+        }
+
+        int count = taskRepository.getImportanceTaskCountSince(userId, importance, startOfPeriod);
+        return count >= limit;
+    }
+        private long getStartOfToday() {
+            Calendar c = Calendar.getInstance();
+            c.set(Calendar.HOUR_OF_DAY, 0);
+            c.set(Calendar.MINUTE, 0);
+            c.set(Calendar.SECOND, 0);
+            c.set(Calendar.MILLISECOND, 0);
+            return c.getTimeInMillis();
+        }
+
+        private long getStartOfThisWeek() {
+            Calendar c = Calendar.getInstance();
+            c.set(Calendar.DAY_OF_WEEK, c.getFirstDayOfWeek());
+            c.set(Calendar.HOUR_OF_DAY, 0);
+            c.set(Calendar.MINUTE, 0);
+            c.set(Calendar.SECOND, 0);
+            c.set(Calendar.MILLISECOND, 0);
+            return c.getTimeInMillis();
+        }
+
+        private long getStartOfThisMonth() {
+            Calendar c = Calendar.getInstance();
+            c.set(Calendar.DAY_OF_MONTH, 1);
+            c.set(Calendar.HOUR_OF_DAY, 0);
+            c.set(Calendar.MINUTE, 0);
+            c.set(Calendar.SECOND, 0);
+            c.set(Calendar.MILLISECOND, 0);
+            return c.getTimeInMillis();
+        }
+
+    /*
     private void checkQuotaAndUpdateXP(FirebaseFirestore db, String userId, Task task, int diffXp, int impXp) {
         String dayId = getPeriodId("daily");
         String weekId = getPeriodId("weekly");
@@ -728,14 +858,14 @@ public class TaskService {
             default:
                 return "";
         }
-    }
+    }*/
 
     public interface XPAwardListener {
         void onXPAwarded(int xp, boolean diffAwarded, boolean impAwarded);
 
         void onXPAwardFailed(String error);
     }
-
+/*
     public void logCurrentQuotas(FirebaseFirestore db, String userId) {
         String dayId = getPeriodId("daily");
         String weekId = getPeriodId("weekly");
@@ -762,6 +892,7 @@ public class TaskService {
                 })
                 .addOnFailureListener(e -> Log.e("XP_LOG", "Failed to fetch quota docs", e));
     }
+    */
 
     public interface OnSuccessRateCalculated {
         void OnCalculated(double successRate);

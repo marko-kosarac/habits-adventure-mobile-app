@@ -382,6 +382,7 @@ public class TaskListFragment extends Fragment implements RecyclerViewInterface 
                     }
                     if(status == StatusType.URAĐEN) {
                         FirebaseUser user = userService.getCurrentUser();
+                        task.setStatusTimestamp(System.currentTimeMillis());
                         if (user != null)
                             taskService.awardXP(task, userService.getCurrentUser());
                     }

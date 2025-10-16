@@ -3,6 +3,7 @@ package com.example.mobilnaaplikacija.repository;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.util.Log;
 
 import com.example.mobilnaaplikacija.database.SQLiteHelper;
 import com.example.mobilnaaplikacija.model.enums.DifficultyType;
@@ -464,6 +465,64 @@ public class TaskRepository {
         }
 
         return tasks;
+    }
+
+    public int getDifficultyTaskCountSince(String userId, DifficultyType difficulty, long startOfPeriod) {
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+        Cursor cursor = null;
+        int count = 0;
+
+        try {
+            String query = "SELECT COUNT(*) FROM tasks WHERE " +
+                    SQLiteHelper.COLUMN_USER_ID + "=? AND " +
+                    SQLiteHelper.COLUMN_DIFFICULTY + "=? AND " +
+                    SQLiteHelper.COLUMN_STATUS_TIMESTAMP + ">=?";
+
+            cursor = db.rawQuery(query, new String[]{
+                    userId,
+                    difficulty.name(),
+                    String.valueOf(startOfPeriod)
+            });
+
+            if (cursor.moveToFirst()) {
+                count = cursor.getInt(0);
+            }
+        } catch (Exception e) {
+            Log.e("TaskRepository", "Error counting difficulty tasks: " + e.getMessage());
+        } finally {
+            if (cursor != null) cursor.close();
+        }
+
+        return count;
+    }
+
+    public int getImportanceTaskCountSince(String userId, ImportanceType importance, long startOfPeriod) {
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+        Cursor cursor = null;
+        int count = 0;
+
+        try {
+            String query = "SELECT COUNT(*) FROM tasks WHERE " +
+                    SQLiteHelper.COLUMN_USER_ID + "=? AND " +
+                    SQLiteHelper.COLUMN_IMPORTANCE + "=? AND " +
+                    SQLiteHelper.COLUMN_STATUS_TIMESTAMP + ">=?";
+
+            cursor = db.rawQuery(query, new String[]{
+                    userId,
+                    importance.name(),
+                    String.valueOf(startOfPeriod)
+            });
+
+            if (cursor.moveToFirst()) {
+                count = cursor.getInt(0);
+            }
+        } catch (Exception e) {
+            Log.e("TaskRepository", "Error counting importance tasks: " + e.getMessage());
+        } finally {
+            if (cursor != null) cursor.close();
+        }
+
+        return count;
     }
 
 }
