@@ -95,6 +95,11 @@ public class EquipmentListAdapter extends RecyclerView.Adapter<EquipmentListAdap
                     if (id == item.getId() && !active) {
                         int oldQty = ((Number) e.get("quantity")).intValue();
                         e.put("quantity", oldQty + quantity); // poveća quantity
+
+                        if (!e.containsKey("count") || e.get("count") == null) {
+                            e.put("count", 0);
+                        }
+
                         exists = true;
                         break;
                     }
@@ -110,6 +115,7 @@ public class EquipmentListAdapter extends RecyclerView.Adapter<EquipmentListAdap
                     newItem.put("duration", item.getDuration());
                     newItem.put("price", item.getPrice());
                     newItem.put("quantity", quantity);
+                    newItem.put("count", item.getCount());
                     newItem.put("active", false);
 
                     equipmentData.add(newItem);
