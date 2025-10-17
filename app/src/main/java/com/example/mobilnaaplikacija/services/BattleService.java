@@ -158,7 +158,6 @@ public class BattleService {
             if (bonusCoins != 0) {
                 coins = coins * (1 + bonusCoins/100); //TODO bonus coins 5%
             }
-            battle.setCoinsEarned(coins);
 
             int finalCoins = coins;
             userService.addCoinsToUser(userId, coins, () ->

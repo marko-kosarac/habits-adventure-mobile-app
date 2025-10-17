@@ -57,10 +57,12 @@ public class BattleResultFragment extends Dialog {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        Log.d("DialogDebug", "Window = " + getWindow());
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
 
         View view = LayoutInflater.from(getContext()).inflate(R.layout.dialog_battle_result, null);
+        setContentView(view);
         setCancelable(false);
         setCanceledOnTouchOutside(false);
 
