@@ -451,6 +451,7 @@ public class AddEditTaskFragment extends DialogFragment {
                 task.setUserId(taskToUpdate.getUserId());
                 task.setTaskId(taskToUpdate.getTaskId());
                 task.setQuotaReached(taskToUpdate.isQuotaReached());
+                task.setStatusTimestamp(taskToUpdate.getStatusTimestamp());
             } else {
                 task.setUserId(userService.getCurrentUser().getUid());
                 task.setQuotaReached(false);
