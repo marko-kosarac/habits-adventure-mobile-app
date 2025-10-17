@@ -25,7 +25,7 @@ public class EquipmentService {
         this.userService = new UserService();
     }
 
-    public Equipment getEquipmentReward(String userId, double totalChance) {
+    /*public Equipment getEquipmentReward(String userId, double totalChance) {
         //double roll = Math.random();
         double roll = 0; //TODO FIX LATER
         if (roll > totalChance) {
@@ -52,15 +52,20 @@ public class EquipmentService {
             return null;
         }
 
+        Log.d("BattleFlow", "[1] User won battle at " + System.currentTimeMillis() + " - thread: " + Thread.currentThread().getName());
+
         Equipment rewardItem = filtered.get(new Random().nextInt(filtered.size()));
+        Log.d("BattleFlow", "[2] getEquipmentReward returned " + (rewardItem != null ? rewardItem.getName() : "null"));
         userService.addEquipmentToUser(userId, rewardItem,
-                aVoid -> Log.i("Nagrada", "Oprema dodana u inventar: " + rewardItem.getName()),
-                e -> Log.e("Nagrada", "Neuspjelo dodavanje opreme: " + e.getMessage()));
+                aVoid -> Log.i("Nagrada", "[3] Oprema dodana u inventar: " + rewardItem.getName()),
+                e -> Log.e("Nagrada", "[ERR] Neuspjelo dodavanje opreme: " + e.getMessage()));
 
         Log.i("Nagrada", "Korisnik " + userId + " je osvojio opremu: " + rewardItem.getName() + " [" + rewardItem.getType() + "]");
+        Log.d("BattleFlow", "[4] Showing dialog after reward assignment");
 
         return rewardItem;
     }
+     */
 
     public void manageEquipmentAfterBattle(String userId, List<Equipment> equipmentFromBattle) {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
@@ -108,10 +113,10 @@ public class EquipmentService {
 
                     // ODECA logic
                     if (eqType == Equipment.Type.ODECA) {
+                        eqCount++;
+                        eq.put("count", eqCount); // increment count
                         if (eqCount >= 2) {
                             iterator.remove(); // remove if count >=2
-                        } else {
-                            eq.put("count", eqCount + 1); // increment count
                         }
                         break; // processed one matching piece
                     }
