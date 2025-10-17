@@ -42,7 +42,7 @@ public class PrepareBattleFragment extends DialogFragment {
     private FirebaseFirestore db;
     private int oldLevel = 1;
     private Boss boss = null;
-    private Map<String, Object> previousEtapa;
+    private boolean isFromUserProfile = false;
 
     @Nullable
     @Override
@@ -52,23 +52,58 @@ public class PrepareBattleFragment extends DialogFragment {
 
         Bundle args = getArguments();
         if (args != null) {
-            previousEtapa = (Map<String, Object>) args.getSerializable("previousEtapa");
-
             oldLevel = args.getInt("oldLevel");
-
-            boss = args.getParcelable("nextBoss");
-
-            userEquipment = (List<Equipment>) args.getSerializable("userEquipmentList");
-            if (userEquipment == null) userEquipment = new ArrayList<>();
+            isFromUserProfile = args.getBoolean("isFromUserProfile");
         }
 
+        loadUserEquipment();
+
+        return binding.getRoot();
+    }
+
+    private void loadUserEquipment() {
+        String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        db.collection("users").document(userId).get()
+                .addOnSuccessListener(document -> {
+                    if (document.exists()) {
+                        List<Map<String, Object>> equipmentData = (List<Map<String, Object>>) document.get("equipment");
+
+                        userEquipment = new ArrayList<>();
+
+                        if (equipmentData != null) {
+                            for (Map<String, Object> data : equipmentData) {
+                                Equipment eq = mapToEquipment(data);
+                                userEquipment.add(eq);
+                            }
+                        }
+                        setupEquipmentListsAndUI();
+                    }
+                });
+    }
+
+    private Equipment mapToEquipment(Map<String, Object> data) {
+        Equipment eq = new Equipment();
+        eq.setId(((Number) data.get("id")).longValue());
+        eq.setName((String) data.get("name"));
+        eq.setDescription((String) data.get("description"));
+        eq.setBonus((String) data.get("bonus"));
+        eq.setDuration(((Number) data.get("duration")).intValue());
+        eq.setPrice(((Number) data.get("price")).intValue());
+        eq.setQuantity(((Number) data.get("quantity")).intValue());
+        eq.setActive((Boolean) data.get("active"));
+        eq.setCount(data.get("count") != null ? ((Number) data.get("count")).intValue() : 0);
+        eq.setType(Equipment.Type.valueOf((String) data.get("type")));
+        return eq;
+    }
+
+    private void setupEquipmentListsAndUI() {
         for (Equipment e : userEquipment) {
-            if (e.isActive()) {
-                activeEquipment.add(e);
-            } else unactiveEquipment.add(e);
+            if (e.isActive()) activeEquipment.add(e);
+            else unactiveEquipment.add(e);
         }
 
         updateActivatedEquipmentUI();
+
         if (unactiveEquipment.isEmpty()) {
             binding.rvUnactiveEquipment.setVisibility(View.GONE);
             binding.tvTitle.setVisibility(View.GONE);
@@ -79,7 +114,7 @@ public class PrepareBattleFragment extends DialogFragment {
             binding.emptyStateLayout.setVisibility(View.GONE);
         }
 
-
+        //duplikati
         Map<Long, Equipment> groupedMap = new HashMap<>();
         for (Equipment eq : unactiveEquipment) {
             if (!eq.isActive()) {
@@ -92,11 +127,10 @@ public class PrepareBattleFragment extends DialogFragment {
         }
         List<Equipment> groupedUnactiveEquipment = new ArrayList<>(groupedMap.values());
 
+        //adapter
         adapter = new PrepareBattleAdapter(groupedUnactiveEquipment);
         binding.rvUnactiveEquipment.setLayoutManager(new LinearLayoutManager(requireContext()));
         binding.rvUnactiveEquipment.setAdapter(adapter);
-
-        List<Equipment> finalUserEquipment = userEquipment;
 
         adapter.setOnActivateListener(eq -> {
             Equipment existingActive = null;
@@ -108,10 +142,8 @@ public class PrepareBattleFragment extends DialogFragment {
             }
 
             if (existingActive != null) {
-                //broj aktivne
                 existingActive.setQuantity(existingActive.getQuantity() + 1);
             } else {
-                //nova aktivna
                 Equipment newActive = new Equipment(eq);
                 newActive.setActive(true);
                 newActive.setQuantity(1);
@@ -124,20 +156,19 @@ public class PrepareBattleFragment extends DialogFragment {
 
             updateActivatedEquipmentUI();
             adapter.notifyDataSetChanged();
-            activateEquipment(eq, finalUserEquipment);
+            activateEquipment(eq, userEquipment);
         });
 
         binding.btnStartBattle.setOnClickListener(v -> {
             Bundle bundle = new Bundle();
+            bundle.putBoolean("isFromUserProfile", isFromUserProfile);
             bundle.putSerializable("activeEquipmentList", new ArrayList<>(activeEquipment));
-            if (previousEtapa != null) bundle.putSerializable("previousEtapa", (Serializable) previousEtapa);
             bundle.putInt("oldLevel", oldLevel);
             Navigation.findNavController(requireView()).navigate(R.id.action_prepareBattleFragment_to_battleFragment, bundle);
             dismiss();
         });
-
-        return binding.getRoot();
     }
+
 
     private void activateEquipment(Equipment eq, List<Equipment> userEquipment) {
         String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
@@ -266,7 +297,7 @@ public class PrepareBattleFragment extends DialogFragment {
             //tooltip za aktivnu opremu u ikonicama
             itemLayout.setOnClickListener(v -> {
                 StringBuilder details = new StringBuilder();
-                details.append(first.getName()).append(first.getBonus()).append(" x").append(totalQty);
+                details.append(first.getName()).append(" ").append(first.getBonus()).append(" x").append(totalQty);
                 Toast.makeText(getContext(), details.toString(), Toast.LENGTH_SHORT).show();
             });
 

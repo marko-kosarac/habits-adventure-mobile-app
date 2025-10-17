@@ -418,7 +418,7 @@ public class UserProfileFragment extends Fragment {
                         }
                     }
 
-                    long roundedPP = Math.round(finalPP);
+                    int roundedPP = (int) Math.ceil(finalPP);
                     textPP.setText("Snaga: " + roundedPP);
 
                     //ažuriranje baze: level, title, PP
@@ -571,9 +571,9 @@ public class UserProfileFragment extends Fragment {
                 .setMessage("Spreman/na za borbu sa bosom?")
                 .setPositiveButton("Kreni", (d, w) -> {
                     Bundle bundle = new Bundle();
+                    bundle.putBoolean("isFromUserProfile", true);
                     bundle.putInt("oldLevel", level - 1);
                     bundle.putParcelableArrayList("userEquipmentList", new ArrayList<>(userEquipmentList));
-                    if (previousEtapa != null) bundle.putSerializable("previousEtapa", (Serializable) previousEtapa);
                     NavHostFragment.findNavController(this)
                             .navigate(R.id.action_userProfileFragment_to_prepareBattleFragment, bundle);
                 })
