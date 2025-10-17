@@ -183,11 +183,14 @@ public class BattleService {
         battle.setAttacks(attacks);
         battle.setUserWon(win);
         battle.setCoinsEarned(coins);
-        //borba prosla - stavi njenu opremu TODO
+        //borba prosla - stavi njenu opremu
         List<String> equipmentIds = new ArrayList<>();
         if (!equipmentFromBattle.isEmpty()) {
             for (Equipment eq : equipmentFromBattle) {
-                equipmentIds.add(String.valueOf(eq.getId()));
+                int qty = eq.getQuantity() > 0 ? eq.getQuantity() : 1;
+                for (int i = 0; i < qty; i++) {
+                    equipmentIds.add(String.valueOf(eq.getId()));
+                }
             }
         }
         battle.setEquipmentIds(equipmentIds);

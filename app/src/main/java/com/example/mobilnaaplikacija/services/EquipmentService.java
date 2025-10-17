@@ -37,9 +37,9 @@ public class EquipmentService {
         Equipment.Type rewardType = typeRoll <= 0.95 ? Equipment.Type.ORUZJE : Equipment.Type.ODECA; //TODO FIX LATER
 
         ArrayList<Equipment> allEquipment = equipmentRepository.getAllEquipment();
-        allEquipment.add(new Equipment(0, "Čelični mač", "Trajno povećava snagu za 5%",
+        allEquipment.add(new Equipment(10, "Čelični mač", "Trajno povećava snagu za 5%",
                 Equipment.Type.ORUZJE, "+5%", -1, 500, 0));
-        allEquipment.add(new Equipment(0, "Luk i strela",
+        allEquipment.add(new Equipment(11, "Luk i strela",
                 "Trajno povećava procenat dobijenog novca za 5%",
                 Equipment.Type.ORUZJE, "+5%", -1, 700, 0));
 
@@ -99,7 +99,7 @@ public class EquipmentService {
                     if (!active || !eq.get("id").equals(battleEq.getId())) continue;
 
                     // NAPITAK logic
-                    if (duration == 0 && eqType == Equipment.Type.NAPITAK) {
+                    if (duration == 0 && eqType == Equipment.Type.NAPITAK && active) {
                         powerPoints = powerPoints / (1 + eqBonus);
                         powerPoints = Math.round(powerPoints);
                         iterator.remove();
@@ -127,7 +127,6 @@ public class EquipmentService {
         });
     }
 
-    // helper to parse "+20%" → 0.2
     private double parseBonus(String bonusStr) {
         if (bonusStr == null || bonusStr.isEmpty()) return 0.0;
         try {
