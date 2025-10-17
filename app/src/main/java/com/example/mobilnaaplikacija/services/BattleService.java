@@ -120,7 +120,7 @@ public class BattleService {
             checkAndCreateNextBattleIfNeeded(userBattles, battle, boss, userId);
             handleDefeat(userId, boss, battle, attacks, bonusCoins, equipmentFromBattle, callback);
         } else {
-            updateBattleAndBoss(battle, null, boss, userId, 0, attacks, equipmentFromBattle); //TODO update?
+            updateBattleAndBoss(battle, null, boss, userId, 0, attacks, equipmentFromBattle);
             callback.onBattleFinished(battle, null, 0);
         }
     }
@@ -141,7 +141,7 @@ public class BattleService {
         Equipment equipmentReward = null;//equipmentService.getEquipmentReward(userId, chance); TODO
 
         updateBattleAndBoss(battle, true, boss, userId, coins, attacks, equipmentFromBattle);
-        equipmentService.manageEquipmentAfterBattle(userId, equipmentFromBattle);
+        //equipmentService.manageEquipmentAfterBattle(userId, equipmentFromBattle);
         callback.onBattleFinished(battle, equipmentReward, coins);
     }
 
@@ -174,7 +174,7 @@ public class BattleService {
         boss.setCurrentHp(bossService.calculateMaxHp(boss.getLevel()));
 
         updateBattleAndBoss(battle, null, boss, userId, coins, attacks, equipmentFromBattle);
-        equipmentService.manageEquipmentAfterBattle(userId, equipmentFromBattle);
+        //equipmentService.manageEquipmentAfterBattle(userId, equipmentFromBattle);
     callback.onBattleFinished(battle, equipmentReward, coins);
     }
 
@@ -213,7 +213,7 @@ public class BattleService {
                     Battle newBattle = new Battle();
                     newBattle.setUserId(userId);
                     newBattle.setBossId(newBoss.getId());
-                    //nova borba - nema opreme TODO
+                    //nova borba - nema opreme
                     newBattle.setEquipmentIdsFromString("");
                     newBattle.setCoinsEarned(0);
                     newBattle.setUserWon(null);

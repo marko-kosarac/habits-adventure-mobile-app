@@ -360,82 +360,48 @@ public class BattleFragment extends Fragment {
 
             double luck = Math.random() * 100;
             boolean userHit = luck < successRate;
-            if (!userHit) {
-                //user missed
-                Log.i("ATTACK", "Missed. Luck: " + Math.round(luck) + ". Success rate: " + successRate + ".");
 
-                battleService.attackBoss(firebaseUser, boss, battle, battles, luck, successRate, 0, numberOfAttacks, bonusCoins, activeEquipment, new BattleService.OnBattleCompleted() {
-                    @Override
-                    public void onBattleFinished(Battle battle, Equipment equipment, int coins) {
-                        double roundedLuck = Math.round(luck * 10.0) / 10.0; //npr 73.4%
-
-                        if (Boolean.TRUE.equals(battle.hasUserWon())) {
-                            bonusCoins = 0; //TODO
-                            Toast.makeText(getContext(), "Pobedio si, bravo! Sreća u napadu: " + roundedLuck + "%", Toast.LENGTH_LONG).show();
-                            //ucitaj narednu borbu ako je ima
-                            loadNextBattle(true, coins, equipment);
-                        } else if (numberOfAttacks >= 5 && !Boolean.TRUE.equals(battle.hasUserWon())) {
-                            bonusCoins = 0;
-                            Toast.makeText(getContext(), "Bos nije poražen! Sreća u napadu: " + roundedLuck + "%", Toast.LENGTH_LONG).show();
-                            if (coins > 0 || equipment != null) {
-                                showBattleResultDialog(false, coins, equipment);
-                            } else {
-                                NavHostFragment.findNavController(BattleFragment.this)
-                                        .navigate(R.id.action_battleFragment_to_userProfileFragment);
-                            }                        } else {
-                            Toast.makeText(getContext(), "Promašaj! Sreća: " + roundedLuck + "%", Toast.LENGTH_SHORT).show();
-                        }
-                    }
-
-                    @Override
-                    public void onError(String message) {
-                        Toast.makeText(getContext(), message, Toast.LENGTH_SHORT).show();
-                    }
-                });
-            } else {
-                //user hit
-                Log.i("ATTACK", "Hit. Luck: " + luck + ". Success rate: " + successRate + ".");
+            if (userHit) {
                 if (firebaseUser == null || battle == null || boss == null) return;
-
                 //animacija udarca
                 animateAttack();
-
                 //oduzmi štetu
                 boss = bossService.takeDamage(boss, PP);
-
                 //azuriraj progress bar-ove
                 setupProgressBars();
 
-                battleService.attackBoss(firebaseUser, boss, battle, battles, luck, successRate, PP, numberOfAttacks, bonusCoins, activeEquipment, new BattleService.OnBattleCompleted() {
-                    @Override
-                    public void onBattleFinished(Battle battle, Equipment equipment, int coins) {
-                        double roundedLuck = Math.round(luck * 10.0) / 10.0; //npr 73.4%
-
-                        if (Boolean.TRUE.equals(battle.hasUserWon())) {
-                            bonusCoins = 0; //TODO
-                            Toast.makeText(getContext(), "Pobeda, bravo! Sreća u napadu: " + roundedLuck + "%", Toast.LENGTH_LONG).show();
-                            //ucitaj narednu borbu ako je ima
-                            loadNextBattle(true, coins, equipment);
-                        } else if (numberOfAttacks >= 5 && !Boolean.TRUE.equals(battle.hasUserWon())) {
-                            bonusCoins = 0;
-                            Toast.makeText(getContext(), "Bos nije poražen. Sreća u napadu: " + roundedLuck + "%", Toast.LENGTH_LONG).show();
-                            if (coins > 0 || equipment != null) {
-                                showBattleResultDialog(false, coins, equipment);
-                            } else {
-                                NavHostFragment.findNavController(BattleFragment.this)
-                                        .navigate(R.id.action_battleFragment_to_userProfileFragment);
-                            }
-                        } else {
-                            Toast.makeText(getContext(), "Pogodak! Sreća: " + roundedLuck + "%", Toast.LENGTH_SHORT).show();
-                        }
-                    }
-
-                    @Override
-                    public void onError(String message) {
-                        Toast.makeText(getContext(), message, Toast.LENGTH_SHORT).show();
-                    }
-                });
             }
+
+            battleService.attackBoss(firebaseUser, boss, battle, battles, luck, successRate, 0, numberOfAttacks, bonusCoins, activeEquipment, new BattleService.OnBattleCompleted() {
+                @Override
+                public void onBattleFinished(Battle battle, Equipment equipment, int coins) {
+                    double roundedLuck = Math.round(luck * 10.0) / 10.0; //npr 73.4%
+
+                    if (Boolean.TRUE.equals(battle.hasUserWon())) {
+                        bonusCoins = 0; //TODO
+                        Toast.makeText(getContext(), "Pobedio si, bravo! Sreća u napadu: " + roundedLuck + "%", Toast.LENGTH_LONG).show();
+                        //ucitaj narednu borbu ako je ima
+                        loadNextBattle(true, coins, equipment);
+                    } else if (numberOfAttacks >= 5 && !Boolean.TRUE.equals(battle.hasUserWon())) {
+                        bonusCoins = 0;
+                        Toast.makeText(getContext(), "Bos nije poražen! Sreća u napadu: " + roundedLuck + "%", Toast.LENGTH_LONG).show();
+                        if (coins > 0 || equipment != null) {
+                            showBattleResultDialog(false, coins, equipment);
+                        } else {
+                            NavHostFragment.findNavController(BattleFragment.this)
+                                    .navigate(R.id.action_battleFragment_to_userProfileFragment);
+                        }
+                    } else {
+                        if (userHit) Toast.makeText(getContext(), "Pogodak! Sreća: " + roundedLuck + "%", Toast.LENGTH_SHORT).show();
+                        else Toast.makeText(getContext(), "Promašaj! Sreća: " + roundedLuck + "%", Toast.LENGTH_SHORT).show();
+                    }
+                }
+
+                @Override
+                public void onError(String message) {
+                    Toast.makeText(getContext(), message, Toast.LENGTH_SHORT).show();
+                }
+            });
         });
     }
 
