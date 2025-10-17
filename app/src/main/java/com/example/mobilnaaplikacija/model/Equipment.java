@@ -1,9 +1,9 @@
 package com.example.mobilnaaplikacija.model;
 
-public class Equipment {
+import android.os.Parcelable;
+import android.os.Parcel;
 
-
-
+public class Equipment implements Parcelable {
     public enum Type {
         NAPITAK,
         ODECA,
@@ -73,4 +73,48 @@ public class Equipment {
     public void setActive(boolean active) {
         isActivated = active;
     }
+
+    protected Equipment(Parcel in) {
+        id = in.readLong();
+        name = in.readString();
+        description = in.readString();
+        // Enums are written as strings
+        String typeName = in.readString();
+        type = typeName != null ? Type.valueOf(typeName) : null;
+        bonus = in.readString();
+        duration = in.readInt();
+        quantity = in.readInt();
+        price = in.readInt();
+        isActivated = in.readByte() != 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeLong(id);
+        dest.writeString(name);
+        dest.writeString(description);
+        dest.writeString(type != null ? type.name() : null);
+        dest.writeString(bonus);
+        dest.writeInt(duration);
+        dest.writeInt(quantity);
+        dest.writeInt(price);
+        dest.writeByte((byte) (isActivated ? 1 : 0));
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    public static final Creator<Equipment> CREATOR = new Creator<Equipment>() {
+        @Override
+        public Equipment createFromParcel(Parcel in) {
+            return new Equipment(in);
+        }
+
+        @Override
+        public Equipment[] newArray(int size) {
+            return new Equipment[size];
+        }
+    };
 }

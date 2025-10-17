@@ -5,6 +5,8 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
+import androidx.compose.ui.node.HitTestResult;
+
 public class SQLiteHelper extends SQLiteOpenHelper {
     //Equipment table
     public static final String TABLE_EQUIPMENT = "EQUIPMENT";
@@ -34,13 +36,41 @@ public class SQLiteHelper extends SQLiteOpenHelper {
     public static final String COLUMN_DIFFICULTY = "difficulty";
     public static final String COLUMN_IMPORTANCE = "importance";
     public static final String COLUMN_STATUS = "status";
+    public static final String COLUMN_CREATED_AT_LEVEL = "created_at_level";
+    public static final String COLUMN_QUOTA_REACHED = "quota_reached";
 
     // Categories table
     public static final String TABLE_CATEGORIES = "CATEGORIES";
     public static final String COLUMN_CATEGORY_ID = "id";
     public static final String COLUMN_CATEGORY_NAME = "name";
     public static final String COLUMN_CATEGORY_COLOR = "color";
-    private static final int DATABASE_VERSION = 10;
+
+    // Boss table
+    public static final String TABLE_BOSS = "BOSS";
+    public static final String COLUMN_BOSS_ID = "id";
+    public static final String COLUMN_BOSS_CURRENT_HP = "current_hp";
+    public static final String COLUMN_BOSS_MAX_HP = "max_hp";
+    public static final String COLUMN_BOSS_LEVEL = "level";
+    public static final String COLUMN_BOSS_DEFEATED = "defeated";
+
+    // Battle table
+    public static final String TABLE_BATTLES = "BATTLES";
+    public static final String COLUMN_BATTLE_ID = "id";
+    public static final String COLUMN_BATTLE_USER_ID = "user_id";
+    public static final String COLUMN_BATTLE_BOSS_ID = "boss_id";
+    public static final String COLUMN_BATTLE_USER_WON = "user_won";
+    public static final String COLUMN_BATTLE_COINS_EARNED = "coins_earned";
+
+    // Attack table
+    public static final String TABLE_ATTACKS = "ATTACKS";
+    public static final String COLUMN_ATTACK_ID = "id";
+    public static final String COLUMN_ATTACK_USER_ID = "user_id";
+    public static final String COLUMN_ATTACK_BOSS_ID = "boss_id";
+    public static final String COLUMN_ATTACK_ATTEMPTS_NUMBER = "attempts";
+    public static final String COLUMN_ATTACK_HIT = "hit";
+    public static final String COLUMN_ATTACK_DAMAGE_DEALT = "damage_dealt";
+
+    private static final int DATABASE_VERSION = 11;
     private static final String DATABASE_NAME = "appdata.db";
 
     private static final String DB_CREATE_EQUIPMENT = "CREATE TABLE " + TABLE_EQUIPMENT + " ("
@@ -70,13 +100,40 @@ public class SQLiteHelper extends SQLiteOpenHelper {
                     COLUMN_UNIT + " TEXT, " +
                     COLUMN_DIFFICULTY + " TEXT, " +
                     COLUMN_IMPORTANCE + " TEXT, " +
-                    COLUMN_STATUS + " TEXT" +
-                    ");";
+                    COLUMN_STATUS + " TEXT, " +
+                    COLUMN_CREATED_AT_LEVEL + " TEXT, " +
+                    COLUMN_QUOTA_REACHED + " TEXT" +
+        ");";
 
     private static final String DB_CREATE_CATEGORIES = "CREATE TABLE " + TABLE_CATEGORIES + " ("
             + COLUMN_CATEGORY_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
             + COLUMN_CATEGORY_NAME + " TEXT, "
             + COLUMN_CATEGORY_COLOR + " INTEGER"
+            + ");";
+
+    private static final String DB_CREATE_BOSS = "CREATE TABLE " + TABLE_BOSS + " ("
+            + COLUMN_BOSS_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
+            + COLUMN_BOSS_CURRENT_HP + " INTEGER, "
+            + COLUMN_BOSS_MAX_HP + " INTEGER, "
+            + COLUMN_BOSS_LEVEL + " INTEGER, "
+            + COLUMN_BOSS_DEFEATED + " INTEGER"
+            + ");";
+
+    private static final String DB_CREATE_BATTLES = "CREATE TABLE " + TABLE_BATTLES + " ("
+            + COLUMN_BATTLE_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
+            + COLUMN_BATTLE_USER_ID + " TEXT, "
+            + COLUMN_BATTLE_BOSS_ID + " TEXT, "
+            + COLUMN_BATTLE_USER_WON + " INTEGER,"
+            + COLUMN_BATTLE_COINS_EARNED + " INTEGER"
+            + ");";
+
+    private static final String DB_CREATE_ATTACKS = "CREATE TABLE " + TABLE_ATTACKS + " ("
+            + COLUMN_ATTACK_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
+            + COLUMN_ATTACK_USER_ID + " TEXT, "
+            + COLUMN_ATTACK_BOSS_ID + " TEXT, "
+            + COLUMN_ATTACK_ATTEMPTS_NUMBER + " INTEGER, "
+            + COLUMN_ATTACK_HIT + " INTEGER, "
+            + COLUMN_ATTACK_DAMAGE_DEALT + " INTEGER"
             + ");";
 
     public SQLiteHelper(Context context) {
@@ -85,10 +142,13 @@ public class SQLiteHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        Log.i("DB", "Creating Equipment, Tasks and Categories table");
+        Log.i("DB", "Creating Equipment, Tasks, Categories, Boss, Battles and Attacks table");
         db.execSQL(DB_CREATE_EQUIPMENT);
         db.execSQL(DB_CREATE_TASKS);
         db.execSQL(DB_CREATE_CATEGORIES);
+        db.execSQL(DB_CREATE_BOSS);
+        db.execSQL(DB_CREATE_BATTLES);
+        db.execSQL(DB_CREATE_ATTACKS);
     }
 
     @Override
@@ -97,6 +157,9 @@ public class SQLiteHelper extends SQLiteOpenHelper {
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_EQUIPMENT);
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_TASKS);
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_CATEGORIES);
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_BOSS);
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_BATTLES);
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_ATTACKS);
         onCreate(db);
     }
 }

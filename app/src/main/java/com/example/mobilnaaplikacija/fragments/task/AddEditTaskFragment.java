@@ -9,6 +9,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -444,8 +445,10 @@ public class AddEditTaskFragment extends DialogFragment {
                 task.setId(taskToUpdate.getId());
                 task.setUserId(taskToUpdate.getUserId());
                 task.setTaskId(taskToUpdate.getTaskId());
+                task.setQuotaReached(taskToUpdate.isQuotaReached());
             } else {
                 task.setUserId(userService.getCurrentUser().getUid());
+                task.setQuotaReached(false);
             }
             if(isOneTime && !isEditing){
                 task.setTaskId(UUID.randomUUID().toString());
@@ -471,61 +474,77 @@ public class AddEditTaskFragment extends DialogFragment {
                 task.setUnit((UnitType) binding.spinnerRecurringUnit.getSelectedItem());
                 task.setInterval(Integer.parseInt(recurringNumber));
             }
-
-            // Čuvanje zadatka
-            if (areDatesValid) {
-                if (isEditing) {
-                    if (taskToUpdate.getFrequency() == FrequencyType.PONAVLJAJUCI) {
-                        new AlertDialog.Builder(requireContext())
-                                .setTitle("Izmena zadatka")
-                                .setMessage("Promene će važiti samo za buduće pojavljivanja ovog zadatka počevši od danas. " +
-                                        "Završeni i odrađeni zadaci se neće menjati.\n\nDa li želite da nastavite?")
-                                .setPositiveButton("Da", (dialog, which) -> {
-                                    updateStartEndMillis(task);
-                                    List<Task> list = taskService.updateFutureOccurrences(task);
-                                    if (!list.isEmpty()) {
-                                        Toast.makeText(requireContext(),
-                                                "Zadatak izmenjen!",
-                                                Toast.LENGTH_SHORT).show();
-                                        sendBackToTaskList(task);
-                                        updateStreak();
-                                        dismiss();
-                                    } else {
-                                        Toast.makeText(requireContext(),
-                                                "Greška pri izmeni zadatka!",
-                                                Toast.LENGTH_SHORT).show();
-                                    }
-                                })
-                                .setNegativeButton("Ne", (dialog, which) -> dialog.dismiss())
-                                .show();
-                    } else {
-                        Task updated = taskService.update(task);
-                        if (updated != null) {
-                            Toast.makeText(requireContext(), "Zadatak izmenjen!", Toast.LENGTH_SHORT).show();
-                            sendBackToTaskList(task);
-                            updateStreak();
-                            dismiss();
-                        } else {
-                            Toast.makeText(requireContext(), "Greška pri izmeni zadatka!", Toast.LENGTH_SHORT).show();
-                        }
-                    }
-                } else {
-                    if (isRepeating)
-                        taskService.addRepeatingTask(task);
-                    else
-                        taskService.add(task);
-
-                    Toast.makeText(requireContext(), "Zadatak dodan!", Toast.LENGTH_SHORT).show();
-                    sendBackToTaskList(task);
-                    updateStreak();
-                    dismiss();
+            userService.getUserLevel(task.getUserId(), new UserService.OnLevelRetrievedCallback() {
+                @Override
+                public void onSuccess(int level) {
+                    Log.d("UserLevel", "Trenutni level korisnika: " + level);
+                    task.setCreatedAtLevel(level);
+                    save(task);
                 }
-            } else {
-                showError("Datum završetka je pre početka!");
-            }
+
+                @Override
+                public void onFailure(String errorMessage) {
+                    Log.e("UserLevel", "Greška: " + errorMessage);
+                    task.setCreatedAtLevel(1);
+                    save(task);
+                }
+            });
         });
     }
 
+    private void save (Task task) {
+        // Čuvanje zadatka
+        if (areDatesValid) {
+            if (isEditing) {
+                if (taskToUpdate.getFrequency() == FrequencyType.PONAVLJAJUCI) {
+                    new AlertDialog.Builder(requireContext())
+                            .setTitle("Izmena zadatka")
+                            .setMessage("Promene će važiti samo za buduće pojavljivanja ovog zadatka počevši od danas. " +
+                                    "Završeni i odrađeni zadaci se neće menjati.\n\nDa li želite da nastavite?")
+                            .setPositiveButton("Da", (dialog, which) -> {
+                                updateStartEndMillis(task);
+                                List<Task> list = taskService.updateFutureOccurrences(task);
+                                if (!list.isEmpty()) {
+                                    Toast.makeText(requireContext(),
+                                            "Zadatak izmenjen!",
+                                            Toast.LENGTH_SHORT).show();
+                                    sendBackToTaskList(task);
+                                    updateStreak();
+                                    dismiss();
+                                } else {
+                                    Toast.makeText(requireContext(),
+                                            "Greška pri izmeni zadatka!",
+                                            Toast.LENGTH_SHORT).show();
+                                }
+                            })
+                            .setNegativeButton("Ne", (dialog, which) -> dialog.dismiss())
+                            .show();
+                } else {
+                    Task updated = taskService.update(task);
+                    if (updated != null) {
+                        Toast.makeText(requireContext(), "Zadatak izmenjen!", Toast.LENGTH_SHORT).show();
+                        sendBackToTaskList(task);
+                        updateStreak();
+                        dismiss();
+                    } else {
+                        Toast.makeText(requireContext(), "Greška pri izmeni zadatka!", Toast.LENGTH_SHORT).show();
+                    }
+                }
+            } else {
+                if (task.getFrequency() == FrequencyType.PONAVLJAJUCI)
+                    taskService.addRepeatingTask(task);
+                else
+                    taskService.add(task);
+
+                Toast.makeText(requireContext(), "Zadatak dodan!", Toast.LENGTH_SHORT).show();
+                sendBackToTaskList(task);
+                updateStreak();
+                dismiss();
+            }
+        } else {
+            showError("Datum završetka je pre početka!");
+        }
+    }
     private void sendBackToTaskList(Task task) {
         Bundle bundle = new Bundle();
         bundle.putParcelable("task", task);

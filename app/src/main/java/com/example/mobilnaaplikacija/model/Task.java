@@ -28,13 +28,15 @@ public class Task implements Parcelable {
     private DifficultyType difficulty;
     private ImportanceType importance;
     private StatusType status;
+    private Integer createdAtLevel;
+    private boolean quotaReached;
 
     public Task() {}
 
     public Task(String userId, String taskId, String name, String description, String categoryId,
                 FrequencyType frequency, Long startMillis, Long endMillis, Long groupStartMillis,
                 Long groupEndMillis, Integer interval, UnitType unit, DifficultyType difficulty,
-                ImportanceType importance, StatusType status) {
+                ImportanceType importance, StatusType status, Integer createdAtLevel, boolean quotaReached) {
         this.userId = userId;
         this.taskId = taskId;
         this.name = name;
@@ -50,12 +52,14 @@ public class Task implements Parcelable {
         this.difficulty = difficulty;
         this.importance = importance;
         this.status = status;
+        this.createdAtLevel = createdAtLevel;
+        this.quotaReached = quotaReached;
     }
 
     public Task(String id, String userId, String taskId, String name, String description, String categoryId,
                 FrequencyType frequency, Long startMillis, Long endMillis, Long groupStartMillis,
                 Long groupEndMillis, Integer interval, UnitType unit, DifficultyType difficulty,
-                ImportanceType importance, StatusType status) {
+                ImportanceType importance, StatusType status, Integer createdAtLevel, boolean quotaReached) {
         this.id = id;
         this.userId = userId;
         this.taskId = taskId;
@@ -72,6 +76,8 @@ public class Task implements Parcelable {
         this.difficulty = difficulty;
         this.importance = importance;
         this.status = status;
+        this.createdAtLevel = createdAtLevel;
+        this.quotaReached = quotaReached;
     }
 
     protected Task(Parcel in) {
@@ -96,6 +102,8 @@ public class Task implements Parcelable {
         importance = impName != null ? ImportanceType.valueOf(impName) : null;
         String statusName = in.readString();
         status = statusName != null ? StatusType.valueOf(statusName) : null;
+        createdAtLevel = in.readInt();
+        quotaReached = in.readBoolean();
     }
 
     public String getId() { return id; }
@@ -146,6 +154,22 @@ public class Task implements Parcelable {
     public StatusType getStatus() { return status; }
     public void setStatus(StatusType status) { this.status = status; }
 
+    public Integer getCreatedAtLevel() {
+        return createdAtLevel;
+    }
+
+    public void setCreatedAtLevel(Integer createdAtLevel) {
+        this.createdAtLevel = createdAtLevel;
+    }
+
+    public boolean isQuotaReached() {
+        return quotaReached;
+    }
+
+    public void setQuotaReached(boolean quotaReached) {
+        this.quotaReached = quotaReached;
+    }
+
     @Override
     public int describeContents() { return 0; }
 
@@ -167,6 +191,8 @@ public class Task implements Parcelable {
         parcel.writeString(difficulty != null ? difficulty.name() : null);
         parcel.writeString(importance != null ? importance.name() : null);
         parcel.writeString(status != null ? status.name() : null);
+        parcel.writeInt(createdAtLevel != null ? createdAtLevel : 1);
+        parcel.writeBoolean(quotaReached);
     }
 
     public static final Creator<Task> CREATOR = new Creator<>() {

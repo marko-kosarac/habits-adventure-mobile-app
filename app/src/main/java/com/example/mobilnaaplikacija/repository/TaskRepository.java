@@ -13,7 +13,6 @@ import com.example.mobilnaaplikacija.model.Task;
 import com.example.mobilnaaplikacija.model.enums.UnitType;
 
 import java.util.ArrayList;
-import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -44,6 +43,8 @@ public class TaskRepository {
         values.put(SQLiteHelper.COLUMN_DIFFICULTY, task.getDifficulty().name());
         values.put(SQLiteHelper.COLUMN_IMPORTANCE, task.getImportance().name());
         values.put(SQLiteHelper.COLUMN_STATUS, task.getStatus().name());
+        values.put(SQLiteHelper.COLUMN_CREATED_AT_LEVEL, task.getCreatedAtLevel());
+        values.put(SQLiteHelper.COLUMN_QUOTA_REACHED, task.isQuotaReached());
 
         long rowId = db.insert(SQLiteHelper.TABLE_TASKS, null, values);
         db.close();
@@ -73,6 +74,8 @@ public class TaskRepository {
         values.put(SQLiteHelper.COLUMN_DIFFICULTY, task.getDifficulty().name());
         values.put(SQLiteHelper.COLUMN_IMPORTANCE, task.getImportance().name());
         values.put(SQLiteHelper.COLUMN_STATUS, task.getStatus().name());
+        values.put(SQLiteHelper.COLUMN_CREATED_AT_LEVEL, task.getCreatedAtLevel());
+        values.put(SQLiteHelper.COLUMN_QUOTA_REACHED, task.isQuotaReached());
 
         db.update(SQLiteHelper.TABLE_TASKS, values,
                 SQLiteHelper.COLUMN_TASK_OCCURRENCE_ID + " = ?",
@@ -105,6 +108,8 @@ public class TaskRepository {
                 task.setGroupStartMillis(cursor.getLong(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_GROUP_START_MILLIS)));
                 task.setGroupEndMillis(cursor.getLong(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_GROUP_END_MILLIS)));
                 task.setInterval(cursor.getInt(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_INTERVAL)));
+                task.setCreatedAtLevel(cursor.getInt(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_CREATED_AT_LEVEL)));
+                task.setQuotaReached(cursor.getInt(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_QUOTA_REACHED)) == 1);
                 int unitIndex = cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_UNIT);
                 String unitStr = cursor.getString(unitIndex);
 
@@ -404,4 +409,50 @@ public class TaskRepository {
 
         db.close();
     }
+
+    public List<Task> getTasksAtLevel(String userId, int level) {
+        List<Task> tasks = new ArrayList<>();
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+
+        Cursor cursor = db.query(SQLiteHelper.TABLE_TASKS, null,
+                SQLiteHelper.COLUMN_USER_ID + " = ? AND " + SQLiteHelper.COLUMN_CREATED_AT_LEVEL + " = ?",
+                new String[]{String.valueOf(userId), String.valueOf(level)},
+                null, null, null);
+
+        if (cursor.moveToFirst()) {
+            do {
+                Task task = new Task();
+                task.setId(cursor.getString(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_TASK_OCCURRENCE_ID)));
+                task.setUserId(cursor.getString(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_USER_ID)));
+                task.setTaskId(cursor.getString(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_TASK_ID)));
+                task.setName(cursor.getString(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_TASK_NAME)));
+                task.setDescription(cursor.getString(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_TASK_DESCRIPTION)));
+                task.setCategoryId(cursor.getString(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_TASK_CATEGORY_ID)));
+                task.setFrequency(FrequencyType.valueOf(cursor.getString(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_FREQUENCY))));
+                task.setStartMillis(cursor.getLong(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_START_MILLIS)));
+                task.setEndMillis(cursor.getLong(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_END_MILLIS)));
+                task.setGroupStartMillis(cursor.getLong(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_GROUP_START_MILLIS)));
+                task.setGroupEndMillis(cursor.getLong(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_GROUP_END_MILLIS)));
+                task.setInterval(cursor.getInt(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_INTERVAL)));
+                task.setCreatedAtLevel(cursor.getInt(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_CREATED_AT_LEVEL)));
+                task.setQuotaReached(cursor.getInt(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_QUOTA_REACHED)) == 1);
+                int unitIndex = cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_UNIT);
+                String unitStr = cursor.getString(unitIndex);
+
+                if (unitStr != null) {
+                    task.setUnit(UnitType.valueOf(unitStr));
+                } else {
+                    task.setUnit(null);
+                }
+                task.setDifficulty(DifficultyType.valueOf(cursor.getString(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_DIFFICULTY))));
+                task.setImportance(ImportanceType.valueOf(cursor.getString(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_IMPORTANCE))));
+                task.setStatus(StatusType.valueOf(cursor.getString(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_STATUS))));
+                tasks.add(task);
+            } while (cursor.moveToNext());
+        }
+
+        db.close();
+        return tasks;
+    }
+
 }

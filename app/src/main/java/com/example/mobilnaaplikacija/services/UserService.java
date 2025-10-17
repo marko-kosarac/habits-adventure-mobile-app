@@ -4,13 +4,17 @@ import android.util.Log;
 
 import androidx.annotation.NonNull;
 
+import com.example.mobilnaaplikacija.model.Equipment;
 import com.example.mobilnaaplikacija.model.User;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.messaging.FirebaseMessaging;
 
@@ -159,4 +163,85 @@ public class UserService {
     public DocumentReference getUserDoc(String userId) {
         return db.collection("users").document(userId);
     }
+
+    public void getUserLevel(String userId, OnLevelRetrievedCallback callback) {
+        if (userId == null || userId.isEmpty()) {
+            callback.onFailure("Neispravan ID korisnika.");
+            return;
+        }
+
+        db.collection("users").document(userId)
+                .get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    if (documentSnapshot.exists()) {
+                        Long levelValue = documentSnapshot.getLong("level");
+                        if (levelValue != null) {
+                            callback.onSuccess(levelValue.intValue());
+                        } else {
+                            callback.onFailure("Polje 'level' nije pronađeno.");
+                        }
+                    } else {
+                        callback.onFailure("Korisnik ne postoji u bazi.");
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    Log.e("UserService", "Greška pri dohvatanju levela", e);
+                    callback.onFailure("Greška pri dohvatanju levela: " + e.getMessage());
+                });
+    }
+
+    public interface OnLevelRetrievedCallback {
+        void onSuccess(int level);
+        void onFailure(String errorMessage);
+    }
+
+    public void addCoinsToUser(String userId, int coins, Runnable onSuccess, OnFailureListener onFailure) {
+        DocumentReference userRef = db.collection("users").document(userId);
+
+        db.runTransaction(transaction -> {
+            DocumentReference docRef = db.collection("users").document(userId);
+            DocumentSnapshot snapshot = transaction.get(docRef);
+            Long currentCoins = snapshot.getLong("coins");
+            if (currentCoins == null) currentCoins = 0L;
+            transaction.update(docRef, "coins", currentCoins + coins);
+            return null;
+        }).addOnSuccessListener(aVoid -> {
+            if (onSuccess != null) onSuccess.run();
+        }).addOnFailureListener(e -> {
+            if (onFailure != null) onFailure.onFailure(e);
+        });
+    }
+
+    public void addEquipmentToUser(String userId, Equipment equipment, OnSuccessListener<Void> onSuccess, OnFailureListener onFailure) {
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+
+        DocumentReference equipmentRef = db
+                .collection("users")
+                .document(userId)
+                .collection("inventory")
+                .document(String.valueOf(equipment.getId()));
+
+        equipmentRef.get().addOnSuccessListener(documentSnapshot -> {
+            if (documentSnapshot.exists()) {
+                //Vec posjeduje
+            } else {
+                //Ne posjeduje - dodaj
+                Map<String, Object> data = new HashMap<>();
+                data.put("id", equipment.getId());
+                data.put("name", equipment.getName());
+                data.put("description", equipment.getDescription());
+                data.put("type", equipment.getType().name());
+                data.put("bonus", equipment.getBonus());
+                data.put("duration", equipment.getDuration());
+                data.put("price", equipment.getPrice());
+                data.put("quantity", 1);
+                data.put("isActivated", false);
+
+                equipmentRef.set(data)
+                        .addOnSuccessListener(onSuccess)
+                        .addOnFailureListener(onFailure);
+            }
+        }).addOnFailureListener(onFailure);
+    }
+
 }
