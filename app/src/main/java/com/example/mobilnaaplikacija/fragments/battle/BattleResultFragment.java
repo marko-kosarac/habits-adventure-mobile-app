@@ -57,7 +57,6 @@ public class BattleResultFragment extends Dialog {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        Log.d("DialogDebug", "Window = " + getWindow());
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
 

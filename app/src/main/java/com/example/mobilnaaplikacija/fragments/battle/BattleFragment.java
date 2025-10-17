@@ -83,6 +83,9 @@ public class BattleFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        firebaseUser = userService.getCurrentUser();
+        if (firebaseUser == null) return;
+
         previousEtapa = (Map<String, Object>) getArguments().getSerializable("previousEtapa");
 
         oldLevel = getArguments().getInt("oldLevel");
@@ -94,19 +97,27 @@ public class BattleFragment extends Fragment {
             }
         }
 
-        firebaseUser = userService.getCurrentUser();
-
         battles = battleService.startOrGetBattle(firebaseUser);
         //TODO for loop battles expose each boss in fight
 
-        //prva koju nije pobijedio
         for (Battle b : battles) {
+            //prva koju nije pobijedio ide u borbu
             if (!Boolean.TRUE.equals(b.hasUserWon())) {
                 battle = b;
                 boss = bossService.getBossById(b.getBossId());
                 break;
             }
         }
+
+        for (Battle b : battles) {
+            //kreiraj za novi predjeni nivo bossa i borbu
+            boolean isLastBattle = battles.indexOf(b) == battles.size() - 1;
+            if (isLastBattle) {
+                Boss bossTemp = bossService.getBossById(b.getBossId());
+                createNextBattleIfNeeded(b, bossTemp, firebaseUser.getUid(), oldLevel);
+            }
+        }
+
 
         //sve je pobijedio
         if (battle == null) {
@@ -140,9 +151,9 @@ public class BattleFragment extends Fragment {
                         bonusAttackSuccessChance = 0;
                     }
 
-                    String text = String.format(getString(R.string.attack_chance), (int)bossSuccessRate);
+                    String text = String.format(getString(R.string.attack_chance), (int) Math.round(bossSuccessRate));
                     binding.tvAttackChance.setText(text);
-                    setupAttackButton(battle, (int)bossSuccessRate);
+                    setupAttackButton(battle, (int) Math.round(bossSuccessRate));
                 }
             }).addOnFailureListener(e -> {
                 Log.e("Firestore", "Failed to fetch boss etapa success rate", e);
@@ -159,9 +170,9 @@ public class BattleFragment extends Fragment {
                 }
 
             if (boss.getLevel() >= lvl) {
-                String text = String.format(getString(R.string.attack_chance), (int) successRate);
+                String text = String.format(getString(R.string.attack_chance), (int) Math.round(successRate));
                 binding.tvAttackChance.setText(text);
-                setupAttackButton(battle, (int) successRate);
+                setupAttackButton(battle, (int) Math.round(successRate));
             }
 
             //update u bazi: etapaHistory (dodat successRate prethodne etape)
@@ -182,6 +193,31 @@ public class BattleFragment extends Fragment {
 
         setupRemainingAttacks();
         setupCoinReward();
+    }
+
+    private void createNextBattleIfNeeded(Battle b, Boss boss, String userId, int oldLevel) {
+        Boss bossFromLastBattle = bossService.getBossById(battle.getBossId());
+        boolean exists = battleService.bossExistsForLevel(userId, oldLevel);
+        if (bossFromLastBattle != null && boss.getLevel() < oldLevel && !exists) {
+            //spremna borba tog nivoa kao i boss
+            Boss newBoss = new Boss();
+            newBoss.setLevel(oldLevel);
+            newBoss.setDefeated(false);
+            int hp = bossService.calculateMaxHp(oldLevel);
+            newBoss.setMaxHp(hp);
+            newBoss.setCurrentHp(hp);
+            Boss addedBoss = bossService.add(newBoss);
+
+            Battle newBattle = new Battle();
+            newBattle.setUserId(userId);
+            newBattle.setBossId(addedBoss.getId());
+            //nova borba - nema opreme
+            newBattle.setEquipmentIdsFromString("");
+            newBattle.setCoinsEarned(0);
+            newBattle.setUserWon(null);
+            battleService.add(newBattle);
+            Log.d("BossCheck", "Inserted new boss and battle for level " + (oldLevel));
+        }
     }
 
     private void setupCoinReward () {
@@ -405,7 +441,7 @@ public class BattleFragment extends Fragment {
 
             }
 
-            battleService.attackBoss(firebaseUser, boss, battle, battles, luck, successRate, 0, numberOfAttacks, bonusCoins, activeEquipment, new BattleService.OnBattleCompleted() {
+            battleService.attackBoss(firebaseUser, boss, battle, battles, luck, successRate, 0, numberOfAttacks, bonusCoins, activeEquipment, oldLevel, new BattleService.OnBattleCompleted() {
                 @Override
                 public void onBattleFinished(Battle battle, Equipment equipment, int coins) {
                     double roundedLuck = Math.round(luck * 10.0) / 10.0; //npr 73.4%
@@ -476,15 +512,15 @@ public class BattleFragment extends Fragment {
                 try {
                     if (victory && nextBattleReady && battle != null && boss != null) {
                         Log.i("ShowDialog", "Slededca borba");
-                        //              fetchUserEquipment(() -> {
-                        Bundle bundle = new Bundle();
-                        bundle.putInt("bossLevel", boss.getLevel());
-                        bundle.putParcelable("nextBoss", boss);
-                        bundle.putSerializable("userEquipmentList", new ArrayList<>(userEquipment));
-                        NavHostFragment.findNavController(this).navigate(R.id.action_battleFragment_to_prepareBattleFragment, bundle);
-                        //                        });
+                        //fetch nakon manageEquipmentAfterBattle
+                        fetchUserEquipment(() -> {
+                            Bundle bundle = new Bundle();
+                            bundle.putInt("bossLevel", boss.getLevel());
+                            bundle.putParcelable("nextBoss", boss);
+                            bundle.putSerializable("userEquipmentList", new ArrayList<>(userEquipment));
+                            NavHostFragment.findNavController(this).navigate(R.id.action_battleFragment_to_prepareBattleFragment, bundle);
+                        });
                     } else {
-                        Log.i("ShowDialog", "Profil1");
                         NavHostFragment.findNavController(this).navigate(R.id.profile_page);
                     }
                 } catch (IllegalArgumentException e) {

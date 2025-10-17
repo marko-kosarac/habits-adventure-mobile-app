@@ -1,6 +1,9 @@
 package com.example.mobilnaaplikacija.services;
 
+import android.content.ContentValues;
 import android.content.Context;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.media.audiofx.DynamicsProcessing;
 import android.util.Log;
 
@@ -84,7 +87,7 @@ public class BattleService {
         void onError(String message);
     }
 
-    public void attackBoss (FirebaseUser user, Boss boss, Battle battle, List<Battle> userBattles, double luck, int successRate, int damage, int numberOfAttacks, int bonusCoins, List<Equipment> equipmentFromBattle, OnBattleCompleted callback) {
+    public void attackBoss (FirebaseUser user, Boss boss, Battle battle, List<Battle> userBattles, double luck, int successRate, int damage, int numberOfAttacks, int bonusCoins, List<Equipment> equipmentFromBattle, int oldLevel, OnBattleCompleted callback) {
         if (numberOfAttacks > 5) {
             callback.onError("Svi pokušaji za napad su iskorišteni.");
             return;
@@ -111,13 +114,15 @@ public class BattleService {
         attacks.add(attack);
         attackService.add(attack);
 
-        if (boss.isDefeated()) { //TODO Nakon 5 napada, ukoliko je bos poražen, uslov nakon 5 napada?
+        //TODO
+        //checkAndCreateNextBattleIfNeeded(userBattles, battle, boss, userId, oldLevel);
+
+        if (boss.isDefeated()) {
             //boss porazen
-            checkAndCreateNextBattleIfNeeded(userBattles, battle, boss, userId);
             handleVictory(userId, boss, battle, attacks, bonusCoins, equipmentFromBattle, callback);
         } else if (!boss.isDefeated() && attacks.size() >= 5) {
             //boss neporazen
-            checkAndCreateNextBattleIfNeeded(userBattles, battle, boss, userId);
+            //checkAndCreateNextBattleIfNeeded(userBattles, battle, boss, userId);
             handleDefeat(userId, boss, battle, attacks, bonusCoins, equipmentFromBattle, callback);
         } else {
             updateBattleAndBoss(battle, null, boss, userId, 0, attacks, equipmentFromBattle);
@@ -141,7 +146,7 @@ public class BattleService {
         Equipment equipmentReward = null;//equipmentService.getEquipmentReward(userId, chance); TODO
 
         updateBattleAndBoss(battle, true, boss, userId, coins, attacks, equipmentFromBattle);
-        //equipmentService.manageEquipmentAfterBattle(userId, equipmentFromBattle);
+
         callback.onBattleFinished(battle, equipmentReward, coins);
     }
 
@@ -174,7 +179,7 @@ public class BattleService {
 
         updateBattleAndBoss(battle, null, boss, userId, coins, attacks, equipmentFromBattle);
         //equipmentService.manageEquipmentAfterBattle(userId, equipmentFromBattle);
-    callback.onBattleFinished(battle, equipmentReward, coins);
+        callback.onBattleFinished(battle, equipmentReward, coins);
     }
 
     private void updateBattleAndBoss (Battle battle, Boolean win, Boss boss, String userId, int coins, List<Attack> attacks, List<Equipment> equipmentFromBattle) {
@@ -198,31 +203,47 @@ public class BattleService {
         battleRepository.update(battle);
         bossService.update(boss);
     }
-
-    private void checkAndCreateNextBattleIfNeeded(List<Battle> userBattles, Battle battle, Boss boss, String userId) {
+/*
+    private void checkAndCreateNextBattleIfNeeded(List<Battle> userBattles, Battle battle, Boss boss, String userId, int oldLevel) {
         for (Battle b : userBattles) {
             if (b.getId().equals(battle.getId())) {
                 boolean isLastBattle = userBattles.indexOf(b) == userBattles.size() - 1;
 
                 if (isLastBattle) {
-                    //poslednji boss pobijedjen - novi dodaj
-                    Boss newBoss = bossService.addUpgradedBoss(boss);
+                    Boss bossFromLastBattle = bossService.getBossById(battle.getBossId());
+                    boolean exists = battleRepository.bossExistsForLevel(userId, oldLevel+1);
+                    if (bossFromLastBattle != null && boss.getLevel() < oldLevel+1 && !exists) {
+                        //spremna borba tog nivoa kao i boss
+                        Boss newBoss = new Boss();
+                        newBoss.setLevel(oldLevel+1);
+                        newBoss.setDefeated(false);
+                        int hp = bossService.calculateMaxHp(oldLevel+1);
+                        newBoss.setMaxHp(hp);
+                        newBoss.setCurrentHp(hp);
+                        Boss addedBoss = bossService.add(newBoss);
 
-                    //naredna borba spremna (ceka ga kad predje ponovo nekad nivo)
-                    Battle newBattle = new Battle();
-                    newBattle.setUserId(userId);
-                    newBattle.setBossId(newBoss.getId());
-                    //nova borba - nema opreme
-                    newBattle.setEquipmentIdsFromString("");
-                    newBattle.setCoinsEarned(0);
-                    newBattle.setUserWon(null);
-
-                    battleRepository.add(newBattle);
+                        Battle newBattle = new Battle();
+                        newBattle.setUserId(userId);
+                        newBattle.setBossId(addedBoss.getId());
+                        //nova borba - nema opreme
+                        newBattle.setEquipmentIdsFromString("");
+                        newBattle.setCoinsEarned(0);
+                        newBattle.setUserWon(null);
+                        battleRepository.add(newBattle);
+                        Log.d("BossCheck", "Inserted new boss and battle for level " + (oldLevel+1));
+                    }
                 }
                 break;
             }
         }
+    }*/
+
+    public boolean bossExistsForLevel(String userId, int level) {
+        return battleRepository.bossExistsForLevel(userId, level);
     }
 
+    public Battle add (Battle battle) {
+        return battleRepository.add(battle);
+    }
 
 }

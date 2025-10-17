@@ -97,4 +97,23 @@ public class BattleRepository {
         return battles;
     }
 
+    public boolean bossExistsForLevel(String userId, int level) {
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+        boolean exists = false;
+        Cursor cursor = db.rawQuery(
+                "SELECT 1 FROM " + SQLiteHelper.TABLE_BOSS + " b " +
+                        "JOIN " + SQLiteHelper.TABLE_BATTLES + " bt ON b.id = bt.boss_id " +
+                        "WHERE bt.user_id = ? AND b.level = ? " +
+                        "LIMIT 1",
+                new String[]{userId, String.valueOf(level)}
+        );
+
+        if (cursor.moveToFirst()) {
+            exists = true;
+        }
+        cursor.close();
+
+        return exists;
+    }
+
 }
