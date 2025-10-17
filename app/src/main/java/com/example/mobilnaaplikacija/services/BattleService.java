@@ -114,12 +114,10 @@ public class BattleService {
         if (boss.isDefeated()) { //TODO Nakon 5 napada, ukoliko je bos poražen, uslov nakon 5 napada?
             //boss porazen
             checkAndCreateNextBattleIfNeeded(userBattles, battle, boss, userId);
-            equipmentService.manageEquipmentAfterBattle(userId, equipmentFromBattle); //salje se koristena oprema na cuvanje
             handleVictory(userId, boss, battle, attacks, bonusCoins, equipmentFromBattle, callback);
         } else if (!boss.isDefeated() && attacks.size() >= 5) {
             //boss neporazen
             checkAndCreateNextBattleIfNeeded(userBattles, battle, boss, userId);
-            equipmentService.manageEquipmentAfterBattle(userId, equipmentFromBattle);
             handleDefeat(userId, boss, battle, attacks, bonusCoins, equipmentFromBattle, callback);
         } else {
             updateBattleAndBoss(battle, null, boss, userId, 0, attacks, equipmentFromBattle); //TODO update?
@@ -140,9 +138,10 @@ public class BattleService {
 
         //šansa od 20% da se dobije komad opreme (95% šanse za odeću, 5% šanse za oružje)
         double chance = 0.20;
-        Equipment equipmentReward = equipmentService.getEquipmentReward(userId, chance);
+        Equipment equipmentReward = null;//equipmentService.getEquipmentReward(userId, chance); TODO
 
         updateBattleAndBoss(battle, true, boss, userId, coins, attacks, equipmentFromBattle);
+        equipmentService.manageEquipmentAfterBattle(userId, equipmentFromBattle);
         callback.onBattleFinished(battle, equipmentReward, coins);
     }
 
@@ -167,14 +166,16 @@ public class BattleService {
                     e -> Log.e("Battle", "Defeat: Failed to add coins", e)
             );
 
-            equipmentReward = equipmentService.getEquipmentReward(userId, chance);
+            //equipmentReward = equipmentService.getEquipmentReward(userId, chance); TODO
+
         } else coins = 0;
 
         //reset boss HP
         boss.setCurrentHp(bossService.calculateMaxHp(boss.getLevel()));
 
         updateBattleAndBoss(battle, null, boss, userId, coins, attacks, equipmentFromBattle);
-        callback.onBattleFinished(battle, equipmentReward, coins);
+        equipmentService.manageEquipmentAfterBattle(userId, equipmentFromBattle);
+    callback.onBattleFinished(battle, equipmentReward, coins);
     }
 
     private void updateBattleAndBoss (Battle battle, Boolean win, Boss boss, String userId, int coins, List<Attack> attacks, List<Equipment> equipmentFromBattle) {

@@ -171,7 +171,7 @@ public class BattleFragment extends Fragment {
                     break;
 
                 case ORUZJE:
-                    if (eq.getName().contains("Mač")) {
+                    if (eq.getName().contains("mač")) {
                         totalPPMultiplier *= Math.pow(1.05, eq.getQuantity());  //jaci napad trajno TODO
                     } else if (eq.getName().contains("Luk")) {
                         totalBonusCoins += 5 * eq.getQuantity(); //novicic TODO
@@ -322,7 +322,7 @@ public class BattleFragment extends Fragment {
 
             //tooltip
             itemLayout.setOnClickListener(v -> {
-                String msg = first.getName() + " x" + totalQty;
+                String msg = first.getName() + first.getBonus() + " x" + totalQty;
                 Toast.makeText(getContext(), msg, Toast.LENGTH_SHORT).show();
             });
 
@@ -429,7 +429,7 @@ public class BattleFragment extends Fragment {
                             Toast.makeText(getContext(), "Pogodak! Sreća: " + roundedLuck + "%", Toast.LENGTH_SHORT).show();
                         }
                     }
-                    
+
                     @Override
                     public void onError(String message) {
                         Toast.makeText(getContext(), message, Toast.LENGTH_SHORT).show();
@@ -510,3 +510,5 @@ public class BattleFragment extends Fragment {
     }
 
 }
+
+

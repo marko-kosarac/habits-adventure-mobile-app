@@ -25,7 +25,8 @@ public class EquipmentService {
         this.userService = new UserService();
     }
 
-    /*public Equipment getEquipmentReward(String userId, double totalChance) {
+    /*
+    public Equipment getEquipmentReward(String userId, double totalChance) {
         //double roll = Math.random();
         double roll = 0; //TODO FIX LATER
         if (roll > totalChance) {
@@ -65,7 +66,50 @@ public class EquipmentService {
 
         return rewardItem;
     }
-     */
+
+    public interface OnRewardReady {
+        void onSuccess(Equipment reward);
+        void onError(Exception e);
+    }
+
+    public void getEquipmentReward(String userId, double totalChance, OnRewardReady callback) {
+        double roll = 0;
+        if (roll > totalChance) {  //FIX TODO
+            Log.d("Nagrada", "Nema nagrade u vidu opreme.");
+            callback.onSuccess(null);
+            return;
+        }
+
+        double typeRoll = Math.random();
+        Equipment.Type rewardType = typeRoll <= 0.95 ? Equipment.Type.ORUZJE : Equipment.Type.ODECA;
+
+        ArrayList<Equipment> allEquipment = equipmentRepository.getAllEquipment();
+        allEquipment.add(new Equipment(10, "Čelični mač", "Trajno povećava snagu za 5%", Equipment.Type.ORUZJE, "+5%", -1, 500, 0));
+        allEquipment.add(new Equipment(11, "Luk i strela", "Trajno povećava procenat dobijenog novca za 5%", Equipment.Type.ORUZJE, "+5%", -1, 700, 0));
+
+        List<Equipment> filtered = allEquipment.stream()
+                .filter(eq -> eq.getType() == rewardType)
+                .collect(Collectors.toList());
+
+        if (filtered.isEmpty()) {
+            callback.onSuccess(null);
+            return;
+        }
+
+        Equipment rewardItem = filtered.get(new Random().nextInt(filtered.size()));
+        Log.d("BattleFlow", "[2] getEquipmentReward returned " + rewardItem.getName());
+
+        userService.addEquipmentToUser(userId, rewardItem,
+                aVoid -> {
+                    Log.i("Nagrada", "[3] Oprema dodana u inventar: " + rewardItem.getName());
+                    callback.onSuccess(rewardItem);
+                },
+                e -> {
+                    Log.e("Nagrada", "[ERR] Neuspjelo dodavanje opreme: " + e.getMessage());
+                    callback.onError(e);
+                });
+    }
+    */
 
     public void manageEquipmentAfterBattle(String userId, List<Equipment> equipmentFromBattle) {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
@@ -114,16 +158,15 @@ public class EquipmentService {
                     // ODECA logic
                     if (eqType == Equipment.Type.ODECA) {
                         eqCount++;
-                        eq.put("count", eqCount); // increment count
+                        eq.put("count", eqCount); //increment
                         if (eqCount >= 2) {
-                            iterator.remove(); // remove if count >=2
+                            iterator.remove(); //remove if count >=2
                         }
-                        break; // processed one matching piece
+                        break;
                     }
                 }
             }
 
-            // Update Firestore
             userRef.update(
                             "equipment", updatedEquipment,
                             "powerPoints", powerPoints

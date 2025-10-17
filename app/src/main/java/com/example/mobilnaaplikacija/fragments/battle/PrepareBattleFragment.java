@@ -266,7 +266,7 @@ public class PrepareBattleFragment extends DialogFragment {
             //tooltip za aktivnu opremu u ikonicama
             itemLayout.setOnClickListener(v -> {
                 StringBuilder details = new StringBuilder();
-                details.append(first.getName()).append(" +").append(first.getBonus()).append(" x").append(totalQty);
+                details.append(first.getName()).append(first.getBonus()).append(" x").append(totalQty);
                 Toast.makeText(getContext(), details.toString(), Toast.LENGTH_SHORT).show();
             });
 
