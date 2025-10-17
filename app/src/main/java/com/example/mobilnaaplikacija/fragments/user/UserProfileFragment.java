@@ -157,7 +157,11 @@ public class UserProfileFragment extends Fragment {
             desc.setText(eq.getDescription());
             quantity.setText("Količina: " + eq.getQuantity());
 
-            if (eq.isActive()) {
+            boolean isPotionOrWeapon = eq.getType() != null &&
+                    (eq.getType().toString().equals("NAPITAK") || eq.getType().toString().equals("ORUZJE"));
+            String str = eq.getType().toString();
+            if (eq.isActive() && !isPotionOrWeapon) {
+                // Dodaj samo ako nije napitak ili oružje
                 activateButton.setText("Aktivirana");
                 activateButton.setEnabled(false);
                 activeEquipmentContainer.addView(card);
@@ -172,6 +176,7 @@ public class UserProfileFragment extends Fragment {
             }
         }
     }
+
 
 
     private void activateEquipment(Equipment eq, View cardView) {

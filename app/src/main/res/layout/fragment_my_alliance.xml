@@ -136,6 +136,26 @@
             android:textColor="@android:color/white"
             android:background="#D32F2F"
             android:padding="12dp"/>
+        <Button
+            android:id="@+id/btnStartMission"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:visibility="gone"
+            android:text="Započni misiju"
+            android:textColor="@android:color/white"
+            android:backgroundTint="@color/colorPrimary"
+            android:padding="12dp"/>
+        <Button
+            android:id="@+id/btnEndMission"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:visibility="gone"
+            android:text="Završi misiju"
+            android:textColor="@android:color/white"
+            android:backgroundTint="#D32F2F"
+            android:padding="12dp"/>
     </LinearLayout>
 
 
