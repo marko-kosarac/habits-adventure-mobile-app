@@ -261,7 +261,7 @@ public class BattleFragment extends Fragment {
     }
 
     private void setupCoinReward () {
-        int coins = bossService.calculateCoins(boss.getLevel()); //TODO bonus coins
+        int coins = bossService.calculateCoins(boss.getLevel());
         if (bonusCoins != 0) coins *= (int) bonusCoins;
         binding.tvCoinReward.setText("+ " + coins);
     }
@@ -305,7 +305,7 @@ public class BattleFragment extends Fragment {
         }
 
         PP = (int) Math.ceil(PP * totalPPMultiplier);
-        maxAttacks += extraAttacks; //TODO
+        maxAttacks += extraAttacks;
         bonusCoins = totalBonusCoinsMultiplier;
         bonusAttackSuccessChance = totalAttackChance;
 
@@ -422,9 +422,26 @@ public class BattleFragment extends Fragment {
             ImageView icon = new ImageView(getContext());
             icon.setLayoutParams(new LinearLayout.LayoutParams(80, 80));
             switch (first.getType()) {
-                case ORUZJE: icon.setImageResource(R.drawable.ic_swords); break;
-                case ODECA: icon.setImageResource(R.drawable.ic_shield); break;
+                case ORUZJE:
+                    if (first.getName().toLowerCase().contains("mač")) {
+                        icon.setImageResource(R.drawable.ic_swords);
+                    } else if (first.getName().toLowerCase().contains("luk")) {
+                        icon.setImageResource(R.drawable.ic_arrow);
+                    }
+                    break;
+                case ODECA: String nameLower = first.getName().toLowerCase();
+                    if (nameLower.contains("čizme")) {
+                        icon.setImageResource(R.drawable.ic_boots);
+                    } else if (nameLower.contains("štit")) {
+                        icon.setImageResource(R.drawable.ic_shield);
+                    } else if (nameLower.contains("rukavice")) {
+                        icon.setImageResource(R.drawable.ic_glove);
+                    }
+                    break;
                 case NAPITAK: icon.setImageResource(R.drawable.ic_potion); break;
+                default:
+                    icon.setImageResource(R.drawable.ic_potion);
+                    break;
             }
             itemLayout.addView(icon);
 
@@ -447,7 +464,7 @@ public class BattleFragment extends Fragment {
     private void setupRemainingAttacks () {
         if (!isAdded() || binding == null || boss == null) return;
         List<Attack> attacks = attackService.getAttacksByUserAndBoss(firebaseUser.getUid(), boss.getId());
-        numberOfAttacks = attacks.size();//TODO
+        numberOfAttacks = attacks.size();
         String text = String.format(getString(R.string.attack_number), numberOfAttacks, maxAttacks);
         binding.tvAttackCount.setText(text);
     }

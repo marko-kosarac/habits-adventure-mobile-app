@@ -104,12 +104,23 @@ public class BattleResultFragment extends Dialog {
 
             switch (reward.getType()) {
                 case ORUZJE:
-                    icon.setImageResource(R.drawable.ic_swords);
+                    if (reward.getName().toLowerCase().contains("mač")) {
+                        icon.setImageResource(R.drawable.ic_swords);
+                    } else if (reward.getName().toLowerCase().contains("luk")) {
+                        icon.setImageResource(R.drawable.ic_arrow);
+                    }
                     break;
-                case ODECA:
-                    icon.setImageResource(R.drawable.ic_shield);
+                case ODECA: String nameLower = reward.getName().toLowerCase();
+                    if (nameLower.contains("čizme")) {
+                        icon.setImageResource(R.drawable.ic_boots);
+                    } else if (nameLower.contains("štit")) {
+                        icon.setImageResource(R.drawable.ic_shield);
+                    } else if (nameLower.contains("rukavice")) {
+                        icon.setImageResource(R.drawable.ic_glove);
+                    }
                     break;
-                case NAPITAK:
+                case NAPITAK: icon.setImageResource(R.drawable.ic_potion); break;
+                default:
                     icon.setImageResource(R.drawable.ic_potion);
                     break;
             }

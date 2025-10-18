@@ -50,7 +50,12 @@ public class EquipmentListAdapter extends RecyclerView.Adapter<EquipmentListAdap
 
         holder.textName.setText(item.getName());
         holder.textDescription.setText(item.getDescription());
-        holder.textBonus.setText("Bonus: " + item.getBonus() + " snage");
+        if (item.getDescription().contains("snag"))
+            holder.textBonus.setText("Bonus: " + item.getBonus() + " PP");
+        else if (item.getDescription().contains("šansu"))
+            holder.textBonus.setText("Bonus: " + item.getBonus() + " šansa napada");
+        else if (item.getDescription().contains("broj"))
+            holder.textBonus.setText("Bonus: " + item.getBonus() + " broj napada");
         holder.textPrice.setText("Cena: " + item.getPrice());
 
         holder.buttonBuy.setOnClickListener(v -> {

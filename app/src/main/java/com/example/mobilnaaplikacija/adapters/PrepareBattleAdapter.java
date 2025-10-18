@@ -60,10 +60,32 @@ public class PrepareBattleAdapter extends RecyclerView.Adapter<PrepareBattleAdap
         holder.qty.setText("Preostalo: " + eq.getQuantity());
 
         switch (eq.getType()) {
-            case NAPITAK: holder.icon.setImageResource(R.drawable.ic_potion); break;
-            case ORUZJE: holder.icon.setImageResource(R.drawable.ic_swords); break;
-            case ODECA: holder.icon.setImageResource(R.drawable.ic_shield); break;
-            default: holder.icon.setImageResource(R.drawable.ic_potion); break;
+            case NAPITAK:
+                holder.icon.setImageResource(R.drawable.ic_potion);
+                break;
+
+            case ORUZJE:
+                if (eq.getName().toLowerCase().contains("mač")) {
+                    holder.icon.setImageResource(R.drawable.ic_swords);
+                } else if (eq.getName().toLowerCase().contains("luk")) {
+                    holder.icon.setImageResource(R.drawable.ic_arrow);
+                }
+                break;
+
+            case ODECA:
+                String nameLower = eq.getName().toLowerCase();
+                if (nameLower.contains("čizme")) {
+                    holder.icon.setImageResource(R.drawable.ic_boots);
+                } else if (nameLower.contains("štit")) {
+                    holder.icon.setImageResource(R.drawable.ic_shield);
+                } else if (nameLower.contains("rukavice")) {
+                    holder.icon.setImageResource(R.drawable.ic_glove);
+                }
+                break;
+
+            default:
+                holder.icon.setImageResource(R.drawable.ic_potion);
+                break;
         }
 
         holder.btnActivateEquipment.setOnClickListener(v -> {
