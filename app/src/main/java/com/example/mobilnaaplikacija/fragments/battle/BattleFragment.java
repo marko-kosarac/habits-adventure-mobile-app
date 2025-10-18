@@ -35,6 +35,7 @@ import com.example.mobilnaaplikacija.services.UserService;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
@@ -60,11 +61,13 @@ public class BattleFragment extends Fragment {
     private int PP = 0;
     private int HP = 0, HP_MAX;
     private int numberOfAttacks = 0, calculatedSuccessRate = 0;
-    private int bonusCoins = 0, bonusAttack = 0, bonusAttackSuccessChance = 0;
+    private int bonusCoins = 0, bonusAttack = 0;
+    private int bonusAttackSuccessChance = 0;
     private List<Equipment> userEquipment;
     private List<Equipment> activeEquipment;
     private Map<String, Object> previousEtapa;
     private int oldLevel = 1;
+    private boolean isFromUserProfile = false;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -86,16 +89,21 @@ public class BattleFragment extends Fragment {
         firebaseUser = userService.getCurrentUser();
         if (firebaseUser == null) return;
 
-        previousEtapa = (Map<String, Object>) getArguments().getSerializable("previousEtapa");
-
-        oldLevel = getArguments().getInt("oldLevel");
-        PP = 20; //prvi nivo
-        if (oldLevel > 1) {
-            PP = 40; //nakon prvog nivoa
-            for (int i = 2; i < oldLevel; i++) {
-                PP = PP + (PP * 3 / 4);
-            }
+        Bundle args = getArguments();
+        if (args != null) {
+            isFromUserProfile = args.getBoolean("isFromUserProfile");
+            oldLevel = args.getInt("oldLevel", 1);
         }
+
+//        PP = 20; //prvi nivo
+//        if (oldLevel > 1) {
+//            PP = 40; //nakon prvog nivoa
+//            for (int i = 2; i < oldLevel; i++) {
+//                PP = PP + (PP * 3 / 4);
+//            }
+//        }
+
+        fetchPowerPoints(firebaseUser.getUid());
 
         battles = battleService.startOrGetBattle(firebaseUser);
         //TODO for loop battles expose each boss in fight
@@ -112,12 +120,12 @@ public class BattleFragment extends Fragment {
         for (Battle b : battles) {
             //kreiraj za novi predjeni nivo bossa i borbu
             boolean isLastBattle = battles.indexOf(b) == battles.size() - 1;
-            if (isLastBattle) {
+            if (isLastBattle && isFromUserProfile) {
                 Boss bossTemp = bossService.getBossById(b.getBossId());
-                createNextBattleIfNeeded(b, bossTemp, firebaseUser.getUid(), oldLevel);
+                Battle newBattle = createNextBattleIfNeeded(b, bossTemp, firebaseUser.getUid(), oldLevel);
+                battles.add(newBattle);
             }
         }
-
 
         //sve je pobijedio
         if (battle == null) {
@@ -127,75 +135,150 @@ public class BattleFragment extends Fragment {
 
         fetchUserEquipment(() -> {
             setupActiveEquipment();
+            loadAndHandleEtapaSuccessRate(boss.getLevel(), firebaseUser.getUid()); //posle efekata opreme se ucita
         });
 
         setupAnimations(view);
-
         binding.tvBossLevel.setText("Nivo bosa: " + boss.getLevel());
-        //succ rate for leftover boss
-        int lvl = (int) (Number) previousEtapa.get("level");
-        if (boss.getLevel() < lvl) {
-            int bossLvl = boss.getLevel();
-            FirebaseFirestore db = FirebaseFirestore.getInstance();
-
-            String bossEtapaId = "etapa_" + bossLvl;
-            DocumentReference bossEtapaRef = db.collection("users")
-                    .document(firebaseUser.getUid())
-                    .collection("etapaHistory")
-                    .document(bossEtapaId);
-            bossEtapaRef.get().addOnSuccessListener(documentSnapshot -> {
-                if (documentSnapshot.exists() && documentSnapshot.contains("successRate")) {
-                    double bossSuccessRate = documentSnapshot.getDouble("successRate");
-                    if (bonusAttackSuccessChance != 0) { //TODO bonus attack
-                        bossSuccessRate += bonusAttackSuccessChance;
-                        bonusAttackSuccessChance = 0;
-                    }
-
-                    String text = String.format(getString(R.string.attack_chance), (int) Math.round(bossSuccessRate));
-                    binding.tvAttackChance.setText(text);
-                    setupAttackButton(battle, (int) Math.round(bossSuccessRate));
-                }
-            }).addOnFailureListener(e -> {
-                Log.e("Firestore", "Failed to fetch boss etapa success rate", e);
-            });
-
-        }
-
-        taskService.getSuccessRate(firebaseUser.getUid(), previousEtapa, successRate -> {
-            if (!isAdded() || binding == null) return;
-            //success rate završene etape
-                if (bonusAttackSuccessChance != 0) { //TODO
-                    successRate += bonusAttackSuccessChance;
-                    bonusAttackSuccessChance = 0;
-                }
-
-            if (boss.getLevel() >= lvl) {
-                String text = String.format(getString(R.string.attack_chance), (int) Math.round(successRate));
-                binding.tvAttackChance.setText(text);
-                setupAttackButton(battle, (int) Math.round(successRate));
-            }
-
-            //update u bazi: etapaHistory (dodat successRate prethodne etape)
-            FirebaseFirestore db = FirebaseFirestore.getInstance();
-            String etapaId = "etapa_" + previousEtapa.get("level");
-            DocumentReference etapaHistoryRef = db.collection("users")
-                    .document(firebaseUser.getUid())
-                    .collection("etapaHistory")
-                    .document(etapaId);
-
-            etapaHistoryRef.update("successRate", Math.round(successRate))
-                    .addOnSuccessListener(aVoid ->
-                            Log.d("EtapaHistoryUpdate", "Success rate updated for " + etapaId))
-                    .addOnFailureListener(e ->
-                            Log.e("EtapaHistoryUpdate", "Failed to update success rate for " + etapaId, e));
-
-        });
-
         setupRemainingAttacks();
         setupCoinReward();
+
     }
 
-    private void createNextBattleIfNeeded(Battle b, Boss boss, String userId, int oldLevel) {
+    private void fetchPowerPoints(String userId) {
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+
+        db.collection("users").document(userId).get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    if (!documentSnapshot.exists()) {
+                        Log.w("PP", "User not found: " + userId);
+                        binding.tvUserPP.setText("Snaga korisnika: 0");
+                        PP = 0;
+                        return;
+                    }
+
+                    int level = 1;
+                    if (documentSnapshot.contains("level")) {
+                        Number lvlNum = documentSnapshot.getLong("level");
+                        if (lvlNum != null) level = lvlNum.intValue();
+                    }
+
+                    //base PP
+                    long basePP = 20;
+                    if (level > 1) {
+                        basePP = 40;
+                        for (int i = 2; i < level; i++) {
+                            basePP = basePP + (basePP * 3 / 4);
+                        }
+                    }
+
+                    double finalPP = basePP;
+/*
+                    //bonusi aktivne opreme
+                    List<Map<String, Object>> equipmentList =
+                            (List<Map<String, Object>>) documentSnapshot.get("equipment");
+
+                    if (equipmentList != null) {
+                        for (Map<String, Object> e : equipmentList) {
+                            Boolean active = (Boolean) e.get("active");
+                            String bonus = (String) e.get("bonus");
+                            String description = (String) e.get("description");
+                            Number durationNum = (Number) e.get("duration");
+                            int duration = (durationNum != null) ? durationNum.intValue() : 0;
+                            Number quantityNum = e.containsKey("quantity") ? (Number) e.get("quantity") : 1;
+                            int quantity = (quantityNum != null) ? quantityNum.intValue() : 1;
+
+                            if (active != null && active
+                                    && duration == -1
+                                    && bonus != null && bonus.contains("%")
+                                    && description != null && description.toLowerCase().contains("snag")) {
+                                try {
+                                    double percent = Double.parseDouble(
+                                            bonus.replace("+", "").replace("%", "").trim()
+                                    );
+                                    for (int i = 0; i < quantity; i++) {
+                                        finalPP *= (1 + percent / 100.0);
+                                    }
+                                } catch (NumberFormatException ex) {
+                                    Log.w("PP", "Invalid bonus format: " + bonus);
+                                }
+                            }
+                        }
+                    }*/
+
+                    PP = (int) Math.ceil(finalPP);
+                })
+                .addOnFailureListener(e -> {
+                    Log.e("PP", "Failed to fetch user", e);
+                    binding.tvUserPP.setText("Snaga: 0");
+                });
+    }
+
+    private void loadAndHandleEtapaSuccessRate(int bossLevel, String userId) {
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+
+        //etape iz etapaHistory
+        db.collection("users")
+                .document(userId)
+                .collection("etapaHistory")
+                .get()
+                .addOnSuccessListener(querySnapshot -> {
+                    if (querySnapshot.isEmpty()) {
+                        Log.w("EtapaHistory", "No etapas found for user " + userId);
+                        setupAttackButton(battle, 0);
+                        return;
+                    }
+
+                    Map<String, Object> matchingEtapa = null;
+
+                    //etapa ima isti level kao boss
+                    for (DocumentSnapshot doc : querySnapshot.getDocuments()) {
+                        Long level = doc.getLong("level");
+                        if (level != null && level.intValue() == bossLevel) {
+                            matchingEtapa = doc.getData();
+                            break;
+                        }
+                    }
+
+                    if (matchingEtapa == null) {
+                        Log.w("EtapaHistory", "No matching etapa for boss level " + bossLevel);
+                        setupAttackButton(battle, 0);
+                        return;
+                    }
+
+                    //successRate
+                    taskService.getSuccessRate(userId, matchingEtapa, calculatedRate -> {
+                        if (!isAdded() || binding == null) return;
+
+                        //bonus
+                        calculatedRate += bonusAttackSuccessChance;
+                        if (calculatedRate > 100) {
+                            calculatedRate = 100;
+                        }
+
+                        //UI
+                        String text = String.format(getString(R.string.attack_chance), (int) Math.round(calculatedRate));
+                        binding.tvAttackChance.setText(text);
+                        setupAttackButton(battle, (int) Math.round(calculatedRate));
+
+                        //update u etapi u bazi
+                        String etapaDocId = "etapa_" + bossLevel;
+                        db.collection("users")
+                                .document(userId)
+                                .collection("etapaHistory")
+                                .document(etapaDocId)
+                                .update("successRate", (int) Math.round(calculatedRate))
+                                .addOnSuccessListener(aVoid -> Log.d("EtapaHistory", "Updated successRate for etapa " + etapaDocId))
+                                .addOnFailureListener(e -> Log.e("EtapaHistory", "Failed to update successRate for etapa " + etapaDocId, e));
+                    });
+                })
+                .addOnFailureListener(e -> {
+                    Log.e("EtapaHistory", "Failed to fetch etapaHistory for user " + userId, e);
+                    setupAttackButton(battle, 0);
+                });
+    }
+
+    private Battle createNextBattleIfNeeded(Battle b, Boss boss, String userId, int oldLevel) {
         Boss bossFromLastBattle = bossService.getBossById(battle.getBossId());
         boolean exists = battleService.bossExistsForLevel(userId, oldLevel);
         if (bossFromLastBattle != null && boss.getLevel() < oldLevel && !exists) {
@@ -218,6 +301,7 @@ public class BattleFragment extends Fragment {
             battleService.add(newBattle);
             Log.d("BossCheck", "Inserted new boss and battle for level " + (oldLevel));
         }
+        return battle;
     }
 
     private void setupCoinReward () {
@@ -230,8 +314,8 @@ public class BattleFragment extends Fragment {
 
         double totalPPMultiplier = 1.0;
         double totalAttackMultiplier = 1.0;
+        int totalAttackChance = 0;
         int totalBonusCoins = 0;
-        int totalBonusAttackChance = 0;
 
         for (Equipment eq : equipment) {
             switch (eq.getType()) {
@@ -241,9 +325,9 @@ public class BattleFragment extends Fragment {
 
                 case ORUZJE:
                     if (eq.getName().contains("mač")) {
-                        totalPPMultiplier *= Math.pow(1.05, eq.getQuantity());  //jaci napad trajno TODO
+                        totalPPMultiplier *= Math.pow(1.05, eq.getQuantity());  //jaci napad trajno
                     } else if (eq.getName().contains("Luk")) {
-                        totalBonusCoins += 5 * eq.getQuantity(); //novicic TODO
+                        totalBonusCoins += 5 * eq.getQuantity(); //novcici TODO
                     }
                     break;
 
@@ -251,9 +335,9 @@ public class BattleFragment extends Fragment {
                     if (eq.getName().contains("Čizme")) {
                         totalAttackMultiplier *= Math.pow(1.40, eq.getQuantity()); //vise napada TODO
                     } else if (eq.getName().contains("Štit")) {
-                        totalBonusAttackChance += 10 * eq.getQuantity(); //success chance poveca TODO
-                    } else if (eq.getName().contains("Rukavice")) {
-                        totalPPMultiplier *= Math.pow(1.10, eq.getQuantity()); //jaci napad trajno TODO
+                        totalAttackChance += (10 * eq.getQuantity()); // +10% šanse po komadu
+                    }else if (eq.getName().contains("Rukavice")) {
+                        totalPPMultiplier *= Math.pow(1.10, eq.getQuantity()); //jaci napad trajno
                     }
                     break;
             }
@@ -262,7 +346,7 @@ public class BattleFragment extends Fragment {
         PP = (int) Math.ceil(PP * totalPPMultiplier);
         numberOfAttacks = (int) Math.ceil(numberOfAttacks * totalAttackMultiplier);
         bonusCoins += totalBonusCoins;
-        bonusAttackSuccessChance += totalBonusAttackChance;
+        bonusAttackSuccessChance = totalAttackChance;
 
         setupProgressBars();
     }
@@ -401,12 +485,11 @@ public class BattleFragment extends Fragment {
 
     private void setupRemainingAttacks () {
         if (!isAdded() || binding == null) return;
-        //TODO from battle get attacks
         List<Attack> attacks = attackService.getAttacksByUserAndBoss(firebaseUser.getUid(), boss.getId());
         numberOfAttacks = attacks.size();
         if (bonusAttack != 0) {
             bonusAttack--;
-            numberOfAttacks += bonusAttack; //TODO
+            numberOfAttacks += bonusAttack; //TODO BONUS
         }
         String text = String.format(getString(R.string.attack_number), numberOfAttacks);
         binding.tvAttackCount.setText(text);
@@ -441,7 +524,7 @@ public class BattleFragment extends Fragment {
 
             }
 
-            battleService.attackBoss(firebaseUser, boss, battle, battles, luck, successRate, 0, numberOfAttacks, bonusCoins, activeEquipment, oldLevel, new BattleService.OnBattleCompleted() {
+            battleService.attackBoss(firebaseUser, boss, battle, luck, successRate, 0, numberOfAttacks, bonusCoins, activeEquipment, new BattleService.OnBattleCompleted() {
                 @Override
                 public void onBattleFinished(Battle battle, Equipment equipment, int coins) {
                     double roundedLuck = Math.round(luck * 10.0) / 10.0; //npr 73.4%
@@ -503,28 +586,13 @@ public class BattleFragment extends Fragment {
         BattleResultFragment.ResultType type = victory ? BattleResultFragment.ResultType.VICTORY : BattleResultFragment.ResultType.DEFEAT;
 
         BattleResultFragment dialog = new BattleResultFragment(requireActivity(), type, coins, reward);
-
-        loadNextBattle();
-
         dialog.setOnDialogClosedListener(() -> {
-            Log.i("BattleDialog", "Dialog closed, navigating now...");
             if (isAdded()) {
-                try {
-                    if (victory && nextBattleReady && battle != null && boss != null) {
-                        Log.i("ShowDialog", "Slededca borba");
-                        //fetch nakon manageEquipmentAfterBattle
-                        fetchUserEquipment(() -> {
-                            Bundle bundle = new Bundle();
-                            bundle.putInt("bossLevel", boss.getLevel());
-                            bundle.putParcelable("nextBoss", boss);
-                            bundle.putSerializable("userEquipmentList", new ArrayList<>(userEquipment));
-                            NavHostFragment.findNavController(this).navigate(R.id.action_battleFragment_to_prepareBattleFragment, bundle);
-                        });
-                    } else {
-                        NavHostFragment.findNavController(this).navigate(R.id.profile_page);
-                    }
-                } catch (IllegalArgumentException e) {
-                    Log.e("NavigationError", "Cannot navigate to profile_page from current destination", e);
+                if (victory) {
+                    //TODO fetch nakon manageEquipmentAfterBattle
+                    loadNextBattle();
+                } else {
+                    NavHostFragment.findNavController(this).navigate(R.id.profile_page);
                 }
             }
         });
@@ -533,13 +601,60 @@ public class BattleFragment extends Fragment {
     }
 
     private void loadNextBattle() {
+        if (firebaseUser == null) return;
+
+        // Re-fetch battles to get the latest state
+        battles = battleService.startOrGetBattle(firebaseUser);
+        nextBattleReady = false;
+        battle = null;
+        boss = null;
+
+        for (Battle b : battles) {
+            if (!Boolean.TRUE.equals(b.hasUserWon())) {
+                nextBattleReady = true;
+                battle = b;
+                boss = bossService.getBossById(b.getBossId());
+                break;
+            }
+        }
+
+        Log.d("BattleFragment", "battles.size=" + battles.size() +
+                ", nextBattleReady=" + nextBattleReady +
+                ", battle=" + battle +
+                ", boss=" + boss);
+
+        if (nextBattleReady && battle != null && boss != null) {
+            Bundle bundle = new Bundle();
+            bundle.putInt("bossLevel", boss.getLevel());
+            bundle.putParcelable("nextBoss", boss);
+
+            NavHostFragment.findNavController(this)
+                    .navigate(R.id.action_battleFragment_to_prepareBattleFragment, bundle);
+        } else {
+            Toast.makeText(getContext(), "Nema predstojećih borbi!", Toast.LENGTH_LONG).show();
+            NavHostFragment.findNavController(this)
+                    .navigate(R.id.action_battleFragment_to_userProfileFragment);
+        }
+    }
+
+
+    /*private void loadNextBattle() {
+        for (Battle b : battles) {
+            //kreiraj za novi predjeni nivo bossa i borbu
+            boolean isLastBattle = battles.indexOf(b) == battles.size() - 1;
+            if (isLastBattle && isFromUserProfile) {
+                Boss bossTemp = bossService.getBossById(b.getBossId());
+                Battle newBattle = createNextBattleIfNeeded(b, bossTemp, firebaseUser.getUid(), oldLevel);
+                battles.add(newBattle);
+            }
+        }
+
         for (Battle b : battles) {
             if (!Boolean.TRUE.equals(b.hasUserWon())) {
                 //ima još nepobijeđenih boseva
                 nextBattleReady = true;
                 boss = bossService.getBossById(b.getBossId());
                 battle = b;
-                return;
             }
         }
 
@@ -547,9 +662,8 @@ public class BattleFragment extends Fragment {
         boss = null;
         battle = null;
         Toast.makeText(getContext(), "Nema predstojećih borbi!", Toast.LENGTH_LONG).show();
-        Log.i("ShowDialog", "Profil2");
         NavHostFragment.findNavController(this).navigate(R.id.action_battleFragment_to_userProfileFragment);
-    }
+    }*/
 
 }
 

@@ -25,56 +25,15 @@ public class EquipmentService {
         this.userService = new UserService();
     }
 
-    /*
-    public Equipment getEquipmentReward(String userId, double totalChance) {
-        //double roll = Math.random();
-        double roll = 0; //TODO FIX LATER
-        if (roll > totalChance) {
-            Log.d("Nagrada", "Nema nagrade u vidu opreme.");
-            return null;
-        }
-
-        double typeRoll = Math.random();
-        Equipment.Type rewardType = typeRoll <= 0.95 ? Equipment.Type.ORUZJE : Equipment.Type.ODECA; //TODO FIX LATER
-
-        ArrayList<Equipment> allEquipment = equipmentRepository.getAllEquipment();
-        allEquipment.add(new Equipment(10, "Čelični mač", "Trajno povećava snagu za 5%",
-                Equipment.Type.ORUZJE, "+5%", -1, 500, 0));
-        allEquipment.add(new Equipment(11, "Luk i strela",
-                "Trajno povećava procenat dobijenog novca za 5%",
-                Equipment.Type.ORUZJE, "+5%", -1, 700, 0));
-
-        List<Equipment> filtered = allEquipment.stream()
-                .filter(eq -> eq.getType() == rewardType)
-                .collect(Collectors.toList());
-
-        if (filtered.isEmpty()) {
-            Log.w("Nagrada", "Nema nagrade tipa: " + rewardType);
-            return null;
-        }
-
-        Log.d("BattleFlow", "[1] User won battle at " + System.currentTimeMillis() + " - thread: " + Thread.currentThread().getName());
-
-        Equipment rewardItem = filtered.get(new Random().nextInt(filtered.size()));
-        Log.d("BattleFlow", "[2] getEquipmentReward returned " + (rewardItem != null ? rewardItem.getName() : "null"));
-        userService.addEquipmentToUser(userId, rewardItem,
-                aVoid -> Log.i("Nagrada", "[3] Oprema dodana u inventar: " + rewardItem.getName()),
-                e -> Log.e("Nagrada", "[ERR] Neuspjelo dodavanje opreme: " + e.getMessage()));
-
-        Log.i("Nagrada", "Korisnik " + userId + " je osvojio opremu: " + rewardItem.getName() + " [" + rewardItem.getType() + "]");
-        Log.d("BattleFlow", "[4] Showing dialog after reward assignment");
-
-        return rewardItem;
-    }
-
     public interface OnRewardReady {
         void onSuccess(Equipment reward);
         void onError(Exception e);
     }
 
     public void getEquipmentReward(String userId, double totalChance, OnRewardReady callback) {
-        double roll = 0;
-        if (roll > totalChance) {  //FIX TODO
+        //double roll = Math.random();
+        double roll = 0; //TODO FIX LATER
+        if (roll > totalChance) {
             Log.d("Nagrada", "Nema nagrade u vidu opreme.");
             callback.onSuccess(null);
             return;
@@ -109,8 +68,9 @@ public class EquipmentService {
                     callback.onError(e);
                 });
     }
-    */
 
+
+    //TODO
     public void manageEquipmentAfterBattle(String userId, List<Equipment> equipmentFromBattle) {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         DocumentReference userRef = db.collection("users").document(userId);

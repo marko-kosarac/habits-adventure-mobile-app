@@ -87,7 +87,7 @@ public class BattleService {
         void onError(String message);
     }
 
-    public void attackBoss (FirebaseUser user, Boss boss, Battle battle, List<Battle> userBattles, double luck, int successRate, int damage, int numberOfAttacks, int bonusCoins, List<Equipment> equipmentFromBattle, int oldLevel, OnBattleCompleted callback) {
+    public void attackBoss (FirebaseUser user, Boss boss, Battle battle, double luck, int successRate, int damage, int numberOfAttacks, int bonusCoins, List<Equipment> equipmentFromBattle, OnBattleCompleted callback) {
         if (numberOfAttacks > 5) {
             callback.onError("Svi pokušaji za napad su iskorišteni.");
             return;
@@ -143,19 +143,28 @@ public class BattleService {
 
         //šansa od 20% da se dobije komad opreme (95% šanse za odeću, 5% šanse za oružje)
         double chance = 0.20;
-        Equipment equipmentReward = null;//equipmentService.getEquipmentReward(userId, chance); TODO
+        int finalCoins1 = coins;
+        equipmentService.getEquipmentReward(userId, chance, new EquipmentService.OnRewardReady() {
+            @Override
+            public void onSuccess(Equipment reward) {
+                Log.i("Reward", "Received: " + (reward != null ? reward.getName() : "none"));
+                updateBattleAndBoss(battle, true, boss, userId, finalCoins1, attacks, equipmentFromBattle);
+                callback.onBattleFinished(battle, reward, finalCoins1);
+            }
 
-        updateBattleAndBoss(battle, true, boss, userId, coins, attacks, equipmentFromBattle);
-
-        callback.onBattleFinished(battle, equipmentReward, coins);
+            @Override
+            public void onError(Exception e) {
+                Log.i("Reward", "No reward.");
+                updateBattleAndBoss(battle, true, boss, userId, finalCoins1, attacks, equipmentFromBattle);
+                callback.onBattleFinished(battle, null, finalCoins1);
+            }
+        });// TODO
     }
 
     private void handleDefeat(String userId, Boss boss, Battle battle, List<Attack> attacks, int bonusCoins, List<Equipment> equipmentFromBattle, OnBattleCompleted callback) {
         double bossHpPercent = (boss.getCurrentHp() * 100.0) / boss.getMaxHp();
         int baseCoins = bossService.calculateCoins(boss.getLevel());
         int coins;
-        double chance = 0.10;
-        Equipment equipmentReward = null;
 
         if (bossHpPercent <= 50) {
             //umanjeno 50% HP boss-a
@@ -170,16 +179,28 @@ public class BattleService {
                     e -> Log.e("Battle", "Defeat: Failed to add coins", e)
             );
 
-            //equipmentReward = equipmentService.getEquipmentReward(userId, chance); TODO
-
         } else coins = 0;
 
         //reset boss HP
         boss.setCurrentHp(bossService.calculateMaxHp(boss.getLevel()));
 
-        updateBattleAndBoss(battle, null, boss, userId, coins, attacks, equipmentFromBattle);
-        //equipmentService.manageEquipmentAfterBattle(userId, equipmentFromBattle);
-        callback.onBattleFinished(battle, equipmentReward, coins);
+        double chance = 0.10;
+        int finalCoins1 = coins;
+        equipmentService.getEquipmentReward(userId, chance, new EquipmentService.OnRewardReady() {
+            @Override
+            public void onSuccess(Equipment reward) {
+                Log.i("Reward", "Received: " + (reward != null ? reward.getName() : "none"));
+                updateBattleAndBoss(battle, null, boss, userId, finalCoins1, attacks, equipmentFromBattle);
+                callback.onBattleFinished(battle, reward, finalCoins1);
+            }
+
+            @Override
+            public void onError(Exception e) {
+                Log.i("Reward", "No reward.");
+                updateBattleAndBoss(battle, null, boss, userId, finalCoins1, attacks, equipmentFromBattle);
+                callback.onBattleFinished(battle, null, finalCoins1);
+            }
+        });// TODO
     }
 
     private void updateBattleAndBoss (Battle battle, Boolean win, Boss boss, String userId, int coins, List<Attack> attacks, List<Equipment> equipmentFromBattle) {
@@ -203,40 +224,6 @@ public class BattleService {
         battleRepository.update(battle);
         bossService.update(boss);
     }
-/*
-    private void checkAndCreateNextBattleIfNeeded(List<Battle> userBattles, Battle battle, Boss boss, String userId, int oldLevel) {
-        for (Battle b : userBattles) {
-            if (b.getId().equals(battle.getId())) {
-                boolean isLastBattle = userBattles.indexOf(b) == userBattles.size() - 1;
-
-                if (isLastBattle) {
-                    Boss bossFromLastBattle = bossService.getBossById(battle.getBossId());
-                    boolean exists = battleRepository.bossExistsForLevel(userId, oldLevel+1);
-                    if (bossFromLastBattle != null && boss.getLevel() < oldLevel+1 && !exists) {
-                        //spremna borba tog nivoa kao i boss
-                        Boss newBoss = new Boss();
-                        newBoss.setLevel(oldLevel+1);
-                        newBoss.setDefeated(false);
-                        int hp = bossService.calculateMaxHp(oldLevel+1);
-                        newBoss.setMaxHp(hp);
-                        newBoss.setCurrentHp(hp);
-                        Boss addedBoss = bossService.add(newBoss);
-
-                        Battle newBattle = new Battle();
-                        newBattle.setUserId(userId);
-                        newBattle.setBossId(addedBoss.getId());
-                        //nova borba - nema opreme
-                        newBattle.setEquipmentIdsFromString("");
-                        newBattle.setCoinsEarned(0);
-                        newBattle.setUserWon(null);
-                        battleRepository.add(newBattle);
-                        Log.d("BossCheck", "Inserted new boss and battle for level " + (oldLevel+1));
-                    }
-                }
-                break;
-            }
-        }
-    }*/
 
     public boolean bossExistsForLevel(String userId, int level) {
         return battleRepository.bossExistsForLevel(userId, level);
