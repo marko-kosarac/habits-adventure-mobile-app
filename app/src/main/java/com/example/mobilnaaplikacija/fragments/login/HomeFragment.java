@@ -145,7 +145,6 @@ public class HomeFragment extends Fragment {
                 etapa.put("level", level);
                 etapa.put("start", now);
                 etapa.put("end", null);
-                etapa.put("bossDefeated", false);
                 etapa.put("successRate", 0.0);
 
                 userRef.set(Collections.singletonMap("etapa", etapa), SetOptions.merge())
