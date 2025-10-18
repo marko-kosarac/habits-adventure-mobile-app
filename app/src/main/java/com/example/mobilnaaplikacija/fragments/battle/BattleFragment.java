@@ -30,6 +30,7 @@ import com.example.mobilnaaplikacija.model.User;
 import com.example.mobilnaaplikacija.services.AttackService;
 import com.example.mobilnaaplikacija.services.BattleService;
 import com.example.mobilnaaplikacija.services.BossService;
+import com.example.mobilnaaplikacija.services.EquipmentService;
 import com.example.mobilnaaplikacija.services.TaskService;
 import com.example.mobilnaaplikacija.services.UserService;
 import com.google.firebase.auth.FirebaseAuth;
@@ -58,6 +59,7 @@ public class BattleFragment extends Fragment {
     private BattleService battleService;
     private TaskService taskService;
     private AttackService attackService;
+    private EquipmentService equipmentService;
     private int PP = 0;
     private int HP = 0, HP_MAX;
     private int numberOfAttacks = 0, calculatedSuccessRate = 0;
@@ -76,6 +78,7 @@ public class BattleFragment extends Fragment {
         this.battleService = new BattleService(getContext());
         this.taskService = new TaskService(getContext());
         this.attackService = new AttackService(getContext());
+        this.equipmentService = new EquipmentService(getContext());
         db = FirebaseFirestore.getInstance();
 
         binding = FragmentBattleBinding.inflate(inflater, container, false);
@@ -95,18 +98,9 @@ public class BattleFragment extends Fragment {
             oldLevel = args.getInt("oldLevel", 1);
         }
 
-//        PP = 20; //prvi nivo
-//        if (oldLevel > 1) {
-//            PP = 40; //nakon prvog nivoa
-//            for (int i = 2; i < oldLevel; i++) {
-//                PP = PP + (PP * 3 / 4);
-//            }
-//        }
-
         fetchPowerPoints(firebaseUser.getUid());
 
         battles = battleService.startOrGetBattle(firebaseUser);
-        //TODO for loop battles expose each boss in fight
 
         for (Battle b : battles) {
             //prva koju nije pobijedio ide u borbu
@@ -125,12 +119,6 @@ public class BattleFragment extends Fragment {
                 Battle newBattle = createNextBattleIfNeeded(b, bossTemp, firebaseUser.getUid(), oldLevel);
                 battles.add(newBattle);
             }
-        }
-
-        //sve je pobijedio
-        if (battle == null) {
-            Toast.makeText(getContext(), "Sve borbe su pobijeđene! Bravo!", Toast.LENGTH_LONG).show();
-            return;
         }
 
         fetchUserEquipment(() -> {
@@ -173,39 +161,6 @@ public class BattleFragment extends Fragment {
                     }
 
                     double finalPP = basePP;
-/*
-                    //bonusi aktivne opreme
-                    List<Map<String, Object>> equipmentList =
-                            (List<Map<String, Object>>) documentSnapshot.get("equipment");
-
-                    if (equipmentList != null) {
-                        for (Map<String, Object> e : equipmentList) {
-                            Boolean active = (Boolean) e.get("active");
-                            String bonus = (String) e.get("bonus");
-                            String description = (String) e.get("description");
-                            Number durationNum = (Number) e.get("duration");
-                            int duration = (durationNum != null) ? durationNum.intValue() : 0;
-                            Number quantityNum = e.containsKey("quantity") ? (Number) e.get("quantity") : 1;
-                            int quantity = (quantityNum != null) ? quantityNum.intValue() : 1;
-
-                            if (active != null && active
-                                    && duration == -1
-                                    && bonus != null && bonus.contains("%")
-                                    && description != null && description.toLowerCase().contains("snag")) {
-                                try {
-                                    double percent = Double.parseDouble(
-                                            bonus.replace("+", "").replace("%", "").trim()
-                                    );
-                                    for (int i = 0; i < quantity; i++) {
-                                        finalPP *= (1 + percent / 100.0);
-                                    }
-                                } catch (NumberFormatException ex) {
-                                    Log.w("PP", "Invalid bonus format: " + bonus);
-                                }
-                            }
-                        }
-                    }*/
-
                     PP = (int) Math.ceil(finalPP);
                 })
                 .addOnFailureListener(e -> {
@@ -535,11 +490,16 @@ public class BattleFragment extends Fragment {
                     if (Boolean.TRUE.equals(battle.hasUserWon())) {
                         bonusCoins = 0; //TODO
                         Toast.makeText(getContext(), "Pobedio si, bravo! Sreća u napadu: " + roundedLuck + "%", Toast.LENGTH_LONG).show();
-                        //ucitaj narednu borbu ako je ima
+
+                        equipmentService.manageEquipmentAfterBattle(firebaseUser.getUid(), activeEquipment);
+
                         showBattleResultDialog(true, coins, equipment);
                     } else if (numberOfAttacks >= 5 && !Boolean.TRUE.equals(battle.hasUserWon())) {
                         bonusCoins = 0;
                         Toast.makeText(getContext(), "Bos nije poražen! Sreća u napadu: " + roundedLuck + "%", Toast.LENGTH_LONG).show();
+
+                        equipmentService.manageEquipmentAfterBattle(firebaseUser.getUid(), activeEquipment);
+
                         if (coins > 0 || equipment != null) {
                             showBattleResultDialog(false, coins, equipment);
                         } else {
@@ -589,7 +549,6 @@ public class BattleFragment extends Fragment {
         dialog.setOnDialogClosedListener(() -> {
             if (isAdded()) {
                 if (victory) {
-                    //TODO fetch nakon manageEquipmentAfterBattle
                     loadNextBattle();
                 } else {
                     NavHostFragment.findNavController(this).navigate(R.id.profile_page);

@@ -87,11 +87,7 @@ public class EquipmentService {
             List<Map<String, Object>> updatedEquipment = new ArrayList<>(userEquipment);
 
             for (Equipment battleEq : equipmentFromBattle) {
-                Equipment.Type type = battleEq.getType();
                 long duration = battleEq.getDuration();
-                long count = battleEq.getCount();
-                double bonus = parseBonus(battleEq.getBonus());
-
                 Iterator<Map<String, Object>> iterator = updatedEquipment.iterator();
 
                 while (iterator.hasNext()) {
@@ -104,31 +100,29 @@ public class EquipmentService {
                     }
                     double eqBonus = parseBonus((String) eq.get("bonus"));
 
-                    // match by id or name
                     if (!active || !eq.get("id").equals(battleEq.getId())) continue;
 
-                    // NAPITAK logic
+                    //NAPITAK
                     if (duration == 0 && eqType == Equipment.Type.NAPITAK && active) {
                         powerPoints = powerPoints / (1 + eqBonus);
-                        powerPoints = Math.round(powerPoints);
+                        powerPoints = Math.ceil(powerPoints);
                         iterator.remove();
-                        break; // remove one matching active NAPITAK
+                        break;
                     }
 
-                    // ODECA logic
+                    //ODECA
                     if (eqType == Equipment.Type.ODECA) {
                         eqCount++;
-                        eq.put("count", eqCount); //increment
+                        eq.put("count", eqCount);
                         if (eqCount >= 2) {
-                            iterator.remove(); //remove if count >=2
+                            iterator.remove();
                         }
                         break;
                     }
                 }
             }
 
-            userRef.update(
-                            "equipment", updatedEquipment,
+            userRef.update("equipment", updatedEquipment,
                             "powerPoints", powerPoints
                     ).addOnSuccessListener(v -> Log.d("Battle", "Equipment and powerPoints updated successfully"))
                     .addOnFailureListener(e -> Log.e("Battle", "Error updating user equipment", e));
