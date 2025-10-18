@@ -495,7 +495,7 @@ public class BattleFragment extends Fragment {
 
                         equipmentService.manageEquipmentAfterBattle(firebaseUser.getUid(), activeEquipment);
                         showBattleResultDialog(true, coins, equipment);
-                    } else if (numberOfAttacks >= 5 && !Boolean.TRUE.equals(battle.hasUserWon())) {
+                    } else if (numberOfAttacks >= maxAttacks && !Boolean.TRUE.equals(battle.hasUserWon())) {
                         bonusCoins = 0;
                         Toast.makeText(getContext(), "Bos nije poražen! Sreća u napadu: " + roundedLuck + "%", Toast.LENGTH_LONG).show();
 
@@ -595,7 +595,4 @@ public class BattleFragment extends Fragment {
         }
     }
 
-
 }
-
-

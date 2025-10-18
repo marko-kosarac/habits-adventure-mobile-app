@@ -297,5 +297,4 @@ public class UserService {
                 .addOnFailureListener(e -> Log.e("EtapaInit", "Failed to create etapa", e));
     }
 
-
 }
