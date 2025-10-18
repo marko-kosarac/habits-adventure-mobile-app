@@ -7,6 +7,7 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.navigation.Navigation;
 import androidx.navigation.fragment.NavHostFragment;
 
 import android.util.Log;
@@ -60,7 +61,7 @@ public class BattleFragment extends Fragment {
     private int PP = 0;
     private int HP = 0, HP_MAX;
     private int numberOfAttacks = 0, maxAttacks = 5;
-    private double bonusCoins = 0;
+    private double bonusCoins = 1;
     private int bonusAttackSuccessChance = 0;
     private List<Equipment> userEquipment;
     private List<Equipment> activeEquipment;
@@ -262,7 +263,7 @@ public class BattleFragment extends Fragment {
 
     private void setupCoinReward () {
         int coins = bossService.calculateCoins(boss.getLevel());
-        if (bonusCoins != 0) coins *= (int) bonusCoins;
+        coins *= (int) bonusCoins;
         binding.tvCoinReward.setText("+ " + coins);
     }
 
@@ -479,9 +480,9 @@ public class BattleFragment extends Fragment {
         if (!isAdded() || binding == null) return;
 
         binding.btnAttackBoss.setOnClickListener(v-> {
-            if (numberOfAttacks >= maxAttacks) {
+            if (numberOfAttacks > maxAttacks) {
                 Toast.makeText(getContext(), "Svi pokušaji za napad su iskorišteni.", Toast.LENGTH_SHORT).show();
-                return;
+//                return;
             } else updateNumberOfAttacks();
 
             double luck = Math.random() * 100;
@@ -499,7 +500,7 @@ public class BattleFragment extends Fragment {
                 damage = PP;
             }
 
-            battleService.attackBoss(firebaseUser, boss, battle, luck, successRate, damage, numberOfAttacks, bonusCoins, activeEquipment, new BattleService.OnBattleCompleted() {
+            battleService.attackBoss(firebaseUser, boss, battle, maxAttacks, luck, successRate, damage, numberOfAttacks, bonusCoins, activeEquipment, new BattleService.OnBattleCompleted() {
                 @Override
                 public void onBattleFinished(Battle battle, Equipment equipment, int coins) {
                     double roundedLuck = Math.round(luck * 10.0) / 10.0; //npr 73.4%
@@ -532,7 +533,8 @@ public class BattleFragment extends Fragment {
                 @Override
                 public void onError(String message) {
                     Toast.makeText(getContext(), message, Toast.LENGTH_SHORT).show();
-                }
+                    NavHostFragment.findNavController(BattleFragment.this)
+                            .navigate(R.id.action_battleFragment_to_userProfileFragment);                }
             });
         });
     }

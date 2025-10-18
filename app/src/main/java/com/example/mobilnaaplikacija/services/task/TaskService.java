@@ -402,7 +402,8 @@ public class TaskService {
 
         long now = System.currentTimeMillis();
         for (Task task : tasks) {
-            if (task != null && task.getEndMillis() >= now) filtered.add(task);
+            if (task != null && task.getEndMillis() >= now && task.getStatus() != StatusType.URAĐEN)
+                filtered.add(task);
         }
         return filtered;
     }

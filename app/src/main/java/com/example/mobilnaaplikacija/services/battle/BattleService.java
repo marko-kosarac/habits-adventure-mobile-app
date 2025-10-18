@@ -113,8 +113,8 @@ public class BattleService {
         void onError(String message);
     }
 
-    public void attackBoss (FirebaseUser user, Boss boss, Battle battle, double luck, int successRate, int damage, int numberOfAttacks, double bonusCoins, List<Equipment> equipmentFromBattle, OnBattleCompleted callback) {
-        if (numberOfAttacks > 5) {
+    public void attackBoss (FirebaseUser user, Boss boss, Battle battle, int maxAttacks, double luck, int successRate, int damage, int numberOfAttacks, double bonusCoins, List<Equipment> equipmentFromBattle, OnBattleCompleted callback) {
+        if (numberOfAttacks > maxAttacks) {
             callback.onError("Svi pokušaji za napad su iskorišteni.");
             return;
         }
