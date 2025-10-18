@@ -59,8 +59,8 @@ public class BattleFragment extends Fragment {
     private EquipmentService equipmentService;
     private int PP = 0;
     private int HP = 0, HP_MAX;
-    private int numberOfAttacks = 0;
-    private int bonusCoins = 0, bonusAttack = 0;
+    private int numberOfAttacks = 0, maxAttacks = 5;
+    private double bonusCoins = 0;
     private int bonusAttackSuccessChance = 0;
     private List<Equipment> userEquipment;
     private List<Equipment> activeEquipment;
@@ -108,7 +108,7 @@ public class BattleFragment extends Fragment {
         }
 
         for (Battle b : battles) {
-            //kreiraj za novi predjeni nivo bossa i borbu
+            //kreiraj za novi predjeni nivo i bossa i borbu
             boolean isLastBattle = battles.indexOf(b) == battles.size() - 1;
             if (isLastBattle && isFromUserProfile) {
                 Boss bossTemp = bossService.getBossById(b.getBossId());
@@ -117,16 +117,22 @@ public class BattleFragment extends Fragment {
             }
         }
 
-        setupRemainingAttacks();
+        if (boss != null) {
+            setupRemainingAttacks();
+        } else {
+            Log.w("BattleFragment", "No valid boss found for remaining attacks setup");
+        }
 
-        fetchUserEquipment(() -> {
-            setupActiveEquipment();
-            loadAndHandleEtapaSuccessRate(boss.getLevel(), firebaseUser.getUid()); //posle efekata opreme se ucita
-        });
+        if (boss != null && firebaseUser != null) {
+            fetchUserEquipment(() -> {
+                setupActiveEquipment();
+                loadAndHandleEtapaSuccessRate(boss.getLevel(), firebaseUser.getUid()); //posle efekata opreme se ucita
+                setupCoinReward();
+            });
+        }
 
         setupAnimations(view);
         binding.tvBossLevel.setText("Nivo bosa: " + boss.getLevel());
-        setupCoinReward();
     }
 
     private void fetchPowerPoints(String userId) {
@@ -256,6 +262,7 @@ public class BattleFragment extends Fragment {
 
     private void setupCoinReward () {
         int coins = bossService.calculateCoins(boss.getLevel()); //TODO bonus coins
+        if (bonusCoins != 0) coins *= (int) bonusCoins;
         binding.tvCoinReward.setText("+ " + coins);
     }
 
@@ -263,9 +270,9 @@ public class BattleFragment extends Fragment {
         if (!isAdded() || binding == null || equipment == null || equipment.isEmpty()) return;
 
         double totalPPMultiplier = 1.0;
-        double totalAttackMultiplier = 1.0;
+        double totalBonusCoinsMultiplier = 1.0;
         int totalAttackChance = 0;
-        int totalBonusCoins = 0;
+        int extraAttacks = 0;
 
         for (Equipment eq : equipment) {
             switch (eq.getType()) {
@@ -277,13 +284,17 @@ public class BattleFragment extends Fragment {
                     if (eq.getName().contains("mač")) {
                         totalPPMultiplier *= Math.pow(1.05, eq.getQuantity());  //jaci napad trajno
                     } else if (eq.getName().contains("Luk")) {
-                        totalBonusCoins += 5 * eq.getQuantity(); //novcici TODO
+                        totalBonusCoinsMultiplier *= Math.pow(1.05, eq.getQuantity()); //novcici
                     }
                     break;
 
                 case ODECA:
-                    if (eq.getName().contains("Čizme")) {
-                        totalAttackMultiplier *= Math.pow(1.40, eq.getQuantity()); //vise napada TODO
+                    if (eq.getName().contains("Čizme")) {  //vise napada
+                        for (int i = 0; i < eq.getQuantity(); i++) {
+                            if (Math.random() < 0.4) {
+                                extraAttacks += 1;
+                            }
+                        }
                     } else if (eq.getName().contains("Štit")) {
                         totalAttackChance += (10 * eq.getQuantity()); // +10% šanse po komadu
                     }else if (eq.getName().contains("Rukavice")) {
@@ -294,8 +305,8 @@ public class BattleFragment extends Fragment {
         }
 
         PP = (int) Math.ceil(PP * totalPPMultiplier);
-        numberOfAttacks = (int) Math.ceil(numberOfAttacks * totalAttackMultiplier);
-        bonusCoins += totalBonusCoins;
+        maxAttacks += extraAttacks; //TODO
+        bonusCoins = totalBonusCoinsMultiplier;
         bonusAttackSuccessChance = totalAttackChance;
 
         setupProgressBars();
@@ -434,20 +445,16 @@ public class BattleFragment extends Fragment {
     }
 
     private void setupRemainingAttacks () {
-        if (!isAdded() || binding == null) return;
+        if (!isAdded() || binding == null || boss == null) return;
         List<Attack> attacks = attackService.getAttacksByUserAndBoss(firebaseUser.getUid(), boss.getId());
-        numberOfAttacks = attacks.size();
-        if (bonusAttack != 0) {
-            bonusAttack--;
-            numberOfAttacks += bonusAttack; //TODO BONUS
-        }
-        String text = String.format(getString(R.string.attack_number), numberOfAttacks);
+        numberOfAttacks = attacks.size();//TODO
+        String text = String.format(getString(R.string.attack_number), numberOfAttacks, maxAttacks);
         binding.tvAttackCount.setText(text);
     }
 
     private void updateNumberOfAttacks () {
         numberOfAttacks++;
-        String text = String.format(getString(R.string.attack_number), numberOfAttacks);
+        String text = String.format(getString(R.string.attack_number), numberOfAttacks, maxAttacks);
         binding.tvAttackCount.setText(text);
     }
 
@@ -455,13 +462,14 @@ public class BattleFragment extends Fragment {
         if (!isAdded() || binding == null) return;
 
         binding.btnAttackBoss.setOnClickListener(v-> {
-            if (numberOfAttacks >= 5) {
+            if (numberOfAttacks >= maxAttacks) {
                 Toast.makeText(getContext(), "Svi pokušaji za napad su iskorišteni.", Toast.LENGTH_SHORT).show();
                 return;
             } else updateNumberOfAttacks();
 
             double luck = Math.random() * 100;
             boolean userHit = luck < successRate;
+            int damage = 0;
 
             if (userHit) {
                 if (firebaseUser == null || battle == null || boss == null) return;
@@ -471,10 +479,10 @@ public class BattleFragment extends Fragment {
                 boss = bossService.takeDamage(boss, PP);
                 //azuriraj progress bar-ove
                 setupProgressBars();
-
+                damage = PP;
             }
 
-            battleService.attackBoss(firebaseUser, boss, battle, luck, successRate, 0, numberOfAttacks, bonusCoins, activeEquipment, new BattleService.OnBattleCompleted() {
+            battleService.attackBoss(firebaseUser, boss, battle, luck, successRate, damage, numberOfAttacks, bonusCoins, activeEquipment, new BattleService.OnBattleCompleted() {
                 @Override
                 public void onBattleFinished(Battle battle, Equipment equipment, int coins) {
                     double roundedLuck = Math.round(luck * 10.0) / 10.0; //npr 73.4%
@@ -483,18 +491,15 @@ public class BattleFragment extends Fragment {
                             + ", coins=" + coins
                             + ", equipment=" + (equipment != null));
                     if (Boolean.TRUE.equals(battle.hasUserWon())) {
-                        bonusCoins = 0; //TODO
                         Toast.makeText(getContext(), "Pobedio si, bravo! Sreća u napadu: " + roundedLuck + "%", Toast.LENGTH_LONG).show();
 
                         equipmentService.manageEquipmentAfterBattle(firebaseUser.getUid(), activeEquipment);
-
                         showBattleResultDialog(true, coins, equipment);
                     } else if (numberOfAttacks >= 5 && !Boolean.TRUE.equals(battle.hasUserWon())) {
                         bonusCoins = 0;
                         Toast.makeText(getContext(), "Bos nije poražen! Sreća u napadu: " + roundedLuck + "%", Toast.LENGTH_LONG).show();
 
                         equipmentService.manageEquipmentAfterBattle(firebaseUser.getUid(), activeEquipment);
-
                         if (coins > 0 || equipment != null) {
                             showBattleResultDialog(false, coins, equipment);
                         } else {

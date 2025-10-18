@@ -77,6 +77,34 @@ public class BattleService {
             }
         }
 
+        if(battlesToWin.isEmpty()) {
+            Battle prevoiusBattle = battles.get(battles.size() - 1);
+            Boss previousBoss = bossService.getBossById(prevoiusBattle.getBossId());
+            int newBossLvl = previousBoss.getLevel() + 1;
+            int maxHp = bossService.calculateMaxHp(newBossLvl);
+
+            //naredni boss
+            Boss nextBoss = new Boss();
+            nextBoss.setMaxHp(maxHp);
+            nextBoss.setCurrentHp(maxHp);
+            nextBoss.setLevel(newBossLvl);
+            nextBoss.setDefeated(false);
+            bossService.add(nextBoss);
+
+            //naredna borba
+            Battle nextBattle = new Battle();
+            nextBattle.setUserId(user.getUid());
+            nextBattle.setBossId(nextBoss.getId());
+            //equipment setuje na prazno u repo
+            nextBattle.setAttacks(new ArrayList<>());
+            nextBattle.setUserWon(null);
+            nextBattle.setCoinsEarned(0);
+            battleRepository.add(nextBattle);
+
+            battles.add(nextBattle);
+            return battles;
+        }
+
        return battlesToWin;
     }
 
@@ -85,7 +113,7 @@ public class BattleService {
         void onError(String message);
     }
 
-    public void attackBoss (FirebaseUser user, Boss boss, Battle battle, double luck, int successRate, int damage, int numberOfAttacks, int bonusCoins, List<Equipment> equipmentFromBattle, OnBattleCompleted callback) {
+    public void attackBoss (FirebaseUser user, Boss boss, Battle battle, double luck, int successRate, int damage, int numberOfAttacks, double bonusCoins, List<Equipment> equipmentFromBattle, OnBattleCompleted callback) {
         if (numberOfAttacks > 5) {
             callback.onError("Svi pokušaji za napad su iskorišteni.");
             return;
@@ -124,10 +152,11 @@ public class BattleService {
         }
     }
 
-    private void handleVictory(String userId, Boss boss, Battle battle, List<Attack> attacks, int bonusCoins, List<Equipment> equipmentFromBattle, OnBattleCompleted callback) {
+    private void handleVictory(String userId, Boss boss, Battle battle, List<Attack> attacks, double bonusCoins, List<Equipment> equipmentFromBattle, OnBattleCompleted callback) {
         int coins = bossService.calculateCoins(boss.getLevel());
         if (bonusCoins != 0) {
-            coins *= 1.05; //TODO bonus coins 5%
+            coins *= 1.05;
+            coins = (int) Math.ceil(coins);
         }
 
         int finalCoins = coins;
@@ -155,7 +184,7 @@ public class BattleService {
         });
     }
 
-    private void handleDefeat(String userId, Boss boss, Battle battle, List<Attack> attacks, int bonusCoins, List<Equipment> equipmentFromBattle, OnBattleCompleted callback) {
+    private void handleDefeat(String userId, Boss boss, Battle battle, List<Attack> attacks, double bonusCoins, List<Equipment> equipmentFromBattle, OnBattleCompleted callback) {
         double bossHpPercent = (boss.getCurrentHp() * 100.0) / boss.getMaxHp();
         int baseCoins = bossService.calculateCoins(boss.getLevel());
         int coins;
@@ -164,7 +193,8 @@ public class BattleService {
             //umanjeno 50% HP boss-a
             coins = baseCoins / 2;
             if (bonusCoins != 0) {
-                coins = coins * (1 + bonusCoins/100); //TODO bonus coins 5%
+                coins *= bonusCoins; //TODO
+                coins = (int) Math.ceil(coins);
             }
 
             int finalCoins = coins;

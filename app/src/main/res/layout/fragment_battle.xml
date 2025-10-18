@@ -168,7 +168,6 @@
         android:id="@+id/tvAttackCount"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Pokušaji: 3"
         app:layout_constraintTop_toBottomOf="@id/pbPPBar"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

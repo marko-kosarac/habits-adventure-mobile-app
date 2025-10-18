@@ -41,7 +41,6 @@ public class PrepareBattleFragment extends DialogFragment {
     private final List<Equipment> unactiveEquipment = new ArrayList<>();
     private FirebaseFirestore db;
     private int oldLevel = 1;
-    private Boss boss = null;
     private boolean isFromUserProfile = false;
 
     @Nullable
