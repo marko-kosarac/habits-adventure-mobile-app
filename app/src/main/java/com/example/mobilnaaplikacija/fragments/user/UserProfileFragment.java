@@ -165,7 +165,10 @@ public class UserProfileFragment extends Fragment {
             Button activateButton = card.findViewById(R.id.buttonActivateEquipment);
 
             name.setText(eq.getName());
-            bonus.setText(eq.getBonus() + " PP");
+            if (eq.getDescription().contains("snag")) bonus.setText(eq.getBonus() + " PP");
+            else if (eq.getDescription().contains("novca")) bonus.setText(eq.getBonus() + " novac");
+            else if (eq.getDescription().contains("šansu")) bonus.setText(eq.getBonus() + " šansa napada");
+            else if (eq.getDescription().contains("broj")) bonus.setText(eq.getBonus() + " broj napada");
             desc.setText(eq.getDescription());
             quantity.setText("Količina: " + eq.getQuantity());
 

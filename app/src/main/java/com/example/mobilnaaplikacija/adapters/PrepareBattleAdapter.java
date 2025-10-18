@@ -38,16 +38,6 @@ public class PrepareBattleAdapter extends RecyclerView.Adapter<PrepareBattleAdap
         this.onActivateListener = listener;
     }
 
-    public List<Equipment> getUnactivatedEquipment(long id) { //TODO useful or not?
-        List<Equipment> res = new ArrayList<>();
-        for (Equipment eq : this.equipmentList) {
-            if (!eq.isActive() && eq.getId() == id) {
-                res.add(eq);
-            }
-        }
-        return res;
-    }
-
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -60,7 +50,12 @@ public class PrepareBattleAdapter extends RecyclerView.Adapter<PrepareBattleAdap
         Equipment eq = equipmentList.get(position);
 
         holder.name.setText(eq.getName());
-        holder.bonus.setText(eq.getBonus() + " PP");
+
+        if (eq.getDescription().contains("snag")) holder.bonus.setText(eq.getBonus() + " PP");
+        else if (eq.getDescription().contains("novca")) holder.bonus.setText(eq.getBonus() + " novac");
+        else if (eq.getDescription().contains("šansu")) holder.bonus.setText(eq.getBonus() + " šansa napada");
+        else if (eq.getDescription().contains("broj")) holder.bonus.setText(eq.getBonus() + " broj napada");
+
         holder.desc.setText(eq.getDescription());
         holder.qty.setText("Preostalo: " + eq.getQuantity());
 
