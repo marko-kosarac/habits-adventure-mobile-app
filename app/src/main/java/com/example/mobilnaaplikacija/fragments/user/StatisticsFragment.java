@@ -12,13 +12,11 @@ import android.widget.TextView;
 
 import com.example.mobilnaaplikacija.R;
 import com.example.mobilnaaplikacija.model.enums.DifficultyType;
-import com.example.mobilnaaplikacija.model.enums.StatusType;
 import com.example.mobilnaaplikacija.model.Task;
-import com.example.mobilnaaplikacija.services.TaskService;
+import com.example.mobilnaaplikacija.services.task.TaskService;
 import com.github.mikephil.charting.charts.BarChart;
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.charts.PieChart;
-import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.data.BarData;
 import com.github.mikephil.charting.data.BarDataSet;
 import com.github.mikephil.charting.data.BarEntry;
@@ -34,7 +32,6 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 

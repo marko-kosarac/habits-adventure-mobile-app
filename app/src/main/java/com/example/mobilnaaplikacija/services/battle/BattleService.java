@@ -1,10 +1,6 @@
-package com.example.mobilnaaplikacija.services;
+package com.example.mobilnaaplikacija.services.battle;
 
-import android.content.ContentValues;
 import android.content.Context;
-import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
-import android.media.audiofx.DynamicsProcessing;
 import android.util.Log;
 
 import com.example.mobilnaaplikacija.database.SQLiteHelper;
@@ -13,6 +9,8 @@ import com.example.mobilnaaplikacija.model.Battle;
 import com.example.mobilnaaplikacija.model.Boss;
 import com.example.mobilnaaplikacija.model.Equipment;
 import com.example.mobilnaaplikacija.repository.BattleRepository;
+import com.example.mobilnaaplikacija.services.EquipmentService;
+import com.example.mobilnaaplikacija.services.UserService;
 import com.google.firebase.auth.FirebaseUser;
 
 import java.util.ArrayList;

@@ -1,16 +1,12 @@
-package com.example.mobilnaaplikacija.services;
+package com.example.mobilnaaplikacija.services.battle;
 
 import android.content.Context;
-import android.util.Log;
 
 import com.example.mobilnaaplikacija.database.SQLiteHelper;
 import com.example.mobilnaaplikacija.model.Attack;
-import com.example.mobilnaaplikacija.model.Battle;
-import com.example.mobilnaaplikacija.model.Boss;
 import com.example.mobilnaaplikacija.repository.AttackRepository;
-import com.google.firebase.auth.FirebaseUser;
+import com.example.mobilnaaplikacija.services.task.TaskService;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class AttackService {

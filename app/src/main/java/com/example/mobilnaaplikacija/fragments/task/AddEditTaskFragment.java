@@ -9,7 +9,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
 
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -28,8 +27,8 @@ import com.example.mobilnaaplikacija.model.enums.ImportanceType;
 import com.example.mobilnaaplikacija.model.enums.StatusType;
 import com.example.mobilnaaplikacija.model.Task;
 import com.example.mobilnaaplikacija.model.enums.UnitType;
-import com.example.mobilnaaplikacija.services.CategoryService;
-import com.example.mobilnaaplikacija.services.TaskService;
+import com.example.mobilnaaplikacija.services.task.CategoryService;
+import com.example.mobilnaaplikacija.services.task.TaskService;
 import com.example.mobilnaaplikacija.services.UserService;
 import com.google.firebase.auth.FirebaseUser;
 

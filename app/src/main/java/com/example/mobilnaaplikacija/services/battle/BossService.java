@@ -1,4 +1,4 @@
-package com.example.mobilnaaplikacija.services;
+package com.example.mobilnaaplikacija.services.battle;
 
 import android.content.Context;
 

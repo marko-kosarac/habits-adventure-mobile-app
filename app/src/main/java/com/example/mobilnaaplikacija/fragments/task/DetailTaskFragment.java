@@ -2,7 +2,6 @@ package com.example.mobilnaaplikacija.fragments.task;
 
 import android.app.AlertDialog;
 import android.os.Bundle;
-import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,9 +16,8 @@ import com.example.mobilnaaplikacija.model.Category;
 import com.example.mobilnaaplikacija.model.enums.FrequencyType;
 import com.example.mobilnaaplikacija.model.enums.StatusType;
 import com.example.mobilnaaplikacija.model.Task;
-import com.example.mobilnaaplikacija.services.CategoryService;
-import com.example.mobilnaaplikacija.services.TaskService;
-import com.google.firebase.firestore.FirebaseFirestore;
+import com.example.mobilnaaplikacija.services.task.CategoryService;
+import com.example.mobilnaaplikacija.services.task.TaskService;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;

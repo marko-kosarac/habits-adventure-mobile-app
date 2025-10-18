@@ -31,8 +31,7 @@ public class EquipmentService {
     }
 
     public void getEquipmentReward(String userId, double totalChance, OnRewardReady callback) {
-        //double roll = Math.random();
-        double roll = 0; //TODO FIX LATER
+        double roll = Math.random();
         if (roll > totalChance) {
             Log.d("Nagrada", "Nema nagrade u vidu opreme.");
             callback.onSuccess(null);
@@ -40,7 +39,7 @@ public class EquipmentService {
         }
 
         double typeRoll = Math.random();
-        Equipment.Type rewardType = typeRoll <= 0.95 ? Equipment.Type.ORUZJE : Equipment.Type.ODECA;
+        Equipment.Type rewardType = typeRoll <= 0.95 ? Equipment.Type.ODECA : Equipment.Type.ORUZJE;
 
         ArrayList<Equipment> allEquipment = equipmentRepository.getAllEquipment();
         allEquipment.add(new Equipment(10, "Čelični mač", "Trajno povećava snagu za 5%", Equipment.Type.ORUZJE, "+5%", -1, 500, 0));
@@ -56,21 +55,18 @@ public class EquipmentService {
         }
 
         Equipment rewardItem = filtered.get(new Random().nextInt(filtered.size()));
-        Log.d("BattleFlow", "[2] getEquipmentReward returned " + rewardItem.getName());
 
         userService.addEquipmentToUser(userId, rewardItem,
                 aVoid -> {
-                    Log.i("Nagrada", "[3] Oprema dodana u inventar: " + rewardItem.getName());
+                    Log.i("Nagrada", "Oprema dodana u inventar: " + rewardItem.getName());
                     callback.onSuccess(rewardItem);
                 },
                 e -> {
-                    Log.e("Nagrada", "[ERR] Neuspjelo dodavanje opreme: " + e.getMessage());
+                    Log.e("Nagrada", "Neuspjelo dodavanje opreme: " + e.getMessage());
                     callback.onError(e);
                 });
     }
 
-
-    //TODO
     public void manageEquipmentAfterBattle(String userId, List<Equipment> equipmentFromBattle) {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         DocumentReference userRef = db.collection("users").document(userId);
@@ -102,7 +98,6 @@ public class EquipmentService {
 
                     if (!active || !eq.get("id").equals(battleEq.getId())) continue;
 
-                    //NAPITAK
                     if (duration == 0 && eqType == Equipment.Type.NAPITAK && active) {
                         powerPoints = powerPoints / (1 + eqBonus);
                         powerPoints = Math.ceil(powerPoints);
@@ -110,7 +105,6 @@ public class EquipmentService {
                         break;
                     }
 
-                    //ODECA
                     if (eqType == Equipment.Type.ODECA) {
                         eqCount++;
                         eq.put("count", eqCount);
@@ -138,9 +132,5 @@ public class EquipmentService {
             return 0.0;
         }
     }
-
-
-
-
 
 }

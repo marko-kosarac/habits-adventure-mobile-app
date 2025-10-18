@@ -1,10 +1,7 @@
-package com.example.mobilnaaplikacija.services;
+package com.example.mobilnaaplikacija.services.task;
 
 import android.content.Context;
-import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
-import android.graphics.Color;
 
 import androidx.annotation.Nullable;
 
@@ -14,35 +11,22 @@ import com.example.mobilnaaplikacija.model.enums.FrequencyType;
 import com.example.mobilnaaplikacija.model.enums.ImportanceType;
 import com.example.mobilnaaplikacija.model.enums.StatusType;
 import com.example.mobilnaaplikacija.model.enums.UnitType;
-import com.example.mobilnaaplikacija.repository.CategoryRepository;
 import com.example.mobilnaaplikacija.repository.TaskRepository;
 import com.example.mobilnaaplikacija.model.*;
+import com.example.mobilnaaplikacija.services.UserService;
 import com.example.mobilnaaplikacija.utils.XpCalculator;
-import com.google.android.gms.tasks.Tasks;
-import com.google.firebase.Timestamp;
-import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.FirebaseFirestoreException;
-import com.google.firebase.firestore.SetOptions;
-import com.google.firebase.firestore.Transaction;
-import com.example.mobilnaaplikacija.utils.XpCalculator;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
-import java.util.HashMap;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Locale;
-import java.util.Map;
 import java.util.UUID;
 
 public class TaskService {
