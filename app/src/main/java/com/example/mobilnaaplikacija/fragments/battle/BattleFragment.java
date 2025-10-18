@@ -2,7 +2,6 @@ package com.example.mobilnaaplikacija.fragments.battle;
 
 import android.animation.ObjectAnimator;
 import android.graphics.drawable.AnimationDrawable;
-import android.media.audiofx.DynamicsProcessing;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -50,7 +49,7 @@ public class BattleFragment extends Fragment {
     private FirebaseUser firebaseUser;
     private List<Battle> battles;
     private Boss boss;
-    private Battle battle, nextBattle;
+    private Battle battle;
     private boolean nextBattleReady = false;
     private UserService userService;
     private BossService bossService;
@@ -60,12 +59,11 @@ public class BattleFragment extends Fragment {
     private EquipmentService equipmentService;
     private int PP = 0;
     private int HP = 0, HP_MAX;
-    private int numberOfAttacks = 0, calculatedSuccessRate = 0;
+    private int numberOfAttacks = 0;
     private int bonusCoins = 0, bonusAttack = 0;
     private int bonusAttackSuccessChance = 0;
     private List<Equipment> userEquipment;
     private List<Equipment> activeEquipment;
-    private Map<String, Object> previousEtapa;
     private int oldLevel = 1;
     private boolean isFromUserProfile = false;
 
@@ -119,6 +117,8 @@ public class BattleFragment extends Fragment {
             }
         }
 
+        setupRemainingAttacks();
+
         fetchUserEquipment(() -> {
             setupActiveEquipment();
             loadAndHandleEtapaSuccessRate(boss.getLevel(), firebaseUser.getUid()); //posle efekata opreme se ucita
@@ -126,9 +126,7 @@ public class BattleFragment extends Fragment {
 
         setupAnimations(view);
         binding.tvBossLevel.setText("Nivo bosa: " + boss.getLevel());
-        setupRemainingAttacks();
         setupCoinReward();
-
     }
 
     private void fetchPowerPoints(String userId) {
@@ -252,7 +250,6 @@ public class BattleFragment extends Fragment {
             newBattle.setCoinsEarned(0);
             newBattle.setUserWon(null);
             battleService.add(newBattle);
-            Log.d("BossCheck", "Inserted new boss and battle for level " + (oldLevel));
         }
         return battle;
     }
@@ -560,7 +557,6 @@ public class BattleFragment extends Fragment {
     private void loadNextBattle() {
         if (firebaseUser == null) return;
 
-        // Re-fetch battles to get the latest state
         battles = battleService.startOrGetBattle(firebaseUser);
         nextBattleReady = false;
         battle = null;
@@ -594,33 +590,6 @@ public class BattleFragment extends Fragment {
         }
     }
 
-
-    /*private void loadNextBattle() {
-        for (Battle b : battles) {
-            //kreiraj za novi predjeni nivo bossa i borbu
-            boolean isLastBattle = battles.indexOf(b) == battles.size() - 1;
-            if (isLastBattle && isFromUserProfile) {
-                Boss bossTemp = bossService.getBossById(b.getBossId());
-                Battle newBattle = createNextBattleIfNeeded(b, bossTemp, firebaseUser.getUid(), oldLevel);
-                battles.add(newBattle);
-            }
-        }
-
-        for (Battle b : battles) {
-            if (!Boolean.TRUE.equals(b.hasUserWon())) {
-                //ima još nepobijeđenih boseva
-                nextBattleReady = true;
-                boss = bossService.getBossById(b.getBossId());
-                battle = b;
-            }
-        }
-
-        //nema više
-        boss = null;
-        battle = null;
-        Toast.makeText(getContext(), "Nema predstojećih borbi!", Toast.LENGTH_LONG).show();
-        NavHostFragment.findNavController(this).navigate(R.id.action_battleFragment_to_userProfileFragment);
-    }*/
 
 }
 

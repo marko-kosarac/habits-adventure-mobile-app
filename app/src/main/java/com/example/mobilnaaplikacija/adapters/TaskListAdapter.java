@@ -16,7 +16,7 @@ import com.example.mobilnaaplikacija.model.Category;
 import com.example.mobilnaaplikacija.model.enums.FrequencyType;
 import com.example.mobilnaaplikacija.model.enums.StatusType;
 import com.example.mobilnaaplikacija.model.Task;
-import com.example.mobilnaaplikacija.services.TaskService;
+import com.example.mobilnaaplikacija.services.task.TaskService;
 
 import java.util.ArrayList;
 import java.util.HashMap;

@@ -16,13 +16,11 @@ import com.example.mobilnaaplikacija.RecyclerViewInterface;
 import com.example.mobilnaaplikacija.adapters.CategoryListAdapter;
 import com.example.mobilnaaplikacija.databinding.FragmentCategoryListBinding;
 import com.example.mobilnaaplikacija.model.Category;
-import com.example.mobilnaaplikacija.model.Task;
-import com.example.mobilnaaplikacija.services.CategoryService;
+import com.example.mobilnaaplikacija.services.task.CategoryService;
 import com.example.mobilnaaplikacija.services.UserService;
 import com.google.firebase.auth.FirebaseUser;
 
 import java.util.ArrayList;
-import java.util.List;
 
 public class CategoryListFragment extends Fragment implements RecyclerViewInterface {
     private FragmentCategoryListBinding binding;

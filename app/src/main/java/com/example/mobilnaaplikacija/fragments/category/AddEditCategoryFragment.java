@@ -17,7 +17,7 @@ import android.widget.Toast;
 import com.example.mobilnaaplikacija.R;
 import com.example.mobilnaaplikacija.databinding.DialogAddEditCategoryBinding;
 import com.example.mobilnaaplikacija.model.Category;
-import com.example.mobilnaaplikacija.services.CategoryService;
+import com.example.mobilnaaplikacija.services.task.CategoryService;
 import com.example.mobilnaaplikacija.services.UserService;
 import com.github.dhaval2404.colorpicker.ColorPickerDialog;
 import com.github.dhaval2404.colorpicker.listener.ColorListener;

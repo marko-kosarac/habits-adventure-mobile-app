@@ -112,15 +112,11 @@ public class BattleService {
         attacks.add(attack);
         attackService.add(attack);
 
-        //TODO
-        //checkAndCreateNextBattleIfNeeded(userBattles, battle, boss, userId, oldLevel);
-
         if (boss.isDefeated()) {
             //boss porazen
             handleVictory(userId, boss, battle, attacks, bonusCoins, equipmentFromBattle, callback);
         } else if (!boss.isDefeated() && attacks.size() >= 5) {
             //boss neporazen
-            //checkAndCreateNextBattleIfNeeded(userBattles, battle, boss, userId);
             handleDefeat(userId, boss, battle, attacks, bonusCoins, equipmentFromBattle, callback);
         } else {
             updateBattleAndBoss(battle, null, boss, userId, 0, attacks, equipmentFromBattle);
@@ -156,7 +152,7 @@ public class BattleService {
                 updateBattleAndBoss(battle, true, boss, userId, finalCoins1, attacks, equipmentFromBattle);
                 callback.onBattleFinished(battle, null, finalCoins1);
             }
-        });// TODO
+        });
     }
 
     private void handleDefeat(String userId, Boss boss, Battle battle, List<Attack> attacks, int bonusCoins, List<Equipment> equipmentFromBattle, OnBattleCompleted callback) {
@@ -198,7 +194,7 @@ public class BattleService {
                 updateBattleAndBoss(battle, null, boss, userId, finalCoins1, attacks, equipmentFromBattle);
                 callback.onBattleFinished(battle, null, finalCoins1);
             }
-        });// TODO
+        });
     }
 
     private void updateBattleAndBoss (Battle battle, Boolean win, Boss boss, String userId, int coins, List<Attack> attacks, List<Equipment> equipmentFromBattle) {
