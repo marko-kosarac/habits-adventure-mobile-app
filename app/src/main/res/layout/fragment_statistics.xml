@@ -71,7 +71,6 @@
             android:id="@+id/tvMissions"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Specijalne misije: 3 započete, 2 završene"
             android:textSize="18sp"
             android:textStyle="bold"
             android:padding="8dp" />

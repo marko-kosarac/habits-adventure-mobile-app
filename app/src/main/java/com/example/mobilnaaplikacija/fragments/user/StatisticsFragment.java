@@ -9,8 +9,10 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.mobilnaaplikacija.R;
+import com.example.mobilnaaplikacija.model.SpecialMission;
 import com.example.mobilnaaplikacija.model.enums.DifficultyType;
 import com.example.mobilnaaplikacija.model.enums.StatusType;
 import com.example.mobilnaaplikacija.model.Task;
@@ -31,6 +33,7 @@ import com.github.mikephil.charting.data.PieEntry;
 import com.github.mikephil.charting.formatter.ValueFormatter;
 import com.github.mikephil.charting.utils.ColorTemplate;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
@@ -92,7 +95,7 @@ public class StatisticsFragment extends Fragment {
         //line chart for difficulty
         setupLineChartDifficulty(userId);
 
-        tvMissions.setText("Specijalne misije: 3 započete / 2 završene");
+        countUserMissions(currentUserId);
 
         return view;
     }
@@ -197,6 +200,56 @@ public class StatisticsFragment extends Fragment {
         tvAverageDifficulty.setText("Korisnik uglavnom rešava: " + mainDifficulty.name() +
                 " (prosek XP: " + avgXP + ")");
     }
+
+    private void countUserMissions(String userId) {
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+
+        db.collection("users").document(userId).get()
+                .addOnSuccessListener(userDoc -> {
+                    if (!userDoc.exists()) return;
+
+                    String allianceId = userDoc.getString("currentAllianceId");
+                    if (allianceId == null || allianceId.isEmpty()) {
+                        tvMissions.setText("Specijalne misije: 0 započete / 0 završene");
+                        return;
+                    }
+
+                    db.collection("alliances")
+                            .document(allianceId)
+                            .collection("missions")
+                            .get()
+                            .addOnSuccessListener(querySnapshot -> {
+                                int startedCount = 0;
+                                int doneCount = 0;
+
+                                for (DocumentSnapshot mission : querySnapshot.getDocuments()) {
+                                    Object membersObj = mission.get("members");
+                                    if (!(membersObj instanceof List)) continue;
+
+                                    List<?> members = (List<?>) membersObj;
+                                    if (!members.contains(userId)) continue; // korisnik nije član
+
+                                    // Uzimamo globalna polja misije
+                                    Object startedObj = mission.get("isStarted");
+                                    Object doneObj = mission.get("isDone");
+
+                                    if (startedObj instanceof Boolean && (Boolean) startedObj) startedCount++;
+                                    if (doneObj instanceof Boolean && (Boolean) doneObj) doneCount++;
+                                }
+                                int countAll = startedCount + doneCount;
+                                tvMissions.setText("Specijalne misije: " + countAll + "\nZapočetih: " + startedCount +
+                                        "\nZavršenih: " + doneCount);
+                            })
+                            .addOnFailureListener(e -> Toast.makeText(getContext(),
+                                    "Greška pri dohvaćanju misija: " + e.getMessage(),
+                                    Toast.LENGTH_SHORT).show());
+                })
+                .addOnFailureListener(e -> Toast.makeText(getContext(),
+                        "Greška pri dohvaćanju korisnika: " + e.getMessage(),
+                        Toast.LENGTH_SHORT).show());
+    }
+
+
 
 
 

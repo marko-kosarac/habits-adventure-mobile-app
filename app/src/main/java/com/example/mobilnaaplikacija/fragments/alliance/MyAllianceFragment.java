@@ -177,7 +177,6 @@ public class MyAllianceFragment extends Fragment {
                                                             String friendAllianceId = doc.getString("currentAllianceId");
 
                                                             if (finalCurrentMembers.contains(friendId)) continue;
-
                                                             if (pendingUserIds.contains(friendId)) continue;
 
                                                             tasks.add(db.collection("alliances")
@@ -214,7 +213,54 @@ public class MyAllianceFragment extends Fragment {
                                                                             .setPositiveButton("Pošalji pozive", (d, which) -> {
                                                                                 List<User> selectedFriends = adapter.getSelectedFriends();
                                                                                 for (User friend : selectedFriends) {
-                                                                                    sendAllianceInvite(friend.getId(), currentAllianceId, currentUserId);
+                                                                                    String friendId = friend.getId();
+
+                                                                                    // 🔹 DODATAK — pre nego što se pošalje poziv, proveri da li je korisnik u aktivnoj misiji
+                                                                                    db.collection("alliances")
+                                                                                            .document(currentAllianceId)
+                                                                                            .collection("missions")
+                                                                                            .get()
+                                                                                            .addOnSuccessListener(missionSnapshot -> {
+                                                                                                boolean inActiveMission = false;
+
+                                                                                                for (DocumentSnapshot missionDoc : missionSnapshot.getDocuments()) {
+                                                                                                    List<Map<String, Object>> members =
+                                                                                                            (List<Map<String, Object>>) missionDoc.get("members");
+                                                                                                    if (members == null) continue;
+
+                                                                                                    for (Map<String, Object> member : members) {
+                                                                                                        Object memberIdObj = member.get("userId");
+                                                                                                        if (memberIdObj == null) continue;
+                                                                                                        String memberId = memberIdObj.toString();
+
+                                                                                                        Boolean isStarted = member.get("isStarted") instanceof Boolean
+                                                                                                                ? (Boolean) member.get("isStarted") : false;
+                                                                                                        Boolean isDone = member.get("isDone") instanceof Boolean
+                                                                                                                ? (Boolean) member.get("isDone") : false;
+
+                                                                                                        if (memberId.equals(friendId) && isStarted && !isDone) {
+                                                                                                            inActiveMission = true;
+                                                                                                            break;
+                                                                                                        }
+                                                                                                    }
+
+                                                                                                    if (inActiveMission) break;
+                                                                                                }
+
+                                                                                                if (inActiveMission) {
+                                                                                                    Toast.makeText(getContext(),
+                                                                                                            "Ne možete poslati poziv korisniku " + friend.getUsername() +
+                                                                                                                    " jer je trenutno u aktivnoj misiji.",
+                                                                                                            Toast.LENGTH_SHORT).show();
+                                                                                                } else {
+                                                                                                    // ✅ ako nije u misiji → pošalji poziv
+                                                                                                    sendAllianceInvite(friendId, currentAllianceId, currentUserId);
+                                                                                                }
+                                                                                            })
+                                                                                            .addOnFailureListener(e ->
+                                                                                                    Toast.makeText(getContext(),
+                                                                                                            "Greška pri proveri misija za korisnika " + friend.getUsername(),
+                                                                                                            Toast.LENGTH_SHORT).show());
                                                                                 }
                                                                             })
                                                                             .setNegativeButton("Otkaži", null)
@@ -227,6 +273,7 @@ public class MyAllianceFragment extends Fragment {
                             });
                 });
     }
+
 
     private void sendAllianceInvite(String toUserId, String allianceId, String fromUserId) {
         Map<String, Object> invite = new HashMap<>();
@@ -282,29 +329,37 @@ public class MyAllianceFragment extends Fragment {
                                         recyclerAllianceMembers.setVisibility(View.VISIBLE);
                                         btnChat.setVisibility(View.VISIBLE);
 
-                                        // Prikaz dugmadi za članove i vođu
+                                        // Prikaz dugmadi
                                         if (currentUserId.equals(leaderId)) {
                                             btnDeleteAlliance.setVisibility(View.VISIBLE);
                                             btnLeaveAlliance.setVisibility(View.GONE);
                                             btnAddMembers.setVisibility(View.VISIBLE);
 
-                                            // Proveri da li postoji aktivna misija
+                                            // 🔹 Proveri da li postoji aktivna misija (isStarted = true)
                                             db.collection("alliances").document(allianceId)
                                                     .collection("missions")
                                                     .whereEqualTo("isStarted", true)
                                                     .get()
                                                     .addOnSuccessListener(missionSnapshot -> {
-                                                        if (missionSnapshot.isEmpty()) {
-                                                            // Nema aktivne misije → dugme za start
-                                                            btnStartMission.setVisibility(View.VISIBLE);
-                                                            btnEndMission.setVisibility(View.GONE);
-                                                        } else {
-                                                            // Postoji aktivna misija → dugme za kraj
+                                                        boolean activeMission = false;
+                                                        for (DocumentSnapshot missionDoc : missionSnapshot.getDocuments()) {
+                                                            Boolean isDone = missionDoc.getBoolean("isDone");
+                                                            if (isDone == null || !isDone) {
+                                                                activeMission = true;
+                                                                break;
+                                                            }
+                                                        }
+
+                                                        if (activeMission) {
+                                                            // Ako već ima aktivna misija, pokaži dugme za kraj
                                                             btnStartMission.setVisibility(View.GONE);
                                                             btnEndMission.setVisibility(View.VISIBLE);
+                                                        } else {
+                                                            // Ako nema aktivne, pokaži dugme za početak
+                                                            btnStartMission.setVisibility(View.VISIBLE);
+                                                            btnEndMission.setVisibility(View.GONE);
                                                         }
                                                     });
-
                                         } else {
                                             btnDeleteAlliance.setVisibility(View.GONE);
                                             btnLeaveAlliance.setVisibility(View.VISIBLE);
@@ -322,7 +377,6 @@ public class MyAllianceFragment extends Fragment {
                     }
                 });
     }
-
 
     private void clearAllianceUI() {
         textAllianceName.setText("Trenutno niste član nijednog saveza");
