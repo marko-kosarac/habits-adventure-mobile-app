@@ -287,7 +287,6 @@ public class UserService {
         initialEtapa.put("level", 1);
         initialEtapa.put("start", now);
         initialEtapa.put("end", null);
-        initialEtapa.put("bossDefeated", false);
         initialEtapa.put("successRate", 0.0);
 
         FirebaseFirestore.getInstance()

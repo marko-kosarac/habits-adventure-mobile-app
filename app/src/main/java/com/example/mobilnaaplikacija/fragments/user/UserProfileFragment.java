@@ -544,7 +544,6 @@ public class UserProfileFragment extends Fragment {
             newEtapa.put("level", newLevel);
             newEtapa.put("start", now);
             newEtapa.put("end", null);
-            newEtapa.put("bossDefeated", false);
             newEtapa.put("successRate", 0.0);
 
             //update korisnikov level i etapu
