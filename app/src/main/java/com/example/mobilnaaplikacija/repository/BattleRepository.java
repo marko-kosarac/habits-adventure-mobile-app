@@ -75,7 +75,7 @@ public class BattleRepository {
                         battle.setEquipmentIds(new ArrayList<>());
                         Log.w("BattleRepo", "COLUMN_BATTLE_EQUIPMENT_IDS not found in cursor!");
                     }
-                    //TODO does it work?
+
                     battle.setCoinsEarned(cursor.getInt(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_BATTLE_COINS_EARNED)));
 
                     if (!cursor.isNull(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_BATTLE_USER_WON))) {

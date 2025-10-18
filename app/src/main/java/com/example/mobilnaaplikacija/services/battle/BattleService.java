@@ -193,7 +193,7 @@ public class BattleService {
             //umanjeno 50% HP boss-a
             coins = baseCoins / 2;
             if (bonusCoins != 0) {
-                coins *= bonusCoins; //TODO
+                coins *= bonusCoins;
                 coins = (int) Math.ceil(coins);
             }
 
@@ -203,28 +203,29 @@ public class BattleService {
                     e -> Log.e("Battle", "Defeat: Failed to add coins", e)
             );
 
-        } else coins = 0;
+            double chance = 0.10;
+            equipmentService.getEquipmentReward(userId, chance, new EquipmentService.OnRewardReady() {
+                @Override
+                public void onSuccess(Equipment reward) {
+                    Log.i("Reward", "Received: " + (reward != null ? reward.getName() : "none"));
+                    updateBattleAndBoss(battle, null, boss, userId, finalCoins, attacks, equipmentFromBattle);
+                    callback.onBattleFinished(battle, reward, finalCoins);
+                }
 
+                @Override
+                public void onError(Exception e) {
+                    Log.i("Reward", "No reward.");
+                    updateBattleAndBoss(battle, null, boss, userId, finalCoins, attacks, equipmentFromBattle);
+                    callback.onBattleFinished(battle, null, finalCoins);
+                }
+            });
+        } else {
+            //boss HP > 50 → bez coins, bez equipment
+            updateBattleAndBoss(battle, null, boss, userId, 0, attacks, equipmentFromBattle);
+            callback.onBattleFinished(battle, null, 0);
+        }
         //reset boss HP
         boss.setCurrentHp(bossService.calculateMaxHp(boss.getLevel()));
-
-        double chance = 0.10;
-        int finalCoins1 = coins;
-        equipmentService.getEquipmentReward(userId, chance, new EquipmentService.OnRewardReady() {
-            @Override
-            public void onSuccess(Equipment reward) {
-                Log.i("Reward", "Received: " + (reward != null ? reward.getName() : "none"));
-                updateBattleAndBoss(battle, null, boss, userId, finalCoins1, attacks, equipmentFromBattle);
-                callback.onBattleFinished(battle, reward, finalCoins1);
-            }
-
-            @Override
-            public void onError(Exception e) {
-                Log.i("Reward", "No reward.");
-                updateBattleAndBoss(battle, null, boss, userId, finalCoins1, attacks, equipmentFromBattle);
-                callback.onBattleFinished(battle, null, finalCoins1);
-            }
-        });
     }
 
     private void updateBattleAndBoss (Battle battle, Boolean win, Boss boss, String userId, int coins, List<Attack> attacks, List<Equipment> equipmentFromBattle) {
