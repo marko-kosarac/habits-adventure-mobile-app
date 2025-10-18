@@ -1,6 +1,9 @@
 package com.example.mobilnaaplikacija.fragments.friends;
 
+import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.Color;
+import android.graphics.Typeface;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -8,6 +11,7 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -87,8 +91,85 @@ public class FriendProfileFragment extends Fragment {
 
         loadUserData();
         loadUserEquipment();
+        loadUserBadges();
 
         return view;
+    }
+
+    private void loadUserBadges() {
+        db.collection("users").document(friendId)
+                .get()
+                .addOnSuccessListener(document -> {
+                    if (document.exists()) {
+                        List<Map<String, Object>> badges =
+                                (List<Map<String, Object>>) document.get("badges");
+
+                        if (badges != null && !badges.isEmpty()) {
+                            showBadges(badges);
+                        }
+                    }
+                })
+                .addOnFailureListener(e ->
+                        Toast.makeText(getContext(), "Greška pri učitavanju bedževa.", Toast.LENGTH_SHORT).show());
+    }
+
+    private void showBadges(List<Map<String, Object>> badges) {
+        badgesContainer.removeAllViews();
+        Context context = badgesContainer.getContext();
+
+        for (Map<String, Object> badge : badges) {
+            // Kreiramo LinearLayout za jedan bedž
+            LinearLayout badgeLayout = new LinearLayout(context);
+            badgeLayout.setOrientation(LinearLayout.VERTICAL);
+            badgeLayout.setGravity(Gravity.CENTER_HORIZONTAL); // CENTRIRA IKONICU
+            badgeLayout.setPadding(16, 8, 16, 8);
+
+            // Veći razmak između bedževa
+            float scale = context.getResources().getDisplayMetrics().density;
+            int marginInDp = 16;
+            int marginInPx = (int) (marginInDp * scale + 0.5f);
+            LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT
+            );
+            layoutParams.setMargins(0, 0, marginInPx, 0);
+            badgeLayout.setLayoutParams(layoutParams);
+
+            // Ikonica bedža
+            ImageView icon = new ImageView(context);
+            int resId = context.getResources().getIdentifier(
+                    badge.get("icon").toString(), "drawable", context.getPackageName());
+            icon.setImageResource(resId);
+
+            int sizeInDp = 80; // npr 80dp
+            int sizeInPx = (int) (sizeInDp * scale + 0.5f);
+            LinearLayout.LayoutParams iconParams = new LinearLayout.LayoutParams(sizeInPx, sizeInPx);
+            icon.setLayoutParams(iconParams);
+            icon.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
+
+            // Naziv bedža
+            TextView name = new TextView(context);
+            name.setText(badge.get("name").toString());
+            name.setTextColor(Color.BLACK);
+            name.setGravity(Gravity.CENTER);
+            name.setTextSize(12);
+            name.setTypeface(null, Typeface.BOLD);
+
+            // Info o zadacima i levelu
+            TextView info = new TextView(context);
+            info.setText("Zadaci: " + badge.get("completedTasks"));
+            info.setTextColor(Color.DKGRAY);
+            info.setGravity(Gravity.CENTER);
+            info.setTextSize(10);
+
+            // Dodavanje u layout
+            badgeLayout.addView(icon);
+            badgeLayout.addView(name);
+            badgeLayout.addView(info);
+
+            // Dodavanje u container
+            badgesContainer.addView(badgeLayout);
+        }
     }
 
     private void loadUserData() {

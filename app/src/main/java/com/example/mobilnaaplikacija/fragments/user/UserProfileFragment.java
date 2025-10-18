@@ -1,7 +1,10 @@
 package com.example.mobilnaaplikacija.fragments.user;
 
 import android.app.AlertDialog;
+import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.Color;
+import android.graphics.Typeface;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -9,6 +12,7 @@ import androidx.fragment.app.Fragment;
 
 import android.text.InputType;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -29,6 +33,7 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.SetOptions;
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.MultiFormatWriter;
 import com.google.zxing.common.BitMatrix;
@@ -82,11 +87,142 @@ public class UserProfileFragment extends Fragment {
 
         loadUserData();
         loadUserEquipment();
+        addTestBadgesToFirebase();
+        loadUserBadges();
 
         buttonChangePassword.setOnClickListener(v -> showChangePasswordDialog());
 
         return view;
     }
+
+    private void addTestBadgesToFirebase() {
+        String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        DocumentReference userRef = FirebaseFirestore.getInstance().collection("users").document(userId);
+
+        // Prvo proveri da li korisnik već ima bedževe
+        userRef.get().addOnSuccessListener(document -> {
+            if (document.exists()) {
+                List<Map<String, Object>> existingBadges =
+                        (List<Map<String, Object>>) document.get("badges");
+
+                if (existingBadges == null || existingBadges.isEmpty()) {
+                    // Ako nema bedževa, dodaj test bedževe
+                    List<Map<String, Object>> newBadges = new ArrayList<>();
+
+                    Map<String, Object> bronze = new HashMap<>();
+                    bronze.put("name", "Bronzani heroj");
+                    bronze.put("completedTasks", 3);
+                    bronze.put("icon", "badge_bronze");
+
+                    Map<String, Object> silver = new HashMap<>();
+                    silver.put("name", "Srebrni ratnik");
+                    silver.put("completedTasks", 7);
+                    silver.put("icon", "badge_silver");
+
+                    Map<String, Object> gold = new HashMap<>();
+                    gold.put("name", "Zlatni gospodar");
+                    gold.put("completedTasks", 12);
+                    gold.put("icon", "badge_gold");
+
+                    newBadges.add(bronze);
+                    newBadges.add(silver);
+                    newBadges.add(gold);
+
+                    Map<String, Object> data = new HashMap<>();
+                    data.put("badges", newBadges);
+
+                    userRef.set(data, SetOptions.merge())
+                            .addOnSuccessListener(aVoid -> Log.d("UserProfile", "Bedževi uspešno upisani u Firebase"))
+                            .addOnFailureListener(e -> Log.e("UserProfile", "Greška pri upisu bedževa: " + e.getMessage()));
+                } else {
+                    Log.d("UserProfile", "Korisnik već ima bedževe, neće dodavati nove.");
+                }
+            }
+        }).addOnFailureListener(e -> Log.e("UserProfile", "Greška pri proveri bedževa: " + e.getMessage()));
+    }
+
+
+
+    private void loadUserBadges() {
+        String userId = auth.getCurrentUser().getUid();
+
+        db.collection("users").document(userId)
+                .get()
+                .addOnSuccessListener(document -> {
+                    if (document.exists()) {
+                        List<Map<String, Object>> badges =
+                                (List<Map<String, Object>>) document.get("badges");
+
+                        if (badges != null && !badges.isEmpty()) {
+                            showBadges(badges);
+                        }
+                    }
+                })
+                .addOnFailureListener(e ->
+                        Toast.makeText(getContext(), "Greška pri učitavanju bedževa.", Toast.LENGTH_SHORT).show());
+    }
+
+    private void showBadges(List<Map<String, Object>> badges) {
+        badgesContainer.removeAllViews();
+        Context context = badgesContainer.getContext();
+
+        for (Map<String, Object> badge : badges) {
+            // Kreiramo LinearLayout za jedan bedž
+            LinearLayout badgeLayout = new LinearLayout(context);
+            badgeLayout.setOrientation(LinearLayout.VERTICAL);
+            badgeLayout.setGravity(Gravity.CENTER_HORIZONTAL); // CENTRIRA IKONICU
+            badgeLayout.setPadding(16, 8, 16, 8);
+
+            // Veći razmak između bedževa
+            float scale = context.getResources().getDisplayMetrics().density;
+            int marginInDp = 16;
+            int marginInPx = (int) (marginInDp * scale + 0.5f);
+            LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT
+            );
+            layoutParams.setMargins(0, 0, marginInPx, 0);
+            badgeLayout.setLayoutParams(layoutParams);
+
+            // Ikonica bedža
+            ImageView icon = new ImageView(context);
+            int resId = context.getResources().getIdentifier(
+                    badge.get("icon").toString(), "drawable", context.getPackageName());
+            icon.setImageResource(resId);
+
+            int sizeInDp = 80; // npr 80dp
+            int sizeInPx = (int) (sizeInDp * scale + 0.5f);
+            LinearLayout.LayoutParams iconParams = new LinearLayout.LayoutParams(sizeInPx, sizeInPx);
+            icon.setLayoutParams(iconParams);
+            icon.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
+
+            // Naziv bedža
+            TextView name = new TextView(context);
+            name.setText(badge.get("name").toString());
+            name.setTextColor(Color.BLACK);
+            name.setGravity(Gravity.CENTER);
+            name.setTextSize(12);
+            name.setTypeface(null, Typeface.BOLD);
+
+            // Info o zadacima i levelu
+            TextView info = new TextView(context);
+            info.setText("Zadaci: " + badge.get("completedTasks"));
+            info.setTextColor(Color.DKGRAY);
+            info.setGravity(Gravity.CENTER);
+            info.setTextSize(10);
+
+            // Dodavanje u layout
+            badgeLayout.addView(icon);
+            badgeLayout.addView(name);
+            badgeLayout.addView(info);
+
+            // Dodavanje u container
+            badgesContainer.addView(badgeLayout);
+        }
+    }
+
+
+
 
     private void loadUserData() {
         FirebaseUser currentUser = auth.getCurrentUser();
