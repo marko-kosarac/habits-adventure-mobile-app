@@ -219,7 +219,7 @@ public class TaskService {
                 taskOccurrence.setDifficulty(task.getDifficulty());
                 taskOccurrence.setImportance(task.getImportance());
                 taskOccurrence.setStatus(task.getStatus());
-                taskOccurrence.setStatusTimestamp(task.getStatusTimestamp()); //TODO ostaje isto?
+                taskOccurrence.setStatusTimestamp(task.getStatusTimestamp());
                 taskOccurrence.setQuotaReached(task.isQuotaReached());
 
                 taskRepository.add(taskOccurrence);

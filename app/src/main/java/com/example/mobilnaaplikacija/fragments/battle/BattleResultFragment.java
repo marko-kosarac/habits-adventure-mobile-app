@@ -1,12 +1,11 @@
 package com.example.mobilnaaplikacija.fragments.battle;
-
-import static com.example.mobilnaaplikacija.model.Equipment.Type.NAPITAK;
-import static com.example.mobilnaaplikacija.model.Equipment.Type.ODECA;
-import static com.example.mobilnaaplikacija.model.Equipment.Type.ORUZJE;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 
 import android.app.Dialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.util.Log;
@@ -26,8 +25,6 @@ import com.airbnb.lottie.LottieAnimationView;
 import com.example.mobilnaaplikacija.R;
 import com.example.mobilnaaplikacija.model.Equipment;
 
-import java.util.List;
-
 public class BattleResultFragment extends Dialog {
     public enum ResultType {
         VICTORY,
@@ -38,6 +35,11 @@ public class BattleResultFragment extends Dialog {
     private final int coins;
     private final Equipment reward;
     private boolean chestOpened = false;
+    private SensorManager sensorManager;
+    private float lastX, lastY, lastZ;
+    private long lastShakeTime = 0;
+    private static final int SHAKE_THRESHOLD = 1200;
+    private SensorEventListener shakeListener;
     private OnDialogClosedListener listener;
 
     public interface OnDialogClosedListener {
@@ -123,8 +125,45 @@ public class BattleResultFragment extends Dialog {
             dismiss();
         });
 
+        //shake senzor
+        sensorManager = (SensorManager) getContext().getSystemService(Context.SENSOR_SERVICE);
+        Sensor accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+
+        shakeListener = new SensorEventListener() {
+            @Override
+            public void onSensorChanged(SensorEvent event) {
+                float x = event.values[0];
+                float y = event.values[1];
+                float z = event.values[2];
+
+                long currentTime = System.currentTimeMillis();
+
+                if ((currentTime - lastShakeTime) > 100) {
+                    long diffTime = (currentTime - lastShakeTime);
+                    lastShakeTime = currentTime;
+
+                    float speed = Math.abs(x + y + z - lastX - lastY - lastZ) / diffTime * 10000;
+
+                    if (speed > SHAKE_THRESHOLD && !chestOpened) {
+                        //otvori kovčeg ako nije već otvoren
+                        openChest(ivClosedChest, ivOpenedChest, layoutRewards, tvCoins, confetti);
+                    }
+
+                    lastX = x;
+                    lastY = y;
+                    lastZ = z;
+                }
+            }
+
+            @Override
+            public void onAccuracyChanged(Sensor sensor, int accuracy) {}
+        };
+
+        sensorManager.registerListener(shakeListener, accelerometer, SensorManager.SENSOR_DELAY_UI);
+
         setOnDismissListener(dialog -> {
             if (listener != null) listener.onDialogClosed();
+            if (sensorManager != null && shakeListener != null) sensorManager.unregisterListener(shakeListener);
         });
     }
 
@@ -134,35 +173,36 @@ public class BattleResultFragment extends Dialog {
         chestOpened = true;
 
         ivClosed.setOnClickListener(null);
-        ivClosed.setVisibility(View.GONE);
-        ivOpened.setVisibility(View.VISIBLE);
 
-        layoutRewards.setVisibility(View.VISIBLE);
-
-        //fejd in
-        layoutRewards.startAnimation(AnimationUtils.loadAnimation(getContext(), android.R.anim.fade_in));
-
-        tvCoins.setText("+ " + coins + " novčića");
-
-        //konfete
-        if (resultType == ResultType.VICTORY) {
-            confetti.bringToFront();
-            confetti.setZ(10f);
-            confetti.setVisibility(View.VISIBLE);
-            confetti.setAnimation("confetti.json");
-            confetti.playAnimation();
-            confetti.setFailureListener(result -> {
-                Log.e("LottieError", "Failed to load animation", result);
-            });
-
-            if (getContext() != null) {
-                MediaPlayer mp = MediaPlayer.create(getContext(), R.raw.game_chest_effect);
-                if (mp != null) {
-                    mp.setOnCompletionListener(player -> player.release());
-                    mp.start();
-                }
+        if (getContext() != null) {
+            MediaPlayer mp = MediaPlayer.create(getContext(), R.raw.game_chest_effect);
+            if (mp != null) {
+                mp.setOnCompletionListener(player -> player.release());
+                mp.start();
             }
         }
+
+        ivClosed.postDelayed(() -> {
+            ivClosed.setVisibility(View.GONE);
+            ivOpened.setVisibility(View.VISIBLE);
+
+            layoutRewards.setVisibility(View.VISIBLE);
+            layoutRewards.startAnimation(AnimationUtils.loadAnimation(getContext(), android.R.anim.fade_in));
+
+            tvCoins.setText("+ " + coins + " novčića");
+
+            if (resultType == ResultType.VICTORY) {
+                confetti.postDelayed(() -> {
+                    confetti.bringToFront();
+                    confetti.setZ(10f);
+                    confetti.setVisibility(View.VISIBLE);
+                    confetti.setAnimation("confetti.json");
+                    confetti.playAnimation();
+                    confetti.setFailureListener(result -> Log.e("LottieError", "Failed to load animation", result));
+                }, 150);
+            }
+
+        }, 500);
     }
 
 }
