@@ -292,27 +292,29 @@ public class FriendProfileFragment extends Fragment {
         if (userEquipmentList == null || userEquipmentList.isEmpty()) return;
 
         for (Equipment eq : userEquipmentList) {
-            View card = LayoutInflater.from(getContext()).inflate(R.layout.card_user_equipment, null);
-            TextView name = card.findViewById(R.id.textEquipmentName);
-            TextView desc = card.findViewById(R.id.textEquipmentDescription);
-            TextView quantity = card.findViewById(R.id.textEquipmentQuantity);
-            Button activateButton = card.findViewById(R.id.buttonActivateEquipment);
+            // Prikaži samo aktivnu opremu koja nije napitak ili oružje
+            boolean isClothing = eq.getType() != null &&
+                    !(eq.getType().toString().equals("NAPITAK") || eq.getType().toString().equals("ORUZJE"));
 
-            name.setText(eq.getName());
-            desc.setText(eq.getDescription());
-            quantity.setText("Količina: " + eq.getQuantity());
+            if (eq.isActive() && isClothing) {
+                View card = LayoutInflater.from(getContext()).inflate(R.layout.card_user_equipment, null);
+                TextView name = card.findViewById(R.id.textEquipmentName);
+                TextView desc = card.findViewById(R.id.textEquipmentDescription);
+                TextView quantity = card.findViewById(R.id.textEquipmentQuantity);
+                Button activateButton = card.findViewById(R.id.buttonActivateEquipment);
 
-            if (eq.isActive()) {
+                name.setText(eq.getName());
+                desc.setText(eq.getDescription());
+                quantity.setText("Količina: " + eq.getQuantity());
+
                 activateButton.setText("Aktivirana");
                 activateButton.setEnabled(false);
-                activeEquipmentContainer.addView(card);
-            } else {
-                activateButton.setText("Aktiviraj");
-                activateButton.setEnabled(true);
 
+                activeEquipmentContainer.addView(card);
             }
         }
     }
+
 
     private void generateQRCode(String userId, String username, String email) {
         MultiFormatWriter writer = new MultiFormatWriter();

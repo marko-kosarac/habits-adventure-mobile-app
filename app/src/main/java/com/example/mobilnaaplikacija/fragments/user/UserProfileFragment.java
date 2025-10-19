@@ -295,13 +295,14 @@ public class UserProfileFragment extends Fragment {
 
             boolean isPotionOrWeapon = eq.getType() != null &&
                     (eq.getType().toString().equals("NAPITAK") || eq.getType().toString().equals("ORUZJE"));
-            String str = eq.getType().toString();
+
             if (eq.isActive() && !isPotionOrWeapon) {
-                // Dodaj samo ako nije napitak ili oružje
+                // Samo ne-napitci i ne-оружje idu u aktivnu listu
                 activateButton.setText("Aktivirana");
                 activateButton.setEnabled(false);
                 activeEquipmentContainer.addView(card);
-            } else {
+            } else if (!eq.isActive()) {
+                // Neaktivna oprema ide u listu neaktivne opreme
                 activateButton.setText("Aktiviraj");
                 activateButton.setEnabled(true);
                 inactiveEquipmentContainer.addView(card);
@@ -310,8 +311,10 @@ public class UserProfileFragment extends Fragment {
                     activateEquipment(eq, card);
                 });
             }
+            // Napitci i oružje koji su aktivni se NE prikazuju nigde
         }
     }
+
 
 
 
@@ -319,10 +322,17 @@ public class UserProfileFragment extends Fragment {
         String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
         DocumentReference userRef = db.collection("users").document(userId);
 
-        // Smanji quantity u objektu
+        if (eq.getQuantity() <= 0) return;
+
+        // Smanji quantity u neaktivnoj instanci
         eq.setQuantity(eq.getQuantity() - 1);
 
-        // Proveri da li ista oprema već postoji u aktivnim
+        // Ako quantity postane 0, ukloni iz inventara
+        if (eq.getQuantity() == 0) {
+            userEquipmentList.remove(eq);
+        }
+
+        // Proveri da li postoji aktivna instanca iste opreme
         Equipment activeEq = null;
         for (Equipment e : userEquipmentList) {
             if (e.isActive() && e.getId() == eq.getId()) {
@@ -335,7 +345,7 @@ public class UserProfileFragment extends Fragment {
             // Ako postoji, samo povećaj quantity
             activeEq.setQuantity(activeEq.getQuantity() + 1);
         } else {
-            // Ako ne postoji, kreiraj novu aktivnu instancu
+            // Kreiraj novu aktivnu instancu
             activeEq = new Equipment();
             activeEq.setId(eq.getId());
             activeEq.setName(eq.getName());
@@ -346,23 +356,25 @@ public class UserProfileFragment extends Fragment {
             activeEq.setQuantity(1);
             activeEq.setType(eq.getType());
             activeEq.setActive(true);
-            userEquipmentList.add(activeEq);
+            userEquipmentList.add(activeEq); // dodaj u listu sa isActive = true
         }
 
-        // Ažuriraj Firestore
         Equipment finalActiveEq = activeEq;
+
+        // Ažuriraj Firestore
         userRef.get().addOnSuccessListener(doc -> {
             List<Map<String, Object>> equipmentData = (List<Map<String, Object>>) doc.get("equipment");
             if (equipmentData == null) equipmentData = new ArrayList<>();
             List<Map<String, Object>> updatedList = new ArrayList<>();
 
-            // Update quantity u inventaru i dodaj aktivne
+            // Ažuriraj quantity u neaktivnoj opremi
             for (Map<String, Object> e : equipmentData) {
                 long id = ((Number) e.get("id")).longValue();
                 int qty = ((Number) e.get("quantity")).intValue();
+                boolean isActive = e.containsKey("active") && (Boolean) e.get("active");
 
-                if (id == eq.getId()) {
-                    qty = qty - 1; // smanji quantity u inventaru
+                if (id == eq.getId() && !isActive) {
+                    qty = qty - 1; // smanji quantity neaktivne
                 }
 
                 if (qty > 0) {
@@ -380,6 +392,7 @@ public class UserProfileFragment extends Fragment {
                     break;
                 }
             }
+
             if (!found) {
                 Map<String, Object> activeMap = new HashMap<>();
                 activeMap.put("id", finalActiveEq.getId());
@@ -396,10 +409,11 @@ public class UserProfileFragment extends Fragment {
 
             userRef.update("equipment", updatedList).addOnSuccessListener(aVoid -> {
                 loadUserEquipment(); // osveži prikaz
-                Toast.makeText(getContext(), eq.getName() + " je aktivirana!", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getContext(), finalActiveEq.getName() + " je aktivirana!", Toast.LENGTH_SHORT).show();
             });
         });
     }
+
 
     private void bindUserData(@NonNull DocumentSnapshot document, String userId) {
         String username = document.getString("username");

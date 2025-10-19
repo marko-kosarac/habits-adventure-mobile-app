@@ -177,6 +177,7 @@ public class MyAllianceFragment extends Fragment {
                                                             String friendAllianceId = doc.getString("currentAllianceId");
 
                                                             if (finalCurrentMembers.contains(friendId)) continue;
+
                                                             if (pendingUserIds.contains(friendId)) continue;
 
                                                             tasks.add(db.collection("alliances")
@@ -213,54 +214,7 @@ public class MyAllianceFragment extends Fragment {
                                                                             .setPositiveButton("Pošalji pozive", (d, which) -> {
                                                                                 List<User> selectedFriends = adapter.getSelectedFriends();
                                                                                 for (User friend : selectedFriends) {
-                                                                                    String friendId = friend.getId();
-
-                                                                                    // 🔹 DODATAK — pre nego što se pošalje poziv, proveri da li je korisnik u aktivnoj misiji
-                                                                                    db.collection("alliances")
-                                                                                            .document(currentAllianceId)
-                                                                                            .collection("missions")
-                                                                                            .get()
-                                                                                            .addOnSuccessListener(missionSnapshot -> {
-                                                                                                boolean inActiveMission = false;
-
-                                                                                                for (DocumentSnapshot missionDoc : missionSnapshot.getDocuments()) {
-                                                                                                    List<Map<String, Object>> members =
-                                                                                                            (List<Map<String, Object>>) missionDoc.get("members");
-                                                                                                    if (members == null) continue;
-
-                                                                                                    for (Map<String, Object> member : members) {
-                                                                                                        Object memberIdObj = member.get("userId");
-                                                                                                        if (memberIdObj == null) continue;
-                                                                                                        String memberId = memberIdObj.toString();
-
-                                                                                                        Boolean isStarted = member.get("isStarted") instanceof Boolean
-                                                                                                                ? (Boolean) member.get("isStarted") : false;
-                                                                                                        Boolean isDone = member.get("isDone") instanceof Boolean
-                                                                                                                ? (Boolean) member.get("isDone") : false;
-
-                                                                                                        if (memberId.equals(friendId) && isStarted && !isDone) {
-                                                                                                            inActiveMission = true;
-                                                                                                            break;
-                                                                                                        }
-                                                                                                    }
-
-                                                                                                    if (inActiveMission) break;
-                                                                                                }
-
-                                                                                                if (inActiveMission) {
-                                                                                                    Toast.makeText(getContext(),
-                                                                                                            "Ne možete poslati poziv korisniku " + friend.getUsername() +
-                                                                                                                    " jer je trenutno u aktivnoj misiji.",
-                                                                                                            Toast.LENGTH_SHORT).show();
-                                                                                                } else {
-                                                                                                    // ✅ ako nije u misiji → pošalji poziv
-                                                                                                    sendAllianceInvite(friendId, currentAllianceId, currentUserId);
-                                                                                                }
-                                                                                            })
-                                                                                            .addOnFailureListener(e ->
-                                                                                                    Toast.makeText(getContext(),
-                                                                                                            "Greška pri proveri misija za korisnika " + friend.getUsername(),
-                                                                                                            Toast.LENGTH_SHORT).show());
+                                                                                    sendAllianceInvite(friend.getId(), currentAllianceId, currentUserId);
                                                                                 }
                                                                             })
                                                                             .setNegativeButton("Otkaži", null)
@@ -273,6 +227,7 @@ public class MyAllianceFragment extends Fragment {
                             });
                 });
     }
+
 
 
     private void sendAllianceInvite(String toUserId, String allianceId, String fromUserId) {
