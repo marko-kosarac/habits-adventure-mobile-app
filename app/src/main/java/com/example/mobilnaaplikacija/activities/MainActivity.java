@@ -107,7 +107,8 @@ public class MainActivity extends AppCompatActivity {
                 R.id.friendsFragment,
                 R.id.friendProfileFragment,
                 R.id.myAllianceFragment,
-                R.id.allianceChatFragment
+                R.id.allianceChatFragment,
+                R.id.categoriesFragment
         ).setOpenableLayout(drawer).build();
 
         NavigationUI.setupActionBarWithNavController(this, navController, mAppBarConfiguration);
