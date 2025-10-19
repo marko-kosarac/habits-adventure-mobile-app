@@ -374,7 +374,7 @@ public class TaskListFragment extends Fragment implements RecyclerViewInterface 
                     StatusType oldStatus = task.getStatus();
                     long now = System.currentTimeMillis();
 
-                    // Samo AKTIVAN <-> PAUZIRAN
+                    //Samo AKTIVAN <-> PAUZIRAN
                     if (task.getFrequency() == FrequencyType.PONAVLJAJUCI &&
                             ((oldStatus == StatusType.AKTIVAN && status == StatusType.PAUZIRAN) ||
                                     (oldStatus == StatusType.PAUZIRAN && status == StatusType.AKTIVAN))) {
@@ -391,38 +391,30 @@ public class TaskListFragment extends Fragment implements RecyclerViewInterface 
                                     adapter.notifyItemChanged(i);
                                 }
                             }
-                        } else {
-                            Toast.makeText(requireContext(),
-                                    "Ne možeš menjati status završenog zadatka.",
-                                    Toast.LENGTH_SHORT).show();
-                        }
+                        } else
+                            Toast.makeText(requireContext(), "Ne možeš menjati status završenog zadatka.", Toast.LENGTH_SHORT).show();
 
                     } else {
-                        // Pojavu zadatka update
+                        //Pojavu zadatka update
                         task.setStatus(status);
                         taskService.update(task);
                     }
-
                     if (status == StatusType.URAĐEN) {
                         FirebaseUser user = userService.getCurrentUser();
                         task.setStatusTimestamp(System.currentTimeMillis());
                         if (user != null) {
-                            taskService.awardXP(task, user);
+                            taskService.awardXP(task, userService.getCurrentUser());
                             updateStreak();
                         }
                     }
-
                     getTasks();
                     break;
                 }
             }
-
             return true;
         });
-
         popup.show();
     }
-
 
     private void showXpToast(Context context, int xp, boolean diffAwarded, boolean impAwarded) {
         String message;
