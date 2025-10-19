@@ -377,7 +377,7 @@ public class TaskListFragment extends Fragment implements RecyclerViewInterface 
                     //Samo AKTIVAN <-> PAUZIRAN
                     if (task.getFrequency() == FrequencyType.PONAVLJAJUCI &&
                             ((oldStatus == StatusType.AKTIVAN && status == StatusType.PAUZIRAN) ||
-                             (oldStatus == StatusType.PAUZIRAN && status == StatusType.AKTIVAN))) {
+                                    (oldStatus == StatusType.PAUZIRAN && status == StatusType.AKTIVAN))) {
 
                         if (task.getEndMillis() > now) {
                             taskService.updateRepeatingTaskStatus(task.getTaskId(), oldStatus, status);
@@ -391,17 +391,18 @@ public class TaskListFragment extends Fragment implements RecyclerViewInterface 
                                     adapter.notifyItemChanged(i);
                                 }
                             }
-                        } else Toast.makeText(requireContext(), "Ne možeš menjati status završenog zadatka.", Toast.LENGTH_SHORT).show();
+                        } else
+                            Toast.makeText(requireContext(), "Ne možeš menjati status završenog zadatka.", Toast.LENGTH_SHORT).show();
 
                     } else {
                         //Pojavu zadatka update
                         task.setStatus(status);
                         taskService.update(task);
                     }
-                    if(status == StatusType.URAĐEN) {
+                    if (status == StatusType.URAĐEN) {
                         FirebaseUser user = userService.getCurrentUser();
                         task.setStatusTimestamp(System.currentTimeMillis());
-                        if (user != null)
+                        if (user != null) {
                             taskService.awardXP(task, userService.getCurrentUser());
                             updateStreak();
                         }
@@ -409,6 +410,7 @@ public class TaskListFragment extends Fragment implements RecyclerViewInterface 
                     getTasks();
                     break;
                 }
+            }
             return true;
         });
         popup.show();
