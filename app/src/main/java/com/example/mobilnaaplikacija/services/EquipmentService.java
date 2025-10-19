@@ -6,7 +6,9 @@ import android.util.Log;
 
 import com.example.mobilnaaplikacija.model.Equipment;
 import com.example.mobilnaaplikacija.repository.EquipmentRepository;
+import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
@@ -55,6 +57,39 @@ public class EquipmentService {
         }
 
         Equipment rewardItem = filtered.get(new Random().nextInt(filtered.size()));
+
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        CollectionReference eqRef = db.collection("users")
+                .document(userId)
+                .collection("equipment");
+
+        eqRef.whereEqualTo("name", rewardItem.getName())
+                .whereEqualTo("active", false)
+                .get()
+                .addOnSuccessListener(query -> {
+                    if (!query.isEmpty()) {
+                        DocumentSnapshot doc = query.getDocuments().get(0);
+                        long currentQty = doc.getLong("quantity") != null ? doc.getLong("quantity") : 0;
+                        doc.getReference().update("quantity", currentQty + 1)
+                                .addOnSuccessListener(aVoid -> {
+                                    Log.i("Nagrada", "Povećana količina za: " + rewardItem.getName());
+                                    callback.onSuccess(rewardItem);
+                                })
+                                .addOnFailureListener(callback::onError);
+                    } else {
+                        rewardItem.setQuantity(1);
+                        rewardItem.setActive(false);
+
+                        eqRef.add(rewardItem)
+                                .addOnSuccessListener(docRef -> {
+                                    Log.i("Nagrada", "Nova oprema dodana: " + rewardItem.getName());
+                                    callback.onSuccess(rewardItem);
+                                })
+                                .addOnFailureListener(callback::onError);
+                    }
+                })
+                .addOnFailureListener(callback::onError);
+
 
         userService.addEquipmentToUser(userId, rewardItem,
                 aVoid -> {
