@@ -206,7 +206,7 @@ public class TaskRepository {
         if (cursor.moveToFirst()) {
             do {
                 long millis = cursor.getLong(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_START_MILLIS));
-                long fakeDay = millis / 30000; // 30 sekundi = jedan dan
+                long fakeDay = millis / 60000; // 60 sekundi = jedan dan
 
                 if (lastDay == -1) {
                     currentStreak = 1;

@@ -371,8 +371,10 @@ public class TaskListFragment extends Fragment implements RecyclerViewInterface 
                     }
                     if(status == StatusType.URAĐEN) {
                         FirebaseUser user = userService.getCurrentUser();
-                        if (user != null)
+                        if (user != null) {
                             taskService.awardXP(task, userService.getCurrentUser());
+                            updateStreak();
+                        }
                     }
                     getTasks();
                     break;
@@ -433,5 +435,10 @@ public class TaskListFragment extends Fragment implements RecyclerViewInterface 
     public void onDestroyView() {
         super.onDestroyView();
         binding = null;
+    }
+
+    private void updateStreak() {
+        String currentUserId = userService.getCurrentUser().getUid();
+        userService.updateActiveDaysOnTaskAction(currentUserId);
     }
 }
