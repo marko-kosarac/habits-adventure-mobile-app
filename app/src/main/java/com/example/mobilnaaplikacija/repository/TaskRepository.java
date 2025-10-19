@@ -393,8 +393,8 @@ public class TaskRepository {
         //start >= now
         int deleted = db.delete(
                 SQLiteHelper.TABLE_TASKS,
-                "task_id = ? AND (start_millis >= ? OR (start_millis <= ? AND end_millis >= ?))",
-                new String[]{taskId, String.valueOf(now), String.valueOf(now), String.valueOf(now)}
+                "task_id = ? AND (start_millis >= ? OR (start_millis <= ? AND end_millis >= ?)) AND status != ?",
+                new String[]{taskId, String.valueOf(now), String.valueOf(now), String.valueOf(now), StatusType.OTKAZAN.name()}
         );
 
         db.close();
