@@ -128,7 +128,6 @@ public class BattleFragment extends Fragment {
             fetchUserEquipment(() -> {
                 setupActiveEquipment();
                 loadAndHandleEtapaSuccessRate(boss.getLevel(), firebaseUser.getUid()); //posle efekata opreme se ucita
-                setupCoinReward();
             });
         }
 
@@ -263,10 +262,12 @@ public class BattleFragment extends Fragment {
         return battle;
     }
 
-    private void setupCoinReward () {
+    private void setupCoinReward (double bonus) {
         int coins = bossService.calculateCoins(boss.getLevel());
-        coins *= (int) bonusCoins;
+        Log.w("Coins before bonus", "Coins: " + coins);
+        coins = (int) Math.ceil(coins * bonus);
         binding.tvCoinReward.setText("+ " + coins);
+        Log.w("Coins after bonus", "Coins: " + coins);
     }
 
     private void applyEquipmentEffects(List<Equipment> equipment) {
@@ -313,6 +314,8 @@ public class BattleFragment extends Fragment {
         bonusAttackSuccessChance = totalAttackChance;
 
         setupProgressBars();
+        Log.w("Coins setup", "Bonus for coins active: " + bonusCoins);
+        setupCoinReward(bonusCoins);
     }
 
     private double getPotionMultiplier(Equipment eq) {

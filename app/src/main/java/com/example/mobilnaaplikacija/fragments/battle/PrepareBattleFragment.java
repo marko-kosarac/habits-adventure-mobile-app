@@ -281,9 +281,26 @@ public class PrepareBattleFragment extends DialogFragment {
             ImageView icon = new ImageView(getContext());
             icon.setLayoutParams(new LinearLayout.LayoutParams(80, 80));
             switch (first.getType()) {
-                case ORUZJE: icon.setImageResource(R.drawable.ic_swords); break;
-                case ODECA: icon.setImageResource(R.drawable.ic_shield); break;
+                case ORUZJE:
+                    if (first.getName().toLowerCase().contains("mač")) {
+                        icon.setImageResource(R.drawable.ic_swords);
+                    } else if (first.getName().toLowerCase().contains("luk")) {
+                        icon.setImageResource(R.drawable.ic_arrow);
+                    }
+                    break;
+                case ODECA: String nameLower = first.getName().toLowerCase();
+                    if (nameLower.contains("čizme")) {
+                        icon.setImageResource(R.drawable.ic_boots);
+                    } else if (nameLower.contains("štit")) {
+                        icon.setImageResource(R.drawable.ic_shield);
+                    } else if (nameLower.contains("rukavice")) {
+                        icon.setImageResource(R.drawable.ic_glove);
+                    }
+                    break;
                 case NAPITAK: icon.setImageResource(R.drawable.ic_potion); break;
+                default:
+                    icon.setImageResource(R.drawable.ic_potion);
+                    break;
             }
             itemLayout.addView(icon);
 
