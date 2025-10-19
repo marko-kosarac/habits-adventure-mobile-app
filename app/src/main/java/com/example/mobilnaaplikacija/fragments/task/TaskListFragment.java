@@ -403,6 +403,8 @@ public class TaskListFragment extends Fragment implements RecyclerViewInterface 
                         task.setStatusTimestamp(System.currentTimeMillis());
                         if (user != null)
                             taskService.awardXP(task, userService.getCurrentUser());
+                            updateStreak();
+                        }
                     }
                     getTasks();
                     break;
@@ -463,5 +465,10 @@ public class TaskListFragment extends Fragment implements RecyclerViewInterface 
     public void onDestroyView() {
         super.onDestroyView();
         binding = null;
+    }
+
+    private void updateStreak() {
+        String currentUserId = userService.getCurrentUser().getUid();
+        userService.updateActiveDaysOnTaskAction(currentUserId);
     }
 }

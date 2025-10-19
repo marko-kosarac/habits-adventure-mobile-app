@@ -21,6 +21,7 @@ import com.example.mobilnaaplikacija.R;
 import com.example.mobilnaaplikacija.adapters.AllianceFriendsAdapter;
 import com.example.mobilnaaplikacija.adapters.AllianceMemberAdapter;
 import com.example.mobilnaaplikacija.model.User;
+import com.example.mobilnaaplikacija.services.AllianceService;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -37,11 +38,13 @@ import java.util.Set;
 public class MyAllianceFragment extends Fragment {
 
     private TextView textAllianceName, textAllianceLeader, textMembersLabel;
-    private Button btnDeleteAlliance, btnLeaveAlliance, btnAddMembers;
+    private Button btnDeleteAlliance, btnLeaveAlliance, btnAddMembers, btnStartMission, btnEndMission;
     private FloatingActionButton btnChat;
     private RecyclerView recyclerAllianceMembers;
     private AllianceMemberAdapter memberAdapter;
     private List<String> memberList = new ArrayList<>();
+    private List<String> memberIds = new ArrayList<>();
+    private String allianceId, currentUserId;
 
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
 
@@ -49,6 +52,14 @@ public class MyAllianceFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_my_alliance, container, false);
+
+        currentUserId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+
+        db.collection("users").document(currentUserId)
+                .get()
+                .addOnSuccessListener(doc -> {
+                    allianceId = doc.getString("currentAllianceId");
+                });
 
         textAllianceName = view.findViewById(R.id.textAllianceName);
         textAllianceLeader = view.findViewById(R.id.textAllianceLeader);
@@ -58,6 +69,10 @@ public class MyAllianceFragment extends Fragment {
         textMembersLabel = view.findViewById(R.id.textMembersLabel);
         btnChat = view.findViewById(R.id.fabOpenChat);
         btnAddMembers = view.findViewById(R.id.btnAddMembers);
+        btnStartMission = view.findViewById(R.id.btnStartMission);
+        btnEndMission = view.findViewById(R.id.btnEndMission);
+
+        AllianceService allianceService = new AllianceService();
 
         btnAddMembers.setOnClickListener(v -> showAddMembersDialog());
 
@@ -73,7 +88,7 @@ public class MyAllianceFragment extends Fragment {
             db.collection("users").document(FirebaseAuth.getInstance().getCurrentUser().getUid())
                     .get()
                     .addOnSuccessListener(userDoc -> {
-                        String allianceId = userDoc.getString("currentAllianceId");
+                        allianceId = userDoc.getString("currentAllianceId");
                         if (allianceId != null && !allianceId.isEmpty()) {
                             Bundle bundle = new Bundle();
                             bundle.putString("allianceId", allianceId);
@@ -87,6 +102,35 @@ public class MyAllianceFragment extends Fragment {
         });
 
         loadAllianceData();
+
+
+        btnStartMission.setOnClickListener(v -> {
+            if (allianceId == null || currentUserId == null || memberIds.isEmpty()) {
+                Toast.makeText(getContext(), "Podaci o savezu nisu učitani.", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            allianceService.startMission(allianceId, currentUserId, memberIds,
+                    () -> {
+                        btnStartMission.setVisibility(View.GONE);
+                        btnEndMission.setVisibility(View.VISIBLE);
+                        Toast.makeText(getContext(), "Misija je pokrenuta!", Toast.LENGTH_SHORT).show();
+                    },
+                    () -> Toast.makeText(getContext(), "Greška pri pokretanju misije!", Toast.LENGTH_SHORT).show()
+            );
+        });
+
+
+        btnEndMission.setOnClickListener(v -> {
+            allianceService.endMission(allianceId,
+                    () -> {
+                        btnEndMission.setVisibility(View.GONE);
+                        btnStartMission.setVisibility(View.VISIBLE);
+                        Toast.makeText(getContext(), "Misija je uspešno završena!", Toast.LENGTH_SHORT).show();
+                    },
+                    () -> Toast.makeText(getContext(), "Greška pri okončanju misije!", Toast.LENGTH_SHORT).show()
+            );
+        });
 
         return view;
     }
@@ -186,34 +230,6 @@ public class MyAllianceFragment extends Fragment {
 
 
 
-
-    private void showFriendsCheckboxDialog(List<String> friendIds, String allianceId) {
-        String[] friendNames = new String[friendIds.size()];
-        boolean[] checkedItems = new boolean[friendIds.size()];
-
-        for (int i = 0; i < friendIds.size(); i++) {
-            String friendId = friendIds.get(i);
-            int finalI = i;
-            db.collection("users").document(friendId).get().addOnSuccessListener(doc -> {
-                String username = doc.getString("username");
-                if (username != null) friendNames[finalI] = username;
-            });
-        }
-
-        new AlertDialog.Builder(getContext())
-                .setTitle("Odaberite prijatelje")
-                .setMultiChoiceItems(friendNames, checkedItems, (dialog, which, isChecked) -> checkedItems[which] = isChecked)
-                .setPositiveButton("Pošalji pozive", (dialog, which) -> {
-                    for (int i = 0; i < friendIds.size(); i++) {
-                        if (checkedItems[i]) {
-                            sendAllianceInvite(friendIds.get(i), allianceId, FirebaseAuth.getInstance().getCurrentUser().getUid());
-                        }
-                    }
-                })
-                .setNegativeButton("Otkaži", null)
-                .show();
-    }
-
     private void sendAllianceInvite(String toUserId, String allianceId, String fromUserId) {
         Map<String, Object> invite = new HashMap<>();
         invite.put("toUserId", toUserId);
@@ -226,9 +242,6 @@ public class MyAllianceFragment extends Fragment {
                 .addOnSuccessListener(aVoid -> Toast.makeText(getContext(), "Poziv poslat!", Toast.LENGTH_SHORT).show())
                 .addOnFailureListener(e -> Toast.makeText(getContext(), "Greška pri slanju poziva.", Toast.LENGTH_SHORT).show());
     }
-
-
-
 
 
     private void loadAllianceData() {
@@ -260,6 +273,9 @@ public class MyAllianceFragment extends Fragment {
                                         }
 
                                         if (members != null) {
+                                            memberIds.clear();
+                                            memberIds.addAll(members);
+
                                             memberList.clear();
                                             memberList.addAll(members);
                                             memberAdapter.notifyDataSetChanged();
@@ -273,10 +289,38 @@ public class MyAllianceFragment extends Fragment {
                                             btnDeleteAlliance.setVisibility(View.VISIBLE);
                                             btnLeaveAlliance.setVisibility(View.GONE);
                                             btnAddMembers.setVisibility(View.VISIBLE);
+
+                                            // 🔹 Proveri da li postoji aktivna misija (isStarted = true)
+                                            db.collection("alliances").document(allianceId)
+                                                    .collection("missions")
+                                                    .whereEqualTo("isStarted", true)
+                                                    .get()
+                                                    .addOnSuccessListener(missionSnapshot -> {
+                                                        boolean activeMission = false;
+                                                        for (DocumentSnapshot missionDoc : missionSnapshot.getDocuments()) {
+                                                            Boolean isDone = missionDoc.getBoolean("isDone");
+                                                            if (isDone == null || !isDone) {
+                                                                activeMission = true;
+                                                                break;
+                                                            }
+                                                        }
+
+                                                        if (activeMission) {
+                                                            // Ako već ima aktivna misija, pokaži dugme za kraj
+                                                            btnStartMission.setVisibility(View.GONE);
+                                                            btnEndMission.setVisibility(View.VISIBLE);
+                                                        } else {
+                                                            // Ako nema aktivne, pokaži dugme za početak
+                                                            btnStartMission.setVisibility(View.VISIBLE);
+                                                            btnEndMission.setVisibility(View.GONE);
+                                                        }
+                                                    });
                                         } else {
                                             btnDeleteAlliance.setVisibility(View.GONE);
                                             btnLeaveAlliance.setVisibility(View.VISIBLE);
                                             btnAddMembers.setVisibility(View.GONE);
+                                            btnStartMission.setVisibility(View.GONE);
+                                            btnEndMission.setVisibility(View.GONE);
                                         }
 
                                     } else {
@@ -325,19 +369,42 @@ public class MyAllianceFragment extends Fragment {
                 .get()
                 .addOnSuccessListener(userDoc -> {
                     String allianceId = userDoc.getString("currentAllianceId");
-                    if (allianceId != null) {
-                        db.collection("alliances").document(allianceId)
-                                .update("members", FieldValue.arrayRemove(currentUserId))
-                                .addOnSuccessListener(aVoid -> db.collection("users").document(currentUserId)
-                                        .update("currentAllianceId", null)
-                                        .addOnSuccessListener(aVoid1 -> {
-                                            Toast.makeText(getContext(), "Napustili ste savez.", Toast.LENGTH_SHORT).show();
-                                            loadAllianceData();
-                                        }))
-                                .addOnFailureListener(e -> Toast.makeText(getContext(), "Greška pri napuštanju saveza.", Toast.LENGTH_SHORT).show());
-                    }
+                    if (allianceId == null) return;
+
+                    // Proveri sve misije u savezu
+                    db.collection("alliances").document(allianceId)
+                            .collection("missions")
+                            .whereEqualTo("isStarted", true) // samo aktivne misije
+                            .get()
+                            .addOnSuccessListener(querySnapshot -> {
+                                boolean inActiveMission = false;
+                                for (DocumentSnapshot missionDoc : querySnapshot.getDocuments()) {
+                                    List<String> members = (List<String>) missionDoc.get("members");
+                                    if (members != null && members.contains(currentUserId)) {
+                                        inActiveMission = true;
+                                        break;
+                                    }
+                                }
+
+                                if (inActiveMission) {
+                                    Toast.makeText(getContext(), "Ne možete napustiti savez dok učestvujete u aktivnoj misiji.", Toast.LENGTH_SHORT).show();
+                                    return;
+                                }
+
+                                // Ako nije u nijednoj aktivnoj misiji, ukloni iz saveza
+                                db.collection("alliances").document(allianceId)
+                                        .update("members", com.google.firebase.firestore.FieldValue.arrayRemove(currentUserId))
+                                        .addOnSuccessListener(aVoid -> db.collection("users").document(currentUserId)
+                                                .update("currentAllianceId", null)
+                                                .addOnSuccessListener(aVoid1 -> {
+                                                    Toast.makeText(getContext(), "Napustili ste savez.", Toast.LENGTH_SHORT).show();
+                                                    loadAllianceData();
+                                                }))
+                                        .addOnFailureListener(e -> Toast.makeText(getContext(), "Greška pri napuštanju saveza.", Toast.LENGTH_SHORT).show());
+                            });
                 });
     }
+
 
     private void deleteAlliance() {
         String currentUserId = FirebaseAuth.getInstance().getCurrentUser().getUid();
@@ -346,29 +413,60 @@ public class MyAllianceFragment extends Fragment {
                 .get()
                 .addOnSuccessListener(userDoc -> {
                     String allianceId = userDoc.getString("currentAllianceId");
-                    if (allianceId != null) {
-                        db.collection("alliances").document(allianceId)
-                                .get()
-                                .addOnSuccessListener(allianceDoc -> {
-                                    if (allianceDoc.exists()) {
-                                        List<String> members = (List<String>) allianceDoc.get("members");
-                                        if (members != null) {
-                                            for (String memberId : members) {
-                                                db.collection("users").document(memberId)
-                                                        .update("currentAllianceId", null);
-                                            }
-                                        }
+                    if (allianceId == null) return;
 
-                                        db.collection("alliances").document(allianceId)
-                                                .delete()
-                                                .addOnSuccessListener(aVoid -> {
-                                                    Toast.makeText(getContext(), "Savez je uspešno obrisan.", Toast.LENGTH_SHORT).show();
-                                                    loadAllianceData();
-                                                })
-                                                .addOnFailureListener(e -> Toast.makeText(getContext(), "Greška pri brisanju saveza.", Toast.LENGTH_SHORT).show());
-                                    }
-                                });
-                    }
+                    db.collection("alliances").document(allianceId)
+                            .get()
+                            .addOnSuccessListener(allianceDoc -> {
+                                if (!allianceDoc.exists()) return;
+
+                                String leaderId = allianceDoc.getString("leaderId");
+                                if (!currentUserId.equals(leaderId)) {
+                                    Toast.makeText(getContext(), "Samo vođa može obrisati savez.", Toast.LENGTH_SHORT).show();
+                                    return;
+                                }
+
+                                // Provera aktivnih misija u savezu
+                                db.collection("alliances").document(allianceId)
+                                        .collection("missions")
+                                        .whereEqualTo("isStarted", true)
+                                        .get()
+                                        .addOnSuccessListener(querySnapshot -> {
+                                            boolean leaderInMission = false;
+                                            for (DocumentSnapshot missionDoc : querySnapshot.getDocuments()) {
+                                                List<String> members = (List<String>) missionDoc.get("members");
+                                                if (members != null && members.contains(currentUserId)) {
+                                                    leaderInMission = true;
+                                                    break;
+                                                }
+                                            }
+
+                                            if (leaderInMission) {
+                                                Toast.makeText(getContext(), "Ne možete obrisati savez dok učestvujete u aktivnoj misiji.", Toast.LENGTH_SHORT).show();
+                                                return;
+                                            }
+
+                                            // Brisanje saveza
+                                            List<String> members = (List<String>) allianceDoc.get("members");
+                                            if (members != null) {
+                                                for (String memberId : members) {
+                                                    db.collection("users").document(memberId)
+                                                            .update("currentAllianceId", null);
+                                                }
+                                            }
+
+                                            db.collection("alliances").document(allianceId)
+                                                    .delete()
+                                                    .addOnSuccessListener(aVoid -> {
+                                                        Toast.makeText(getContext(), "Savez je uspešno obrisan.", Toast.LENGTH_SHORT).show();
+                                                        loadAllianceData();
+                                                    })
+                                                    .addOnFailureListener(e -> Toast.makeText(getContext(), "Greška pri brisanju saveza.", Toast.LENGTH_SHORT).show());
+                                        });
+                            });
                 });
     }
+
+
+
 }

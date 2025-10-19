@@ -31,6 +31,7 @@ import com.example.mobilnaaplikacija.model.User;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentChange;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.ListenerRegistration;
@@ -290,15 +291,32 @@ public class TabFriendsFragment extends Fragment {
                                                     String leaderId = userAllianceDoc.getString("leaderId");
 
                                                     if (userId.equals(leaderId)) {
-                                                        // Korisnik je vođa drugog saveza → prikazi toast i ne šalji poziv
+                                                        // Korisnik je vođa drugog saveza → ne šalji poziv
                                                         String username = userDoc.getString("username");
                                                         Toast.makeText(getContext(),
                                                                 (username != null ? username : "Korisnik") +
                                                                         " je vođa drugog saveza i ne može biti pozvan.",
                                                                 Toast.LENGTH_SHORT).show();
                                                     } else {
-                                                        // Može primiti poziv
-                                                        sendAllianceInvite(userId, allianceId, creatorId);
+                                                        // Proveri da li je korisnik u aktivnoj misiji
+                                                        db.collection("alliances").document(userAllianceId)
+                                                                .collection("missions")
+                                                                .whereEqualTo("isStarted", true)
+                                                                .whereArrayContains("members", userId)
+                                                                .get()
+                                                                .addOnSuccessListener(missionsSnapshot -> {
+                                                                    if (missionsSnapshot.isEmpty()) {
+                                                                        // Nema aktivnu misiju → šalje se poziv
+                                                                        sendAllianceInvite(userId, allianceId, creatorId);
+                                                                    } else {
+                                                                        // Korisnik je u aktivnoj misiji → ne šalji poziv
+                                                                        String username = userDoc.getString("username");
+                                                                        Toast.makeText(getContext(),
+                                                                                (username != null ? username : "Korisnik") +
+                                                                                        " trenutno učestvuje u aktivnoj misiji i ne može biti pozvan.",
+                                                                                Toast.LENGTH_SHORT).show();
+                                                                    }
+                                                                });
                                                     }
                                                 });
                                     } else {
@@ -332,15 +350,49 @@ public class TabFriendsFragment extends Fragment {
         String currentUserId = FirebaseAuth.getInstance().getCurrentUser().getUid();
         FirebaseFirestore db = FirebaseFirestore.getInstance();
 
+        if (allianceId == null || allianceId.isEmpty()) {
+            onComplete.run();
+            return;
+        }
+
+        // 1️⃣ Proveri sve aktivne misije saveza
         db.collection("alliances").document(allianceId)
-                .update("members", FieldValue.arrayRemove(currentUserId))
-                .addOnSuccessListener(aVoid -> {
-                    db.collection("users").document(currentUserId)
-                            .update("currentAllianceId", null)
-                            .addOnSuccessListener(aVoid2 -> onComplete.run());
+                .collection("missions")
+                .whereEqualTo("isStarted", true)
+                .get()
+                .addOnSuccessListener(querySnapshot -> {
+                    boolean inActiveMission = false;
+
+                    for (DocumentSnapshot missionDoc : querySnapshot.getDocuments()) {
+                        List<String> members = (List<String>) missionDoc.get("members");
+                        if (members != null && members.contains(currentUserId)) {
+                            inActiveMission = true;
+                            break;
+                        }
+                    }
+
+                    // 2️⃣ Ako je u aktivnoj misiji → ne može napustiti savez
+                    if (inActiveMission) {
+                        Toast.makeText(getContext(),
+                                "Ne možete napustiti savez dok učestvujete u aktivnoj misiji.",
+                                Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+
+                    // 3️⃣ Ako nije u misiji → ukloni iz saveza
+                    db.collection("alliances").document(allianceId)
+                            .update("members", FieldValue.arrayRemove(currentUserId))
+                            .addOnSuccessListener(aVoid -> db.collection("users").document(currentUserId)
+                                    .update("currentAllianceId", null)
+                                    .addOnSuccessListener(aVoid2 -> onComplete.run()))
+                            .addOnFailureListener(e -> Toast.makeText(getContext(),
+                                    "Greška pri napuštanju saveza.", Toast.LENGTH_SHORT).show());
+
                 })
-                .addOnFailureListener(e -> Toast.makeText(getContext(), "Greška pri napuštanju prethodnog saveza.", Toast.LENGTH_SHORT).show());
+                .addOnFailureListener(e -> Toast.makeText(getContext(),
+                        "Greška pri proveri aktivnih misija.", Toast.LENGTH_SHORT).show());
     }
+
 
     @Override
     public void onDestroyView() {
