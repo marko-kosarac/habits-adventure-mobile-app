@@ -131,19 +131,20 @@ public class UserService {
             long lastActive = userDoc.contains("lastActive") ? userDoc.getLong("lastActive") : 0L;
             int activeDays = userDoc.contains("activeDays") ? userDoc.getLong("activeDays").intValue() : 0;
 
-            long ONE_MINUTE = 60 * 1000; // 1 minut
-            long TWO_MINUTES = 2 * ONE_MINUTE;
+            long THIRTY_SECONDS = 30 * 1000; // 30 sekundi
+            long TWO_THIRTY_SECONDS = 2 * THIRTY_SECONDS;
 
-            if (now - lastActive >= ONE_MINUTE && now - lastActive < TWO_MINUTES) {
+            if (now - lastActive >= THIRTY_SECONDS && now - lastActive < TWO_THIRTY_SECONDS) {
                 activeDays += 1; // nastavlja streak
-            } else if (now - lastActive >= TWO_MINUTES) {
+            } else if (now - lastActive >= TWO_THIRTY_SECONDS) {
                 activeDays = 1; // resetuje streak
-            } // else -> još uvek isti "minut", ne povećava se
+            } // else -> još uvek isti "dan", ne povećava se
 
             db.collection("users").document(currentUserId)
                     .update("activeDays", activeDays, "lastActive", now);
         });
     }
+
 
 
 

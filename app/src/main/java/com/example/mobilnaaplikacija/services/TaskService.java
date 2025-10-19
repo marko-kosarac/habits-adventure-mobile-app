@@ -250,8 +250,8 @@ public class TaskService {
         return taskRepository.getTaskCountsByStatus(userId);
     }
 
-    public int getLongestStreak() {
-        return taskRepository.getLongestStreak();
+    public int getLongestStreak(String userId) {
+        return taskRepository.getLongestStreak(userId);
     }
 
     public Map<String, Integer> getCompletedTasksWithColors(String userId) {

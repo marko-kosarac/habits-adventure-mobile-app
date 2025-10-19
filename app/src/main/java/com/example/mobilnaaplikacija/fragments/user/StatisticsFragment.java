@@ -88,7 +88,7 @@ public class StatisticsFragment extends Fragment {
         String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
         updatePieChart(userId);
         //streak
-        int longestStreak = taskService.getLongestStreak();
+        int longestStreak = taskService.getLongestStreak(userId);
         tvLongestStreak.setText("Najduži niz: "+ longestStreak);
         //bar chart
         taskService = new TaskService(requireContext());
