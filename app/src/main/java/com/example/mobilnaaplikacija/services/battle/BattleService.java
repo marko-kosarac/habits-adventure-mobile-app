@@ -208,6 +208,8 @@ public class BattleService {
                 @Override
                 public void onSuccess(Equipment reward) {
                     Log.i("Reward", "Received: " + (reward != null ? reward.getName() : "none"));
+                    //reset boss HP
+                    boss.setCurrentHp(bossService.calculateMaxHp(boss.getLevel()));
                     updateBattleAndBoss(battle, null, boss, userId, finalCoins, attacks, equipmentFromBattle);
                     callback.onBattleFinished(battle, reward, finalCoins);
                 }
@@ -215,17 +217,19 @@ public class BattleService {
                 @Override
                 public void onError(Exception e) {
                     Log.i("Reward", "No reward.");
+                    //reset boss HP
+                    boss.setCurrentHp(bossService.calculateMaxHp(boss.getLevel()));
                     updateBattleAndBoss(battle, null, boss, userId, finalCoins, attacks, equipmentFromBattle);
                     callback.onBattleFinished(battle, null, finalCoins);
                 }
             });
         } else {
+            //reset boss HP
+            boss.setCurrentHp(bossService.calculateMaxHp(boss.getLevel()));
             //boss HP > 50 → bez coins, bez equipment
             updateBattleAndBoss(battle, null, boss, userId, 0, attacks, equipmentFromBattle);
             callback.onBattleFinished(battle, null, 0);
         }
-        //reset boss HP
-        boss.setCurrentHp(bossService.calculateMaxHp(boss.getLevel()));
     }
 
     private void updateBattleAndBoss (Battle battle, Boolean win, Boss boss, String userId, int coins, List<Attack> attacks, List<Equipment> equipmentFromBattle) {
