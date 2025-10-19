@@ -409,7 +409,6 @@ public class TaskListFragment extends Fragment implements RecyclerViewInterface 
                     getTasks();
                     break;
                 }
-            }
             return true;
         });
         popup.show();
