@@ -572,7 +572,44 @@ public class TaskService {
                         logCurrentQuotas(db, userId);
                         return;
                     }
-                    updateXPAndLog(db, userId, task, totalAwardedXp, allowDiff, allowImp, dayRef, weekRef, monthRef);
+
+                    DocumentReference userRef = db.collection("users").document(userId);
+
+                    // TRANSAKCIJA: update XP i istorija
+                    db.runTransaction((Transaction.Function<Void>) transaction -> {
+                        // 1. Ažuriranje ukupnog XP
+                        transaction.update(userRef, "experiencePoints", FieldValue.increment(totalAwardedXp));
+
+                        // 2. Ažuriranje kvota
+                        if (allowDiff || allowImp) {
+                            updateQuotaDocInTransaction(transaction, dayRef, daySnap, task, allowDiff, allowImp);
+                            updateQuotaDocInTransaction(transaction, weekRef, weekSnap, task, allowDiff, allowImp);
+                            updateQuotaDocInTransaction(transaction, monthRef, monthSnap, task, allowDiff, allowImp);
+                        }
+
+                        // 3. LOG istorije XP-a
+                        Map<String, Object> historyEntry = new HashMap<>();
+                        historyEntry.put("taskId", task.getTaskId());
+                        historyEntry.put("at", new Timestamp(new Date()));
+                        historyEntry.put("xp", totalAwardedXp);
+                        historyEntry.put("difficulty", task.getDifficulty().name());
+                        historyEntry.put("importance", task.getImportance().name());
+
+                        transaction.update(userRef, "xpHistory", FieldValue.arrayUnion(historyEntry));
+                        transaction.update(userRef, "lastAwardedXP", totalAwardedXp);
+                        transaction.update(userRef, "lastAwardedAt", FieldValue.serverTimestamp());
+
+                        return null;
+                    }).addOnSuccessListener(aVoid -> {
+                        Log.d("XP", "User awarded " + totalAwardedXp + " XP");
+                        if (xpAwardListener != null) xpAwardListener.onXPAwarded(totalAwardedXp, allowDiff, allowImp);
+                        logCurrentQuotas(db, userId);
+                    }).addOnFailureListener(e -> {
+                        Log.e("XP", "XP transaction failed", e);
+                        if (xpAwardListener != null) xpAwardListener.onXPAwardFailed("Greška pri dodeli XP.");
+                        logCurrentQuotas(db, userId);
+                    });
+
                 })
                 .addOnFailureListener(e -> {
                     Log.e("XP", "Error fetching quota docs", e);
@@ -580,6 +617,7 @@ public class TaskService {
                         xpAwardListener.onXPAwardFailed("Greška pri proveri kvote.");
                 });
     }
+
 
     private boolean isDifficultyWithinQuota(DocumentSnapshot day, DocumentSnapshot week, DifficultyType difficulty) {
         int dailyDifficultyCount = getCount(day, "difficultyCounts", difficulty.name());
