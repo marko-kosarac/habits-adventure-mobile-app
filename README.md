@@ -22,7 +22,8 @@ Projekat izrađen u Javi. Omogućava:
 - **Firebase**: `users`, `friend_requests`, `alliances`, `alliance_invites`.
 - **SQLite**: `tasks`, `battles`, `boss`, `attacks`, `categories`, `equipment`.
 
-## Korištena verzija Jave: **Java 11** (provjeriti u `build.gradle`)
+## Korištena verzija Jave: 
+- **Java 11** (provjeriti u `build.gradle`)
 
 ## Autori
 - [Marko Kosarac](https://gitlab.com/marko.kosarac), RA 226/2020
