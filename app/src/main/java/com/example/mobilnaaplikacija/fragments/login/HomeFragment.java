@@ -28,6 +28,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.SetOptions;
 import com.google.firebase.messaging.FirebaseMessaging;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -80,8 +81,8 @@ public class HomeFragment extends Fragment {
                                                 .update("fcmToken", token)
                                                 .addOnSuccessListener(aVoid -> {
                                                     Log.d("FCM", "Token sačuvan: " + token);
-                                                    //Inicijalizacija etape ako ne postoji
                                                     ensureEtapaExists(fbUser);
+                                                    ensureXPHistoryExists(fbUser);
                                                 })
                                                 .addOnFailureListener(e -> {
                                                     Log.e("FCM", "Greška pri čuvanju tokena", e);
@@ -151,6 +152,32 @@ public class HomeFragment extends Fragment {
             }
         });
     }
+
+    private void ensureXPHistoryExists(FirebaseUser fbUser) {
+        if (fbUser == null) return;
+
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        DocumentReference userRef = db.collection("users").document(fbUser.getUid());
+
+        userRef.get().addOnSuccessListener(document -> {
+            if (document.exists()) {
+                if (!document.contains("xpHistory")) {
+                    // Create empty xpHistory field
+                    Map<String, Object> init = new HashMap<>();
+                    init.put("xpHistory", new ArrayList<>());
+                    userRef.set(init, SetOptions.merge())
+                            .addOnSuccessListener(aVoid ->
+                                    Log.d("XP", "xpHistory field initialized for " + fbUser.getUid()))
+                            .addOnFailureListener(e ->
+                                    Log.e("XP", "Failed to create xpHistory field", e));
+                } else {
+                    Log.d("XP", "xpHistory already exists for " + fbUser.getUid());
+                }
+            }
+        }).addOnFailureListener(e ->
+                Log.e("XP", "Failed to check xpHistory", e));
+    }
+
 
     @Override
     public void onDestroyView() {
