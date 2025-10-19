@@ -103,14 +103,12 @@ public class RegisterFragment extends Fragment {
             return;
         }
 
-        // Kreiramo User objekat
         User user = new User();
         user.setUsername(username);
         user.setEmail(email);
         user.setPassword(password);
         user.setAvatarId(selectedAvatar);
 
-        // Registracija putem UserService
         userService.register(
                 user.getEmail(),
                 password,

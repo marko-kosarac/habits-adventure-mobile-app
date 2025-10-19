@@ -462,8 +462,7 @@ public class MainActivity extends AppCompatActivity {
             notificationManager.createNotificationChannel(channel);
         }
 
-        // ⚡ Generiši naslov automatski iz poruke ili prosledi kao parametar
-        String title = "Obaveštenje o savezu";  // ovo je sada naslov, možeš proslediti kao parametar
+        String title = "Obaveštenje o savezu";
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, channelId)
                 .setSmallIcon(R.drawable.ic_notifications)
@@ -510,51 +509,6 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-
-    private void showAllianceInviteNotification(String fromUsername, String allianceId, String inviteDocId) {
-        String ALLIANCE_INVITE_CHANNEL_ID = "alliance_invite_channel";
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
-
-        db.collection("alliances").document(allianceId).get().addOnSuccessListener(doc -> {
-            String allianceName = "savez";
-            if (doc.exists() && doc.getString("name") != null) {
-                allianceName = doc.getString("name");
-            }
-
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                NotificationChannel channel = new NotificationChannel(
-                        ALLIANCE_INVITE_CHANNEL_ID,
-                        "Alliance Invites",
-                        NotificationManager.IMPORTANCE_HIGH
-                );
-                channel.setDescription("Obaveštenja o pozivima u saveze");
-                NotificationManager notificationManager = getSystemService(NotificationManager.class);
-                if (notificationManager != null) {
-                    notificationManager.createNotificationChannel(channel);
-                }
-            }
-
-            PendingIntent pendingIntent = PendingIntent.getActivity(
-                    this, 0, new Intent(this, MainActivity.class),
-                    PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
-            );
-
-            Notification.Builder builder = new Notification.Builder(this, ALLIANCE_INVITE_CHANNEL_ID)
-                    .setSmallIcon(R.drawable.ic_alliance)
-                    .setContentTitle("Poziv u savez")
-                    .setContentText(fromUsername + " te je pozvao u savez \"" + allianceName + "\".")
-                    .setContentIntent(pendingIntent)
-                    .setAutoCancel(true)
-                    .setPriority(Notification.PRIORITY_HIGH);
-
-            NotificationManager notificationManager =
-                    (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-
-            if (notificationManager != null) {
-                notificationManager.notify(inviteDocId.hashCode(), builder.build());
-            }
-        });
-    }
 
     private void acceptAllianceInvite(String allianceId, String inviteDocId) {
         String currentUserId = FirebaseAuth.getInstance().getCurrentUser().getUid();
@@ -647,46 +601,6 @@ public class MainActivity extends AppCompatActivity {
                 .update("status", "declined");
     }
 
-    private void showFriendRequestDialog(String fromUserId, String requestId) {
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
-
-        db.collection("users").document(fromUserId)
-                .get()
-                .addOnSuccessListener(doc -> {
-                    String fromUsername = doc.getString("username");
-
-                    new androidx.appcompat.app.AlertDialog.Builder(this)
-                            .setTitle("Novi zahtev za prijateljstvo")
-                            .setMessage(fromUsername + " ti je poslao zahtev.")
-                            .setPositiveButton("Prihvati", (dialog, which) -> acceptFriendRequest(fromUserId, requestId))
-                            .setNegativeButton("Odbij", (dialog, which) -> declineFriendRequest(requestId))
-                            .setCancelable(false)
-                            .show();
-                });
-    }
-
-    private void showFriendRequestNotification(String fromUsername, String requestId) {
-        android.app.NotificationManager notificationManager =
-                (android.app.NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-
-        android.app.PendingIntent pendingIntent = android.app.PendingIntent.getActivity(
-                this, 0, new Intent(this, MainActivity.class),
-                android.app.PendingIntent.FLAG_UPDATE_CURRENT | android.app.PendingIntent.FLAG_IMMUTABLE
-        );
-
-        android.app.Notification.Builder builder = new android.app.Notification.Builder(this, FRIEND_REQUEST_CHANNEL_ID)
-                .setSmallIcon(R.drawable.ic_friend_request)
-                .setContentTitle("Novi zahtev za prijateljstvo")
-                .setContentText(fromUsername + " ti je poslao zahtev.")
-                .setContentIntent(pendingIntent)
-                .setAutoCancel(true)
-                .setPriority(android.app.Notification.PRIORITY_HIGH);
-
-        if (notificationManager != null) {
-            notificationManager.notify(requestId.hashCode(), builder.build());
-        }
-    }
-
     private void acceptFriendRequest(String fromUserId, String requestId) {
         String currentUserId = FirebaseAuth.getInstance().getCurrentUser().getUid();
         FirebaseFirestore db = FirebaseFirestore.getInstance();
@@ -736,13 +650,11 @@ public class MainActivity extends AppCompatActivity {
                             continue;
                         }
 
-                        // ⚡ Ako nema poruke ili tipa, obriši dokument
                         if (message == null || type == null) {
                             doc.getReference().delete();
                             continue;
                         }
 
-                        // ⚡ Prikaz sistemske notifikacije na osnovu tipa
                         switch (type) {
                             case "alliance_message":
                                 showAllianceMessageNotification(message);
@@ -751,11 +663,9 @@ public class MainActivity extends AppCompatActivity {
                                 showAllianceAcceptanceNotificationSafe(message);
                                 break;
                             default:
-                                // drugi tipovi – možeš dodati ako bude potrebno
                                 break;
                         }
 
-                        // ⚡ Obriši dokument odmah da ne zauzima memoriju
                         doc.getReference().delete();
                     }
                 });
@@ -791,7 +701,5 @@ public class MainActivity extends AppCompatActivity {
             notificationManager.notify((int) System.currentTimeMillis(), builder.build());
         }
     }
-
-
 
 }

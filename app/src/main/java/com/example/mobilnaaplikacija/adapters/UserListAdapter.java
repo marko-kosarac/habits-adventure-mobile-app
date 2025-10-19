@@ -23,8 +23,8 @@ import de.hdodenhof.circleimageview.CircleImageView;
 public class UserListAdapter extends RecyclerView.Adapter<UserListAdapter.UserViewHolder> {
 
     private Context context;
-    private List<User> userList;      // svi korisnici
-    private List<User> friendsList;   // lista prijatelja
+    private List<User> userList;
+    private List<User> friendsList;
     private OnFriendClickListener listener;
 
     public interface OnFriendClickListener {
@@ -60,7 +60,6 @@ public class UserListAdapter extends RecyclerView.Adapter<UserListAdapter.UserVi
             default: holder.userAvatar.setImageResource(R.drawable.avatar1);
         }
 
-        // Provera da li je korisnik već prijatelj
         boolean isFriend = false;
         for (User friend : friendsList) {
             if (friend.getId().equals(user.getId())) {
@@ -71,7 +70,7 @@ public class UserListAdapter extends RecyclerView.Adapter<UserListAdapter.UserVi
 
         if (isFriend) {
             holder.buttonAddFriend.setVisibility(View.GONE);
-            holder.textFriend.setVisibility(View.VISIBLE); // prikazi "Prijatelji"
+            holder.textFriend.setVisibility(View.VISIBLE);
         }else if (user.isRequestSent()) {
             holder.buttonAddFriend.setText("Poslato");
             holder.buttonAddFriend.setEnabled(false);
@@ -106,7 +105,7 @@ public class UserListAdapter extends RecyclerView.Adapter<UserListAdapter.UserVi
             userAvatar = itemView.findViewById(R.id.userAvatar);
             userName = itemView.findViewById(R.id.userName);
             buttonAddFriend = itemView.findViewById(R.id.buttonAddFriend);
-            textFriend = itemView.findViewById(R.id.textFriend); // TextView koji prikazuje "Prijatelji"
+            textFriend = itemView.findViewById(R.id.textFriend);
         }
     }
 

@@ -35,9 +35,6 @@ public class UserService {
         db = FirebaseFirestore.getInstance();
     }
 
-    /**
-     * Registracija korisnika
-     */
     public void register(String email, String password, String username, int avatarId, OnUserRegisterCallback callback) {
         FirebaseAuth auth = FirebaseAuth.getInstance();
         FirebaseFirestore db = FirebaseFirestore.getInstance();

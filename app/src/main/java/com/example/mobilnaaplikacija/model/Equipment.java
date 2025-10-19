@@ -13,9 +13,9 @@ public class Equipment implements Parcelable {
     private long id;
     private String name;
     private String description;
-    private Type type;      // enum umesto stringa
-    private String bonus;   // "+20% PP", "+10% Snage", itd.
-    private int duration;   // trajanje u borbama (0 = jednokratni, >0 = trajno)
+    private Type type;
+    private String bonus;
+    private int duration;
     private int quantity;
     private int price;
     private boolean isActivated;

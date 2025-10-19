@@ -13,7 +13,7 @@ public class SQLiteHelper extends SQLiteOpenHelper {
     public static final String COLUMN_ID = "_id";
     public static final String COLUMN_NAME = "name";
     public static final String COLUMN_DESCRIPTION = "description";
-    public static final String COLUMN_TYPE = "type";       // enum se čuva kao string
+    public static final String COLUMN_TYPE = "type";
     public static final String COLUMN_BONUS = "bonus";
     public static final String COLUMN_DURATION = "duration";
     public static final String COLUMN_PRICE = "price";
@@ -77,7 +77,7 @@ public class SQLiteHelper extends SQLiteOpenHelper {
             + COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
             + COLUMN_NAME + " TEXT, "
             + COLUMN_DESCRIPTION + " TEXT, "
-            + COLUMN_TYPE + " TEXT, "           // enum stored as TEXT
+            + COLUMN_TYPE + " TEXT, "
             + COLUMN_BONUS + " TEXT, "
             + COLUMN_DURATION + " INTEGER, "
             + COLUMN_PRICE + " INTEGER"

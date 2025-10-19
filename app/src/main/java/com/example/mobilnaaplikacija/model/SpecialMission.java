@@ -11,7 +11,7 @@ public class SpecialMission {
     private long startTime;
     private long endTime;
 
-    public SpecialMission() {} // Firestore zahteva prazan konstruktor
+    public SpecialMission() {}
 
     public SpecialMission(String id, String leaderId, boolean isStarted, boolean isDone, List<String> members, long startTime, long endTime) {
         this.id = id;

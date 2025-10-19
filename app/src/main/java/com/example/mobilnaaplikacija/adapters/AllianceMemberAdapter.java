@@ -36,7 +36,6 @@ public class AllianceMemberAdapter extends RecyclerView.Adapter<AllianceMemberAd
     public void onBindViewHolder(@NonNull MemberViewHolder holder, int position) {
         String memberId = memberIds.get(position);
 
-        // Dohvati username i avatar člana
         db.collection("users").document(memberId)
                 .get()
                 .addOnSuccessListener(doc -> {
@@ -45,7 +44,6 @@ public class AllianceMemberAdapter extends RecyclerView.Adapter<AllianceMemberAd
 
                     holder.textView.setText(username != null ? username : "Nepoznato");
 
-                    // Postavi avatar prema avatarId
                     int avatarResId = R.drawable.avatar1; // default avatar
                     if (avatarId != null) {
                         switch (avatarId.intValue()) {

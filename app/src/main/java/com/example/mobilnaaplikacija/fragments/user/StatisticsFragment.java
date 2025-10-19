@@ -47,21 +47,19 @@ import java.util.Map;
 public class StatisticsFragment extends Fragment {
 
     // Charts
-    private PieChart pieChart;            // urađeni/neurađeni/otkazani
-    private BarChart barChart;            // zavrseni po kategorijama
-    private LineChart lineChartXP;        // XP poslednjih 7 dana
-    private LineChart lineChartDifficulty;// prosečna težina zadataka
+    private PieChart pieChart;
+    private BarChart barChart;
+    private LineChart lineChartXP;
+    private LineChart lineChartDifficulty;
     private TaskService taskService;
 
 
-    // TextViews
     private TextView tvActiveDays, tvAverageDifficulty, tvLongestStreak, tvMissions;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_statistics, container, false);
 
-        // Bind views
         pieChart = view.findViewById(R.id.donutChart);
         barChart = view.findViewById(R.id.barChart);
         lineChartXP = view.findViewById(R.id.lineChartXP);
@@ -106,7 +104,6 @@ public class StatisticsFragment extends Fragment {
     }
 
     private void updatePieChart(String userId) {
-        // Dohvati statistiku iz baze preko TaskService
         Map<String, Integer> counts = taskService.getTaskCounts(userId);
 
         int uradjeni = counts.getOrDefault("URAĐENI", 0);
@@ -114,7 +111,6 @@ public class StatisticsFragment extends Fragment {
         int otkazani = counts.getOrDefault("OTKAZANI", 0);
         int aktivni = counts.getOrDefault("AKTIVNI", 0);
 
-        // Kreirani = aktivni + urađeni + neurađeni + otkazani
         int kreirani = aktivni + uradjeni + neuradjeni + otkazani;
 
         List<PieEntry> entries = new ArrayList<>();
@@ -200,7 +196,6 @@ public class StatisticsFragment extends Fragment {
         lineChartDifficulty.getDescription().setEnabled(false);
         lineChartDifficulty.invalidate();
 
-        // Prosečna težina
         float avgXP = taskService.getAverageXPOfCompletedTasks(userId);
         DifficultyType mainDifficulty = taskService.getDifficultyFromXP(avgXP);
         tvAverageDifficulty.setText("Korisnik uglavnom rešava: " + mainDifficulty.name() +
@@ -271,7 +266,6 @@ public class StatisticsFragment extends Fragment {
             long now = System.currentTimeMillis();
             List<Entry> entries = new ArrayList<>();
 
-            // Prikupljanje poslednjih 7 "dana" (u testu: poslednjih 7 minuta)
             for (int i = 6; i >= 0; i--) {
                 long periodStart = now - i * 60 * 1000; // svaki period = 1 minuta
                 long periodEnd = periodStart + 60 * 1000;

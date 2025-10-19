@@ -17,7 +17,6 @@ public class HomePageFragment extends Fragment {
     private FragmentHomePageBinding binding;
 
     public HomePageFragment() {
-        // Required empty public constructor
     }
 
     @Nullable
