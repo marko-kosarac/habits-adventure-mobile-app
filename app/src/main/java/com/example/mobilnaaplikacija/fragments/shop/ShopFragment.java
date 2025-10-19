@@ -45,7 +45,6 @@ public class ShopFragment extends Fragment {
 
         firestore = FirebaseFirestore.getInstance();
 
-        // Seedovanje baze ako je prazna
         SQLiteHelper dbHelper = new SQLiteHelper(getContext());
         SQLiteDatabase db = dbHelper.getReadableDatabase();
         long count = android.database.DatabaseUtils.queryNumEntries(db, SQLiteHelper.TABLE_EQUIPMENT);
@@ -55,7 +54,6 @@ public class ShopFragment extends Fragment {
             seedEquipment();
         }
 
-        // Prvo učitaj nivo korisnika, pa tek onda listu opreme
         fetchUserLevel();
 
         return view;
@@ -70,7 +68,6 @@ public class ShopFragment extends Fragment {
                 Long levelValue = documentSnapshot.getLong("level");
                 if (levelValue != null) currentUserLevel = levelValue.intValue();
             }
-            // Tek sada učitaj opremu sa pravim nivoom
             loadEquipmentList();
         }).addOnFailureListener(e -> loadEquipmentList());
     }
@@ -80,7 +77,7 @@ public class ShopFragment extends Fragment {
         SQLiteDatabase db = dbHelper.getWritableDatabase();
 
         EquipmentSeeder seeder = new EquipmentSeeder(getContext(), db);
-        seeder.seedData(); // ubacuje stavke
+        seeder.seedData();
         db.close();
     }
 
@@ -113,7 +110,6 @@ public class ShopFragment extends Fragment {
                 int duration = cursor.getInt(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_DURATION));
                 int count = cursor.getInt(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_COUNT));
 
-                // Dinamičko računanje cene na osnovu nivoa korisnika
                 int price = PriceCalculator.calculatePrice(currentUserLevel, type, bonus);
 
                 equipmentList.add(new Equipment(id, name, description, type, bonus, duration, price, count));
@@ -126,7 +122,7 @@ public class ShopFragment extends Fragment {
             adapter = new EquipmentListAdapter(getContext(), equipmentList);
             recyclerView.setAdapter(adapter);
         } else {
-            adapter.updateList(equipmentList); // metoda u adapteru za osvežavanje liste
+            adapter.updateList(equipmentList);
         }
     }
 }

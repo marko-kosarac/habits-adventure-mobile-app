@@ -17,7 +17,6 @@ public class AllianceService {
 
         FirebaseFirestore db = FirebaseFirestore.getInstance();
 
-        // Nova misija
         String missionId = db.collection("alliances").document(allianceId)
                 .collection("missions").document().getId();
 
@@ -40,7 +39,6 @@ public class AllianceService {
         missionMap.put("startTime", newMission.getStartTime());
         missionMap.put("endTime", 0L);
 
-        // 🔹 Čuvanje u podkolekciju "missions"
         db.collection("alliances")
                 .document(allianceId)
                 .collection("missions")
@@ -80,7 +78,6 @@ public class AllianceService {
                     activeMission.put("isDone", true);
                     activeMission.put("endTime", endTime);
 
-                    // 🔹 Ažuriraj aktivnu misiju
                     db.collection("alliances").document(allianceId)
                             .update("activeMission", null)
                             .addOnSuccessListener(aVoid -> {

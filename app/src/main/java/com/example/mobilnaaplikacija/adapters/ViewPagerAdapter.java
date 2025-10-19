@@ -19,9 +19,9 @@ public class ViewPagerAdapter extends FragmentStateAdapter {
     public Fragment createFragment(int position) {
         switch (position) {
             case 0:
-                return new TabFriendsFragment(); // Tab za prijatelje
+                return new TabFriendsFragment();
             case 1:
-                return new TabAllUsersFragment(); // Tab za sve korisnike
+                return new TabAllUsersFragment();
             default:
                 return new TabFriendsFragment();
         }
@@ -29,6 +29,6 @@ public class ViewPagerAdapter extends FragmentStateAdapter {
 
     @Override
     public int getItemCount() {
-        return 2; // Imamo dva taba
+        return 2;
     }
 }

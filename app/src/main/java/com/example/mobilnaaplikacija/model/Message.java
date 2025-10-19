@@ -6,7 +6,7 @@ public class Message {
     public String message;
     public long timestamp;
 
-    public Message() {} // prazan konstruktor za Firebase
+    public Message() {}
 
     public Message(String fromUserId, String username, String message, long timestamp) {
         this.fromUserId = fromUserId;

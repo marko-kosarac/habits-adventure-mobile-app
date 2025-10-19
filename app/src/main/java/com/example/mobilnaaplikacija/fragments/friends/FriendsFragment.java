@@ -49,11 +49,9 @@ public class FriendsFragment extends Fragment {
     }
 
     private void setupViewPager() {
-        // Prosledi 'this' Fragment kao owner (može i getActivity())
         ViewPagerAdapter adapter = new ViewPagerAdapter(this);
         viewPager.setAdapter(adapter);
 
-        // Postavi nazive tabova
         new TabLayoutMediator(tabLayout, viewPager,
                 (tab, position) -> tab.setText(tabTitles[position])
         ).attach();

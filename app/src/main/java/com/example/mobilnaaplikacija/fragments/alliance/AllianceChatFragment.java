@@ -63,7 +63,6 @@ public class AllianceChatFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        // označi da korisnik trenutno gleda chat
         db.collection("users").document(currentUserId)
                 .update("currentOpenAllianceChatId", allianceId);
     }
@@ -71,7 +70,6 @@ public class AllianceChatFragment extends Fragment {
     @Override
     public void onPause() {
         super.onPause();
-        // ukloni status da više ne gleda chat
         db.collection("users").document(currentUserId)
                 .update("currentOpenAllianceChatId", null);
     }
@@ -106,7 +104,6 @@ public class AllianceChatFragment extends Fragment {
                     }
 
                     if (addedNew) {
-                        // Sortiraj po timestamp-u
                         messageList.sort((m1, m2) -> {
                             long t1 = (long) m1.get("timestamp");
                             long t2 = (long) m2.get("timestamp");
@@ -154,7 +151,6 @@ public class AllianceChatFragment extends Fragment {
     private void sendAllianceMessageNotifications(String allianceId, String messageText) {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
 
-        // dohvat članova saveza
         db.collection("alliances").document(allianceId).get()
                 .addOnSuccessListener(allianceDoc -> {
                     if (!allianceDoc.exists()) return;
@@ -167,14 +163,14 @@ public class AllianceChatFragment extends Fragment {
                                 if (username == null) username = "Korisnik";
 
                                 for (String memberId : members) {
-                                    if (memberId.equals(currentUserId)) continue; // preskoči pošiljaoca
+                                    if (memberId.equals(currentUserId)) continue;
 
                                     String finalUsername = username;
                                     db.collection("users").document(memberId).get()
                                             .addOnSuccessListener(memberDoc -> {
                                                 String openChatId = memberDoc.getString("currentOpenAllianceChatId");
                                                 if (allianceId.equals(openChatId)) {
-                                                    // korisnik trenutno gleda chat -> preskoči notifikaciju
+
                                                     return;
                                                 }
 

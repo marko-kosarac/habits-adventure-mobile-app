@@ -79,7 +79,7 @@ public class TabAllUsersFragment extends Fragment {
     }
 
     private void startQrScanner() {
-        Intent intent = new Intent(getActivity(), QrScanActivity.class); // tvoja aktivnost za skener
+        Intent intent = new Intent(getActivity(), QrScanActivity.class);
         startActivityForResult(intent, QR_SCAN_REQUEST_CODE);
     }
 
@@ -102,16 +102,14 @@ public class TabAllUsersFragment extends Fragment {
                 return;
             }
 
-            // Dodaj u bazu prijatelja oba korisnika
             db.collection("users").document(currentUserId)
                     .update("friends", FieldValue.arrayUnion(scannedUserId));
             db.collection("users").document(scannedUserId)
                     .update("friends", FieldValue.arrayUnion(currentUserId));
 
-            // Dodaj u UI listu ako već nije
             User newFriend = new User();
             newFriend.setId(scannedUserId);
-            newFriend.setUsername("Korisnik"); // možeš kasnije dohvatiti pravo ime iz Firestore
+            newFriend.setUsername("Korisnik");
             newFriend.setFriend(true);
 
             if (friendsList.stream().noneMatch(u -> u.getId().equals(newFriend.getId()))) {
@@ -178,7 +176,6 @@ public class TabAllUsersFragment extends Fragment {
                 }
                 adapter.setUsers(allUsersList);
 
-                // 🔹 dodatno obeleži kome je već poslat zahtev
                 markPendingRequests();
             } else {
                 Toast.makeText(getContext(), "Greška pri učitavanju korisnika", Toast.LENGTH_SHORT).show();
@@ -202,7 +199,7 @@ public class TabAllUsersFragment extends Fragment {
                                 }
                             }
                         }
-                        adapter.setUsers(allUsersList); // osveži UI
+                        adapter.setUsers(allUsersList);
                     }
                 });
     }
@@ -223,7 +220,6 @@ public class TabAllUsersFragment extends Fragment {
                 .addOnSuccessListener(docRef -> {
                     Toast.makeText(getContext(), "Zahtev poslat korisniku " + user.getUsername(), Toast.LENGTH_SHORT).show();
 
-                    // 🔹 odmah promeni status u UI
                     user.setRequestSent(true);
                     adapter.updateUser(allUsersList.indexOf(user), user);
                 })

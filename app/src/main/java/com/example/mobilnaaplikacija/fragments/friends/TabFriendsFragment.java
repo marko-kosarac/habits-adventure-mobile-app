@@ -70,8 +70,8 @@ public class TabFriendsFragment extends Fragment {
         FloatingActionButton fabCreate = view.findViewById(R.id.fabCreateAlliance);
         fabCreate.setOnClickListener(v -> showCreateAllianceDialog());
 
-        loadFriends(); // učitaj sve postojeće prijatelje
-        listenForFriendAcceptances(); // osluškuj nove u real-time
+        loadFriends();
+        listenForFriendAcceptances();
 
         searchInput.addTextChangedListener(new TextWatcher() {
             @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
@@ -112,7 +112,6 @@ public class TabFriendsFragment extends Fragment {
                                 user.setAvatarId(avatarId);
                                 user.setFriend(true);
 
-                                // ⚡ Dodaj samo ako već nije u listi
                                 if (friendsList.stream().noneMatch(u -> u.getId().equals(uid))) {
                                     friendsList.add(user);
                                 }
@@ -154,7 +153,6 @@ public class TabFriendsFragment extends Fragment {
                         if (dc.getType() == DocumentChange.Type.ADDED) {
                             String fromUserId = dc.getDocument().getString("fromUserId");
 
-                            // ⚡ Ako već postoji, preskoči
                             if (friendsList.stream().anyMatch(u -> u.getId().equals(fromUserId))) {
                                 continue;
                             }
@@ -190,7 +188,6 @@ public class TabFriendsFragment extends Fragment {
 
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
-        // učitaj prijatelje iz friendsList
         AllianceFriendsAdapter adapter = new AllianceFriendsAdapter(friendsList);
         recyclerView.setAdapter(adapter);
 
@@ -213,14 +210,12 @@ public class TabFriendsFragment extends Fragment {
         String creatorId = FirebaseAuth.getInstance().getCurrentUser().getUid();
         FirebaseFirestore db = FirebaseFirestore.getInstance();
 
-        // Proveri da li korisnik već ima savez
         db.collection("users").document(creatorId)
                 .get()
                 .addOnSuccessListener(userDoc -> {
                     String currentAllianceId = userDoc.getString("currentAllianceId");
 
                     if (currentAllianceId != null && !currentAllianceId.isEmpty()) {
-                        // Dohvati prethodni savez da proverimo da li je vođa
                         db.collection("alliances").document(currentAllianceId)
                                 .get()
                                 .addOnSuccessListener(prevAllianceDoc -> {
@@ -228,29 +223,24 @@ public class TabFriendsFragment extends Fragment {
                                         String leaderId = prevAllianceDoc.getString("leaderId");
 
                                         if (creatorId.equals(leaderId)) {
-                                            // Ako je vođa, ne može kreirati novi savez
                                             new AlertDialog.Builder(getContext())
                                                     .setTitle("Ne možete kreirati novi savez")
                                                     .setMessage("Prvo morate ukinuti prethodni savez pre nego što kreirate novi.")
                                                     .setPositiveButton("OK", null)
                                                     .show();
                                         } else {
-                                            // Ako nije vođa, napušta prethodni savez sa potvrdom
                                             showLeavePreviousAllianceDialog(currentAllianceId, allianceName, inviteUserIds);
                                         }
                                     } else {
-                                        // Prethodni savez ne postoji, može kreirati novi
                                         actuallyCreateAlliance(allianceName, creatorId, inviteUserIds);
                                     }
                                 });
                     } else {
-                        // Nema prethodnog saveza, može kreirati novi
                         actuallyCreateAlliance(allianceName, creatorId, inviteUserIds);
                     }
                 });
     }
 
-    // Dijalog za potvrdu napuštanja prethodnog saveza
     private void showLeavePreviousAllianceDialog(String previousAllianceId, String newAllianceName, List<String> inviteUserIds) {
         new AlertDialog.Builder(getContext())
                 .setTitle("Napuštanje prethodnog saveza")
@@ -261,7 +251,6 @@ public class TabFriendsFragment extends Fragment {
                 .show();
     }
 
-    // Funkcija za kreiranje saveza i slanje poziva
     private void actuallyCreateAlliance(String allianceName, String creatorId, List<String> inviteUserIds) {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         String allianceId = db.collection("alliances").document().getId();
@@ -274,31 +263,26 @@ public class TabFriendsFragment extends Fragment {
         db.collection("alliances").document(allianceId)
                 .set(allianceData)
                 .addOnSuccessListener(aVoid -> {
-                    // Ažuriraj kreatora
                     db.collection("users").document(creatorId)
                             .update("currentAllianceId", allianceId);
 
-                    // Kreiraj pozive za sve inviteUserIds sa proverom
                     for (String userId : inviteUserIds) {
                         db.collection("users").document(userId).get()
                                 .addOnSuccessListener(userDoc -> {
                                     String userAllianceId = userDoc.getString("currentAllianceId");
 
                                     if (userAllianceId != null && !userAllianceId.isEmpty()) {
-                                        // Dohvati savez korisnika
                                         db.collection("alliances").document(userAllianceId)
                                                 .get().addOnSuccessListener(userAllianceDoc -> {
                                                     String leaderId = userAllianceDoc.getString("leaderId");
 
                                                     if (userId.equals(leaderId)) {
-                                                        // Korisnik je vođa drugog saveza → ne šalji poziv
                                                         String username = userDoc.getString("username");
                                                         Toast.makeText(getContext(),
                                                                 (username != null ? username : "Korisnik") +
                                                                         " je vođa drugog saveza i ne može biti pozvan.",
                                                                 Toast.LENGTH_SHORT).show();
                                                     } else {
-                                                        // Proveri da li je korisnik u aktivnoj misiji
                                                         db.collection("alliances").document(userAllianceId)
                                                                 .collection("missions")
                                                                 .whereEqualTo("isStarted", true)
@@ -306,10 +290,8 @@ public class TabFriendsFragment extends Fragment {
                                                                 .get()
                                                                 .addOnSuccessListener(missionsSnapshot -> {
                                                                     if (missionsSnapshot.isEmpty()) {
-                                                                        // Nema aktivnu misiju → šalje se poziv
                                                                         sendAllianceInvite(userId, allianceId, creatorId);
                                                                     } else {
-                                                                        // Korisnik je u aktivnoj misiji → ne šalji poziv
                                                                         String username = userDoc.getString("username");
                                                                         Toast.makeText(getContext(),
                                                                                 (username != null ? username : "Korisnik") +
@@ -320,7 +302,6 @@ public class TabFriendsFragment extends Fragment {
                                                     }
                                                 });
                                     } else {
-                                        // Korisnik nema savez → šalje se poziv
                                         sendAllianceInvite(userId, allianceId, creatorId);
                                     }
                                 });
@@ -355,7 +336,6 @@ public class TabFriendsFragment extends Fragment {
             return;
         }
 
-        // 1️⃣ Proveri sve aktivne misije saveza
         db.collection("alliances").document(allianceId)
                 .collection("missions")
                 .whereEqualTo("isStarted", true)
@@ -371,7 +351,6 @@ public class TabFriendsFragment extends Fragment {
                         }
                     }
 
-                    // 2️⃣ Ako je u aktivnoj misiji → ne može napustiti savez
                     if (inActiveMission) {
                         Toast.makeText(getContext(),
                                 "Ne možete napustiti savez dok učestvujete u aktivnoj misiji.",
@@ -379,7 +358,6 @@ public class TabFriendsFragment extends Fragment {
                         return;
                     }
 
-                    // 3️⃣ Ako nije u misiji → ukloni iz saveza
                     db.collection("alliances").document(allianceId)
                             .update("members", FieldValue.arrayRemove(currentUserId))
                             .addOnSuccessListener(aVoid -> db.collection("users").document(currentUserId)

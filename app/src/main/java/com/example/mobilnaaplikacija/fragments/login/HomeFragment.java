@@ -70,13 +70,10 @@ public class HomeFragment extends Fragment {
                 if (success) {
                     FirebaseUser fbUser = mAuth.getCurrentUser();
                     if (fbUser != null) {
-                        // Promeni meni drawera na logged_in verziju
-                        // 🔹 Dohvati FCM token
                         FirebaseMessaging.getInstance().getToken()
                                 .addOnCompleteListener(task -> {
                                     if (task.isSuccessful()) {
                                         String token = task.getResult();
-                                        // 🔹 Snimi token u Firestore pod user dokument
                                         FirebaseFirestore.getInstance()
                                                 .collection("users")
                                                 .document(fbUser.getUid())
@@ -106,7 +103,6 @@ public class HomeFragment extends Fragment {
                             activity.updateDrawerHeader();
                         }
 
-                        // Navigacija na MainFragment
                         NavController navController = Navigation.findNavController(v);
                         navController.navigate(R.id.mainFragment, null, new NavOptions.Builder()
                                 .setPopUpTo(R.id.homeFragment, true)

@@ -10,12 +10,12 @@ public class User {
     private String password;
     private String username;
     private boolean isFriend;
-    private int avatarId; // indeks od 0-4 za izbor avatara
+    private int avatarId;
 
     private boolean isActivated;
     private boolean requestSent = false;
 
-    private long activationDeadline; // timestamp do kada važi aktivacioni link (24h)
+    private long activationDeadline;
 
     // Profil info
     private int level;
@@ -25,18 +25,16 @@ public class User {
     private int coins;
     private boolean friendRequestSent = false;
 
-    private List<String> badges; // lista naziva bedževa
+    private List<String> badges;
     private List<Equipment> equipment;
     private List<User> friends;
     private int activeDays;
     private long lastActive;
 
-    private String qrCode; // može biti putanja do slike ili generisani kod
-
+    private String qrCode;
     public User() {
         super();
     }
-    // Konstruktor za registraciju
 
     public User(String id, String username, boolean isFriend) {
         this.id = id;
@@ -53,7 +51,6 @@ public class User {
         this.isActivated = false;
         this.activationDeadline = System.currentTimeMillis() + 24 * 60 * 60 * 1000; // 24h
 
-        // Default vrednosti profila
         this.level = 1;
         this.title = "Početnik";
         this.powerPoints = 0;

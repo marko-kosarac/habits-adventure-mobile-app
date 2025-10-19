@@ -18,7 +18,6 @@ public class EquipmentRepository {
         dbHelper = new SQLiteHelper(context);
     }
 
-    // Ubacivanje nove opreme u bazu
     public long insertEquipment(Equipment equipment) {
         SQLiteDatabase db = dbHelper.getWritableDatabase();
         ContentValues values = new ContentValues();
@@ -35,7 +34,6 @@ public class EquipmentRepository {
         return id;
     }
 
-    // Update postojeće opreme
     public int updateEquipment(Equipment equipment) {
         SQLiteDatabase db = dbHelper.getWritableDatabase();
         ContentValues values = new ContentValues();
@@ -53,7 +51,6 @@ public class EquipmentRepository {
         return rows;
     }
 
-    // Brisanje opreme
     public int deleteEquipment(long id) {
         SQLiteDatabase db = dbHelper.getWritableDatabase();
         int rows = db.delete(SQLiteHelper.TABLE_EQUIPMENT,
@@ -62,7 +59,6 @@ public class EquipmentRepository {
         return rows;
     }
 
-    // Dohvatanje svih oprema iz baze
     public ArrayList<Equipment> getAllEquipment() {
         ArrayList<Equipment> equipmentList = new ArrayList<>();
         SQLiteDatabase db = dbHelper.getReadableDatabase();
@@ -91,7 +87,6 @@ public class EquipmentRepository {
         return equipmentList;
     }
 
-    // Dohvatanje opreme po ID-u
     public Equipment getEquipmentById(long id) {
         SQLiteDatabase db = dbHelper.getReadableDatabase();
         Cursor cursor = db.query(SQLiteHelper.TABLE_EQUIPMENT, null,

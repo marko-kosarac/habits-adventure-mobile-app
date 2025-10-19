@@ -192,40 +192,45 @@ public class TaskRepository {
         db.close();
     }
 
-    public int getLongestStreak() {
-        SQLiteDatabase db = dbHelper.getWritableDatabase();
+    public int getLongestStreak(String userId) {
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
 
-        Cursor cursor = db.rawQuery("SELECT start_millis FROM "
-                + SQLiteHelper.TABLE_TASKS +
-                " WHERE " + SQLiteHelper.COLUMN_STATUS + " = 'URAĐEN' " +
-                "ORDER BY " + SQLiteHelper.COLUMN_START_MILLIS + " ASC", null);
+        // Uzmi sve URAĐEN taskove za datog korisnika, sortirane po vremenu
+        Cursor cursor = db.rawQuery(
+                "SELECT " + SQLiteHelper.COLUMN_START_MILLIS +
+                        " FROM " + SQLiteHelper.TABLE_TASKS +
+                        " WHERE " + SQLiteHelper.COLUMN_STATUS + " = 'URAĐEN'" +
+                        " AND " + SQLiteHelper.COLUMN_USER_ID + " = ?" +
+                        " ORDER BY " + SQLiteHelper.COLUMN_START_MILLIS + " ASC",
+                new String[]{userId});
 
         int longestStreak = 0;
         int currentStreak = 0;
-        long lastDay = -1;
+        long lastFakeDay = -1;
 
         if (cursor.moveToFirst()) {
+            long firstMillis = cursor.getLong(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_START_MILLIS));
+
             do {
                 long millis = cursor.getLong(cursor.getColumnIndexOrThrow(SQLiteHelper.COLUMN_START_MILLIS));
-                long fakeDay = millis / 60000; // 60 sekundi = jedan dan
+                // 1 minut = 1 dan
+                long fakeDay = (millis - firstMillis) / 60_000;
 
-                if (lastDay == -1) {
+                if (lastFakeDay == -1) {
+                    // prvi zadatak
                     currentStreak = 1;
                     longestStreak = 1;
-                } else if (fakeDay == lastDay) {
-                    // isti "dan" → ne povećava streak
-                } else if (fakeDay == lastDay + 1) {
-                    // sledeći dan
+                } else if (fakeDay > lastFakeDay) {
+                    // svaki sledeći „novi dan“ povećava streak
                     currentStreak++;
                     if (currentStreak > longestStreak) {
                         longestStreak = currentStreak;
                     }
-                } else {
-                    // preskočen dan
-                    currentStreak = 1;
                 }
+                // Ako je fakeDay == lastFakeDay → isti dan, ne radi ništa
 
-                lastDay = fakeDay;
+                lastFakeDay = fakeDay;
+
             } while (cursor.moveToNext());
         }
 
@@ -234,6 +239,8 @@ public class TaskRepository {
 
         return longestStreak;
     }
+
+
 
     public Map<String, Integer> getCompletedTasksWithColors(String userId) {
         Map<String, Integer> result = new LinkedHashMap<>();

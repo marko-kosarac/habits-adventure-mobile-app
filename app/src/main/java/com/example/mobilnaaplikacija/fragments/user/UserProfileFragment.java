@@ -40,7 +40,6 @@ import com.google.zxing.MultiFormatWriter;
 import com.google.zxing.common.BitMatrix;
 import com.journeyapps.barcodescanner.BarcodeEncoder;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -61,7 +60,6 @@ public class UserProfileFragment extends Fragment {
     private FirebaseFirestore db;
 
     public UserProfileFragment() {
-        // Required empty public constructor
     }
 
     @Override
@@ -108,14 +106,12 @@ public class UserProfileFragment extends Fragment {
         String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
         DocumentReference userRef = FirebaseFirestore.getInstance().collection("users").document(userId);
 
-        // Prvo proveri da li korisnik već ima bedževe
         userRef.get().addOnSuccessListener(document -> {
             if (document.exists()) {
                 List<Map<String, Object>> existingBadges =
                         (List<Map<String, Object>>) document.get("badges");
 
                 if (existingBadges == null || existingBadges.isEmpty()) {
-                    // Ako nema bedževa, dodaj test bedževe
                     List<Map<String, Object>> newBadges = new ArrayList<>();
 
                     Map<String, Object> bronze = new HashMap<>();
@@ -176,13 +172,11 @@ public class UserProfileFragment extends Fragment {
         Context context = badgesContainer.getContext();
 
         for (Map<String, Object> badge : badges) {
-            // Kreiramo LinearLayout za jedan bedž
             LinearLayout badgeLayout = new LinearLayout(context);
             badgeLayout.setOrientation(LinearLayout.VERTICAL);
-            badgeLayout.setGravity(Gravity.CENTER_HORIZONTAL); // CENTRIRA IKONICU
+            badgeLayout.setGravity(Gravity.CENTER_HORIZONTAL);
             badgeLayout.setPadding(16, 8, 16, 8);
 
-            // Veći razmak između bedževa
             float scale = context.getResources().getDisplayMetrics().density;
             int marginInDp = 16;
             int marginInPx = (int) (marginInDp * scale + 0.5f);
@@ -193,7 +187,6 @@ public class UserProfileFragment extends Fragment {
             layoutParams.setMargins(0, 0, marginInPx, 0);
             badgeLayout.setLayoutParams(layoutParams);
 
-            // Ikonica bedža
             ImageView icon = new ImageView(context);
             int resId = context.getResources().getIdentifier(
                     badge.get("icon").toString(), "drawable", context.getPackageName());
@@ -205,7 +198,6 @@ public class UserProfileFragment extends Fragment {
             icon.setLayoutParams(iconParams);
             icon.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
 
-            // Naziv bedža
             TextView name = new TextView(context);
             name.setText(badge.get("name").toString());
             name.setTextColor(Color.BLACK);
@@ -213,19 +205,16 @@ public class UserProfileFragment extends Fragment {
             name.setTextSize(12);
             name.setTypeface(null, Typeface.BOLD);
 
-            // Info o zadacima i levelu
             TextView info = new TextView(context);
             info.setText("Zadaci: " + badge.get("completedTasks"));
             info.setTextColor(Color.DKGRAY);
             info.setGravity(Gravity.CENTER);
             info.setTextSize(10);
 
-            // Dodavanje u layout
             badgeLayout.addView(icon);
             badgeLayout.addView(name);
             badgeLayout.addView(info);
 
-            // Dodavanje u container
             badgesContainer.addView(badgeLayout);
         }
     }
@@ -312,12 +301,10 @@ public class UserProfileFragment extends Fragment {
                     (eq.getType().toString().equals("NAPITAK") || eq.getType().toString().equals("ORUZJE"));
 
             if (eq.isActive() && !isPotionOrWeapon) {
-                // Samo ne-napitci i ne-оружje idu u aktivnu listu
                 activateButton.setText("Aktivirana");
                 activateButton.setEnabled(false);
                 activeEquipmentContainer.addView(card);
             } else if (!eq.isActive()) {
-                // Neaktivna oprema ide u listu neaktivne opreme
                 activateButton.setText("Aktiviraj");
                 activateButton.setEnabled(true);
                 inactiveEquipmentContainer.addView(card);
@@ -326,9 +313,11 @@ public class UserProfileFragment extends Fragment {
                     activateEquipment(eq, card);
                 });
             }
-            // Napitci i oružje koji su aktivni se NE prikazuju nigde
         }
     }
+
+
+
 
     private void activateEquipment(Equipment eq, View cardView) {
         String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
@@ -336,15 +325,12 @@ public class UserProfileFragment extends Fragment {
 
         if (eq.getQuantity() <= 0) return;
 
-        // Smanji quantity u neaktivnoj instanci
         eq.setQuantity(eq.getQuantity() - 1);
 
-        // Ako quantity postane 0, ukloni iz inventara
         if (eq.getQuantity() == 0) {
             userEquipmentList.remove(eq);
         }
 
-        // Proveri da li postoji aktivna instanca iste opreme
         Equipment activeEq = null;
         for (Equipment e : userEquipmentList) {
             if (e.isActive() && e.getId() == eq.getId()) {
@@ -354,10 +340,8 @@ public class UserProfileFragment extends Fragment {
         }
 
         if (activeEq != null) {
-            // Ako postoji, samo povećaj quantity
             activeEq.setQuantity(activeEq.getQuantity() + 1);
         } else {
-            // Kreiraj novu aktivnu instancu
             activeEq = new Equipment();
             activeEq.setId(eq.getId());
             activeEq.setName(eq.getName());
@@ -369,10 +353,9 @@ public class UserProfileFragment extends Fragment {
             activeEq.setType(eq.getType());
             activeEq.setActive(true);
             activeEq.setCount(0);
-            userEquipmentList.add(activeEq); // dodaj u listu sa isActive = true
+            userEquipmentList.add(activeEq);
         }
 
-        //primijeni efekat odmah ako je oprema trajna
         if (activeEq.getDuration() == -1
                 && activeEq.getBonus() != null
                 && activeEq.getBonus().contains("%")
@@ -394,7 +377,6 @@ public class UserProfileFragment extends Fragment {
                 } catch (NumberFormatException ignored) {
                 }
 
-                // Accumulate effect based on quantity
                 double newPP = currentPP;
                 for (int i = 0; i < finalActiveEq1.getQuantity(); i++) {
                     newPP *= (1 + boostPercent / 100.0);
@@ -408,21 +390,20 @@ public class UserProfileFragment extends Fragment {
             });
         }
 
-        // Ažuriraj Firestore
         Equipment finalActiveEq = activeEq;
+
         userRef.get().addOnSuccessListener(doc -> {
             List<Map<String, Object>> equipmentData = (List<Map<String, Object>>) doc.get("equipment");
             if (equipmentData == null) equipmentData = new ArrayList<>();
             List<Map<String, Object>> updatedList = new ArrayList<>();
 
-            // Ažuriraj quantity u neaktivnoj opremi
             for (Map<String, Object> e : equipmentData) {
                 long id = ((Number) e.get("id")).longValue();
                 int qty = ((Number) e.get("quantity")).intValue();
                 boolean isActive = e.containsKey("active") && (Boolean) e.get("active");
 
                 if (id == eq.getId() && !isActive) {
-                    qty = qty - 1; // smanji quantity neaktivne
+                    qty = qty - 1;
                 }
 
                 if (qty > 0) {
@@ -431,7 +412,6 @@ public class UserProfileFragment extends Fragment {
                 }
             }
 
-            // Dodaj ili ažuriraj aktivnu opremu
             boolean found = false;
             for (Map<String, Object> e : updatedList) {
                 if (((Number) e.get("id")).longValue() == finalActiveEq.getId() && (Boolean) e.get("active")) {
@@ -457,11 +437,12 @@ public class UserProfileFragment extends Fragment {
             }
 
             userRef.update("equipment", updatedList).addOnSuccessListener(aVoid -> {
-                loadUserEquipment(); // osveži prikaz
+                loadUserEquipment();
                 Toast.makeText(getContext(), finalActiveEq.getName() + " je aktivirana!", Toast.LENGTH_SHORT).show();
             });
         });
     }
+
 
     private void bindUserData(@NonNull DocumentSnapshot document, String userId) {
         String username = document.getString("username");
@@ -492,7 +473,6 @@ public class UserProfileFragment extends Fragment {
     }
 
     private void updateLevelUI(long currentXP, String userId) {
-        //dobavi trenutni level
         db.collection("users").document(userId).get()
                 .addOnSuccessListener(documentSnapshot -> {
                     if (!documentSnapshot.exists()) return;
@@ -508,54 +488,53 @@ public class UserProfileFragment extends Fragment {
 
                     long oldLevel = documentSnapshot.contains("level") ? documentSnapshot.getLong("level") : 1;
 
-                    //racunanje XP i level-a
                     int level = 1;
                     long xpForNextLevel = 200;
+                    long prevXpForNext = 0;
 
                     while (currentXP >= xpForNextLevel) {
                         level++;
+                        prevXpForNext = xpForNextLevel;
                         long next = xpForNextLevel * 2 + xpForNextLevel / 2;
                         xpForNextLevel = ((next + 99) / 100) * 100;
                     }
 
-                    //update UI
                     textCurrentLevel.setText(String.valueOf(level));
                     textNextLevel.setText(String.valueOf(level + 1));
 
-        // Dodela titula za prvih 3 nivoa
-        String title;
-        switch (level) {
-            case 1:
-                title = "Početnik";
-                break;
-            case 2:
-                title = "Učenik";
-                break;
-            case 3:
-                title = "Iskusni";
-                break;
-            default:
-                title = "Veteran";
-                break;
-        }
-        textLevelTitle.setText("Level " + level + " - " + title);
+                    String title;
+                    switch (level) {
+                        case 1:
+                            title = "Početnik";
+                            break;
+                        case 2:
+                            title = "Učenik";
+                            break;
+                        case 3:
+                            title = "Iskusni";
+                            break;
+                        default:
+                            title = "Veteran";
+                            break;
+                    }
+                    textLevelTitle.setText("Level " + level + " - " + title);
 
-        int progress = (int) ((currentXP * 100) / xpForNextLevel);
-        levelProgressBar.setMax(100);
-        levelProgressBar.setProgress(progress);
-        textXP.setText("XP: " + currentXP + " / " + xpForNextLevel);
+                    int progress = (int) ((currentXP * 100) / xpForNextLevel);
+                    levelProgressBar.setMax(100);
+                    levelProgressBar.setProgress(progress);
+                    textXP.setText("XP: " + currentXP + " / " + xpForNextLevel);
 
-        //racunanje PP-a
-        long basePP  = 20; //pre nego predje prvi nivo
-        if (level > 1) {
-            basePP  = 40; //nakon prvog nivoa
-            for (int i = 2; i < level; i++) {
-                basePP  = basePP  + (basePP  * 3 / 4);
-            }
-        }
 
-        double finalPP = basePP;
-        List<Map<String, Object>> equipmentList = (List<Map<String, Object>>) documentSnapshot.get("equipment");
+                    long basePP  = 20;
+                    if (level > 1) {
+                        basePP = 40; // nakon prvog nivoa
+                        for (int i = 2; i < level; i++) {
+                            basePP  = basePP  + (basePP  * 3 / 4);
+                        }
+                    }
+
+                    double finalPP = basePP;
+                    List<Map<String, Object>> equipmentList = (List<Map<String, Object>>) documentSnapshot.get("equipment");
 
                     if (equipmentList != null) {
                         for (Map<String, Object> e : equipmentList) {
@@ -604,6 +583,7 @@ public class UserProfileFragment extends Fragment {
                 .addOnFailureListener(e ->
                         Log.e("UserProfile", "Greška pri dobavljanju korisnika", e));
     }
+
 
 
     private void generateQRCode(String userId) {

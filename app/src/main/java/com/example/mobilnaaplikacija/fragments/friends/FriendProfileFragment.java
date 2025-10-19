@@ -124,7 +124,6 @@ public class FriendProfileFragment extends Fragment {
             badgeLayout.setGravity(Gravity.CENTER_HORIZONTAL); // CENTRIRA IKONICU
             badgeLayout.setPadding(16, 8, 16, 8);
 
-            // Veći razmak između bedževa
             float scale = context.getResources().getDisplayMetrics().density;
             int marginInDp = 16;
             int marginInPx = (int) (marginInDp * scale + 0.5f);
@@ -135,7 +134,6 @@ public class FriendProfileFragment extends Fragment {
             layoutParams.setMargins(0, 0, marginInPx, 0);
             badgeLayout.setLayoutParams(layoutParams);
 
-            // Ikonica bedža
             ImageView icon = new ImageView(context);
             int resId = context.getResources().getIdentifier(
                     badge.get("icon").toString(), "drawable", context.getPackageName());
@@ -147,7 +145,6 @@ public class FriendProfileFragment extends Fragment {
             icon.setLayoutParams(iconParams);
             icon.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
 
-            // Naziv bedža
             TextView name = new TextView(context);
             name.setText(badge.get("name").toString());
             name.setTextColor(Color.BLACK);
@@ -155,19 +152,16 @@ public class FriendProfileFragment extends Fragment {
             name.setTextSize(12);
             name.setTypeface(null, Typeface.BOLD);
 
-            // Info o zadacima i levelu
             TextView info = new TextView(context);
             info.setText("Zadaci: " + badge.get("completedTasks"));
             info.setTextColor(Color.DKGRAY);
             info.setGravity(Gravity.CENTER);
             info.setTextSize(10);
 
-            // Dodavanje u layout
             badgeLayout.addView(icon);
             badgeLayout.addView(name);
             badgeLayout.addView(info);
 
-            // Dodavanje u container
             badgesContainer.addView(badgeLayout);
         }
     }
@@ -226,7 +220,6 @@ public class FriendProfileFragment extends Fragment {
         textCurrentLevel.setText(String.valueOf(level));
         textNextLevel.setText(String.valueOf(level + 1));
 
-        // Dodela titula za prvih 3 nivoa
         String title;
         switch (level) {
             case 1:
@@ -259,7 +252,7 @@ public class FriendProfileFragment extends Fragment {
 
                         userEquipmentList = new ArrayList<>();
 
-                        if (equipmentData != null) {  // ✅ zaštita od null-a
+                        if (equipmentData != null) {
                             for (Map<String, Object> data : equipmentData) {
                                 Equipment eq = mapToEquipment(data);
                                 userEquipmentList.add(eq);

@@ -44,12 +44,10 @@ public class AllianceFriendsAdapter extends RecyclerView.Adapter<AllianceFriends
 
         holder.checkBox.setText(friend.getUsername());
 
-        // Postavi početno stanje checkbox-a
         holder.checkBox.setOnCheckedChangeListener(null); // ukloni prethodni listener
         boolean isChecked = selectedMap.getOrDefault(friend.getId(), false);
         holder.checkBox.setChecked(isChecked);
 
-        // Dodaj novi listener
         holder.checkBox.setOnCheckedChangeListener((buttonView, checked) -> {
             selectedMap.put(friend.getId(), checked);
             if (checked) {
