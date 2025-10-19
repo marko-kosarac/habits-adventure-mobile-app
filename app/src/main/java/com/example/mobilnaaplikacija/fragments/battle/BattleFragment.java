@@ -154,6 +154,7 @@ public class BattleFragment extends Fragment {
                         if (lvlNum != null) level = lvlNum.intValue();
                     }
 
+                    level--;
                     //base PP
                     long basePP = 20;
                     if (level > 1) {
@@ -165,6 +166,7 @@ public class BattleFragment extends Fragment {
 
                     double finalPP = basePP;
                     PP = (int) Math.ceil(finalPP);
+                    setupProgressBars();
                 })
                 .addOnFailureListener(e -> {
                     Log.e("PP", "Failed to fetch user", e);
